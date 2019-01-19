@@ -61,6 +61,7 @@ typedef struct {
 		std::array<Pad, ROWS> pads;
 		std::array<bool, ROWS> playing;											// TODO Really needed ? Can also be done via setting/deleting ch
 	} output;
+	std::array<bool, STEPS> jumpOff;
 } Key;
 
 class BSEQuencer
@@ -81,7 +82,7 @@ private:
 	void stopMidiOut (const int64_t frames, const int key, const int row, const uint8_t chbits);
 	void startMidiOut (const int64_t frames, const int key, const uint8_t chbits);
 	void startMidiOut (const int64_t frames, const int key, const int row, const uint8_t chbits);
-	double getStep (const double relpos, const double startStep);
+	double getStep (const int key, const double relpos);
 	void runSequencer (const double startpos, const uint32_t start, const uint32_t end);
 	void notifyPadsToGui ();
 	void notifyStatusToGui ();
@@ -127,7 +128,7 @@ private:
 	bool ui_on;
 	StaticArrayList<Key, 16> inKeys;
 	Key key;
-	const Key defaultKey = {0, 0, 0, -1, {{}, {}}};
+	const Key defaultKey = {0, 0, 0, -1, {{}, {}}, {}};
 	BScale scale;
 
 	std::array<BScaleNotes, 14> scaleNotes	=

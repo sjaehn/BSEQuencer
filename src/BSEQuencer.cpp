@@ -187,8 +187,9 @@ void BSEQuencer::startMidiOut (const int64_t frames, const int key, const int ro
  * position in beats relative to the starting position.
  * TODO Control row!!!
  */
-double BSEQuencer::getStep (const double relpos, const double startStep)
+double BSEQuencer::getStep (const int key, const double relpos)
 {
+	double startStep = inKeys[key].stepNr;
 	double rawstep = (startStep + STEPS_PER_BEAT * relpos);
 
 	// Return "raw" negative step position for before-start events
@@ -220,6 +221,35 @@ double BSEQuencer::getStep (const double relpos, const double startStep)
 				{
 				case CTRL_SKIP: break;
 				case CTRL_STOP: break;
+				case CTRL_JUMP_BACK:
+					{
+						if (!inKeys[key].jumpOff[stepNr])
+						{
+							inKeys[key].jumpOff[stepNr] = true;
+							int newStepNr = stepNr;
+							for (int i = 1, jumpbackCount = 1; i < STEPS; ++i)
+							{
+								newStepNr = (i < stepNr ? stepNr - i : stepNr + STEPS - i);
+								if (pads[ROWS-1][newStepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_JUMP_BACK) ++jumpbackCount;
+								if (pads[ROWS-1][newStepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_ALL_MARK) break;
+								if (pads[ROWS-1][newStepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_MARK)
+								{
+									--jumpbackCount;
+									if (jumpbackCount <= 0) break;
+								}
+							}
+							stepNr = newStepNr;
+						}
+						else
+						{
+							inKeys[key].jumpOff[stepNr] = false;
+							stepNr = (stepNr + 1) % STEPS;
+						}
+						++it;
+					}
+
+					break;
+
 				default:
 					{
 						++it;
@@ -287,7 +317,7 @@ void BSEQuencer::runSequencer (const double startpos, const uint32_t start, cons
 			for (double actpos = startpos; actpos <= endpos; actpos = nextpos)
 			{
 				int64_t actframes = LIMIT (start + (actpos - startpos) * FRAMES_PER_BEAT, start, end);
-				double actstep = getStep (actpos - inKeys[key].startPos, inKeys[key].stepNr);
+				double actstep = getStep (key, actpos - inKeys[key].startPos);
 				int actStepNr = LIMIT ((int) floor (actstep), 0, STEPS - 1);
 				double actStepFrac = actstep - actStepNr;
 

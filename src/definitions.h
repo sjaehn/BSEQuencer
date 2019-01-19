@@ -26,7 +26,7 @@
 #define STEPS 16
 #define ROWS 16
 #define NR_SEQUENCER_CHS 4
-#define NR_CTRL_BUTTONS 8
+#define NR_CTRL_BUTTONS 9
 #define NR_MIDI_KEYS 128
 #define AUTOPLAY_KEY 128
 #define ALL_CH 0xFF
@@ -60,10 +60,11 @@ typedef enum {
 	CTRL_PLAY		= 1,
 	CTRL_PLAY_FWD	= 2,
 	CTRL_PLAY_REW	= 3,
-	CTRL_MARK		= 4,
-	CTRL_JUMP_BACK	= 5,
-	CTRL_SKIP		= 6,
-	CTRL_STOP		= 7
+	CTRL_ALL_MARK	= 4,
+	CTRL_MARK		= 5,
+	CTRL_JUMP_BACK	= 6,
+	CTRL_SKIP		= 7,
+	CTRL_STOP		= 8
 } CtrlButtons;
 
 

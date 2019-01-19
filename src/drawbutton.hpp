@@ -32,9 +32,19 @@ void drawButton (cairo_t* cr, double x, double y, double width, double height, B
 	{
 		cairo_set_source_rgba(cr, CAIRO_RGBA (darkened2));
 		cairo_select_font_face(cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-		cairo_set_font_size(cr, (width > height ? height / 2 : width / 2));
+		double fontWidth = (width > height ? height / 2 : width / 2);
 		cairo_text_extents_t ext;
+		cairo_set_font_size(cr, fontWidth);
 		cairo_text_extents (cr, style.symbol.c_str(), &ext);
+
+		// Shrink font size, if needed
+		for (int i = 0; (i < 8) && (ext.width > width); ++i)
+		{
+			fontWidth = fontWidth / sqrt (2);
+			cairo_set_font_size(cr, fontWidth);
+			cairo_text_extents (cr, style.symbol.c_str(), &ext);
+		}
+
 		cairo_move_to (cr, x + width / 2 - ext.width / 2 - ext.x_bearing, y + height / 2 - ext.height / 2 - ext.y_bearing);
 		cairo_show_text(cr, style.symbol.c_str());
 	}
