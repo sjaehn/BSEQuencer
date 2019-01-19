@@ -213,7 +213,7 @@ double BSEQuencer::getStep (const int key, const double relpos)
 			if (stepNr < 0)
 			{
 				++it;
-				++stepNr;
+				++stepNr; // Always forward if stepNr negative
 			}
 			else
 			{
@@ -221,6 +221,48 @@ double BSEQuencer::getStep (const int key, const double relpos)
 				{
 				case CTRL_SKIP: break;
 				case CTRL_STOP: break;
+
+				case CTRL_PLAY_FWD:
+					inKeys[key].direction = 1;
+					stepNr = (stepNr + STEPS + inKeys[key].direction) % STEPS;
+					++it;
+					break;
+
+				case CTRL_PLAY_REW:
+					inKeys[key].direction = -1;
+					stepNr = (stepNr + STEPS + inKeys[key].direction) % STEPS;
+					++it;
+					break;
+
+				case CTRL_JUMP_FWD:
+				{
+					if (!inKeys[key].jumpOff[stepNr])
+					{
+						inKeys[key].jumpOff[stepNr] = true;
+						int newStepNr = stepNr;
+						for (int i = 1, jumpbackCount = 1; i < STEPS; ++i)
+						{
+							newStepNr = (stepNr + i) % STEPS;
+							if (pads[ROWS-1][newStepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_JUMP_FWD) ++jumpbackCount;
+							if (pads[ROWS-1][newStepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_ALL_MARK) break;
+							if (pads[ROWS-1][newStepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_MARK)
+							{
+								--jumpbackCount;
+								if (jumpbackCount <= 0) break;
+							}
+						}
+						stepNr = newStepNr;
+					}
+					else
+					{
+						inKeys[key].jumpOff[stepNr] = false;
+						stepNr = (stepNr + STEPS + inKeys[key].direction) % STEPS;
+					}
+					++it;
+				}
+
+				break;
+
 				case CTRL_JUMP_BACK:
 					{
 						if (!inKeys[key].jumpOff[stepNr])
@@ -243,7 +285,7 @@ double BSEQuencer::getStep (const int key, const double relpos)
 						else
 						{
 							inKeys[key].jumpOff[stepNr] = false;
-							stepNr = (stepNr + 1) % STEPS;
+							stepNr = (stepNr + STEPS + inKeys[key].direction) % STEPS;
 						}
 						++it;
 					}
@@ -253,7 +295,7 @@ double BSEQuencer::getStep (const int key, const double relpos)
 				default:
 					{
 						++it;
-						stepNr = (stepNr + 1) % STEPS;
+						stepNr = (stepNr + STEPS + inKeys[key].direction) % STEPS;
 					}
 				}
 			}
@@ -262,7 +304,9 @@ double BSEQuencer::getStep (const int key, const double relpos)
 			if (stepNr >= 0)
 			{
 				// CTRL_SKIP
-				for (int i = 0; (i <= STEPS) && (pads[ROWS-1][stepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_SKIP); ++i, stepNr = (stepNr + 1) % STEPS)
+				for (int i = 0;
+						(i <= STEPS) && (pads[ROWS-1][stepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_SKIP);
+						++i, stepNr = (stepNr + STEPS + inKeys[key].direction) % STEPS)
 				{
 					// A whole loop of SKIPs => STOP
 					if (i == STEPS) return HALT_STEP;
@@ -607,11 +651,10 @@ void BSEQuencer::run (uint32_t n_samples)
 					// Build new key from MIDI data
 					if (newNote)
 					{
-						key = defaultKey;
+						key = defaultKey; // stepNr = -1; direction = 1; output.pads, output.playing and jumpOff ()-initialized
 						key.note = note;
 						key.velocity = msg[2];
 						key.startPos = position + ((((double)ev->time.frames) - refFrame) / FRAMES_PER_BEAT) - (1 /STEPS_PER_BEAT);
-						key.stepNr = -1;
 						inKeys.push_back (key);										// TODO Alternatively, push_front (key) ?
 					}
 				}
@@ -668,11 +711,10 @@ void BSEQuencer::run (uint32_t n_samples)
 		if (inKeys[0].note != controllers[ROOT] + controllers[SIGNATURE] + (controllers[OCTAVE] + 1) * 12)
 		{
 			stopMidiOut (last_t, 0, ALL_CH);
+			inKeys[0] = defaultKey; // stepNr = -1; direction = 1; output.pads, output.playing and jumpOff ()-initialized
 			inKeys[0].note = controllers[ROOT] + controllers[SIGNATURE] + (controllers[OCTAVE] + 1) * 12;
 			inKeys[0].velocity = 64;
 			inKeys[0].startPos = position + ((((double)last_t) - refFrame) / FRAMES_PER_BEAT) - (1 /STEPS_PER_BEAT);
-			inKeys[0].stepNr = -1;
-			inKeys[0].output = defaultKey.output;
 		}
 	}
 

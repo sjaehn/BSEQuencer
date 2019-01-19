@@ -57,6 +57,7 @@ typedef struct {
 	int8_t velocity;
 	double startPos;
 	int stepNr;
+	int direction;
 	struct {
 		std::array<Pad, ROWS> pads;
 		std::array<bool, ROWS> playing;											// TODO Really needed ? Can also be done via setting/deleting ch
@@ -128,7 +129,7 @@ private:
 	bool ui_on;
 	StaticArrayList<Key, 16> inKeys;
 	Key key;
-	const Key defaultKey = {0, 0, 0, -1, {{}, {}}, {}};
+	const Key defaultKey = {0, 0, 0, -1, 1, {{}, {}}, {}};
 	BScale scale;
 
 	std::array<BScaleNotes, 14> scaleNotes	=

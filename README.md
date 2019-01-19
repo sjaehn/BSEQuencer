@@ -31,16 +31,20 @@ to run it stand-alone and connect it to the JACK system.
 
 Key features
 ------------
-* Step sequencer with 16x16 matrix
-* Control panel (in line 1 of the matrix)
+* Step sequencer with a note-based 16x16 matrix
+* Control panel (in line 1 of the matrix) with playing direction, jump, skip, and stop options
 * Autoplay or host / MIDI controlled playing
-* Four output channels
+* Handles multiple MIDI inputs signals (keys) in one sequencer instance
+* Four configurable output channels
 * Output channels connectable with individual MIDI ports / channels
 
 TODO
 ----
 * Stability (Note: **This plugin is experimental, yet. Not for production!**)
-* Playing direction
+
+See also
+--------
+* https://www.youtube.com/watch?v=iERRKL7J-KU
 
 
 
