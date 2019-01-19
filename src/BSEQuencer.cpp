@@ -229,7 +229,7 @@ double BSEQuencer::getStep (const int key, const double relpos)
 							int newStepNr = stepNr;
 							for (int i = 1, jumpbackCount = 1; i < STEPS; ++i)
 							{
-								newStepNr = (i < stepNr ? stepNr - i : stepNr + STEPS - i);
+								newStepNr = (i <= stepNr ? stepNr - i : stepNr + STEPS - i);
 								if (pads[ROWS-1][newStepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_JUMP_BACK) ++jumpbackCount;
 								if (pads[ROWS-1][newStepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_ALL_MARK) break;
 								if (pads[ROWS-1][newStepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_MARK)
