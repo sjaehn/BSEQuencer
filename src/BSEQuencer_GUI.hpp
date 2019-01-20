@@ -26,7 +26,7 @@
 #include "PadMessage.hpp"
 
 #define BG_FILE "surface.png"
-#define HELP_URL "https://github.com/sjaehn/BSEQuencer/wiki"
+#define HELP_URL "https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer"
 #define OPEN_CMD "xdg-open"
 #define PAD_HEIGHT 30
 #define PAD_WIDTH 40
@@ -116,7 +116,9 @@ private:
 	BWidgets::Widget propertiesBox;
 	BWidgets::Label propertiesBoxLabel;
 	BWidgets::Label propertiesNrStepsLabel;
-	BWidgets::DisplayHSlider propertiesNrStepsSlider;
+	BWidgets::PopupListBox propertiesNrStepsListBox;
+	BWidgets::Label propertiesStepsPerLabel;
+	BWidgets::DisplayHSlider propertiesStepsPerSlider;
 	BWidgets::PopupListBox propertiesBaseListBox;
 	BWidgets::Label propertiesRootLabel;
 	BWidgets::PopupListBox propertiesRootListBox;

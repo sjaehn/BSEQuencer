@@ -13,7 +13,7 @@ typedef enum {
 	KNOBS				= 7,
 	PLAY				= 0,
 	MODE				= 1,
-	NR_STEPS			= 2,
+	STEPS_PER			= 2,
 	BASE				= 3,
 	ROOT				= 4,
 	SIGNATURE			= 5,

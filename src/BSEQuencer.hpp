@@ -26,7 +26,7 @@
 #define VALUE_BPM (controllers[MODE] == AUTOPLAY ? controllers[AUTOPLAY_BPM] : bpm)
 #define VALUE_BPB (controllers[MODE] == AUTOPLAY ? controllers[AUTOPLAY_BPB] : beatsPerBar)
 #define VALUE_BU (controllers[MODE] == AUTOPLAY ? controllers[AUTOPLAY_BU] : beatUnit)
-#define STEPS_PER_BEAT (controllers[BASE] == PER_BEAT ? controllers[NR_STEPS] : controllers[NR_STEPS] / VALUE_BPB)
+#define STEPS_PER_BEAT (controllers[BASE] == PER_BEAT ? controllers[STEPS_PER] : controllers[STEPS_PER] / VALUE_BPB)
 #define FRAMES_PER_BEAT (rate / (VALUE_BPM / 60))
 
 #include <cmath>

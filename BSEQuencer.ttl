@@ -29,7 +29,7 @@
   		lv2:requiredFeature urid:map ;
   		ui:ui <https://www.jahnichen.de/plugins/lv2/BSEQuencer#gui> ;
         lv2:port [
-                a lv2:OutputPort , atom:AtomPort ;
+                a lv2:InputPort , atom:AtomPort ;
                 atom:bufferType atom:Sequence ;
                 lv2:designation lv2:control;
                 lv2:index 0 ;
@@ -107,8 +107,8 @@
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 9 ;
-                lv2:symbol "nr_steps" ;
-                lv2:name "Number of steps" ;
+                lv2:symbol "steps_per" ;
+                lv2:name "Steps per" ;
                 lv2:portProperty lv2:integer ;
                 lv2:default 1.0 ;
                 lv2:minimum 1.0 ;

@@ -38,10 +38,14 @@ Key features
 * Four configurable output channels
 * Output channels connectable with individual MIDI ports / channels
 
+Usage
+-----
+see https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer
+
 TODO
 ----
 * Mouse over widgets (showing values of matrix fields, dials, or sliders; direct keybord keyboard entry of values)
-* Link to online help 
+* Selectable number of steps (8, 16, 24, or 32 steps) - may cause incompatibility to previous versions
 * Stability (Note: **This plugin is experimental, yet. Not for production!**)
 * Testing
 * Bugfixes

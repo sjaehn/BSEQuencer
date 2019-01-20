@@ -53,20 +53,22 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		toolDurationLabel (170, 225, 60, 20, "ctlabel", "Duration"),
 		toolDurationDial (175, 165, 50, 60, "dial", 1.0, 0.0, 1.0, 0.0, "%1.2f"),
 
-		propertiesBox (760, 590, 260, 180, "box"),
+		propertiesBox (760, 590, 260, 230, "box"),
 		propertiesBoxLabel (10, 10, 240, 20, "ctlabel", "Properties"),
-		propertiesNrStepsSlider (10, 40, 80, 25, "slider", 4.0, 1.0, 8.0, 1.0, "%2.0f"),
-		propertiesNrStepsLabel (100, 50, 80, 20, "lflabel", "steps per"),
-		propertiesBaseListBox (190, 50, 60, 20, 60, 60, "menu", std::vector<std::string> {"beat", "bar"}, 1.0),
-		propertiesRootLabel (10, 80, 40, 20, "lflabel", "Root"),
-		propertiesRootListBox (120, 80, 60, 20, 0, -160, 60, 160, "menu", {{0, "C"}, {2, "D"}, {4, "E"}, {5, "F"}, {7, "G"}, {9, "A"}, {11, "B"}}, 0.0),
-		propertiesSignatureListBox (190, 80, 60, 20, 60, 80, "menu", {{-1, "♭"}, {0, ""}, {1, "♯"}}, 0.0),
-		propertiesOctaveLabel (10, 110, 55, 20, "lflabel", "Octave"),
-		propertiesOctaveListBox (190, 110, 60, 20, 0, -220, 60, 220, "menu", {{-1, "-1"}, {0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}}, 4.0),
-		propertiesScaleLabel (10, 140, 50, 20, "lflabel", "Scale"),
-		propertiesScaleListBox (80, 140, 170, 20, 0, -300, 170, 300, "menu", scaleLabels, 1.0),
+		propertiesNrStepsLabel (10, 50, 170, 20, "lflabel", "Total number of steps"),
+		propertiesNrStepsListBox (190, 50, 60, 20, 60, 100, "menu", std::vector<std::string> {"8", "16", "24", "32"}, 2.0),
+		propertiesStepsPerSlider (10, 75, 80, 25, "slider", 4.0, 1.0, 8.0, 1.0, "%2.0f"),
+		propertiesStepsPerLabel (100, 85, 80, 20, "lflabel", "steps per"),
+		propertiesBaseListBox (190, 85, 60, 20, 60, 60, "menu", std::vector<std::string> {"beat", "bar"}, 1.0),
+		propertiesRootLabel (10, 115, 40, 20, "lflabel", "Root"),
+		propertiesRootListBox (120, 115, 60, 20, 0, -160, 60, 160, "menu", {{0, "C"}, {2, "D"}, {4, "E"}, {5, "F"}, {7, "G"}, {9, "A"}, {11, "B"}}, 0.0),
+		propertiesSignatureListBox (190, 115, 60, 20, 60, 80, "menu", {{-1, "♭"}, {0, ""}, {1, "♯"}}, 0.0),
+		propertiesOctaveLabel (10, 145, 55, 20, "lflabel", "Octave"),
+		propertiesOctaveListBox (190, 145, 60, 20, 0, -220, 60, 220, "menu", {{-1, "-1"}, {0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}}, 4.0),
+		propertiesScaleLabel (10, 175, 50, 20, "lflabel", "Scale"),
+		propertiesScaleListBox (80, 175, 170, 20, 0, -300, 170, 300, "menu", scaleLabels, 1.0),
 
-		helpLabel (770, 790, 30, 30, "ilabel", "?")
+		helpLabel (980, 40, 30, 30, "ilabel", "?")
 
 {
 	// Init toolbox buttons
@@ -112,7 +114,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	// Link controllerWidgets
 	controllerWidgets[PLAY] = (BWidgets::ValueWidget*) &modePlayButton;
 	controllerWidgets[MODE] = (BWidgets::ValueWidget*) &modeListBox;
-	controllerWidgets[NR_STEPS] = (BWidgets::ValueWidget*) &propertiesNrStepsSlider;
+	controllerWidgets[STEPS_PER] = (BWidgets::ValueWidget*) &propertiesStepsPerSlider;
 	controllerWidgets[BASE] = (BWidgets::ValueWidget*) &propertiesBaseListBox;
 	controllerWidgets[ROOT] = (BWidgets::ValueWidget*) &propertiesRootListBox;
 	controllerWidgets[SIGNATURE] = (BWidgets::ValueWidget*) &propertiesSignatureListBox;
@@ -176,10 +178,12 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	toolDurationDial.applyTheme (theme);
 
 	propertiesBox.applyTheme (theme);
+	propertiesNrStepsLabel.applyTheme (theme);
+	propertiesNrStepsListBox.applyTheme (theme);
 	propertiesBoxLabel.applyTheme (theme);
 	propertiesBoxLabel.setState (BColors::ACTIVE);
-	propertiesNrStepsLabel.applyTheme (theme);
-	propertiesNrStepsSlider.applyTheme (theme);
+	propertiesStepsPerLabel.applyTheme (theme);
+	propertiesStepsPerSlider.applyTheme (theme);
 	propertiesBaseListBox.applyTheme (theme);
 	propertiesRootLabel.applyTheme (theme);
 	propertiesRootListBox.applyTheme (theme);
@@ -242,7 +246,9 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 
 	propertiesBox.add (propertiesBoxLabel);
 	propertiesBox.add (propertiesNrStepsLabel);
-	propertiesBox.add (propertiesNrStepsSlider);
+	propertiesBox.add (propertiesNrStepsListBox);
+	propertiesBox.add (propertiesStepsPerLabel);
+	propertiesBox.add (propertiesStepsPerSlider);
 	propertiesBox.add (propertiesBaseListBox);
 	propertiesBox.add (propertiesRootLabel);
 	propertiesBox.add (propertiesRootListBox);
@@ -468,7 +474,7 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 					ui->drawCaption ();
 				}
 
-				if (widgetNr == NR_STEPS) ui->drawPad ();
+				if (widgetNr == STEPS_PER) ui->drawPad ();
 
 			}
 		}
@@ -661,7 +667,7 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, int row, int step)
 
 	// Draw background
 	BColors::Color bg =	(row == ROWS - 1 ? ctrlBgColor :
-										   (((int)(step / controllerWidgets[NR_STEPS]->getValue ())) % 2) ? oddPadBgColor : evenPadBgColor);
+										   (((int)(step / controllerWidgets[STEPS_PER]->getValue ())) % 2) ? oddPadBgColor : evenPadBgColor);
 	cairo_set_source_rgba (cr, CAIRO_RGBA (bg));
 	cairo_rectangle (cr, x, y, w, h);
 	cairo_fill (cr);

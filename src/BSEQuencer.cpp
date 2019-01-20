@@ -149,12 +149,12 @@ bool BSEQuencer::makeMidi (const int64_t frames, const uint8_t status, const int
  */
 void BSEQuencer::stopMidiOut (const int64_t frames, const uint8_t chbits)
 {
-	fprintf (stderr, "stopMidiOut at %f\n", position);
+	//fprintf (stderr, "stopMidiOut at %f\n", position);
 	for (int i = 0; i <= 127; ++i) stopMidiOut (frames, i, chbits);
 }
 void BSEQuencer::stopMidiOut (const int64_t frames, const int key, const uint8_t chbits)
 {
-	fprintf (stderr, "stopMidiOut %i at %f\n", key, position);
+	//fprintf (stderr, "stopMidiOut %i at %f\n", key, position);
 	for (int i = 0; i < ROWS - 1; ++i) stopMidiOut (frames, key, i, chbits);
 }
 void BSEQuencer::stopMidiOut (const int64_t frames, const int key, const int row, const uint8_t chbits)
@@ -171,7 +171,7 @@ void BSEQuencer::stopMidiOut (const int64_t frames, const int key, const int row
  */
 void BSEQuencer::startMidiOut (const int64_t frames, const int key, const uint8_t chbits)
 {
-	fprintf (stderr, "startMidiOut %i at %f\n", key, position);
+	//fprintf (stderr, "startMidiOut %i at %f\n", key, position);
 	for (int i = 0; i < ROWS - 1; ++i) startMidiOut (frames, key, i, chbits);
 }
 void BSEQuencer::startMidiOut (const int64_t frames, const int key, const int row, const uint8_t chbits)
@@ -463,7 +463,10 @@ void BSEQuencer::run (uint32_t n_samples)
 				}
 
 				// GUI off
-				else if (obj->body.otype == uris.ui_off) ui_on = false;
+				else if (obj->body.otype == uris.ui_off)
+				{
+					ui_on = false;
+				}
 
 				// GUI notifications
 				else if (obj->body.otype == uris.notify_Event)
@@ -508,7 +511,7 @@ void BSEQuencer::run (uint32_t n_samples)
 		CONTROLLER_CHANGED(SIGNATURE) ||
 		CONTROLLER_CHANGED(OCTAVE))
 	{
-		fprintf (stderr, "Call stopMidiOut from 'Update global controllers' at %f\n", position);
+		//fprintf (stderr, "Call stopMidiOut from 'Update global controllers' at %f\n", position);
 		stopMidiOut(0, ALL_CH);
 		for (int i = 0; i < NR_SEQUENCER_CHS; ++i) midiStopped[i] = true;
 	}
@@ -541,7 +544,7 @@ void BSEQuencer::run (uint32_t n_samples)
 		int ch = (int)((i - CH) / CH_SIZE) + 1;
 		if ((CONTROLLER_CHANGED(i)) && !midiStopped[ch-1])
 		{
-			fprintf (stderr, "Call stopMidiOut from 'Update BSEQuencer channel controllers' at %f\n", position);
+			//fprintf (stderr, "Call stopMidiOut from 'Update BSEQuencer channel controllers' at %f\n", position);
 			stopMidiOut (0, 1 << (ch - 1));
 			midiStopped[ch-1] = true;
 		}
@@ -615,7 +618,7 @@ void BSEQuencer::run (uint32_t n_samples)
 						{
 							if (!midiStopped[i])
 							{
-								fprintf (stderr, "Call stopMidiOut from 'Stop MIDI output for all BSEQuencer channels' at %f\n", position);
+								//fprintf (stderr, "Call stopMidiOut from 'Stop MIDI output for all BSEQuencer channels' at %f\n", position);
 								stopMidiOut (ev->time.frames, 1 << i);
 								midiStopped[i] = true;
 							}
@@ -752,7 +755,7 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 			lv2_atom_sequence_clear(midiOut[i]);
 			midiOut[i]->atom.type = midiIn->atom.type;
 		}
-		fprintf (stderr, "Call stopMidiOut from 'state_restore' at %f\n", position);
+		//fprintf (stderr, "Call stopMidiOut from 'state_restore' at %f\n", position);
 		stopMidiOut (0, ALL_CH);
 
 		// Clear all MIDI in
