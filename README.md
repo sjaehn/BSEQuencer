@@ -40,7 +40,11 @@ Key features
 
 TODO
 ----
+* Mouse over widgets (showing values of matrix fields, dials, or sliders; direct keybord keyboard entry of values)
+* Link to online help 
 * Stability (Note: **This plugin is experimental, yet. Not for production!**)
+* Testing
+* Bugfixes
 
 See also
 --------
