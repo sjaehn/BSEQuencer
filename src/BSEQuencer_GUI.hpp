@@ -18,6 +18,7 @@
 #include "drawbutton.hpp"
 #include "PlayStopButton.hpp"
 #include "ButtonBox.hpp"
+#include "CircledSymbol.hpp"
 #include "definitions.h"
 #include "ports.h"
 #include "urids.h"
@@ -25,6 +26,8 @@
 #include "PadMessage.hpp"
 
 #define BG_FILE "surface.png"
+#define HELP_URL "https://github.com/sjaehn/BSEQuencer/wiki"
+#define OPEN_CMD "xdg-open"
 #define PAD_HEIGHT 30
 #define PAD_WIDTH 40
 
@@ -42,6 +45,7 @@ public:
 
 private:
 	static void valueChangedCallback(BEvents::Event* event);
+	static void helpPressedCallback (BEvents::Event* event);
 	static void padsPressedCallback (BEvents::Event* event);
 	void drawCaption ();
 	void drawPad ();
@@ -141,6 +145,8 @@ private:
 
 	std::array<ChBox, NR_SEQUENCER_CHS> chBoxes;
 
+	CircledSymbol helpLabel;
+
 	// Definition of styles
 	BColors::ColorSet fgColors = {{{0.0, 0.25, 0.75, 1.0}, {0.25, 0.75, 0.75, 1.0}, {0.0, 0.0, 0.1, 1.0}, {0.0, 0.0, 0.0, 0.0}}};
 	BColors::ColorSet fgColors_ch1 = {{{0.0, 0.25, 0.75, 1.0}, {0.25, 0.75, 0.75, 1.0}, {0.0, 0.0, 0.1, 1.0}, {0.0, 0.0, 0.0, 0.0}}};
@@ -166,6 +172,8 @@ private:
 	BStyles::Fill screenBg = BStyles::Fill (BColors::Color (0.0, 0.0, 0.0, 0.8));
 	BStyles::Fill boxBg = BStyles::Fill (BColors::Color (0.0, 0.0, 0.0, 0.9));
 	BStyles::Font ctLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 12.0,
+											   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
+	BStyles::Font iLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 24.0,
 											   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
 	BStyles::Font lfLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 12.0,
 											   BStyles::TEXT_ALIGN_LEFT, BStyles::TEXT_VALIGN_MIDDLE);
@@ -220,8 +228,9 @@ private:
 							 {"font", STYLEPTR (&ctLabelFont)}}},
 		{"ctlabel",	 		{{"uses", STYLEPTR (&labelStyles)}}},
 		{"lflabel",	 		{{"uses", STYLEPTR (&labelStyles)},
-							 {"font", STYLEPTR (&lfLabelFont)}}
-		}
+							 {"font", STYLEPTR (&lfLabelFont)}}},
+		{"ilabel",	 		{{"uses", STYLEPTR (&labelStyles)},
+							 {"font", STYLEPTR (&iLabelFont)}}}
 	});
 
 };

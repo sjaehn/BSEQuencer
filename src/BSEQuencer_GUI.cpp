@@ -53,7 +53,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		toolDurationLabel (170, 225, 60, 20, "ctlabel", "Duration"),
 		toolDurationDial (175, 165, 50, 60, "dial", 1.0, 0.0, 1.0, 0.0, "%1.2f"),
 
-		propertiesBox (760, 590, 260, 170, "box"),
+		propertiesBox (760, 590, 260, 180, "box"),
 		propertiesBoxLabel (10, 10, 240, 20, "ctlabel", "Properties"),
 		propertiesNrStepsSlider (10, 40, 80, 25, "slider", 4.0, 1.0, 8.0, 1.0, "%2.0f"),
 		propertiesNrStepsLabel (100, 50, 80, 20, "lflabel", "steps per"),
@@ -64,7 +64,9 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		propertiesOctaveLabel (10, 110, 55, 20, "lflabel", "Octave"),
 		propertiesOctaveListBox (190, 110, 60, 20, 0, -220, 60, 220, "menu", {{-1, "-1"}, {0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}}, 4.0),
 		propertiesScaleLabel (10, 140, 50, 20, "lflabel", "Scale"),
-		propertiesScaleListBox (80, 140, 170, 20, 0, -300, 170, 300, "menu", scaleLabels, 1.0)
+		propertiesScaleListBox (80, 140, 170, 20, 0, -300, 170, 300, "menu", scaleLabels, 1.0),
+
+		helpLabel (770, 790, 30, 30, "ilabel", "?")
 
 {
 	// Init toolbox buttons
@@ -138,6 +140,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	padSurface.setCallbackFunction (BEvents::BUTTON_RELEASE_EVENT, padsPressedCallback);
 	padSurface.setDragable (true);
 	padSurface.setCallbackFunction (BEvents::POINTER_MOTION_WHILE_BUTTON_PRESSED_EVENT, padsPressedCallback);
+	helpLabel.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, helpPressedCallback);
 
 
 	// Apply theme
@@ -206,7 +209,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		chBoxes[i].noteOffsetLabel.applyTheme (theme);
 	}
 
-
+	helpLabel.applyTheme (theme);
 
 	// Pack widgets
 	mContainer.applyTheme (theme);
@@ -271,6 +274,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	mContainer.add (modeBox);
 	mContainer.add (toolBox);
 	mContainer.add (propertiesBox);
+	mContainer.add (helpLabel);
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i) mContainer.add (chBoxes[i].box);
 
 	add (mContainer);
@@ -470,6 +474,8 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 		}
 	}
 }
+
+void BSEQuencer_GUI::helpPressedCallback (BEvents::Event* event) {system(OPEN_CMD " " HELP_URL);}
 
 void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 {
