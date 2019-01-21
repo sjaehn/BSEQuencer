@@ -85,6 +85,7 @@ private:
 	void startMidiOut (const int64_t frames, const int key, const int row, const uint8_t chbits);
 	double getStep (const int key, const double relpos);
 	void runSequencer (const double startpos, const uint32_t start, const uint32_t end);
+	void padMessageBufferAllPads ();
 	uint32_t notifyPadsToGui (const uint32_t space);
 	uint32_t notifyStatusToGui (const uint32_t space);
 

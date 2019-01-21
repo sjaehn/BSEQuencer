@@ -334,7 +334,7 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 					const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oPad;
 					if (vec->body.child_type == uris.atom_Float)
 					{
-						uint32_t size = (uint32_t) ((oPad->size - sizeof(LV2_Atom_Vector_Body)) / sizeof (int));
+						uint32_t size = (uint32_t) ((oPad->size - sizeof(LV2_Atom_Vector_Body)) / sizeof (PadMessage));
 						PadMessage* pMes = (PadMessage*)(&vec->body + 1);
 						for (int i = 0; i < size; ++i)
 						{
@@ -342,8 +342,7 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 							int row = (int) pMes[i].row;
 							if ((step >= 0) && (step < STEPS) && (row >= 0) && (row < ROWS))
 							{
-								Pad pd (pMes->ch, pMes->pitchOctave, pMes->velocity, pMes->duration);
-								pads[row][step] = pd;
+								pads[row][step] = Pad (pMes[i].ch, pMes[i].pitchOctave, pMes[i].velocity, pMes[i].duration);
 							}
 						}
 

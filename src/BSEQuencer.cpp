@@ -510,6 +510,7 @@ void BSEQuencer::run (uint32_t n_samples)
 			{
 				ui_on = true;
 				fprintf (stderr, "BSEQuencer.lv2: UI on received.\n");
+				padMessageBufferAllPads ();
 				scheduleNotifyPadsToGui = true;
 				scheduleNotifyStatusToGui = true;
 			}
@@ -776,19 +777,27 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 		memcpy (pads, LV2_ATOM_BODY (data), sizeof(Pad) * STEPS * ROWS);
 
 		// Copy all to padMessageBuffer for submission to GUI
-		for (int i = 0; i < STEPS; ++i)
-		{
-			for (int j = 0; j < ROWS; ++j)
-			{
-				Pad* pd = &pads[j][i];
-				padMessageBuffer[i * ROWS + j] = PadMessage (i, j, pd->ch, pd->pitchOctave, pd->velocity, pd->duration);
-			}
-		}
+		padMessageBufferAllPads ();
 
 		// Force GUI notification
 		scheduleNotifyPadsToGui = true;
 	}
 	return LV2_STATE_SUCCESS;
+}
+
+/*
+ * Copies all pads to padMessageBuffer
+ */
+void BSEQuencer::padMessageBufferAllPads ()
+{
+	for (int i = 0; i < STEPS; ++i)
+	{
+		for (int j = 0; j < ROWS; ++j)
+		{
+			Pad* pd = &(pads[j][i]);
+			padMessageBuffer[i * ROWS + j] = PadMessage (i, j, pd->ch, pd->pitchOctave, pd->velocity, pd->duration);
+		}
+	}
 }
 
 uint32_t BSEQuencer::notifyPadsToGui(const uint32_t space)
@@ -801,23 +810,20 @@ uint32_t BSEQuencer::notifyPadsToGui(const uint32_t space)
 		for (int i = 0; (i < ROWS * STEPS) && (!(padMessageBuffer[i] == endmsg)); ++i) end = i;
 
 		// Prepare forge buffer and initialize atom sequence
-		if (space > 1024 + sizeof(PadMessage) * end)
+		if (space > 1024 + sizeof(PadMessage) * end)							// TODO calculate the right size
 		{
-			//lv2_atom_forge_set_buffer(&forge, (uint8_t*) notifyPort, space);
-			//lv2_atom_forge_sequence_head(&forge, &notify_frame, 0);
-
-			// Submit data
 			LV2_Atom_Forge_Frame frame;
 			lv2_atom_forge_frame_time(&forge, 0);
 			lv2_atom_forge_object(&forge, &frame, 0, uris.notify_Event);
 			lv2_atom_forge_key(&forge, uris.notify_pad);
 			lv2_atom_forge_vector(&forge, sizeof(float), uris.atom_Float, sizeof(PadMessage) / sizeof(float) * (end + 1), (void*) padMessageBuffer);
 			lv2_atom_forge_pop(&forge, &frame);
+
 			// Empty padMessageBuffer
 			padMessageBuffer[0] = endmsg;
 
 			scheduleNotifyPadsToGui = false;
-			return sizeof(PadMessage) * end;
+			return sizeof(PadMessage) * end;									// TODO calculate the right size
 		}
 	}
 	return 0;
@@ -859,12 +865,8 @@ uint32_t BSEQuencer::notifyStatusToGui (const uint32_t space)
 	}
 
 	// Prepare forge buffer and initialize atom sequence
-	if (space > 1024 + 3 * sizeof(uint32_t))
+	if (space > 1024 + 3 * sizeof(uint32_t))									// TODO calculate the right size
 	{
-		//lv2_atom_forge_set_buffer(&forge, (uint8_t*) notifyPort, space);
-		//lv2_atom_forge_sequence_head(&forge, &notify_frame, 0);
-
-		// Submit data
 		LV2_Atom_Forge_Frame frame;
 		lv2_atom_forge_frame_time(&forge, 0);
 		lv2_atom_forge_object(&forge, &frame, 0, uris.notify_Event);
@@ -876,11 +878,8 @@ uint32_t BSEQuencer::notifyStatusToGui (const uint32_t space)
 		lv2_atom_forge_int(&forge, chbits);
 		lv2_atom_forge_pop(&forge, &frame);
 
-		// Close off sequence
-		//lv2_atom_forge_pop(&forge, &notify_frame);
-
 		scheduleNotifyStatusToGui = false;
-		return 3 * sizeof(uint32_t);
+		return 3 * sizeof(uint32_t);											// TODO calculate the right size
 	}
 	return 0;
 }
