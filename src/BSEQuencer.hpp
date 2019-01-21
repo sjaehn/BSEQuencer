@@ -85,12 +85,13 @@ private:
 	void startMidiOut (const int64_t frames, const int key, const int row, const uint8_t chbits);
 	double getStep (const int key, const double relpos);
 	void runSequencer (const double startpos, const uint32_t start, const uint32_t end);
-	void notifyPadsToGui ();
-	void notifyStatusToGui ();
+	uint32_t notifyPadsToGui (const uint32_t space);
+	uint32_t notifyStatusToGui (const uint32_t space);
 
 	// URIs
 	BSEQuencerURIs uris;
 	LV2_URID_Map* map;
+	LV2_URID_Unmap* unmap;
 
 	// DSP <-> GUI communication
 	const LV2_Atom_Sequence* controlPort;
@@ -103,11 +104,11 @@ private:
 
 	// MIDI in sequences
 	const LV2_Atom_Sequence* midiIn;
-	std::array<LV2_Atom_Sequence*, NR_SEQUENCER_CHS> midiOut;
+	LV2_Atom_Sequence* midiOut [NR_SEQUENCER_CHS];
 
 	// Controllers
-	std::array<float*, KNOBS_SIZE> new_controllers;
-	std::array<float, KNOBS_SIZE> controllers;
+	float* new_controllers [KNOBS_SIZE];
+	float controllers [KNOBS_SIZE];
 
 	//Pads
 	Pad pads [ROWS] [STEPS];
@@ -127,6 +128,8 @@ private:
 
 	// Internals
 	bool ui_on;
+	bool scheduleNotifyPadsToGui;
+	bool scheduleNotifyStatusToGui;
 	StaticArrayList<Key, 16> inKeys;
 	Key key;
 	const Key defaultKey = {0, 0, 0, -1, 1, {{}, {}}, {}};

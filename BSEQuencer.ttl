@@ -22,7 +22,7 @@
         a lv2:Plugin ;
         doap:name "B.SEQuencer" ;
         rdfs:comment "16 x 16 step sequencer with four output ports." ;
-  		doap:maintainer [ foaf:name "Sven Jähnichen" ] ;
+  		doap:maintainer [ foaf:name "Sven Jaehnichen" ] ;
         lv2:optionalFeature lv2:hardRTCapable ;
         lv2:extensionData state:interface ;
         lv2:binary <BSEQuencer.so> ;
@@ -31,11 +31,12 @@
         lv2:port [
                 a lv2:InputPort , atom:AtomPort ;
                 atom:bufferType atom:Sequence ;
+                atom:supports time:Position ;
                 lv2:designation lv2:control;
                 lv2:index 0 ;
                 lv2:symbol "control" ;
                 lv2:name "Control" ;
-                rsz:minimumSize 65952;
+#               rsz:minimumSize 65952;
                 rdfs:comment "GUI to plugin communication"
         ] , [
 				a lv2:OutputPort , atom:AtomPort ;
@@ -49,8 +50,7 @@
 		] , [
                 a lv2:InputPort , atom:AtomPort ;
                 atom:bufferType atom:Sequence ;
-                atom:supports time:Position ;
-                atom:supports midi:MidiEvent ;
+                atom:supports midi:MidiEvent;
                 lv2:index 2 ;
                 lv2:symbol "midi_in" ;
                 lv2:name "MIDI in" ;

@@ -35,6 +35,7 @@ class BSEQuencer_GUI : public BWidgets::Window
 {
 public:
 	BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *const *features, PuglNativeWindow parentWindow);
+	~BSEQuencer_GUI ();
 	void port_event (uint32_t port_index, uint32_t buffer_size, uint32_t format, const void *buffer);
 	void send_ui_on ();
 	void send_ui_off ();

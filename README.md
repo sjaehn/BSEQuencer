@@ -48,7 +48,7 @@ TODO
 * Selectable number of steps (8, 16, 24, or 32 steps) - may cause incompatibility to previous versions
 * Stability (Note: **This plugin is experimental, yet. Not for production!**)
 * Testing
-* Bugfixes
+* Bugfixes (a lot to do)
 
 See also
 --------

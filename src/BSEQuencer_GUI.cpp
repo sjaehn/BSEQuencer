@@ -304,6 +304,11 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	lv2_atom_forge_init (&forge,map);
 }
 
+BSEQuencer_GUI::~BSEQuencer_GUI ()
+{
+	send_ui_off ();
+}
+
 void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 	uint32_t format, const void* buffer)
 {
