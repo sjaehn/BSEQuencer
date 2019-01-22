@@ -21,7 +21,7 @@ For installation into an alternative directory (e.g., /usr/local/lib/lv2), modif
 
 Running
 -------
-After the installation Ardour, Carla, and any other LV2 host should automatically detect B.SEQuencer.
+(After the installation Ardour, Carla, and any other LV2 host should automatically detect B.SEQuencer.)
 
 If jalv is installed, you can also call it
 ```
@@ -45,10 +45,11 @@ see https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer
 TODO
 ----
 * Mouse over widgets (showing values of matrix fields, dials, or sliders; direct keybord keyboard entry of values)
-* Selectable number of steps (8, 16, 24, or 32 steps) - may cause incompatibility to previous versions
 * Stability (Note: **This plugin is experimental, yet. Not for production!**)
 * Testing
 * Bugfixes (a lot to do)
+* Selectable number of steps (8, 16, 24, or 32 steps) - may cause incompatibility to previous versions
+* Do not divide control fields from note fields - may cause incompatibility to previous versions
 
 See also
 --------

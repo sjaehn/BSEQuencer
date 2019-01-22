@@ -59,6 +59,10 @@ BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
 	// Initialize padMessageBuffer
 	padMessageBuffer[0] = PadMessage (ENDPADMESSAGE);
 
+	// Init pads
+	Pad playPad = Pad (NR_SEQUENCER_CHS + 1 + CTRL_PLAY, 0, 1, 1);
+	for (int i = 0; i < STEPS; ++i) pads[ROWS-1][i] = playPad;
+
 	ui_on = false;
 
 }
@@ -376,7 +380,8 @@ void BSEQuencer::runSequencer (const double startpos, const uint32_t start, cons
 				{
 					stopMidiOut (actframes, key, ALL_CH);
 					inKeys[key].stepNr = HALT_STEP;
-					*new_controllers[PLAY] = 0;
+					*(new_controllers[PLAY]) = 0;
+					//TODO send change to GUI
 					break;
 				}
 
@@ -448,6 +453,18 @@ void BSEQuencer::run (uint32_t n_samples)
 		midiOut[i]->atom.type = midiIn->atom.type;
 	}
 
+	// Validate controllers
+	for (int i = 0; i < KNOBS_SIZE; ++i)
+	{
+		float val = validateValue (*(new_controllers[i]), controllerLimits[i]);
+		if (val != *(new_controllers[i]))
+		{
+			fprintf (stderr, "BSEQuencer.lv2: Value out of range in run (): Controller#%i\n", i);
+			*(new_controllers[i]) = val;
+			// TODO update GUI controller
+		}
+	}
+
 	// Update global controllers
 	// 1. Stop MIDI out if play, mode or root (note/signature/octave) changed
 	bool midiStopped[NR_SEQUENCER_CHS] = {false, false, false, false};
@@ -498,7 +515,6 @@ void BSEQuencer::run (uint32_t n_samples)
 	}
 
 	// Read CONTROL port (notifications from GUI and host)
-
 	LV2_ATOM_SEQUENCE_FOREACH(controlPort, ev)
 	{
 		if (lv2_atom_forge_is_object_type(&forge, ev->body.type))
@@ -546,7 +562,14 @@ void BSEQuencer::run (uint32_t n_samples)
 							if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < STEPS))
 							{
 								Pad pd (pMes->ch, pMes->pitchOctave, pMes->velocity, pMes->duration);
-								pads[row][step] = pd;
+								Pad valPad = validatePad (pd);
+								pads[row][step] = valPad;
+								if (valPad != pd)
+								{
+									fprintf (stderr, "BSEQuencer.lv2: Pad out of range in run (): pads[%i][%i].\n", row, step);
+									padMessageBufferAppendPad (row, step, valPad);
+									scheduleNotifyPadsToGui = true;
+								}
 							}
 						}
 					}
@@ -623,7 +646,7 @@ void BSEQuencer::run (uint32_t n_samples)
 				}
 			}
 
-			else fprintf (stderr, "BSEQuencer.lv2: Unexpected object in Control port (otype = %i, %s)\n", obj->body.otype,
+			else fprintf (stderr, "BSEQuencer.lv2: Uninterpreted object in Control port (otype = %i, %s)\n", obj->body.otype,
 						  (unmap ? unmap->unmap (unmap->handle, obj->body.otype) : NULL));
 		}
 	}
@@ -682,7 +705,7 @@ void BSEQuencer::run (uint32_t n_samples)
 
 			// All other MIDI signals -> forward
 			default:
-				//for (int i = 0; i < NR_SEQUENCER_CHS; ++i) lv2_atom_sequence_append_event (midiOut[i], outCapacity[i], ev);
+				fprintf (stderr, "BSEQuencer.lv2: Uninterpreted MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
 				break;
 			}
 		}
@@ -776,6 +799,20 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 		// Copy retrieved data
 		memcpy (pads, LV2_ATOM_BODY (data), sizeof(Pad) * STEPS * ROWS);
 
+		// Validate all pads
+		for (int i = 0; i < ROWS; ++i)
+		{
+			for (int j = 0; j < STEPS; ++j)
+			{
+				Pad valPad = validatePad (pads[i][j]);
+				if (valPad != pads[i][j])
+				{
+					fprintf (stderr, "BSEQuencer.lv2: Pad out of range in state_restore (): pads[%i][%i].\n", i, j);
+					pads[i][j] = valPad;
+				}
+			}
+		}
+
 		// Copy all to padMessageBuffer for submission to GUI
 		padMessageBufferAllPads ();
 
@@ -786,7 +823,53 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 }
 
 /*
- * Copies all pads to padMessageBuffer
+ * Checks if a value is within a limit, and if not, puts the value within
+ * this limit.
+ * @param value
+ * @param limit
+ * @return		Value is within the limit
+ */
+float BSEQuencer::validateValue (float value, const Limit limit)
+{
+	float ltdValue = ((limit.step != 0) ? (limit.min + round ((value - limit.min) / limit.step) * limit.step) : value);
+	return LIMIT (ltdValue, limit.min, limit.max);
+}
+
+/*
+ * Validates a single pad
+ */
+Pad BSEQuencer::validatePad (Pad pad)
+{
+
+	return Pad(validateValue (pad.ch, controllerLimits[SELECTION_CH]),
+			   validateValue (pad.pitchOctave, controllerLimits[SELECTION_OCTAVE]),
+			   validateValue (pad.velocity, controllerLimits[SELECTION_VELOCITY]),
+			   validateValue (pad.duration, controllerLimits[SELECTION_DURATION]));
+}
+
+/*
+ * Appends a single pad to padMessageBuffer
+ */
+bool BSEQuencer::padMessageBufferAppendPad (int row, int step, Pad pad)
+{
+	PadMessage end = PadMessage (ENDPADMESSAGE);
+	PadMessage msg = PadMessage (step, row, pad.ch, pad.pitchOctave, pad.velocity, pad.duration);
+
+	for (int i = 0; i < STEPS * ROWS; ++i)
+	{
+		if (padMessageBuffer[i] != end)
+		{
+			padMessageBuffer[i] = msg;
+			if (i < STEPS * ROWS - 1) padMessageBuffer[i + 1] = end;
+			return true;
+		}
+	}
+	return false;
+}
+
+
+/*
+ * Copies all pads to padMessageBuffer (thus overwrites it!)
  */
 void BSEQuencer::padMessageBufferAllPads ()
 {

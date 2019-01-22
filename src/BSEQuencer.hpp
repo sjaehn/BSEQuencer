@@ -51,6 +51,11 @@
 #include "PadMessage.hpp"
 #include "StaticArrayList.hpp"
 
+typedef struct {
+	float min;
+	float max;
+	float step;
+} Limit;
 
 typedef struct {
 	int note;
@@ -85,6 +90,9 @@ private:
 	void startMidiOut (const int64_t frames, const int key, const int row, const uint8_t chbits);
 	double getStep (const int key, const double relpos);
 	void runSequencer (const double startpos, const uint32_t start, const uint32_t end);
+	float validateValue (float value, const Limit limit);
+	Pad validatePad (Pad pad);
+	bool padMessageBufferAppendPad (int row, int step, Pad pad);
 	void padMessageBufferAllPads ();
 	uint32_t notifyPadsToGui (const uint32_t space);
 	uint32_t notifyStatusToGui (const uint32_t space);
@@ -110,6 +118,40 @@ private:
 	// Controllers
 	float* new_controllers [KNOBS_SIZE];
 	float controllers [KNOBS_SIZE];
+	Limit controllerLimits [KNOBS_SIZE] = {{0, 1, 1},	// PLAY
+										   {1, 2, 1},	// MODE
+										   {1, 8, 1},	// STEPS_PER
+										   {1, 2, 1},	// BASE
+										   {0, 11, 1},	// ROOT
+										   {-1, 1, 1},	// SIGNATURE
+										   {-1, 8, 1},	// OCTAVE
+										   {1, 14, 1},	// SCALE
+										   {1, 300, 0},	// AUTOPLAY_BPM
+										   {1, 16, 1},	// AUTOPLAY_BPB
+										   {0, NR_SEQUENCER_CHS + NR_CTRL_BUTTONS, 1},	// SELECTION_CH
+										   {-8, 8, 1},	// SELECTION_OCTAVE
+										   {0, 2, 0},	// SELECTION_VELOCITY
+										   {0, 1, 0},	// SELECTION_DURATION
+										   {0, 1, 1},	// CH PITCH
+										   {0, 2, 0},	// CH VELOCITY
+										   {1, 4, 1},	// CH MIDI_PORT
+										   {1, 16, 11},	// CH MIDI_CHANNEL
+										   {-127, 127, 1},	// CH NOTE_OFFSET
+										   {0, 1, 1},	// CH PITCH
+										   {0, 2, 0},	// CH VELOCITY
+										   {1, 4, 1},	// CH MIDI_PORT
+										   {1, 16, 11},	// CH MIDI_CHANNEL
+										   {-127, 127, 1},	// CH NOTE_OFFSET
+										   {0, 1, 1},	// CH PITCH
+										   {0, 2, 0},	// CH VELOCITY
+										   {1, 4, 1},	// CH MIDI_PORT
+										   {1, 16, 11},	// CH MIDI_CHANNEL
+										   {-127, 127, 1},	// CH NOTE_OFFSET
+										   {0, 1, 1},	// CH PITCH
+										   {0, 2, 0},	// CH VELOCITY
+										   {1, 4, 1},	// CH MIDI_PORT
+										   {1, 16, 11},	// CH MIDI_CHANNEL
+										   {-127, 127, 1}};	// CH NOTE_OFFSET
 
 	//Pads
 	Pad pads [ROWS] [STEPS];
