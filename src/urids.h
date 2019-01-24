@@ -12,6 +12,7 @@
 
 typedef struct
 {
+	LV2_URID atom_Sequence;
 	LV2_URID atom_Float;
 	LV2_URID atom_Double;
 	LV2_URID atom_Int;
@@ -40,6 +41,7 @@ typedef struct
 
 void getURIs (LV2_URID_Map* m, BSEQuencerURIs* uris)
 {
+	uris->atom_Sequence = m->map(m->handle, LV2_ATOM__Sequence);
 	uris->atom_Float = m->map(m->handle, LV2_ATOM__Float);
 	uris->atom_Double = m->map(m->handle, LV2_ATOM__Double);
 	uris->atom_Int = m->map(m->handle, LV2_ATOM__Int);

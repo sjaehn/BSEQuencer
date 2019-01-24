@@ -98,7 +98,8 @@ private:
 	BWidgets::DisplayHSlider modeAutoplayBpmSlider;
 	BWidgets::Label modeAutoplayBpbLabel;
 	BWidgets::DisplayHSlider modeAutoplayBpbSlider;
-	BWidgets::Widget modeAutoplayBoxScreen;
+	BWidgets::Label modeMidiInChannelLabel;
+	BWidgets::PopupListBox modeMidiInChannelListBox;
 	BWidgets::Label modePlayLabel;
 	PlayStopButton modePlayButton;
 
@@ -136,8 +137,6 @@ private:
 		BWidgets::Label pitchLabel;
 		BWidgets::HSwitch pitchSwitch;
 		BWidgets::Widget pitchScreen;
-		BWidgets::Label portLabel;
-		BWidgets::PopupListBox portListBox;
 		BWidgets::Label channelLabel;
 		BWidgets::PopupListBox channelListBox;
 		BWidgets::Label velocityLabel;

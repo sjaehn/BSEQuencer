@@ -21,7 +21,7 @@
 #ifndef BSEQUENCER_HPP_
 #define BSEQUENCER_HPP_
 
-#define CONTROLLER_CHANGED(con) (controllers[con] != *(new_controllers[con]))
+#define CONTROLLER_CHANGED(con) ((new_controllers[con]) ? (controllers[con] != *(new_controllers[con])) : false)
 #define VALUE_SPEED (controllers[MODE] == AUTOPLAY ? 1 : speed)
 #define VALUE_BPM (controllers[MODE] == AUTOPLAY ? controllers[AUTOPLAY_BPM] : bpm)
 #define VALUE_BPB (controllers[MODE] == AUTOPLAY ? controllers[AUTOPLAY_BPB] : beatsPerBar)
@@ -81,7 +81,7 @@ public:
 
 private:
 	void appendMidiMsg (const int64_t frames, const uint8_t ch, const uint8_t status, const int note, const uint8_t velocity);
-	void sendMidiOut (const int64_t frames, const uint8_t status, const int key, uint8_t chbits = ALL_CH, uint8_t startrow = 0, uint8_t endrow = ROWS - 2);
+	uint32_t initMidiOut (LV2_Atom_Sequence* midi);
 	bool makeMidi (const int64_t frames, const uint8_t status, const int key, const int row, uint8_t chbits = ALL_CH);
 	void stopMidiOut (const int64_t frames, const uint8_t chbits);
 	void stopMidiOut (const int64_t frames, const int key, const uint8_t chbits);
@@ -106,20 +106,21 @@ private:
 	const LV2_Atom_Sequence* controlPort;
 	LV2_Atom_Sequence* notifyPort;
 
-	LV2_Atom_Forge forge;
+	LV2_Atom_Forge notify_forge;
 	LV2_Atom_Forge_Frame notify_frame;
 
 	PadMessage padMessageBuffer[STEPS * ROWS];
 
-	// MIDI in sequences
-	const LV2_Atom_Sequence* midiIn;
-	LV2_Atom_Sequence* midiOut [NR_SEQUENCER_CHS];
+	// MIDI sequences
+	LV2_Atom_Sequence* midiOut;
 
 	// Controllers
 	float* new_controllers [KNOBS_SIZE];
 	float controllers [KNOBS_SIZE];
-	Limit controllerLimits [KNOBS_SIZE] = {{0, 1, 1},	// PLAY
+	Limit controllerLimits [KNOBS_SIZE] = {{0, 16, 1},	// MIDI_IN_CHANNEL
+										   {0, 1, 1},	// PLAY
 										   {1, 2, 1},	// MODE
+										   {8, 32, 8}, 	// NR_OF_STEPS
 										   {1, 8, 1},	// STEPS_PER
 										   {1, 2, 1},	// BASE
 										   {0, 11, 1},	// ROOT
@@ -134,23 +135,19 @@ private:
 										   {0, 1, 0},	// SELECTION_DURATION
 										   {0, 1, 1},	// CH PITCH
 										   {0, 2, 0},	// CH VELOCITY
-										   {1, 4, 1},	// CH MIDI_PORT
-										   {1, 16, 11},	// CH MIDI_CHANNEL
+										   {1, 16, 1},	// CH MIDI_CHANNEL
 										   {-127, 127, 1},	// CH NOTE_OFFSET
 										   {0, 1, 1},	// CH PITCH
 										   {0, 2, 0},	// CH VELOCITY
-										   {1, 4, 1},	// CH MIDI_PORT
-										   {1, 16, 11},	// CH MIDI_CHANNEL
+										   {1, 16, 1},	// CH MIDI_CHANNEL
 										   {-127, 127, 1},	// CH NOTE_OFFSET
 										   {0, 1, 1},	// CH PITCH
 										   {0, 2, 0},	// CH VELOCITY
-										   {1, 4, 1},	// CH MIDI_PORT
-										   {1, 16, 11},	// CH MIDI_CHANNEL
+										   {1, 16, 1},	// CH MIDI_CHANNEL
 										   {-127, 127, 1},	// CH NOTE_OFFSET
 										   {0, 1, 1},	// CH PITCH
 										   {0, 2, 0},	// CH VELOCITY
-										   {1, 4, 1},	// CH MIDI_PORT
-										   {1, 16, 11},	// CH MIDI_CHANNEL
+										   {1, 16, 1},	// CH MIDI_CHANNEL
 										   {-127, 127, 1}};	// CH NOTE_OFFSET
 
 	//Pads
@@ -164,7 +161,7 @@ private:
 	float beatsPerBar;
 	float barBeats;
 	uint32_t beatUnit;															// TODO Really needed ?
-	std::array<uint32_t, NR_SEQUENCER_CHS> outCapacity;
+	uint32_t outCapacity;
 
 	// Data derived from controllers or host
 	double position;

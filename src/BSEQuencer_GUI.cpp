@@ -21,11 +21,11 @@
 #include "BSEQuencer_GUI.hpp"
 
 BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *const *features, PuglNativeWindow parentWindow) :
-		Window (1040, 840, "B.SEQuencer", parentWindow),
+		Window (1040, 820, "B.SEQuencer", parentWindow),
 		cursorBits (0), noteBits (0), chBits (0), tempTool (false), tempToolCh (0),
 		pluginPath (bundle_path ? std::string (bundle_path) : std::string ("")), controller (NULL), write_function (NULL),
 		map (NULL),
-		mContainer (0, 0, 1040, 840, "main"),
+		mContainer (0, 0, 1040, 820, "main"),
 		padSurface (98, 88, 644, 484, "box"),
 		captionSurface (18, 88, 64, 484, "box"),
 
@@ -37,7 +37,10 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		modeAutoplayBpmSlider (120, 120, 130, 25, "slider", 120.0, 1.0, 300.0, 0.0, "%3.1f"),
 		modeAutoplayBpbLabel (10, 170, 120, 20, "lflabel", "Beats per bar"),
 		modeAutoplayBpbSlider (120, 160, 130, 25, "slider", 4.0, 1.0, 16.0, 1.0, "%2.0f"),
-		modeAutoplayBoxScreen (5, 115, 250, 85, "screen"),
+		modeMidiInChannelLabel (10, 130, 150, 20 , "lflabel", "MIDI input channel"),
+		modeMidiInChannelListBox (180, 130, 70, 20, 70, 200, "menu",
+								  {{0, "All"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}, {9, "9"},
+								   {10, "10"}, {11, "11"}, {12, "12"}, {13, "13"}, {14, "14"}, {15, "15"}, {16, "16"}}),
 		modePlayLabel (10, 50, 205, 20, "lflabel", "Status: playing ..."),
 		modePlayButton (210, 40, 40, 40, "box", 1.0),
 
@@ -53,7 +56,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		toolDurationLabel (170, 225, 60, 20, "ctlabel", "Duration"),
 		toolDurationDial (175, 165, 50, 60, "dial", 1.0, 0.0, 1.0, 0.0, "%1.2f"),
 
-		propertiesBox (760, 590, 260, 230, "box"),
+		propertiesBox (760, 590, 260, 210, "box"),
 		propertiesBoxLabel (10, 10, 240, 20, "ctlabel", "Properties"),
 		propertiesNrStepsLabel (10, 50, 170, 20, "lflabel", "Total number of steps"),
 		propertiesNrStepsListBox (190, 50, 60, 20, 60, 100, "menu", std::vector<std::string> {"8", "16", "24", "32"}, 2.0),
@@ -80,40 +83,38 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	// Init ChBoxes
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
 	{
-		chBoxes[i].box = BWidgets::Widget (98 + i * 163.5, 590, 153.5, 230, "box");
+		chBoxes[i].box = BWidgets::Widget (98 + i * 163.5, 590, 153.5, 210, "box");
 		chBoxes[i].box.rename ("box");
 		chBoxes[i].chSymbol = BWidgets::DrawingSurface (7, 7, 26, 26, "button");
 		chBoxes[i].chSymbol.rename ("button");
 		chBoxes[i].chLabel = BWidgets::Label (40, 10, 40, 20, "ctlabel", "CH " + std::to_string (i + 1));
 		chBoxes[i].chLabel.rename ("ctlabel");
-		chBoxes[i].portLabel = BWidgets::Label (10, 40, 80, 20, "lflabel", "MIDI port");
-		chBoxes[i].portLabel.rename ("lflabel");
-		chBoxes[i].portListBox = BWidgets::PopupListBox (93.5, 40, 50, 20, 50, 100, "menu", {"1", "2", "3", "4"}, i);
-		chBoxes[i].portListBox.rename ("menu");
-		chBoxes[i].channelLabel = BWidgets::Label (10, 70, 80, 20, "lflabel", "MIDI channel");
+		chBoxes[i].channelLabel = BWidgets::Label (10, 50, 80, 20, "lflabel", "MIDI channel");
 		chBoxes[i].channelLabel.rename ("lflabel");
-		chBoxes[i].channelListBox = BWidgets::PopupListBox (93.5, 70, 50, 20, 50, 120, "menu", {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"}, 1.0);
+		chBoxes[i].channelListBox = BWidgets::PopupListBox (93.5, 50, 50, 20, 50, 120, "menu", {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"}, i + 1);
 		chBoxes[i].channelListBox.rename ("menu");
-		chBoxes[i].pitchLabel = BWidgets::Label (10, 100, 80, 20, "lflabel", "Input pitch");
+		chBoxes[i].pitchLabel = BWidgets::Label (10, 80, 80, 20, "lflabel", "Input pitch");
 		chBoxes[i].pitchLabel.rename ("lflabel");
-		chBoxes[i].pitchSwitch = BWidgets::HSwitch (102.5, 102, 32, 16, "slider", 0.0);
+		chBoxes[i].pitchSwitch = BWidgets::HSwitch (102.5, 82, 32, 16, "slider", 0.0);
 		chBoxes[i].pitchSwitch.rename ("ch" + std::to_string (i + 1));
-		chBoxes[i].pitchScreen = BWidgets::Widget (10, 100, 133.5, 20, "screen");
+		chBoxes[i].pitchScreen = BWidgets::Widget (10, 80, 133.5, 20, "screen");
 		chBoxes[i].pitchScreen.rename ("screen");
 		chBoxes[i].pitchScreen.hide ();
-		chBoxes[i].velocityDial = BWidgets::DisplayDial (15, 140, 50, 60, "dial", 1.0, 0.0, 2.0, 0.0, "%1.2f");
+		chBoxes[i].velocityDial = BWidgets::DisplayDial (15, 120, 50, 60, "dial", 1.0, 0.0, 2.0, 0.0, "%1.2f");
 		chBoxes[i].velocityDial.rename ("ch" + std::to_string (i + 1));
-		chBoxes[i].velocityLabel = BWidgets::Label (10, 200, 60, 20, "ctlabel", "Velocity");
+		chBoxes[i].velocityLabel = BWidgets::Label (10, 180, 60, 20, "ctlabel", "Velocity");
 		chBoxes[i].velocityLabel.rename ("ctlabel");
-		chBoxes[i].noteOffsetDial = BWidgets::DisplayDial (88.5, 140, 50, 60, "dial", 0.0, -127.0, 127.0, 1.0, "%3.0f");
+		chBoxes[i].noteOffsetDial = BWidgets::DisplayDial (88.5, 120, 50, 60, "dial", 0.0, -127.0, 127.0, 1.0, "%3.0f");
 		chBoxes[i].noteOffsetDial.rename ("ch" + std::to_string (i + 1));
-		chBoxes[i].noteOffsetLabel = BWidgets::Label (83.5, 200, 60, 20, "ctlabel", "Offset");
+		chBoxes[i].noteOffsetLabel = BWidgets::Label (83.5, 180, 60, 20, "ctlabel", "Offset");
 		chBoxes[i].noteOffsetLabel.rename ("ctlabel");
 	}
 
 	// Link controllerWidgets
+	controllerWidgets[MIDI_IN_CHANNEL] = (BWidgets::ValueWidget*) &modeMidiInChannelListBox;
 	controllerWidgets[PLAY] = (BWidgets::ValueWidget*) &modePlayButton;
 	controllerWidgets[MODE] = (BWidgets::ValueWidget*) &modeListBox;
+	controllerWidgets[NR_OF_STEPS] = (BWidgets::ValueWidget*) &propertiesNrStepsListBox;
 	controllerWidgets[STEPS_PER] = (BWidgets::ValueWidget*) &propertiesStepsPerSlider;
 	controllerWidgets[BASE] = (BWidgets::ValueWidget*) &propertiesBaseListBox;
 	controllerWidgets[ROOT] = (BWidgets::ValueWidget*) &propertiesRootListBox;
@@ -131,7 +132,6 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	{
 		controllerWidgets[CH + i * CH_SIZE + PITCH] = (BWidgets::ValueWidget*) &chBoxes[i].pitchSwitch;
 		controllerWidgets[CH + i * CH_SIZE + VELOCITY] = (BWidgets::ValueWidget*) &chBoxes[i].velocityDial;
-		controllerWidgets[CH + i * CH_SIZE + MIDI_PORT] = (BWidgets::ValueWidget*) &chBoxes[i].portListBox;
 		controllerWidgets[CH + i * CH_SIZE + MIDI_CHANNEL] = (BWidgets::ValueWidget*) &chBoxes[i].channelListBox;
 		controllerWidgets[CH + i * CH_SIZE + NOTE_OFFSET] = (BWidgets::ValueWidget*) &chBoxes[i].noteOffsetDial;
 	}
@@ -157,10 +157,15 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	modeLabel.applyTheme (theme);
 	modeListBox.applyTheme (theme);
 	modeAutoplayBpmLabel.applyTheme (theme);
+	modeAutoplayBpmLabel.hide ();
 	modeAutoplayBpmSlider.applyTheme (theme);
+	modeAutoplayBpmSlider.hide ();
 	modeAutoplayBpbLabel.applyTheme (theme);
+	modeAutoplayBpbLabel.hide ();
 	modeAutoplayBpbSlider.applyTheme (theme);
-	modeAutoplayBoxScreen.applyTheme (theme);
+	modeAutoplayBpbSlider.hide ();
+	modeMidiInChannelLabel.applyTheme (theme);
+	modeMidiInChannelListBox.applyTheme (theme);
 	modePlayLabel.applyTheme (theme);
 	modePlayButton.applyTheme (theme);
 
@@ -200,8 +205,6 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		drawButton (chBoxes[i].chSymbol.getDrawingSurface(), 0, 0, 20, 20, chButtonStyles[i + 1]);
 		chBoxes[i].chLabel.applyTheme (theme);
 		chBoxes[i].chLabel.setState (BColors::ACTIVE);
-		chBoxes[i].portLabel.applyTheme (theme);
-		chBoxes[i].portListBox.applyTheme (theme);
 		chBoxes[i].channelLabel.applyTheme (theme);
 		chBoxes[i].channelListBox.applyTheme (theme);
 		chBoxes[i].pitchLabel.applyTheme (theme);
@@ -227,7 +230,8 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	modeBox.add (modeAutoplayBpmSlider);
 	modeBox.add (modeAutoplayBpbLabel);
 	modeBox.add (modeAutoplayBpbSlider);
-	modeBox.add (modeAutoplayBoxScreen);
+	modeBox.add (modeMidiInChannelLabel);
+	modeBox.add (modeMidiInChannelListBox);
 	modeBox.add (modePlayLabel);
 	modeBox.add (modePlayButton);
 
@@ -262,8 +266,6 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	{
 		chBoxes[i].box.add (chBoxes[i].chSymbol);
 		chBoxes[i].box.add (chBoxes[i].chLabel);
-		chBoxes[i].box.add (chBoxes[i].portLabel);
-		chBoxes[i].box.add (chBoxes[i].portListBox);
 		chBoxes[i].box.add (chBoxes[i].channelLabel);
 		chBoxes[i].box.add (chBoxes[i].channelListBox);
 		chBoxes[i].box.add (chBoxes[i].pitchLabel);
@@ -445,6 +447,7 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 
 			if (widgetNr >= 0)
 			{
+				std::cerr << "BSEQuencer.lv2#GUI valueChangedCallback() for widget #" << widgetNr << ": " << value << "\n";
 				ui->controllers[widgetNr] = value;
 				ui->write_function(ui->controller, KNOBS + widgetNr, sizeof(float), 0, &ui->controllers[widgetNr]);
 
@@ -460,13 +463,23 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 				{
 					if (value == AUTOPLAY)
 					{
-						ui->modeAutoplayBoxScreen.hide ();
+						ui->modeAutoplayBpmLabel.show ();
+						ui->modeAutoplayBpmSlider.show ();
+						ui->modeAutoplayBpbLabel.show ();
+						ui->modeAutoplayBpbSlider.show ();
+						ui->modeMidiInChannelLabel.hide ();
+						ui->modeMidiInChannelListBox.hide ();
 						for (int i = 0; i < NR_SEQUENCER_CHS; ++i) ui->chBoxes[i].pitchScreen.show ();
 
 					}
 					else
 					{
-						ui->modeAutoplayBoxScreen.show ();
+						ui->modeAutoplayBpmLabel.hide ();
+						ui->modeAutoplayBpmSlider.hide ();
+						ui->modeAutoplayBpbLabel.hide ();
+						ui->modeAutoplayBpbSlider.hide ();
+						ui->modeMidiInChannelLabel.show ();
+						ui->modeMidiInChannelListBox.show ();
 						for (int i = 0; i < NR_SEQUENCER_CHS; ++i) ui->chBoxes[i].pitchScreen.hide ();
 					}
 				}
@@ -736,7 +749,7 @@ LV2UI_Handle instantiate (const LV2UI_Descriptor *descriptor,
 
 	ui->controller = controller;
 	ui->write_function = write_function;
-	if (resize) resize->ui_resize(resize->handle, 1040, 840 );
+	if (resize) resize->ui_resize(resize->handle, 1040, 820 );
 
 	*widget = (LV2UI_Widget) puglGetNativeWindow (ui->getPuglView ());
 	ui->send_ui_on();

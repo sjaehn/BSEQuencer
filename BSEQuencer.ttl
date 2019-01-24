@@ -13,7 +13,6 @@
 
 <https://www.jahnichen.de/plugins/lv2/BSEQuencer#gui>
 		a ui:X11UI;
-		ui:binary <BSEQuencer_GUI.so> ;
 		lv2:extensionData ui:idleInterface ;
 		ui:requiredFeature ui:makeResident ;
 		ui:optionalFeature ui:noUserResize .
@@ -25,19 +24,17 @@
   		doap:maintainer [ foaf:name "Sven Jaehnichen" ] ;
         lv2:optionalFeature lv2:hardRTCapable ;
         lv2:extensionData state:interface ;
-        lv2:binary <BSEQuencer.so> ;
   		lv2:requiredFeature urid:map ;
   		ui:ui <https://www.jahnichen.de/plugins/lv2/BSEQuencer#gui> ;
         lv2:port [
                 a lv2:InputPort , atom:AtomPort ;
                 atom:bufferType atom:Sequence ;
-                atom:supports time:Position ;
-                lv2:designation lv2:control;
+                atom:supports midi:MidiEvent ;
+                lv2:designation lv2:control ;
                 lv2:index 0 ;
                 lv2:symbol "control" ;
                 lv2:name "Control" ;
-#               rsz:minimumSize 65952;
-                rdfs:comment "GUI to plugin communication"
+                rdfs:comment "GUI to plugin communication" ;
         ] , [
 				a lv2:OutputPort , atom:AtomPort ;
 				atom:bufferType atom:Sequence ;
@@ -45,46 +42,27 @@
 				lv2:index 1 ;
 				lv2:symbol "notify" ;
 				lv2:name "Notify" ;
-				rsz:minimumSize 65952;
-			  	rdfs:comment "Plugin to GUI communication"
-		] , [
-                a lv2:InputPort , atom:AtomPort ;
-                atom:bufferType atom:Sequence ;
-                atom:supports midi:MidiEvent;
-                lv2:index 2 ;
-                lv2:symbol "midi_in" ;
-                lv2:name "MIDI in" ;
-        ] , [
-				a lv2:OutputPort , atom:AtomPort ;
-				atom:bufferType atom:Sequence ;
-				atom:supports midi:MidiEvent ;
-				lv2:index 3 ;
-				lv2:symbol "midi_out_1" ;
-				lv2:name "MIDI out_1";
+				rsz:minimumSize 16384 ;
+			  	rdfs:comment "Plugin to GUI communication" ;
 		] , [
 				a lv2:OutputPort , atom:AtomPort ;
 				atom:bufferType atom:Sequence ;
 				atom:supports midi:MidiEvent ;
-				lv2:index 4 ;
-				lv2:symbol "midi_out_2" ;
-				lv2:name "MIDI out_2";
-		] , [
-				a lv2:OutputPort , atom:AtomPort ;
-				atom:bufferType atom:Sequence ;
-				atom:supports midi:MidiEvent ;
-				lv2:index 5 ;
-				lv2:symbol "midi_out_3" ;
-				lv2:name "MIDI out_3";
-		] , [
-				a lv2:OutputPort , atom:AtomPort ;
-				atom:bufferType atom:Sequence ;
-				atom:supports midi:MidiEvent ;
-				lv2:index 6 ;
-				lv2:symbol "midi_out_4" ;
-				lv2:name "MIDI out_4";
+				lv2:index 2 ;
+				lv2:symbol "midi_out" ;
+				lv2:name "MIDI out" ;
 		] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 7 ;
+                lv2:index 3 ;
+                lv2:symbol "midi_in" ;
+                lv2:name "MIDI input channel" ;
+                lv2:portProperty lv2:integer;
+                lv2:default 0.0 ;
+                lv2:minimum 0.0 ;
+                lv2:maximum 16.0 ;
+        ] , [
+                a lv2:InputPort , lv2:ControlPort ;
+                lv2:index 4 ;
                 lv2:symbol "play" ;
                 lv2:name "Play" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -95,7 +73,7 @@
                 lv2:maximum 1.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 8 ;
+                lv2:index 5 ;
                 lv2:symbol "mode" ;
                 lv2:name "Mode" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -106,7 +84,20 @@
                 lv2:maximum 2.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 9 ;
+                lv2:index 6 ;
+                lv2:symbol "nr_of_steps" ;
+                lv2:name "Nr of steps" ;
+                lv2:portProperty lv2:integer, lv2:enumeration ;
+					lv2:scalePoint [ rdfs:label "8"; rdf:value 8 ] ;
+					lv2:scalePoint [ rdfs:label "16"; rdf:value 16 ] ;
+					lv2:scalePoint [ rdfs:label "24"; rdf:value 24 ] ;
+					lv2:scalePoint [ rdfs:label "32"; rdf:value 32 ] ;
+                lv2:default 16.0 ;
+                lv2:minimum 8.0 ;
+                lv2:maximum 32.0 ;
+        ] , [
+                a lv2:InputPort , lv2:ControlPort ;
+                lv2:index 7 ;
                 lv2:symbol "steps_per" ;
                 lv2:name "Steps per" ;
                 lv2:portProperty lv2:integer ;
@@ -115,7 +106,7 @@
                 lv2:maximum 8.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 10 ;
+                lv2:index 8 ;
                 lv2:symbol "base" ;
                 lv2:name "Base" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -126,7 +117,7 @@
                 lv2:maximum 2.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 11 ;
+                lv2:index 9 ;
                 lv2:symbol "root" ;
                 lv2:name "Root note" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -142,7 +133,7 @@
                 lv2:maximum 11.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 12 ;
+                lv2:index 10 ;
                 lv2:symbol "signature" ;
                 lv2:name "Signature" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -154,7 +145,7 @@
                 lv2:maximum 1.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 13 ;
+                lv2:index 11 ;
                 lv2:symbol "octave" ;
                 lv2:name "Octave" ;
                 lv2:portProperty lv2:integer ;
@@ -163,7 +154,7 @@
                 lv2:maximum 8.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 14 ;
+                lv2:index 12 ;
                 lv2:symbol "scale" ;
                 lv2:name "Scale" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -186,7 +177,7 @@
                 lv2:maximum 14.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 15 ;
+                lv2:index 13 ;
                 lv2:symbol "autoplay_bpm" ;
                 lv2:name "Autoplay: bpm" ;
                 lv2:default 120.0 ;
@@ -194,7 +185,7 @@
                 lv2:maximum 300.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 16 ;
+                lv2:index 14 ;
                 lv2:symbol "autoplay_beats_per_bar" ;
                 lv2:name "Autoplay: beats per bar" ;
                 lv2:portProperty lv2:integer ;
@@ -203,7 +194,7 @@
                 lv2:maximum 16.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 17 ;
+                lv2:index 15 ;
                 lv2:symbol "selection_channel" ;
                 lv2:name "Selection: Channel" ;
                 lv2:portProperty lv2:integer ;
@@ -212,7 +203,7 @@
                 lv2:maximum 14.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 18 ;
+                lv2:index 16 ;
                 lv2:symbol "selection_pitch_octave" ;
                 lv2:name "Selection: pitch octave" ;
                 lv2:portProperty lv2:integer ;
@@ -221,7 +212,7 @@
                 lv2:maximum 8.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 19 ;
+                lv2:index 17 ;
                 lv2:symbol "selection_velocity" ;
                 lv2:name "Selection: Veloctity" ;
                 lv2:default 1.0 ;
@@ -229,7 +220,7 @@
                 lv2:maximum 2.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 20 ;
+                lv2:index 18 ;
                 lv2:symbol "selection_duration" ;
                 lv2:name "Selection: Duration" ;
                 lv2:default 1.0 ;
@@ -237,7 +228,7 @@
                 lv2:maximum 1.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 21 ;
+                lv2:index 19 ;
                 lv2:symbol "ch1_pitch" ;
                 lv2:name "CH1: Pitch" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -248,7 +239,7 @@
                 lv2:maximum 1.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 22 ;
+                lv2:index 20 ;
                 lv2:symbol "ch1_velocity" ;
                 lv2:name "CH1: Velocity" ;
                 lv2:default 1.0 ;
@@ -256,16 +247,7 @@
                 lv2:maximum 2.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 23 ;
-                lv2:symbol "ch1_midi_port" ;
-                lv2:name "CH1: MIDI Port" ;
-                lv2:portProperty lv2:integer ;
-                lv2:default 1.0 ;
-                lv2:minimum 1.0 ;
-                lv2:maximum 4.0 ;
-        ] , [
-                a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 24 ;
+                lv2:index 21 ;
                 lv2:symbol "ch1_midi_channel" ;
                 lv2:name "CH1: MIDI Channel" ;
                 lv2:portProperty lv2:integer ;
@@ -274,7 +256,7 @@
                 lv2:maximum 16.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 25 ;
+                lv2:index 22 ;
                 lv2:symbol "ch1_note_offset" ;
                 lv2:name "CH1: Note offset" ;
                 lv2:portProperty lv2:integer ;
@@ -283,7 +265,7 @@
                 lv2:maximum 127.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 26 ;
+                lv2:index 23 ;
                 lv2:symbol "ch2_pitch" ;
                 lv2:name "CH2: Pitch" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -294,7 +276,7 @@
                 lv2:maximum 1.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 27 ;
+                lv2:index 24 ;
                 lv2:symbol "ch2_velocity" ;
                 lv2:name "CH2: Velocity" ;
                 lv2:default 1.0 ;
@@ -302,25 +284,16 @@
                 lv2:maximum 2.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 28 ;
-                lv2:symbol "ch2_midi_port" ;
-                lv2:name "CH2: MIDI Port" ;
-                lv2:portProperty lv2:integer ;
-                lv2:default 2.0 ;
-                lv2:minimum 1.0 ;
-                lv2:maximum 4.0 ;
-        ] , [
-                a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 29 ;
+                lv2:index 25 ;
                 lv2:symbol "ch2_midi_channel" ;
                 lv2:name "CH2: MIDI Channel" ;
                 lv2:portProperty lv2:integer ;
-                lv2:default 1.0 ;
+                lv2:default 2.0 ;
                 lv2:minimum 1.0 ;
                 lv2:maximum 16.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 30 ;
+                lv2:index 26 ;
                 lv2:symbol "ch2_note_offset" ;
                 lv2:name "CH2: Note offset" ;
                 lv2:portProperty lv2:integer ;
@@ -329,7 +302,7 @@
                 lv2:maximum 127.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 31 ;
+                lv2:index 27 ;
                 lv2:symbol "ch3_pitch" ;
                 lv2:name "CH3: Pitch" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -340,7 +313,7 @@
                 lv2:maximum 1.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 32 ;
+                lv2:index 28 ;
                 lv2:symbol "ch3_velocity" ;
                 lv2:name "CH3: Velocity" ;
                 lv2:default 1.0 ;
@@ -348,25 +321,16 @@
                 lv2:maximum 2.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 33 ;
-                lv2:symbol "ch3_midi_port" ;
-                lv2:name "CH3: MIDI Port" ;
-                lv2:portProperty lv2:integer ;
-                lv2:default 3.0 ;
-                lv2:minimum 1.0 ;
-                lv2:maximum 4.0 ;
-        ] , [
-                a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 34 ;
+                lv2:index 29 ;
                 lv2:symbol "ch3_midi_channel" ;
                 lv2:name "CH3: MIDI Channel" ;
                 lv2:portProperty lv2:integer ;
-                lv2:default 1.0 ;
+                lv2:default 3.0 ;
                 lv2:minimum 1.0 ;
                 lv2:maximum 16.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 35 ;
+                lv2:index 30 ;
                 lv2:symbol "ch3_note_offset" ;
                 lv2:name "CH3: Note offset" ;
                 lv2:portProperty lv2:integer ;
@@ -375,7 +339,7 @@
                 lv2:maximum 127.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 36 ;
+                lv2:index 31 ;
                 lv2:symbol "ch4_pitch" ;
                 lv2:name "CH4: Pitch" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -386,7 +350,7 @@
                 lv2:maximum 1.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 37 ;
+                lv2:index 32 ;
                 lv2:symbol "ch4_velocity" ;
                 lv2:name "CH4: Velocity" ;
                 lv2:default 1.0 ;
@@ -394,25 +358,16 @@
                 lv2:maximum 2.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 38 ;
-                lv2:symbol "ch4_midi_port" ;
-                lv2:name "CH4: MIDI Port" ;
-                lv2:portProperty lv2:integer ;
-                lv2:default 4.0 ;
-                lv2:minimum 1.0 ;
-                lv2:maximum 4.0 ;
-        ] , [
-                a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 39 ;
+                lv2:index 33 ;
                 lv2:symbol "ch4_midi_channel" ;
                 lv2:name "CH4: MIDI Channel" ;
                 lv2:portProperty lv2:integer ;
-                lv2:default 1.0 ;
+                lv2:default 4.0 ;
                 lv2:minimum 1.0 ;
                 lv2:maximum 16.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 40 ;
+                lv2:index 34 ;
                 lv2:symbol "ch4_note_offset" ;
                 lv2:name "CH4: Note offset" ;
                 lv2:portProperty lv2:integer ;

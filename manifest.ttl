@@ -10,4 +10,4 @@
 <https://www.jahnichen.de/plugins/lv2/BSEQuencer#gui>   
         a ui:X11UI;
 		ui:binary <BSEQuencer_GUI.so>;
-		rdfs:seeAlso <BSEQuencer.ttl>.
+		rdfs:seeAlso <BSEQuencer.ttl> .
