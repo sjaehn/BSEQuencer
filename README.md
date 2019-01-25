@@ -50,7 +50,6 @@ TODO
 * Stability (Note: **This plugin is experimental, yet. Not for production!**)
 * Testing
 * Bugfixes
-* Activate selectable number of steps (8, 16, 24, or 32 steps)
 * Do not divide control fields from note fields - may cause incompatibility to previous versions
 
 See also

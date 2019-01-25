@@ -28,9 +28,6 @@
 #define BG_FILE "surface.png"
 #define HELP_URL "https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer"
 #define OPEN_CMD "xdg-open"
-#define PAD_HEIGHT (480 / ROWS)
-#define PAD_WIDTH (640 / STEPS)
-
 class BSEQuencer_GUI : public BWidgets::Window
 {
 public:
@@ -64,7 +61,7 @@ private:
 	std::array<float, KNOBS_SIZE> controllers;
 
 	//Pads
-	Pad pads [ROWS] [STEPS];
+	Pad pads [ROWS] [MAXSTEPS];
 
 	// Cursors
 	uint32_t cursorBits;
@@ -79,10 +76,10 @@ private:
 				{{{CROMATICSCALE}, {MAJORSCALE}, {MINORSCALE}, {HARMONICMAJORSCALE}, {HARMONICMINORSCALE}, {MELODICMINORSCALE},
 				  {DORIANSCALE}, {PHRYGIANSCALE}, {LYDIANSCALE}, {MIXOLYDIANSCALE}, {LOKRIANSCALE}, {HUNGARIANMINORSCALE},
 				  {MAJORPENTATONICSCALE}, {MINORPENTATONICSCALE}}};
-	std::vector<std::string> scaleLabels =
-				{"Chromatic", "Major", "Minor", "Harmonic major", "Harmonic minor", "Melodic minor",
-				 "Dorian", "Phygian", "Lydian", "Mixolydian", "Lokrian", "Hungarian minor",
-				 "Major pentatonic", "Minor pentatonic"};
+	std::vector<BItems::Item> scaleItems =
+				{{0, "Chromatic"}, {1, "Major"}, {2, "Minor"}, {3, "Harmonic major"}, {4, "Harmonic minor"}, {5, "Melodic minor"},
+				 {6, "Dorian"}, {7, "Phygian"}, {8, "Lydian"}, {9, "Mixolydian"}, {10, "Lokrian"}, {11, "Hungarian minor"},
+				 {12, "Major pentatonic"}, {13, "Minor pentatonic"}};
 
 
 	//Widgets

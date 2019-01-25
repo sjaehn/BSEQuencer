@@ -61,7 +61,12 @@ BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
 
 	// Init pads
 	Pad playPad = Pad (NR_SEQUENCER_CHS + 1 + CTRL_PLAY, 0, 1, 1);
-	for (int i = 0; i < STEPS; ++i) pads[ROWS-1][i] = playPad;
+	for (int i = 0; i < MAXSTEPS; ++i) pads[ROWS-1][i] = playPad;
+
+	// Initialize controllers
+	// Controllers are zero initialized and will get data from host, only
+	// NR_OF_STEPS need to be set to prevent div by zero.
+	controllers[NR_OF_STEPS] = MAXSTEPS;
 
 	ui_on = false;
 
@@ -219,7 +224,7 @@ double BSEQuencer::getStep (const int key, const double relpos)
 	double stepFrac = rawstep - endStepNr;
 
 	// Not stepped => return raw step position
-	if (endStepNr == startStepNr) return fmod (rawstep, STEPS);
+	if (endStepNr == startStepNr) return fmod (rawstep, ((int)controllers[NR_OF_STEPS]));
 
 	// Stepped => iterate through steps
 	if (endStepNr > startStepNr)
@@ -242,13 +247,13 @@ double BSEQuencer::getStep (const int key, const double relpos)
 
 				case CTRL_PLAY_FWD:
 					inKeys[key].direction = 1;
-					stepNr = (stepNr + STEPS + inKeys[key].direction) % STEPS;
+					stepNr = (stepNr + ((int)controllers[NR_OF_STEPS]) + inKeys[key].direction) % ((int)controllers[NR_OF_STEPS]);
 					++it;
 					break;
 
 				case CTRL_PLAY_REW:
 					inKeys[key].direction = -1;
-					stepNr = (stepNr + STEPS + inKeys[key].direction) % STEPS;
+					stepNr = (stepNr + ((int)controllers[NR_OF_STEPS]) + inKeys[key].direction) % ((int)controllers[NR_OF_STEPS]);
 					++it;
 					break;
 
@@ -258,9 +263,9 @@ double BSEQuencer::getStep (const int key, const double relpos)
 					{
 						inKeys[key].jumpOff[stepNr] = true;
 						int newStepNr = stepNr;
-						for (int i = 1, jumpbackCount = 1; i < STEPS; ++i)
+						for (int i = 1, jumpbackCount = 1; i < ((int)controllers[NR_OF_STEPS]); ++i)
 						{
-							newStepNr = (stepNr + i) % STEPS;
+							newStepNr = (stepNr + i) % ((int)controllers[NR_OF_STEPS]);
 							if (pads[ROWS-1][newStepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_JUMP_FWD) ++jumpbackCount;
 							if (pads[ROWS-1][newStepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_ALL_MARK) break;
 							if (pads[ROWS-1][newStepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_MARK)
@@ -274,7 +279,7 @@ double BSEQuencer::getStep (const int key, const double relpos)
 					else
 					{
 						inKeys[key].jumpOff[stepNr] = false;
-						stepNr = (stepNr + STEPS + inKeys[key].direction) % STEPS;
+						stepNr = (stepNr + ((int)controllers[NR_OF_STEPS]) + inKeys[key].direction) % ((int)controllers[NR_OF_STEPS]);
 					}
 					++it;
 				}
@@ -287,9 +292,9 @@ double BSEQuencer::getStep (const int key, const double relpos)
 						{
 							inKeys[key].jumpOff[stepNr] = true;
 							int newStepNr = stepNr;
-							for (int i = 1, jumpbackCount = 1; i < STEPS; ++i)
+							for (int i = 1, jumpbackCount = 1; i < ((int)controllers[NR_OF_STEPS]); ++i)
 							{
-								newStepNr = (i <= stepNr ? stepNr - i : stepNr + STEPS - i);
+								newStepNr = (i <= stepNr ? stepNr - i : stepNr + ((int)controllers[NR_OF_STEPS]) - i);
 								if (pads[ROWS-1][newStepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_JUMP_BACK) ++jumpbackCount;
 								if (pads[ROWS-1][newStepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_ALL_MARK) break;
 								if (pads[ROWS-1][newStepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_MARK)
@@ -303,7 +308,7 @@ double BSEQuencer::getStep (const int key, const double relpos)
 						else
 						{
 							inKeys[key].jumpOff[stepNr] = false;
-							stepNr = (stepNr + STEPS + inKeys[key].direction) % STEPS;
+							stepNr = (stepNr + ((int)controllers[NR_OF_STEPS]) + inKeys[key].direction) % ((int)controllers[NR_OF_STEPS]);
 						}
 						++it;
 					}
@@ -313,7 +318,7 @@ double BSEQuencer::getStep (const int key, const double relpos)
 				default:
 					{
 						++it;
-						stepNr = (stepNr + STEPS + inKeys[key].direction) % STEPS;
+						stepNr = (stepNr + ((int)controllers[NR_OF_STEPS]) + inKeys[key].direction) % ((int)controllers[NR_OF_STEPS]);
 					}
 				}
 			}
@@ -323,11 +328,11 @@ double BSEQuencer::getStep (const int key, const double relpos)
 			{
 				// CTRL_SKIP
 				for (int i = 0;
-						(i <= STEPS) && (pads[ROWS-1][stepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_SKIP);
-						++i, stepNr = (stepNr + STEPS + inKeys[key].direction) % STEPS)
+						(i <= ((int)controllers[NR_OF_STEPS])) && (pads[ROWS-1][stepNr].ch - NR_SEQUENCER_CHS - 1 == CTRL_SKIP);
+						++i, stepNr = (stepNr + ((int)controllers[NR_OF_STEPS]) + inKeys[key].direction) % ((int)controllers[NR_OF_STEPS]))
 				{
 					// A whole loop of SKIPs => STOP
-					if (i == STEPS) return HALT_STEP;
+					if (i == ((int)controllers[NR_OF_STEPS])) return HALT_STEP;
 				}
 
 				// CTRL_STOP
@@ -338,7 +343,7 @@ double BSEQuencer::getStep (const int key, const double relpos)
 	}
 
 	// TODO endStepNr < startStepNr (hard jump back)
-	return fmod (rawstep, STEPS);
+	return fmod (rawstep, ((int)controllers[NR_OF_STEPS]));
 }
 
 
@@ -359,7 +364,7 @@ void BSEQuencer::runSequencer (const double startpos, const uint32_t start, cons
 			valid = true;
 			for (Key** it = inKeys.begin (); it < inKeys.end(); ++it)
 			{
-				if ((**it).stepNr >= STEPS)
+				if ((**it).stepNr >= ((int)controllers[NR_OF_STEPS]))
 				{
 					valid = false;
 					inKeys.erase (it);
@@ -380,11 +385,11 @@ void BSEQuencer::runSequencer (const double startpos, const uint32_t start, cons
 			{
 				int64_t actframes = LIMIT (start + (actpos - startpos) * FRAMES_PER_BEAT, start, end);
 				double actstep = getStep (key, actpos - inKeys[key].startPos);
-				int actStepNr = LIMIT ((int) floor (actstep), 0, STEPS - 1);
+				int actStepNr = LIMIT ((int) floor (actstep), 0, ((int)controllers[NR_OF_STEPS]) - 1);
 				double actStepFrac = actstep - actStepNr;
 
 				// Break if halted
-				if (actstep >= STEPS)
+				if (actstep >= ((int)controllers[NR_OF_STEPS]))
 				{
 					stopMidiOut (actframes, key, ALL_CH);
 					inKeys[key].stepNr = HALT_STEP;
@@ -469,9 +474,10 @@ void BSEQuencer::run (uint32_t n_samples)
 	}
 
 	// Update global controllers
-	// 1. Stop MIDI out if midi_in channel, play, mode or root (note/signature/octave) changed
+	// 1. Stop MIDI out if midi_in channel, steps, play, mode or root (note/signature/octave) changed
 	bool midiStopped[NR_SEQUENCER_CHS] = {false, false, false, false};
 	if (CONTROLLER_CHANGED(MIDI_IN_CHANNEL) ||
+		CONTROLLER_CHANGED(NR_OF_STEPS) ||
 		CONTROLLER_CHANGED(PLAY) ||
 		CONTROLLER_CHANGED(MODE) ||
 		CONTROLLER_CHANGED(ROOT) ||
@@ -483,8 +489,9 @@ void BSEQuencer::run (uint32_t n_samples)
 		for (int i = 0; i < NR_SEQUENCER_CHS; ++i) midiStopped[i] = true;
 	}
 
-	// 2. Stop also MIDI in if midi_in channel, play or mode is changed
-	if (CONTROLLER_CHANGED(MIDI_IN_CHANNEL) || (CONTROLLER_CHANGED(MODE)) || (CONTROLLER_CHANGED(PLAY)))
+	// 2. Stop also MIDI in if midi_in channel, steps, play or mode is changed
+	if (CONTROLLER_CHANGED(MIDI_IN_CHANNEL) || CONTROLLER_CHANGED(NR_OF_STEPS) || (CONTROLLER_CHANGED(MODE)) ||
+		(CONTROLLER_CHANGED(PLAY)))
 	{
 		while (!inKeys.empty ()) inKeys.pop_back ();
 	}
@@ -497,7 +504,7 @@ void BSEQuencer::run (uint32_t n_samples)
 		 CONTROLLER_CHANGED(OCTAVE)))
 	{
 		int newScaleNr = LIMIT (*new_controllers[SCALE], 1, scaleNotes.size ());
-		scale.setScale(scaleNotes[newScaleNr - 1]);
+		scale.setScale(scaleNotes[newScaleNr]);
 		scale.setRoot (*new_controllers[ROOT] + *new_controllers[SIGNATURE] + (*new_controllers[OCTAVE] + 1) * 12);
 	}
 
@@ -564,7 +571,7 @@ void BSEQuencer::run (uint32_t n_samples)
 							{
 								int row = (int) pMes->row;
 								int step = (int) pMes->step;
-								if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < STEPS))
+								if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < MAXSTEPS))
 								{
 									Pad pd (pMes->ch, pMes->pitchOctave, pMes->velocity, pMes->duration);
 									Pad valPad = validatePad (pd);
@@ -804,7 +811,7 @@ LV2_State_Status BSEQuencer::state_save (LV2_State_Store_Function store, LV2_Sta
 			const LV2_Feature* const* features)
 {
 	fprintf (stderr, "BSEQuencer.lv2: state_save ()\n");
-	store(handle, uris.state_pad, (void*) &pads, sizeof(LV2_Atom_Vector_Body) + sizeof(Pad) * STEPS * ROWS, uris.atom_Vector, LV2_STATE_IS_POD);
+	store(handle, uris.state_pad, (void*) &pads, sizeof(LV2_Atom_Vector_Body) + sizeof(Pad) * MAXSTEPS * ROWS, uris.atom_Vector, LV2_STATE_IS_POD);
 	return LV2_STATE_SUCCESS;
 }
 
@@ -819,7 +826,7 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 	uint32_t valflags;
 	const void* data = retrieve(handle, uris.state_pad, &size, &type, &valflags);
 
-	if (data && (size == sizeof(Pad) * STEPS * ROWS) && (type == uris.atom_Vector))
+	if (data && (size == sizeof(Pad) * MAXSTEPS * ROWS) && (type == uris.atom_Vector))
 	{
 		// Stop MIDI out
 		outCapacity = initMidiOut (midiOut);
@@ -830,12 +837,12 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 		while (!inKeys.empty()) inKeys.pop_back();
 
 		// Copy retrieved data
-		memcpy (pads, LV2_ATOM_BODY (data), sizeof(Pad) * STEPS * ROWS);
+		memcpy (pads, LV2_ATOM_BODY (data), sizeof(Pad) * MAXSTEPS * ROWS);
 
 		// Validate all pads
 		for (int i = 0; i < ROWS; ++i)
 		{
-			for (int j = 0; j < STEPS; ++j)
+			for (int j = 0; j < MAXSTEPS; ++j)
 			{
 				Pad valPad = validatePad (pads[i][j]);
 				if (valPad != pads[i][j])
@@ -888,12 +895,12 @@ bool BSEQuencer::padMessageBufferAppendPad (int row, int step, Pad pad)
 	PadMessage end = PadMessage (ENDPADMESSAGE);
 	PadMessage msg = PadMessage (step, row, pad.ch, pad.pitchOctave, pad.velocity, pad.duration);
 
-	for (int i = 0; i < STEPS * ROWS; ++i)
+	for (int i = 0; i < MAXSTEPS * ROWS; ++i)
 	{
 		if (padMessageBuffer[i] != end)
 		{
 			padMessageBuffer[i] = msg;
-			if (i < STEPS * ROWS - 1) padMessageBuffer[i + 1] = end;
+			if (i < MAXSTEPS * ROWS - 1) padMessageBuffer[i + 1] = end;
 			return true;
 		}
 	}
@@ -906,7 +913,7 @@ bool BSEQuencer::padMessageBufferAppendPad (int row, int step, Pad pad)
  */
 void BSEQuencer::padMessageBufferAllPads ()
 {
-	for (int i = 0; i < STEPS; ++i)
+	for (int i = 0; i < MAXSTEPS; ++i)
 	{
 		for (int j = 0; j < ROWS; ++j)
 		{
@@ -923,7 +930,7 @@ uint32_t BSEQuencer::notifyPadsToGui(const uint32_t space)
 	{
 		// Get padMessageBuffer size
 		int end = 0;
-		for (int i = 0; (i < ROWS * STEPS) && (!(padMessageBuffer[i] == endmsg)); ++i) end = i;
+		for (int i = 0; (i < ROWS * MAXSTEPS) && (!(padMessageBuffer[i] == endmsg)); ++i) end = i;
 
 		// Prepare forge buffer and initialize atom sequence
 		if (space > 1024 + sizeof(PadMessage) * end)							// TODO calculate the right size
@@ -965,7 +972,7 @@ uint32_t BSEQuencer::notifyStatusToGui (const uint32_t space)
 			// Set notebits
 			notebits = notebits | (1 << (element % size));
 
-			if ((stepNr >= 0) && (stepNr < STEPS))
+			if ((stepNr >= 0) && (stepNr < MAXSTEPS))
 			{
 
 				// Set cursorbits

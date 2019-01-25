@@ -59,7 +59,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		propertiesBox (760, 590, 260, 210, "box"),
 		propertiesBoxLabel (10, 10, 240, 20, "ctlabel", "Properties"),
 		propertiesNrStepsLabel (10, 50, 170, 20, "lflabel", "Total number of steps"),
-		propertiesNrStepsListBox (190, 50, 60, 20, 60, 100, "menu", std::vector<std::string> {"8", "16", "24", "32"}, 2.0),
+		propertiesNrStepsListBox (190, 50, 60, 20, 60, 100, "menu", {{8, "8"}, {16, "16"}, {24, "24"}, {32, "32"}}, 16.0),
 		propertiesStepsPerSlider (10, 75, 80, 25, "slider", 4.0, 1.0, 8.0, 1.0, "%2.0f"),
 		propertiesStepsPerLabel (100, 85, 80, 20, "lflabel", "steps per"),
 		propertiesBaseListBox (190, 85, 60, 20, 60, 60, "menu", std::vector<std::string> {"beat", "bar"}, 1.0),
@@ -69,7 +69,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		propertiesOctaveLabel (10, 145, 55, 20, "lflabel", "Octave"),
 		propertiesOctaveListBox (190, 145, 60, 20, 0, -220, 60, 220, "menu", {{-1, "-1"}, {0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}}, 4.0),
 		propertiesScaleLabel (10, 175, 50, 20, "lflabel", "Scale"),
-		propertiesScaleListBox (80, 175, 170, 20, 0, -300, 170, 300, "menu", scaleLabels, 1.0),
+		propertiesScaleListBox (80, 175, 170, 20, 0, -300, 170, 300, "menu", scaleItems, 0.0),
 
 		helpLabel (980, 40, 30, 30, "ilabel", "?")
 
@@ -285,6 +285,8 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	mContainer.add (helpLabel);
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i) mContainer.add (chBoxes[i].box);
 
+	drawCaption ();
+	drawPad();
 	add (mContainer);
 
 	//Scan host features for URID map
@@ -342,7 +344,7 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 						{
 							int step = (int) pMes[i].step;
 							int row = (int) pMes[i].row;
-							if ((step >= 0) && (step < STEPS) && (row >= 0) && (row < ROWS))
+							if ((step >= 0) && (step < MAXSTEPS) && (row >= 0) && (row < ROWS))
 							{
 								pads[row][step] = Pad (pMes[i].ch, pMes[i].pitchOctave, pMes[i].velocity, pMes[i].duration);
 							}
@@ -483,15 +485,12 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 					}
 				}
 
-				// GUI changes
-				if ((widgetNr == ROOT) || (widgetNr == SIGNATURE) || (widgetNr == SCALE))
-				{
-					ui->drawPad ();
-					ui->drawCaption ();
-				}
+				// Pad relevant changes
+				if ((widgetNr == NR_OF_STEPS) || (widgetNr == STEPS_PER) ||(widgetNr == ROOT) || (widgetNr == SIGNATURE) ||
+					(widgetNr == SCALE)) ui->drawPad ();
 
-				if (widgetNr == STEPS_PER) ui->drawPad ();
-
+				// Caption relevant changes
+				if ((widgetNr == ROOT) || (widgetNr == SIGNATURE) || (widgetNr == SCALE)) ui->drawCaption ();
 			}
 		}
 	}
@@ -510,11 +509,16 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 		BSEQuencer_GUI* ui = (BSEQuencer_GUI*) widget->getMainWindow();
 		BEvents::PointerEvent* pointerEvent = (BEvents::PointerEvent*) event;
 
-		int row = (ROWS - 1) - (int) ((pointerEvent->getY () - widget->getYOffset()) / PAD_HEIGHT);
-		int step = (pointerEvent->getX () - widget->getXOffset()) / PAD_WIDTH;
+		// Get size of drawing area
+		const double width = ui->padSurface.getEffectiveWidth ();
+		const double height = ui->padSurface.getEffectiveHeight ();
 
-		if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < STEPS))
+		int row = (ROWS - 1) - ((int) ((pointerEvent->getY () - widget->getYOffset()) / (height / ROWS)));
+		int step = (pointerEvent->getX () - widget->getXOffset()) / (width / ui->controllerWidgets[NR_OF_STEPS]->getValue ());
+
+		if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < ((int)ui->controllerWidgets[NR_OF_STEPS]->getValue ())))
 		{
+			std::cerr << "BSEQuencer.lv2#GUI: Pad at " << row << ", " << step << "\n";
 			Pad* pd = &ui->pads[row][step];
 
 			// Left button: apply properties to pad
@@ -607,7 +611,7 @@ void BSEQuencer_GUI::drawCaption ()
 	BColors::Color textcolor = *txColors. getColor(BColors::ACTIVE);
 	cairo_set_source_rgba (cr, CAIRO_RGBA (textcolor));
 
-	BScale scale (controllers[ROOT] + controllers[SIGNATURE], scaleNotes[controllers[SCALE] - 1]);
+	BScale scale (controllers[ROOT] + controllers[SIGNATURE], scaleNotes[controllers[SCALE]]);
 	int size = scale.getSize ();
 	char label[8] = "";
 
@@ -651,9 +655,9 @@ void BSEQuencer_GUI::drawPad ()
 {
 	cairo_surface_t* surface = padSurface.getDrawingSurface();
 	cairo_t* cr = cairo_create (surface);
-	for (int i = 0; i < ROWS; ++i)
+	for (int row = 0; row < ROWS; ++row)
 	{
-		for (int j = 0; j < STEPS; ++j) drawPad (cr, i, j);
+		for (int step = 0; step < ((int)controllerWidgets[NR_OF_STEPS]->getValue ()); ++step) drawPad (cr, row, step);
 	}
 	cairo_destroy (cr);
 	padSurface.update();
@@ -670,12 +674,13 @@ void BSEQuencer_GUI::drawPad (int row, int step)
 
 void BSEQuencer_GUI::drawPad (cairo_t* cr, int row, int step)
 {
-	if ((!cr) || (cairo_status (cr) != CAIRO_STATUS_SUCCESS) || (row < 0) || (row >= ROWS) || (step < 0) || (step >= STEPS)) return;
+	if ((!cr) || (cairo_status (cr) != CAIRO_STATUS_SUCCESS) || (row < 0) || (row >= ROWS) || (step < 0) ||
+		(step >= ((int)controllerWidgets[NR_OF_STEPS]->getValue ()))) return;
 
 	// Get size of drawing area
 	const double width = padSurface.getEffectiveWidth ();
 	const double height = padSurface.getEffectiveHeight ();
-	const double w = width / STEPS;
+	const double w = width / controllerWidgets[NR_OF_STEPS]->getValue ();
 	const double h = height / ROWS;
 	const double x = step * w;
 	const double y = (ROWS - row - 1) * h;

@@ -21,7 +21,7 @@
 #ifndef DEFINITIONS_H_
 #define DEFINITIONS_H_
 
-#define STEPS 16
+#define MAXSTEPS 32
 #define ROWS 16
 #define NR_SEQUENCER_CHS 4
 #define NR_CTRL_BUTTONS 10

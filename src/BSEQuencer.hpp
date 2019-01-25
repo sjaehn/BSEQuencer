@@ -67,7 +67,7 @@ typedef struct {
 		std::array<Pad, ROWS> pads;
 		std::array<bool, ROWS> playing;											// TODO Really needed ? Can also be done via setting/deleting ch
 	} output;
-	std::array<bool, STEPS> jumpOff;
+	std::array<bool, MAXSTEPS> jumpOff;
 } Key;
 
 class BSEQuencer
@@ -109,7 +109,7 @@ private:
 	LV2_Atom_Forge notify_forge;
 	LV2_Atom_Forge_Frame notify_frame;
 
-	PadMessage padMessageBuffer[STEPS * ROWS];
+	PadMessage padMessageBuffer[MAXSTEPS * ROWS];
 
 	// MIDI sequences
 	LV2_Atom_Sequence* midiOut;
@@ -126,7 +126,7 @@ private:
 										   {0, 11, 1},	// ROOT
 										   {-1, 1, 1},	// SIGNATURE
 										   {-1, 8, 1},	// OCTAVE
-										   {1, 14, 1},	// SCALE
+										   {0, 13, 1},	// SCALE
 										   {1, 300, 0},	// AUTOPLAY_BPM
 										   {1, 16, 1},	// AUTOPLAY_BPB
 										   {0, NR_SEQUENCER_CHS + NR_CTRL_BUTTONS, 1},	// SELECTION_CH
@@ -151,7 +151,7 @@ private:
 										   {-127, 127, 1}};	// CH NOTE_OFFSET
 
 	//Pads
-	Pad pads [ROWS] [STEPS];
+	Pad pads [ROWS] [MAXSTEPS];
 
 	// Host communicated data
 	double rate;
