@@ -48,7 +48,6 @@ TODO
 ----
 * Mouse over widgets (showing values of matrix fields, dials, or sliders; direct keybord keyboard entry of values)
 * Stability (Note: **This plugin is experimental, yet. Not for production!**)
-* Reduce CPU load (if GUI on)
 * Testing
 * Bugfixes
 * Activate selectable number of steps (8, 16, 24, or 32 steps)
