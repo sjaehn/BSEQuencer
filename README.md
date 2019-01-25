@@ -21,13 +21,15 @@ For installation into an alternative directory (e.g., /usr/local/lib/lv2), modif
 
 Running
 -------
-(After the installation Ardour, Carla, and any other LV2 host should automatically detect B.SEQuencer.)
+After the installation Carla, (Ardour)** and any other LV2 host should automatically detect B.SEQuencer.
 
 If jalv is installed, you can also call it
 ```
 jalv.gtk https://www.jahnichen.de/plugins/lv2/BSEQuencer
 ```
 to run it stand-alone and connect it to the JACK system.
+
+** (Not running, yet.)
 
 Key features
 ------------
@@ -46,9 +48,10 @@ TODO
 ----
 * Mouse over widgets (showing values of matrix fields, dials, or sliders; direct keybord keyboard entry of values)
 * Stability (Note: **This plugin is experimental, yet. Not for production!**)
+* Reduce CPU load (if GUI on)
 * Testing
-* Bugfixes (a lot to do)
-* Selectable number of steps (8, 16, 24, or 32 steps) - may cause incompatibility to previous versions
+* Bugfixes
+* Activate selectable number of steps (8, 16, 24, or 32 steps)
 * Do not divide control fields from note fields - may cause incompatibility to previous versions
 
 See also

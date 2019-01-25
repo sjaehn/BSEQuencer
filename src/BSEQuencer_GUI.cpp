@@ -511,7 +511,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 		BSEQuencer_GUI* ui = (BSEQuencer_GUI*) widget->getMainWindow();
 		BEvents::PointerEvent* pointerEvent = (BEvents::PointerEvent*) event;
 
-		int row = 15 - (int) ((pointerEvent->getY () - widget->getYOffset()) / PAD_HEIGHT);
+		int row = (ROWS - 1) - (int) ((pointerEvent->getY () - widget->getYOffset()) / PAD_HEIGHT);
 		int step = (pointerEvent->getX () - widget->getXOffset()) / PAD_WIDTH;
 
 		if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < STEPS))

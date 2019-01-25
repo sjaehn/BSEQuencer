@@ -28,8 +28,8 @@
 #define BG_FILE "surface.png"
 #define HELP_URL "https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer"
 #define OPEN_CMD "xdg-open"
-#define PAD_HEIGHT 30
-#define PAD_WIDTH 40
+#define PAD_HEIGHT (480 / ROWS)
+#define PAD_WIDTH (640 / STEPS)
 
 class BSEQuencer_GUI : public BWidgets::Window
 {
