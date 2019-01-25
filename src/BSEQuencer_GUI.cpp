@@ -347,20 +347,19 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 								pads[row][step] = Pad (pMes[i].ch, pMes[i].pitchOctave, pMes[i].velocity, pMes[i].duration);
 							}
 						}
-
 						drawPad ();
 					}
 				}
 
 				// Cursor notifications
-				if (oCursors && (oCursors->type == uris.atom_Int))
+				if (oCursors && (oCursors->type == uris.atom_Int) && (cursorBits != ((LV2_Atom_Int*)oCursors)->body))
 				{
 					cursorBits = ((LV2_Atom_Int*)oCursors)->body;
 					drawPad ();
 				}
 
 				// Note notifications
-				if (oNotes && (oNotes->type == uris.atom_Int))
+				if (oNotes && (oNotes->type == uris.atom_Int) && (noteBits != ((LV2_Atom_Int*)oNotes)->body))
 				{
 					noteBits = ((LV2_Atom_Int*)oNotes)->body;
 					drawCaption ();
