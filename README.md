@@ -33,12 +33,12 @@ to run it stand-alone and connect it to the JACK system.
 
 Key features
 ------------
-* Step sequencer with a note-based 16x16 matrix
+* Step sequencer with a selectable matrix size (8x16, 16x16, 24x16, or 32x16)
 * Control panel (in line 1 of the matrix) with playing direction, jump, skip, and stop options
 * Autoplay or host / MIDI controlled playing
 * Handles multiple MIDI inputs signals (keys) in one sequencer instance
 * Four configurable output channels
-* Output channels connectable with individual MIDI ports / channels
+* Output channels connectable with individual MIDI channels
 
 Usage
 -----

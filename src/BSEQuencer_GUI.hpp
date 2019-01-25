@@ -158,7 +158,7 @@ private:
 	BColors::Color ink = {0.0, 0.25, 0.5, 1.0};
 	BColors::Color light = {1.0, 1.0, 1.0, 1.0};
 	BColors::Color ctrlBgColor = {0.0, 0.08, 0.04, 1.0};
-	BColors::Color evenPadBgColor = {0.0, 0.02, 0.05, 1.0};
+	BColors::Color evenPadBgColor = {0.0, 0.03, 0.06, 1.0};
 	BColors::Color oddPadBgColor = {0.0, 0.0, 0.0, 1.0};
 	std::array<ButtonStyle, NR_SEQUENCER_CHS + 1> chButtonStyles =
 		{{{{0.0, 0.0, 0.0, 0.5}, ""}, {{0.0, 0.0, 1.0, 1.0}, ""}, {{1.0, 0.0, 1.0, 1.0}, ""}, {{1.0, 0.5, 0.0, 1.0}, ""}, {{1.0, 1.0, 0.0, 1.0}, ""}}};
