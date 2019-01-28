@@ -58,16 +58,19 @@ typedef struct {
 } Limit;
 
 typedef struct {
+	bool playing;
+	int stepOffset;
+	int direction;
+	Pad pad;
+	std::array<bool, MAXSTEPS> jumpOff;
+} Output;
+
+typedef struct {
 	int note;
 	int8_t velocity;
 	double startPos;
 	int stepNr;
-	int direction;
-	struct {
-		std::array<Pad, ROWS> pads;
-		std::array<bool, ROWS> playing;											// TODO Really needed ? Can also be done via setting/deleting ch
-	} output;
-	std::array<bool, MAXSTEPS> jumpOff;
+	std::array<Output, MAXSTEPS> output;
 } Key;
 
 class BSEQuencer
@@ -88,7 +91,9 @@ private:
 	void stopMidiOut (const int64_t frames, const int key, const int row, const uint8_t chbits);
 	void startMidiOut (const int64_t frames, const int key, const uint8_t chbits);
 	void startMidiOut (const int64_t frames, const int key, const int row, const uint8_t chbits);
+	void cleanupInKeys ();
 	double getStep (const int key, const double relpos);
+	int getStepOffset (const int key, const int row, const int relStep);
 	void runSequencer (const double startpos, const uint32_t start, const uint32_t end);
 	float validateValue (float value, const Limit limit);
 	Pad validatePad (Pad pad);
@@ -172,7 +177,7 @@ private:
 	bool scheduleNotifyStatusToGui;
 	StaticArrayList<Key, 16> inKeys;
 	Key key;
-	const Key defaultKey = {0, 0, 0, -1, 1, {{}, {}}, {}};
+	Key defaultKey;
 	BScale scale;
 
 	std::array<BScaleNotes, 14> scaleNotes	=

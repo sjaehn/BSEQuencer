@@ -14,6 +14,7 @@ typedef struct
 void drawButton (cairo_t* cr, double x, double y, double width, double height, ButtonStyle style)
 {
 	// Draw button
+	BColors::Color illuminated2 = style.color; illuminated2.applyBrightness (0.33);
 	BColors::Color illuminated = style.color; illuminated.applyBrightness (0.05);
 	BColors::Color darkened = style.color; darkened.applyBrightness (-0.33);
 	BColors::Color darkened2 = style.color; darkened2.applyBrightness (-0.67);
@@ -30,7 +31,8 @@ void drawButton (cairo_t* cr, double x, double y, double width, double height, B
 	// Draw symbol
 	if (style.symbol != "")
 	{
-		cairo_set_source_rgba(cr, CAIRO_RGBA (darkened2));
+		if (style.color.getRed() + style.color.getGreen() + style.color.getBlue() > 0.33) cairo_set_source_rgba(cr, CAIRO_RGBA (darkened2));
+		else cairo_set_source_rgba(cr, CAIRO_RGBA (illuminated2));
 		cairo_select_font_face(cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
 		double fontWidth = (width > height ? height / 2 : width / 2);
 		cairo_text_extents_t ext;

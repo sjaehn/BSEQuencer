@@ -22,7 +22,7 @@
 
 BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *const *features, PuglNativeWindow parentWindow) :
 		Window (1200, 820, "B.SEQuencer", parentWindow),
-		cursorBits (0), noteBits (0), chBits (0), tempTool (false), tempToolCh (0),
+		noteBits (0), chBits (0), tempTool (false), tempToolCh (0),
 		pluginPath (bundle_path ? std::string (bundle_path) : std::string ("")), controller (NULL), write_function (NULL),
 		map (NULL),
 		mContainer (0, 0, 1200, 820, "main"),
@@ -47,9 +47,10 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		toolBox (920, 315, 260, 257, "box"),
 		toolBoxLabel (10, 10, 240, 20, "ctlabel", "Toolbox"),
 		toolButtonBox (0, 40, 260, 100, "widget"),
+		toolWholeStepButton (170, 40, 80, 20, "tgbutton", "Whole step", 0.0),
 		toolButtonBoxCtrlLabel (10, 10, 60, 20, "lflabel", "Controls"),
-		toolButtonBoxChLabel (10, 70, 60, 20, "lflabel", "Notes"),
-		toolOctaveLabel (30, 225, 60, 20, "lflabel", "Octave"),
+		toolButtonBoxChLabel (10, 70, 60, 20, "lflabel", "Channels"),
+		toolOctaveLabel (30, 225, 60, 20, "ctlabel", "Octave"),
 		toolOctaveDial (35, 165, 50, 60, "dial", 0.0, -8.0, 8.0, 1.0, "%1.0f"),
 		toolVelocityLabel (100, 225, 60, 20, "ctlabel", "Velocity"),
 		toolVelocityDial  (105, 165, 50, 60, "dial", 1.0, 0.0, 2.0, 0.0, "%1.2f"),
@@ -75,9 +76,9 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 
 {
 	// Init toolbox buttons
-	toolButtonBox.addButton (80, 70, 20, 20, {{0.1, 0.1, 0.1, 1.0}, ""});
+	toolButtonBox.addButton (80, 70, 20, 20, {{0.0, 0.03, 0.06, 1.0}, ""});
 	for (int i = 1; i < NR_SEQUENCER_CHS + 1; ++i) toolButtonBox.addButton (80 + i * 30, 70, 20, 20, chButtonStyles[i]);
-	toolButtonBox.addButton (80 , 10, 20, 20, {{0.1, 0.1, 0.1, 1.0}, ""});
+	toolButtonBox.addButton (80 , 10, 20, 20, {{0.0, 0.03, 0.06, 1.0}, ""});
 	for (int i = 1; i < NR_CTRL_BUTTONS; ++i) toolButtonBox.addButton (80 + (i % 6) * 30, 10 + ((int) (i / 6)) * 30, 20, 20, ctrlButtonStyles[i]);
 
 	// Init ChBoxes
@@ -173,6 +174,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	toolBoxLabel.applyTheme (theme);
 	toolBoxLabel.setState (BColors::ACTIVE);
 	toolButtonBox.applyTheme (theme);
+	toolWholeStepButton.applyTheme (theme);
 	toolButtonBoxCtrlLabel.applyTheme (theme);
 	toolButtonBoxChLabel.applyTheme (theme);
 	toolOctaveLabel.applyTheme (theme);
@@ -240,6 +242,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 
 	toolButtonBox.add (toolButtonBoxCtrlLabel);
 	toolButtonBox.add (toolButtonBoxChLabel);
+	toolButtonBox.add (toolWholeStepButton);
 
 	toolBox.add (toolOctaveLabel);
 	toolBox.add (toolOctaveDial);
@@ -354,10 +357,18 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 				}
 
 				// Cursor notifications
-				if (oCursors && (oCursors->type == uris.atom_Int) && (cursorBits != ((LV2_Atom_Int*)oCursors)->body))
+				if (oCursors && (oCursors->type == uris.atom_Vector))
 				{
-					cursorBits = ((LV2_Atom_Int*)oCursors)->body;
-					drawPad ();
+					const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oCursors;
+					if (vec->body.child_type == uris.atom_Int)
+					{
+						int* cb = (int*)(&vec->body + 1);
+						if (memcmp (cursorBits, cb, MAXSTEPS * sizeof(int)))
+						{
+							memcpy (&cursorBits, cb, MAXSTEPS * sizeof(int));
+							drawPad ();
+						}
+					}
 				}
 
 				// Note notifications
@@ -448,7 +459,7 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 
 			if (widgetNr >= 0)
 			{
-				std::cerr << "BSEQuencer.lv2#GUI valueChangedCallback() for widget #" << widgetNr << ": " << value << "\n";
+				//std::cerr << "BSEQuencer.lv2#GUI valueChangedCallback() for widget #" << widgetNr << ": " << value << "\n";
 				ui->controllers[widgetNr] = value;
 				ui->write_function(ui->controller, KNOBS + widgetNr, sizeof(float), 0, &ui->controllers[widgetNr]);
 
@@ -518,63 +529,74 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 
 		if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < ((int)ui->controllerWidgets[NR_OF_STEPS]->getValue ())))
 		{
-			std::cerr << "BSEQuencer.lv2#GUI: Pad at " << row << ", " << step << "\n";
 			Pad* pd = &ui->pads[row][step];
+			int pdch = ((int)pd->ch) & 0x0F;
+			int pdctrl = (((int)pd->ch) & 0xF0) / 0x10;
 
 			// Left button: apply properties to pad
-			if (pointerEvent->getButton() == BEvents::LEFT_BUTTON)
+			if ((pointerEvent->getButton() == BEvents::LEFT_BUTTON) &&
+				((event->getEventType () == BEvents::BUTTON_PRESS_EVENT) ||
+				 (event->getEventType () == BEvents::POINTER_MOTION_WHILE_BUTTON_PRESSED_EVENT)))
+
 			{
-				// CH output set: Limit to note area
-				if ((row < ROWS - 1) && (ui->controllerWidgets[SELECTION_CH]->getValue() <= NR_SEQUENCER_CHS))
+				if (ui->controllerWidgets[SELECTION_CH]->getValue() <= NR_SEQUENCER_CHS)
 				{
-					if ((event->getEventType () == BEvents::BUTTON_PRESS_EVENT) ||
-						(event->getEventType () == BEvents::POINTER_MOTION_WHILE_BUTTON_PRESSED_EVENT))
+					//std::cerr << "BSEQuencer.lv2#GUI: Pad CH at " << row << ", " << step << "\n";
+					Pad props (ui->controllerWidgets[SELECTION_CH]->getValue() + (((int)pd->ch) & 0xF0),
+							   ui->controllerWidgets[SELECTION_OCTAVE]->getValue(),
+							   ui->controllerWidgets[SELECTION_VELOCITY]->getValue(),
+							   ui->controllerWidgets[SELECTION_DURATION]->getValue());
+
+					// Click on a pad with same settings as in toolbox => temporarily switch to delete
+					if ((props == *pd) && (!ui->tempTool) && (event->getEventType () == BEvents::BUTTON_PRESS_EVENT))
 					{
-						Pad props (ui->controllerWidgets[SELECTION_CH]->getValue(),
-								   ui->controllerWidgets[SELECTION_OCTAVE]->getValue(),
-								   ui->controllerWidgets[SELECTION_VELOCITY]->getValue(),
-								   ui->controllerWidgets[SELECTION_DURATION]->getValue());
+						ui->tempTool = true;
+						ui->tempToolCh = ui->controllerWidgets[SELECTION_CH]->getValue();
+						props.ch = 0;
+						ui->controllerWidgets[SELECTION_CH]->setValue(props.ch);
+					}
 
-						// Click on a pad with same settings as in toolbox => temporarily switch to delete
-						if ((props == *pd) && (!ui->tempTool) && (event->getEventType () == BEvents::BUTTON_PRESS_EVENT))
-						{
-							ui->tempTool = true;
-							ui->tempToolCh = props.ch;
-							props.ch = 0;
-							ui->controllerWidgets[SELECTION_CH]->setValue(props.ch);
-						}
-
-						// Overwrite if new data
-						if (!(props == *pd))
-						{
-							*pd = props;
-							ui->drawPad (row, step);
-							ui->send_pad (row, step);
-						}
+					// Overwrite if new data
+					if (!(props == *pd))
+					{
+						*pd = props;
+						ui->drawPad (row, step);
+						ui->send_pad (row, step);
 					}
 				}
 
-				// CTRL function set: Limit to CTRL area
-				else if ((row == ROWS - 1) && (ui->controllerWidgets[SELECTION_CH]->getValue() > NR_SEQUENCER_CHS))
+				// CTRL function set
+				else if (ui->controllerWidgets[SELECTION_CH]->getValue() <= NR_SEQUENCER_CHS + NR_CTRL_BUTTONS)
 				{
-					if ((event->getEventType () == BEvents::BUTTON_PRESS_EVENT) ||
-						(event->getEventType () == BEvents::POINTER_MOTION_WHILE_BUTTON_PRESSED_EVENT))
-					{
-						// Click on a pad with same settings as in toolbox => temporarily switch to delete
-						if ((pd->ch == ui->controllerWidgets[SELECTION_CH]->getValue()) && (!ui->tempTool) &&
-							(event->getEventType () == BEvents::BUTTON_PRESS_EVENT))
-						{
-							ui->tempTool = true;
-							ui->tempToolCh = ui->controllerWidgets[SELECTION_CH]->getValue();
-							ui->controllerWidgets[SELECTION_CH]->setValue(NR_SEQUENCER_CHS + 1);
-						}
+					int ctrl = ((int)ui->controllerWidgets[SELECTION_CH]->getValue() - NR_SEQUENCER_CHS - 1) * 0x10;
 
+					// Click on a pad with same settings as in toolbox => temporarily switch to delete
+					if (((((int)pd->ch) & 0xF0) == ctrl) && (!ui->tempTool) && (event->getEventType () == BEvents::BUTTON_PRESS_EVENT))
+					{
+						ui->tempTool = true;
+						ui->tempToolCh = ui->controllerWidgets[SELECTION_CH]->getValue();
+						ui->controllerWidgets[SELECTION_CH]->setValue(NR_SEQUENCER_CHS + 1);
+						ctrl = ((int)ui->controllerWidgets[SELECTION_CH]->getValue() - NR_SEQUENCER_CHS - 1) * 0x10;
+					}
+
+					// Apply controller data
+					// Whole step button pressed ?
+					int startrow = row;
+					int endrow = row;
+					if (ui->toolWholeStepButton.getValue() == 1.0)
+					{
+						startrow = 0;
+						endrow = ROWS - 1;
+					}
+
+					for (int irow = startrow; irow <= endrow; ++irow)
+					{
 						// Overwrite if new data
-						if (pd->ch != ui->controllerWidgets[SELECTION_CH]->getValue())
+						if ((((int)ui->pads[irow][step].ch) & 0xF0) != ctrl)
 						{
-							pd->ch = ui->controllerWidgets[SELECTION_CH]->getValue();
-							ui->drawPad (row, step);
-							ui->send_pad (row, step);
+							ui->pads[irow][step].ch = (((int)ui->pads[irow][step].ch) & 0x0F) + ctrl;
+							ui->drawPad (irow, step);
+							ui->send_pad (irow, step);
 						}
 					}
 				}
@@ -585,7 +607,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 					 ((event->getEventType () == BEvents::BUTTON_PRESS_EVENT) ||
 					  (event->getEventType () == BEvents::POINTER_MOTION_WHILE_BUTTON_PRESSED_EVENT)))
 			{
-				ui->controllerWidgets[SELECTION_CH]->setValue (pd->ch);
+				ui->controllerWidgets[SELECTION_CH]->setValue (((int)pd->ch) & 0x0F);
 				ui->controllerWidgets[SELECTION_OCTAVE]->setValue(pd->pitchOctave);
 				ui->controllerWidgets[SELECTION_VELOCITY]->setValue(pd->velocity);
 				ui->controllerWidgets[SELECTION_DURATION]->setValue(pd->duration);
@@ -618,27 +640,22 @@ void BSEQuencer_GUI::drawCaption ()
 	for (int i = 0; i < ROWS; ++i)
 	{
 		BColors::Color color = BColors::invisible;
-		if (i == ROWS - 1) color = ctrlBgColor;
-		else if (noteBits & (1 << i)) {color = ink; color.applyBrightness (0.75);}
+		if (noteBits & (1 << i)) {color = ink; color.applyBrightness (0.75);}
 		drawButton (surface, 0, (ROWS - i - 1) * height / ROWS + 1, width, height / ROWS - 2, {color, ""});
 
-		if (i < ROWS - 1)
+		int note = scale.getMIDInote (i);
+		if (note != ENOTE)
 		{
-			int note = scale.getMIDInote (i);
-			if (note != ENOTE)
+			scale.getSymbol (label, i);
+			if (note >= 12)
 			{
-				scale.getSymbol (label, i);
-				if (note >= 12)
-				{
-					strcat (label, " +");
-					char oct[8];
-					sprintf (oct,"%i", (int) (note / 12));
-					strcat (label, oct);
-				}
+				strcat (label, " +");
+				char oct[8];
+				sprintf (oct,"%i", (int) (note / 12));
+				strcat (label, oct);
 			}
-			else strcpy(label, "ERR");
 		}
-		else strcpy (label, "Control");
+		else strcpy(label, "ERR");
 
 		cairo_text_extents_t ext;
 		cairo_text_extents (cr, label, &ext);
@@ -687,28 +704,24 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, int row, int step)
 
 
 	// Draw background
-	BColors::Color bg =	(row == ROWS - 1 ? ctrlBgColor :
-										   (((int)(step / controllerWidgets[STEPS_PER]->getValue ())) % 2) ? oddPadBgColor : evenPadBgColor);
+	BColors::Color bg =	(((int)(step / controllerWidgets[STEPS_PER]->getValue ())) % 2) ? oddPadBgColor : evenPadBgColor;
 	cairo_set_source_rgba (cr, CAIRO_RGBA (bg));
 	cairo_rectangle (cr, x, y, w, h);
 	cairo_fill (cr);
 
 	// Draw pad
-	int ch = pads[row][step].ch;
+	int ch = ((int)pads[row][step].ch) & 0x0F;
+	int ctrl = (((int)pads[row][step].ch) & 0xF0) / 0x10;
 	double vel = (pads[row][step].velocity <= 1 ?  pads[row][step].velocity - 1 : (pads[row][step].velocity - 1) * 0.5);
 
-	if ((ch >= 0) && (ch <= NR_SEQUENCER_CHS + NR_CTRL_BUTTONS))
+	if ((ch >= 0) && (ch <= NR_SEQUENCER_CHS) && (ctrl >= 0) && (ctrl < NR_CTRL_BUTTONS))
 	{
 		ButtonStyle padstyle;
+		padstyle.color = chButtonStyles[ch].color;
+		if (ch > 0) padstyle.color.applyBrightness(vel);
+		padstyle.symbol = ctrlButtonStyles[ctrl].symbol;
 
-		if (ch <= NR_SEQUENCER_CHS)
-		{
-			padstyle = chButtonStyles[ch];
-			if (ch > 0) padstyle.color.applyBrightness(vel);
-		}
-		else padstyle = ctrlButtonStyles [ch - NR_SEQUENCER_CHS - 1];
-
-		if (cursorBits & (1 << step))
+		if (cursorBits[step] & (1 << row))
 		{
 			padstyle.color.setAlpha (1.0);
 			padstyle.color.applyBrightness (0.75);

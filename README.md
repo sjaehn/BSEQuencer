@@ -34,7 +34,7 @@ to run it stand-alone and connect it to the JACK system.
 Key features
 ------------
 * Step sequencer with a selectable matrix size (8x16, 16x16, 24x16, or 32x16)
-* Control panel (in line 1 of the matrix) with playing direction, jump, skip, and stop options
+* Notes and controls for playing direction, jump, skip, and stop options placeable to any position within the matrix
 * Autoplay or host / MIDI controlled playing
 * Handles multiple MIDI inputs signals (keys) in one sequencer instance
 * Four configurable output channels
@@ -47,10 +47,10 @@ see https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer
 TODO
 ----
 * Mouse over widgets (showing values of matrix fields, dials, or sliders; direct keybord keyboard entry of values)
+* Save / restore plugin pads
 * Stability (Note: **This plugin is experimental, yet. Not for production!**)
 * Testing
 * Bugfixes
-* Do not divide control fields from note fields - may cause incompatibility to previous versions
 
 See also
 --------

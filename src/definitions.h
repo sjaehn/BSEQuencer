@@ -24,11 +24,11 @@
 #define MAXSTEPS 32
 #define ROWS 16
 #define NR_SEQUENCER_CHS 4
-#define NR_CTRL_BUTTONS 10
+#define NR_CTRL_BUTTONS 9
 #define NR_MIDI_KEYS 128
 #define AUTOPLAY_KEY 128
 #define ALL_CH 0xFF
-#define HALT_STEP 32767
+#define HALT_STEP 1000
 #define BSEQUENCER_URI "https://www.jahnichen.de/plugins/lv2/BSEQuencer"
 #define BSEQUENCER_GUI_URI "https://www.jahnichen.de/plugins/lv2/BSEQuencer#gui"
 
@@ -54,16 +54,15 @@ typedef enum {
 } ScaleIndex;
 
 typedef enum {
-	CTRL_MUTE		= 0,
-	CTRL_PLAY		= 1,
-	CTRL_PLAY_FWD	= 2,
-	CTRL_PLAY_REW	= 3,
-	CTRL_ALL_MARK	= 4,
-	CTRL_MARK		= 5,
-	CTRL_JUMP_FWD	= 6,
-	CTRL_JUMP_BACK	= 7,
-	CTRL_SKIP		= 8,
-	CTRL_STOP		= 9
+	NO_CTRL			= 0x00,
+	CTRL_PLAY_FWD	= 0x10,
+	CTRL_PLAY_REW	= 0x20,
+	CTRL_ALL_MARK	= 0x30,
+	CTRL_MARK		= 0x40,
+	CTRL_JUMP_FWD	= 0x50,
+	CTRL_JUMP_BACK	= 0x60,
+	CTRL_SKIP		= 0x70,
+	CTRL_STOP		= 0x80
 } CtrlButtons;
 
 

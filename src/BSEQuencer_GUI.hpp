@@ -64,7 +64,7 @@ private:
 	Pad pads [ROWS] [MAXSTEPS];
 
 	// Cursors
-	uint32_t cursorBits;
+	uint32_t cursorBits [MAXSTEPS];
 	uint32_t noteBits;
 	uint32_t chBits;
 
@@ -103,6 +103,7 @@ private:
 	BWidgets::Widget toolBox;
 	BWidgets::Label toolBoxLabel;
 	ButtonBox toolButtonBox;
+	BWidgets::TextToggleButton toolWholeStepButton;
 	BWidgets::Label toolButtonBoxCtrlLabel;
 	BWidgets::Label toolButtonBoxChLabel;
 	BWidgets::Label toolOctaveLabel;
@@ -163,14 +164,16 @@ private:
 	std::array<ButtonStyle, NR_SEQUENCER_CHS + 1> chButtonStyles =
 		{{{{0.0, 0.0, 0.0, 0.5}, ""}, {{0.0, 0.0, 1.0, 1.0}, ""}, {{1.0, 0.0, 1.0, 1.0}, ""}, {{1.0, 0.5, 0.0, 1.0}, ""}, {{1.0, 1.0, 0.0, 1.0}, ""}}};
 	std::array<ButtonStyle, NR_CTRL_BUTTONS> ctrlButtonStyles =
-		{{{{0.0, 0.0, 0.0, 0.5}, ""}, {{0.0, 1.0, 0.0, 1.0}, ""}, {{0.0, 1.0, 0.0, 1.0}, "▶"}, {{0.0, 1.0, 0.0, 1.0}, "◀"},
-				{{0.0, 1.0, 0.0, 1.0}, "●●"}, {{0.0, 1.0, 0.0, 1.0}, "●"}, {{0.0, 1.0, 0.0, 1.0}, "▶▶●"},  {{0.0, 1.0, 0.0, 1.0}, "●◀◀"},
-				{{1.0, 0.0, 0.0, 1.0}, "✖"}, {{1.0, 0.0, 0.0, 1.0}, "◼"}}};
+		{{{{0.0, 0.0, 0.0, 0.5}, ""}, {{0.0, 0.03, 0.06, 1.0}, "▶"}, {{0.0, 0.03, 0.06, 1.0}, "◀"},
+		  {{0.0, 0.03, 0.06, 1.0}, "●●"}, {{0.0, 0.03, 0.06, 1.0}, "●"}, {{0.0, 0.03, 0.06, 1.0}, "▶▶●"},  {{0.0, 0.03, 0.06, 1.0}, "●◀◀"},
+		  {{0.0, 0.03, 0.06, 1.0}, "✖"}, {{0.0, 0.03, 0.06, 1.0}, "◼"}}};
 	BStyles::Border border = {{ink, 1.0}, 0.0, 2.0, 0.0};
 	BStyles::Fill widgetBg = BStyles::noFill;
 	BStyles::Fill screenBg = BStyles::Fill (BColors::Color (0.0, 0.0, 0.0, 0.8));
 	BStyles::Fill boxBg = BStyles::Fill (BColors::Color (0.0, 0.0, 0.0, 0.9));
 	BStyles::Font ctLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 12.0,
+											   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
+	BStyles::Font tgLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 12.0,
 											   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
 	BStyles::Font iLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 24.0,
 											   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
@@ -195,6 +198,7 @@ private:
 							 {"border", STYLEPTR (&border)}}},
 		{"button", 			{{"background", STYLEPTR (&BStyles::blackFill)},
 							 {"border", STYLEPTR (&border)}}},
+		{"tgbutton", 		{{"font", STYLEPTR (&tgLabelFont)}}},
 		{"dial", 			{{"uses", STYLEPTR (&defaultStyles)},
 							 {"fgcolors", STYLEPTR (&fgColors)},
 							 {"bgcolors", STYLEPTR (&bgColors)},
