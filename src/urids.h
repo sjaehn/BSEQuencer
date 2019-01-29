@@ -21,6 +21,7 @@ typedef struct
 	LV2_URID atom_eventTransfer;
 	LV2_URID atom_Vector;
 	LV2_URID atom_Long;
+	LV2_URID atom_String;
 	LV2_URID midi_Event;
 	LV2_URID time_Position;
 	LV2_URID time_bar;
@@ -50,6 +51,7 @@ void getURIs (LV2_URID_Map* m, BSEQuencerURIs* uris)
 	uris->atom_eventTransfer = m->map(m->handle, LV2_ATOM__eventTransfer);
 	uris->atom_Vector = m->map(m->handle, LV2_ATOM__Vector);
 	uris->atom_Long = m->map (m->handle, LV2_ATOM__Long);
+	uris->atom_String = m->map (m->handle, LV2_ATOM__String);
 	uris->midi_Event = m->map(m->handle, LV2_MIDI__MidiEvent);
 	uris->time_Position = m->map(m->handle, LV2_TIME__Position);
 	uris->time_bar = m->map(m->handle, LV2_TIME__bar);

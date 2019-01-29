@@ -52,7 +52,6 @@ see https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer
 TODO
 ----
 * Mouse over widgets (showing values of matrix fields, dials, or sliders; direct keybord keyboard entry of values)
-* Save / restore plugin pads (Note: **You can't save your work, yet**)
 * Stability (Note: **This plugin is experimental, yet. Not for production!**)
 * Testing
 * Bugfixes

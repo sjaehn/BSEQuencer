@@ -23,7 +23,7 @@
         rdfs:comment "16 x 16 step sequencer with four output ports." ;
   		doap:maintainer [ foaf:name "Sven Jaehnichen" ] ;
         lv2:optionalFeature lv2:hardRTCapable ;
-#        lv2:extensionData state:interface ;
+        lv2:extensionData state:interface ;
   		lv2:requiredFeature urid:map ;
   		ui:ui <https://www.jahnichen.de/plugins/lv2/BSEQuencer#gui> ;
         lv2:port [

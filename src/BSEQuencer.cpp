@@ -846,8 +846,23 @@ void BSEQuencer::run (uint32_t n_samples)
 LV2_State_Status BSEQuencer::state_save (LV2_State_Store_Function store, LV2_State_Handle handle, uint32_t flags,
 			const LV2_Feature* const* features)
 {
-	fprintf (stderr, "BSEQuencer.lv2: state_save ()\n");
-	store(handle, uris.state_pad, (void*) &pads, sizeof(LV2_Atom_Vector_Body) + sizeof(Pad) * MAXSTEPS * ROWS, uris.atom_Vector, LV2_STATE_IS_POD);
+	char padDataString[0x8010] = "Matrix data:\n";
+
+	for (int step = 0; step < MAXSTEPS; ++step)
+	{
+		for (int row = 0; row < ROWS; ++row)
+		{
+			char valueString[64];
+			int id = step * ROWS + row;
+			Pad* pd = &pads[row][step];
+			snprintf (valueString, 62, "id:%d; ch:%d; oc:%d; ve:%1.2f; du:%1.2f", id, (int) pd->ch, (int) pd->pitchOctave, pd->velocity, pd->duration);
+			if ((step < MAXSTEPS - 1) || (row < ROWS - 1)) strcat (valueString, ";\n");
+			else strcat(valueString, "\n");
+			strcat (padDataString, valueString);
+		}
+	}
+	store (handle, uris.state_pad, padDataString, strlen (padDataString), uris.atom_String, LV2_STATE_IS_POD);
+	//fprintf (stderr, "BSEQuencer.lv2: State saved.\n");
 	return LV2_STATE_SUCCESS;
 }
 
@@ -862,18 +877,63 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 	uint32_t valflags;
 	const void* data = retrieve(handle, uris.state_pad, &size, &type, &valflags);
 
-	if (data && (size == sizeof(Pad) * MAXSTEPS * ROWS) && (type == uris.atom_Vector))
+	if (data && (type == uris.atom_String))
 	{
 		// Stop MIDI out
 		outCapacity = initMidiOut (midiOut);
-		//fprintf (stderr, "Call stopMidiOut from 'state_restore' at %f\n", position);
 		stopMidiOut (0, ALL_CH);
 
 		// Clear all MIDI in
 		while (!inKeys.empty()) inKeys.pop_back();
 
-		// Copy retrieved data
-		memcpy (pads, LV2_ATOM_BODY (data), sizeof(Pad) * MAXSTEPS * ROWS);
+		// TODO Parse retrieved data
+		std::string padDataString = (char*) data;
+		const std::string keywords[5] = {"id:", "ch:", "oc:", "ve:", "du:"};
+		while (!padDataString.empty())
+		{
+			// Look for next "id:"
+			size_t strPos = padDataString.find ("id:");
+			size_t nextPos = 0;
+			if (strPos == std::string::npos) break;	// No "id:" found => end
+			if (strPos + 3 > padDataString.length()) break;	// Nothing more after id => end
+			padDataString.erase (0, strPos + 3);
+			int id = std::stof (padDataString, &nextPos);			// TODO exceptions
+			if (nextPos > 0) padDataString.erase (0, nextPos);
+			if ((id < 0) || (id >= MAXSTEPS * ROWS))
+			{
+				fprintf (stderr, "BSEQuencer.lv2: Invalid matrix data block loaded with ID %i. Try to use the data before this id.\n", id);
+				break;
+			}
+			int row = id % ROWS;
+			int step = id / ROWS;
+
+			// Look for pad data
+			for (int i = 1; i < 5; ++i)
+			{
+				strPos = padDataString.find (keywords[i]);
+				if (strPos == std::string::npos) continue;	// Keyword not found => next keyword
+				if (strPos + 3 >= padDataString.length())	// Nothing more after keyword => end
+				{
+					padDataString ="";
+					break;
+				}
+				if (strPos > 0) padDataString.erase (0, strPos + 3);
+				float val = std::stof (padDataString, &nextPos);		// TODO exceptions
+				if (nextPos > 0) padDataString.erase (0, nextPos);
+				switch (i) {
+				case 1: pads[row][step].ch = val;
+						break;
+				case 2: pads[row][step].pitchOctave = val;
+						break;
+				case 3:	pads[row][step].velocity = val;
+						break;
+				case 4:	pads[row][step].duration = val;
+						break;
+				default:break;
+				}
+			}
+		}
+
 
 		// Validate all pads
 		for (int i = 0; i < ROWS; ++i)
@@ -1076,7 +1136,6 @@ static void run (LV2_Handle instance, uint32_t n_samples)
 	inst->run (n_samples);
 }
 
-/*
 static LV2_State_Status state_save(LV2_Handle instance, LV2_State_Store_Function store, LV2_State_Handle handle, uint32_t flags,
            const LV2_Feature* const* features)
 {
@@ -1094,7 +1153,6 @@ static LV2_State_Status state_restore(LV2_Handle instance, LV2_State_Retrieve_Fu
 	inst->state_restore (retrieve, handle, flags, features);
 	return LV2_STATE_SUCCESS;
 }
-*/
 
 static void cleanup (LV2_Handle instance)
 {
@@ -1102,7 +1160,7 @@ static void cleanup (LV2_Handle instance)
 	delete inst;
 }
 
-/*
+
 static const void* extension_data(const char* uri)
 {
   static const LV2_State_Interface  state  = {state_save, state_restore};
@@ -1111,7 +1169,7 @@ static const void* extension_data(const char* uri)
   }
   return NULL;
 }
-*/
+
 
 static const LV2_Descriptor descriptor =
 {
@@ -1122,7 +1180,7 @@ static const LV2_Descriptor descriptor =
 		run,
 		NULL,			// deactivate,
 		cleanup,
-		NULL //extension_data
+		extension_data
 };
 
 // LV2 Symbol Export
