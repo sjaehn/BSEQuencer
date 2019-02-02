@@ -102,8 +102,6 @@ void BSEQuencer::connect_port (uint32_t port, void *data)
  */
 void BSEQuencer::appendMidiMsg (const int64_t frames, const uint8_t ch, const uint8_t status, const int note, const uint8_t velocity)
 {
-	if (!outputPort) return;
-
 	// ch -> MIDI channel
 	int channel = controllers[CH + (ch - 1) * CH_SIZE + MIDI_CHANNEL] - 1;
 
@@ -169,7 +167,7 @@ void BSEQuencer::stopMidiOut (const int64_t frames, const uint8_t chbits)
 }
 void BSEQuencer::stopMidiOut (const int64_t frames, const int key, const uint8_t chbits)
 {
-	for (int i = 0; i < ROWS - 1; ++i) stopMidiOut (frames, key, i, chbits);
+	for (int i = 0; i < ROWS; ++i) stopMidiOut (frames, key, i, chbits);
 }
 void BSEQuencer::stopMidiOut (const int64_t frames, const int key, const int row, const uint8_t chbits)
 {
@@ -185,7 +183,7 @@ void BSEQuencer::stopMidiOut (const int64_t frames, const int key, const int row
  */
 void BSEQuencer::startMidiOut (const int64_t frames, const int key, const uint8_t chbits)
 {
-	for (int i = 0; i < ROWS - 1; ++i) startMidiOut (frames, key, i, chbits);
+	for (int i = 0; i < ROWS; ++i) startMidiOut (frames, key, i, chbits);
 }
 void BSEQuencer::startMidiOut (const int64_t frames, const int key, const int row, const uint8_t chbits)
 {
@@ -844,7 +842,7 @@ LV2_State_Status BSEQuencer::state_save (LV2_State_Store_Function store, LV2_Sta
 			int id = step * ROWS + row;
 			Pad* pd = &pads[row][step];
 			snprintf (valueString, 62, "id:%d; ch:%d; oc:%d; ve:%1.2f; du:%1.2f", id, (int) pd->ch, (int) pd->pitchOctave, pd->velocity, pd->duration);
-			if ((step < MAXSTEPS - 1) || (row < ROWS - 1)) strcat (valueString, ";\n");
+			if ((step < MAXSTEPS - 1) || (row < ROWS)) strcat (valueString, ";\n");
 			else strcat(valueString, "\n");
 			strcat (padDataString, valueString);
 		}
