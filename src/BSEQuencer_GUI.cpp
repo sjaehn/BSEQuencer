@@ -47,7 +47,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		toolBox (920, 315, 260, 257, "box"),
 		toolBoxLabel (10, 10, 240, 20, "ctlabel", "Toolbox"),
 		toolButtonBox (0, 40, 260, 100, "widget"),
-		toolWholeStepButton (170, 40, 80, 20, "tgbutton", "Whole step", 0.0),
+		toolWholeStepButton (170, 40, 80, 20, "tgbutton", "Whole step", 1.0),
 		toolButtonBoxCtrlLabel (10, 10, 60, 20, "lflabel", "Controls"),
 		toolButtonBoxChLabel (10, 70, 60, 20, "lflabel", "Channels"),
 		toolOctaveLabel (30, 225, 60, 20, "ctlabel", "Octave"),
