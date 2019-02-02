@@ -320,7 +320,7 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 	uint32_t format, const void* buffer)
 {
 	// Notify port
-	if ((format == uris.atom_eventTransfer) && (port == NOTIFY))
+	if ((format == uris.atom_eventTransfer) && (port == OUTPUT))
 	{
 		const LV2_Atom* atom = (const LV2_Atom*) buffer;
 		if ((atom->type == uris.atom_Blank) || (atom->type == uris.atom_Object))
@@ -410,7 +410,7 @@ void BSEQuencer_GUI::send_ui_on ()
 	LV2_Atom_Forge_Frame frame;
 	LV2_Atom* msg = (LV2_Atom*)lv2_atom_forge_object(&forge, &frame, 0, uris.ui_on);
 	lv2_atom_forge_pop(&forge, &frame);
-	write_function(controller, CONTROL, lv2_atom_total_size(msg), uris.atom_eventTransfer, msg);
+	write_function(controller, INPUT, lv2_atom_total_size(msg), uris.atom_eventTransfer, msg);
 }
 
 void BSEQuencer_GUI::send_ui_off ()
@@ -421,7 +421,7 @@ void BSEQuencer_GUI::send_ui_off ()
 	LV2_Atom_Forge_Frame frame;
 	LV2_Atom* msg = (LV2_Atom*)lv2_atom_forge_object(&forge, &frame, 0, uris.ui_off);
 	lv2_atom_forge_pop(&forge, &frame);
-	write_function(controller, CONTROL, lv2_atom_total_size(msg), uris.atom_eventTransfer, msg);
+	write_function(controller, INPUT, lv2_atom_total_size(msg), uris.atom_eventTransfer, msg);
 }
 
 void BSEQuencer_GUI::send_pad (int row, int step)
@@ -437,7 +437,7 @@ void BSEQuencer_GUI::send_pad (int row, int step)
 	lv2_atom_forge_key(&forge, uris.notify_pad);
 	lv2_atom_forge_vector(&forge, sizeof(float), uris.atom_Float, sizeof(PadMessage) / sizeof(float), (void*) &padmsg);
 	lv2_atom_forge_pop(&forge, &frame);
-	write_function(controller, CONTROL, lv2_atom_total_size(msg), uris.atom_eventTransfer, msg);
+	write_function(controller, INPUT, lv2_atom_total_size(msg), uris.atom_eventTransfer, msg);
 }
 
 void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)

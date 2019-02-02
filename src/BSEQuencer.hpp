@@ -108,16 +108,13 @@ private:
 	LV2_URID_Unmap* unmap;
 
 	// DSP <-> GUI communication
-	const LV2_Atom_Sequence* controlPort;
-	LV2_Atom_Sequence* notifyPort;
+	const LV2_Atom_Sequence* inputPort;
+	LV2_Atom_Sequence* outputPort;
 
-	LV2_Atom_Forge notify_forge;
-	LV2_Atom_Forge_Frame notify_frame;
+	LV2_Atom_Forge output_forge;
+	LV2_Atom_Forge_Frame output_frame;
 
 	PadMessage padMessageBuffer[MAXSTEPS * ROWS];
-
-	// MIDI sequences
-	LV2_Atom_Sequence* midiOut;
 
 	// Controllers
 	float* new_controllers [KNOBS_SIZE];

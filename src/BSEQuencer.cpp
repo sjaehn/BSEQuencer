@@ -21,7 +21,7 @@
 #include "BSEQuencer.hpp"
 
 BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
-	map (NULL), notifyPort (NULL), midiOut (NULL), controlPort (NULL), outCapacity (0),
+	map (NULL), inputPort (NULL), outputPort (NULL), outCapacity (0),
 	rate (samplerate), bar (0), bpm (120.0f), speed (1.0f), position (0.0), beatsPerBar (4.0f), barBeats (4),
 	beatUnit (4), key (defaultKey), scale (60, defaultScale), scheduleNotifyPadsToGui (false), scheduleNotifyStatusToGui (false)
 
@@ -54,14 +54,18 @@ BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
 	if (!map) fprintf(stderr, "BSEQuencer.lv2: Host does not support urid:map.\n");
 
 	// Initialize notify
-	lv2_atom_forge_init (&notify_forge, map);
+	lv2_atom_forge_init (&output_forge, map);
 
 	// Initialize padMessageBuffer
 	padMessageBuffer[0] = PadMessage (ENDPADMESSAGE);
 
 	// Init defaultKey
 	defaultKey.stepNr = -1;
-	for (int i = 0; i < MAXSTEPS; ++i) defaultKey.output[i].direction = 1;
+	for (int i = 0; i < MAXSTEPS; ++i)
+	{
+		defaultKey.output[i].direction = 1;
+		defaultKey.output[i].stepOffset = 0;
+	}
 
 
 	// Initialize controllers
@@ -76,31 +80,16 @@ BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
 void BSEQuencer::connect_port (uint32_t port, void *data)
 {
 	switch (port) {
-	case CONTROL:
-		controlPort = (LV2_Atom_Sequence*) data;
+	case INPUT:
+		inputPort = (LV2_Atom_Sequence*) data;
 		break;
-	case NOTIFY:
-		notifyPort = (LV2_Atom_Sequence*) data;
-		break;
-	case MIDI_OUT:
-		midiOut = (LV2_Atom_Sequence*) data;
+	case OUTPUT:
+		outputPort = (LV2_Atom_Sequence*) data;
 		break;
 	default:
 		// Connect controllers
 		if ((port >= KNOBS) && (port < KNOBS + KNOBS_SIZE)) new_controllers[port - KNOBS] = (float*) data;
 	}
-}
-
-uint32_t BSEQuencer::initMidiOut (LV2_Atom_Sequence* midi)
-{
-	if (midi)
-	{
-		uint32_t outCapacity = midi->atom.size;
-		lv2_atom_sequence_clear(midi);
-		midi->atom.type = uris.atom_Sequence;
-		return outCapacity;
-	}
-	return 0;
 }
 
 /* Sends MIDI signal through midiOut port
@@ -113,23 +102,26 @@ uint32_t BSEQuencer::initMidiOut (LV2_Atom_Sequence* midi)
  */
 void BSEQuencer::appendMidiMsg (const int64_t frames, const uint8_t ch, const uint8_t status, const int note, const uint8_t velocity)
 {
-	// ch -> MIDI port, MIDI channel
+	if (!outputPort) return;
+
+	// ch -> MIDI channel
 	int channel = controllers[CH + (ch - 1) * CH_SIZE + MIDI_CHANNEL] - 1;
 
 	// compose MIDI message block
-	struct {
-	    LV2_Atom_Event event;
-	    uint8_t        msg[3];
-	} midiNoteEvent = {};
-	midiNoteEvent.event.time.frames = frames;
-	midiNoteEvent.event.body.type = uris.midi_Event;
-	midiNoteEvent.event.body.size = 3;
-	midiNoteEvent.msg[0] = status + channel;
-	midiNoteEvent.msg[1] = note;
-	midiNoteEvent.msg[2] = velocity;
+	LV2_Atom midiatom;
+	midiatom.type = uris.midi_Event;
+	midiatom.size = 3;
+
+	uint8_t msg[3];
+	msg[0] = status + channel;
+	msg[1] = note;
+	msg[2] = velocity;
 
 	// send MIDI message
-	if (midiOut) lv2_atom_sequence_append_event (midiOut, outCapacity, &midiNoteEvent.event);
+	if (!lv2_atom_forge_frame_time (&output_forge, frames)) return;
+	if (!lv2_atom_forge_raw (&output_forge, &midiatom, sizeof (LV2_Atom))) return;
+	if (!lv2_atom_forge_raw (&output_forge, &msg, 3)) return;
+	lv2_atom_forge_pad (&output_forge, sizeof (LV2_Atom) + 3);
 	// fprintf (stderr, "BSEQuencer.lv2: appendMidiMsg (frames: %li, status: %i, note: %i, velocity: %i) at %f\n", frames, channel + status, note, velocity, position);
 }
 
@@ -494,8 +486,12 @@ void BSEQuencer::run (uint32_t n_samples)
 	int64_t last_t = 0;
 	int64_t refFrame = 0;
 
-	// Init MIDI output
-	outCapacity = initMidiOut(midiOut);	// TODO outCapacity not used yet
+	if ((!inputPort) || (!outputPort)) return;
+
+	// Init notify port
+	uint32_t space = outputPort->atom.size;
+	lv2_atom_forge_set_buffer(&output_forge, (uint8_t*) outputPort, space);
+	lv2_atom_forge_sequence_head(&output_forge, &output_frame, 0);
 
 	// Validate controllers
 	for (int i = 0; i < KNOBS_SIZE; ++i)
@@ -561,263 +557,262 @@ void BSEQuencer::run (uint32_t n_samples)
 	}
 
 	// Read CONTROL port (notifications from GUI and host)
-	if (controlPort)
+	LV2_ATOM_SEQUENCE_FOREACH(inputPort, ev)
 	{
-		LV2_ATOM_SEQUENCE_FOREACH(controlPort, ev)
+		if ((ev->body.type == uris.atom_Object) || (ev->body.type == uris.atom_Blank))
 		{
-			if ((ev->body.type == uris.atom_Object) || (ev->body.type == uris.atom_Blank))
+			const LV2_Atom_Object* obj = (const LV2_Atom_Object*)&ev->body;
+
+			// GUI on
+			if (obj->body.otype == uris.ui_on)
 			{
-				const LV2_Atom_Object* obj = (const LV2_Atom_Object*)&ev->body;
+				ui_on = true;
+				//fprintf (stderr, "BSEQuencer.lv2: UI on received.\n");
+				padMessageBufferAllPads ();
+				scheduleNotifyPadsToGui = true;
+				scheduleNotifyStatusToGui = true;
+			}
 
-				// GUI on
-				if (obj->body.otype == uris.ui_on)
+			// GUI off
+			else if (obj->body.otype == uris.ui_off)
+			{
+				//fprintf (stderr, "BSEQuencer.lv2: UI off received.\n");
+				ui_on = false;
+			}
+
+			// GUI pad notifications
+			else if (obj->body.otype == uris.notify_Event)
+			{
+				LV2_Atom *oPd = NULL;
+				lv2_atom_object_get (obj, uris.notify_pad,  &oPd,
+										  NULL);
+
+				// Pad notification
+				if (oPd && (oPd->type == uris.atom_Vector))
 				{
-					ui_on = true;
-					//fprintf (stderr, "BSEQuencer.lv2: UI on received.\n");
-					padMessageBufferAllPads ();
-					scheduleNotifyPadsToGui = true;
-					scheduleNotifyStatusToGui = true;
+					const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oPd;
+					if (vec->body.child_type == uris.atom_Float)
+					{
+						const uint32_t size = (uint32_t) ((oPd->size - sizeof(LV2_Atom_Vector_Body)) / sizeof (PadMessage));
+						PadMessage* pMes = (PadMessage*) (&vec->body + 1);
+
+						// Copy PadMessages to pads
+						for (int i = 0; i < size; ++i)
+						{
+							int row = (int) pMes->row;
+							int step = (int) pMes->step;
+							if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < MAXSTEPS))
+							{
+								Pad pd (pMes->ch, pMes->pitchOctave, pMes->velocity, pMes->duration);
+								Pad valPad = validatePad (pd);
+								pads[row][step] = valPad;
+								if (valPad != pd)
+								{
+									fprintf (stderr, "BSEQuencer.lv2: Pad out of range in run (): pads[%i][%i].\n", row, step);
+									padMessageBufferAppendPad (row, step, valPad);
+									scheduleNotifyPadsToGui = true;
+								}
+							}
+						}
+					}
 				}
+			}
 
-				// GUI off
-				else if (obj->body.otype == uris.ui_off)
+			// Host time notifications
+			else if (obj->body.otype == uris.time_Position)
+			{
+				if (controllers[MODE] == HOST_CONTROLLED)
 				{
-					//fprintf (stderr, "BSEQuencer.lv2: UI off received.\n");
-					ui_on = false;
-				}
-
-				// GUI pad notifications
-				else if (obj->body.otype == uris.notify_Event)
-				{
-					LV2_Atom *oPd = NULL;
-					lv2_atom_object_get (obj, uris.notify_pad,  &oPd,
+					bool scheduleStopMidi = false;
+					LV2_Atom *oBpm = NULL, *oSpeed = NULL, *oBpb = NULL, *oBu = NULL, *oBbeat = NULL, *oBar = NULL;
+					lv2_atom_object_get (obj, uris.time_beatsPerMinute,  &oBpm,
+											  uris.time_beatsPerBar,  &oBpb,
+											  uris.time_beatUnit,  &oBu,
+											  uris.time_bar,  &oBar,
+											  uris.time_speed, &oSpeed,
+											  uris.time_barBeat, &oBbeat,
 											  NULL);
 
-					// Pad notification
-					if (oPd && (oPd->type == uris.atom_Vector))
+					// BPM changed?
+					if (oBpm && (oBpm->type == uris.atom_Float) && (bpm != ((LV2_Atom_Float*)oBpm)->body))
 					{
-						const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oPd;
-						if (vec->body.child_type == uris.atom_Float)
-						{
-							const uint32_t size = (uint32_t) ((oPd->size - sizeof(LV2_Atom_Vector_Body)) / sizeof (PadMessage));
-							PadMessage* pMes = (PadMessage*) (&vec->body + 1);
+						bpm = ((LV2_Atom_Float*)oBpm)->body;
+						//fprintf (stderr, "BSEQuencer.lv2: bpm set to %f.\n", bpm);
+						if (controllers[MODE] == HOST_CONTROLLED) scheduleStopMidi = true;
+					}
 
-							// Copy PadMessages to pads
-							for (int i = 0; i < size; ++i)
+					// Beats per bar changed?
+					if (oBpb && (oBpb->type == uris.atom_Float) && (beatsPerBar != ((LV2_Atom_Float*)oBpb)->body) && (((LV2_Atom_Float*)oBpb)->body > 0))
+					{
+						beatsPerBar = ((LV2_Atom_Float*)oBpb)->body;
+						//fprintf (stderr, "BSEQuencer.lv2: bpb set to %f.\n", beatsPerBar);
+						if (controllers[MODE] == HOST_CONTROLLED) scheduleStopMidi = true;
+					}
+
+					// BeatUnit changed?
+					if (oBu && (oBu->type == uris.atom_Int) && (beatUnit != ((LV2_Atom_Int*)oBu)->body) &&(((LV2_Atom_Int*)oBu)->body > 0))
+					{
+						beatUnit = ((LV2_Atom_Int*)oBu)->body;
+						//fprintf (stderr, "BSEQuencer.lv2: bu set to %i.\n", beatUnit);
+						if (controllers[MODE] == HOST_CONTROLLED) scheduleStopMidi = true;
+					}
+
+					// Bar changed?
+					if (oBar && (oBar->type == uris.atom_Long) && (bar != ((LV2_Atom_Long*)oBar)->body))
+					{
+						bar = ((LV2_Atom_Long*)oBar)->body;
+						//fprintf (stderr, "BSEQuencer.lv2: bar set to %li.\n", bar);
+						if (controllers[MODE] == HOST_CONTROLLED) scheduleStopMidi = true;
+					}
+
+					// Speed changed? (not implemented yet)
+					if (oSpeed && (oSpeed->type == uris.atom_Float) && (speed != ((LV2_Atom_Float*)oSpeed)->body))
+					{
+						speed = ((LV2_Atom_Float*)oSpeed)->body;
+						//fprintf (stderr, "BSEQuencer.lv2: speed set to %f.\n", speed);
+						if (controllers[MODE] == HOST_CONTROLLED) scheduleStopMidi = true;
+					}
+
+					// Beat position changed (during playing) ?
+					if (oBbeat && (oBbeat->type == uris.atom_Float) && (barBeats != ((LV2_Atom_Float*) oBbeat)->body))
+					{
+						// No host sync in AUTOPLAY mode
+						if (controllers[MODE] == HOST_CONTROLLED)
+						{
+							barBeats = ((LV2_Atom_Float*) oBbeat)->body;
+							position = beatsPerBar * ((double) bar) + barBeats;
+							//fprintf (stderr, "BSEQuencer.lv2: barBeats set to %f (position = %f, bar = %li).\n", barBeats, position, bar);
+							refFrame = ev->time.frames;
+						}
+					}
+
+					// Stop MIDI output for all BSEQuencer channels
+					if (scheduleStopMidi && (controllers[MODE] != AUTOPLAY))
+					{
+						for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
+						{
+							if (!midiStopped[i])
 							{
-								int row = (int) pMes->row;
-								int step = (int) pMes->step;
-								if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < MAXSTEPS))
-								{
-									Pad pd (pMes->ch, pMes->pitchOctave, pMes->velocity, pMes->duration);
-									Pad valPad = validatePad (pd);
-									pads[row][step] = valPad;
-									if (valPad != pd)
-									{
-										fprintf (stderr, "BSEQuencer.lv2: Pad out of range in run (): pads[%i][%i].\n", row, step);
-										padMessageBufferAppendPad (row, step, valPad);
-										scheduleNotifyPadsToGui = true;
-									}
-								}
+								//fprintf (stderr, "Call stopMidiOut from 'Stop MIDI output for all BSEQuencer channels' at %f\n", position);
+								stopMidiOut (ev->time.frames, 1 << i);
+								midiStopped[i] = true;
 							}
 						}
 					}
-				}
-
-				// Host time notifications
-				else if (obj->body.otype == uris.time_Position)
-				{
-					if (controllers[MODE] == HOST_CONTROLLED)
-					{
-						bool scheduleStopMidi = false;
-						LV2_Atom *oBpm = NULL, *oSpeed = NULL, *oBpb = NULL, *oBu = NULL, *oBbeat = NULL, *oBar = NULL;
-						lv2_atom_object_get (obj, uris.time_beatsPerMinute,  &oBpm,
-												  uris.time_beatsPerBar,  &oBpb,
-												  uris.time_beatUnit,  &oBu,
-												  uris.time_bar,  &oBar,
-												  uris.time_speed, &oSpeed,
-												  uris.time_barBeat, &oBbeat,
-												  NULL);
-
-						// BPM changed?
-						if (oBpm && (oBpm->type == uris.atom_Float) && (bpm != ((LV2_Atom_Float*)oBpm)->body))
-						{
-							bpm = ((LV2_Atom_Float*)oBpm)->body;
-							//fprintf (stderr, "BSEQuencer.lv2: bpm set to %f.\n", bpm);
-							if (controllers[MODE] == HOST_CONTROLLED) scheduleStopMidi = true;
-						}
-
-						// Beats per bar changed?
-						if (oBpb && (oBpb->type == uris.atom_Float) && (beatsPerBar != ((LV2_Atom_Float*)oBpb)->body) && (((LV2_Atom_Float*)oBpb)->body > 0))
-						{
-							beatsPerBar = ((LV2_Atom_Float*)oBpb)->body;
-							//fprintf (stderr, "BSEQuencer.lv2: bpb set to %f.\n", beatsPerBar);
-							if (controllers[MODE] == HOST_CONTROLLED) scheduleStopMidi = true;
-						}
-
-						// BeatUnit changed?
-						if (oBu && (oBu->type == uris.atom_Int) && (beatUnit != ((LV2_Atom_Int*)oBu)->body) &&(((LV2_Atom_Int*)oBu)->body > 0))
-						{
-							beatUnit = ((LV2_Atom_Int*)oBu)->body;
-							//fprintf (stderr, "BSEQuencer.lv2: bu set to %i.\n", beatUnit);
-							if (controllers[MODE] == HOST_CONTROLLED) scheduleStopMidi = true;
-						}
-
-						// Bar changed?
-						if (oBar && (oBar->type == uris.atom_Long) && (bar != ((LV2_Atom_Long*)oBar)->body))
-						{
-							bar = ((LV2_Atom_Long*)oBar)->body;
-							//fprintf (stderr, "BSEQuencer.lv2: bar set to %li.\n", bar);
-							if (controllers[MODE] == HOST_CONTROLLED) scheduleStopMidi = true;
-						}
-
-						// Speed changed? (not implemented yet)
-						if (oSpeed && (oSpeed->type == uris.atom_Float) && (speed != ((LV2_Atom_Float*)oSpeed)->body))
-						{
-							speed = ((LV2_Atom_Float*)oSpeed)->body;
-							//fprintf (stderr, "BSEQuencer.lv2: speed set to %f.\n", speed);
-							if (controllers[MODE] == HOST_CONTROLLED) scheduleStopMidi = true;
-						}
-
-						// Beat position changed (during playing) ?
-						if (oBbeat && (oBbeat->type == uris.atom_Float) && (barBeats != ((LV2_Atom_Float*) oBbeat)->body))
-						{
-							// No host sync in AUTOPLAY mode
-							if (controllers[MODE] == HOST_CONTROLLED)
-							{
-								barBeats = ((LV2_Atom_Float*) oBbeat)->body;
-								position = beatsPerBar * ((double) bar) + barBeats;
-								//fprintf (stderr, "BSEQuencer.lv2: barBeats set to %f (position = %f, bar = %li).\n", barBeats, position, bar);
-								refFrame = ev->time.frames;
-							}
-						}
-
-						// Stop MIDI output for all BSEQuencer channels
-						if (scheduleStopMidi && (controllers[MODE] != AUTOPLAY))
-						{
-							for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
-							{
-								if (!midiStopped[i])
-								{
-									//fprintf (stderr, "Call stopMidiOut from 'Stop MIDI output for all BSEQuencer channels' at %f\n", position);
-									stopMidiOut (ev->time.frames, 1 << i);
-									midiStopped[i] = true;
-								}
-							}
-						}
-					}
-				}
-
-				else fprintf (stderr, "BSEQuencer.lv2: Uninterpreted object in Control port (otype = %i, %s)\n", obj->body.otype,
-							  (unmap ? unmap->unmap (unmap->handle, obj->body.otype) : NULL));
-			}
-
-
-			// Read incoming MIDI_IN events
-			else if (ev->body.type == uris.midi_Event)
-			{
-				if ((controllers[PLAY]) && (controllers[MODE] == HOST_CONTROLLED))
-				{
-					const uint8_t* const msg = (const uint8_t*)(ev + 1);
-					uint8_t typ = lv2_midi_message_type(msg);
-					uint8_t chn = msg[0] & 0x0F;
-					uint8_t note = msg[1];
-
-					if ((controllers[MIDI_IN_CHANNEL] == 0) || (controllers[MIDI_IN_CHANNEL] - 1 == chn))
-					{
-						switch (typ) {
-
-						// LV2_MIDI_MSG_NOTE_ON
-						case LV2_MIDI_MSG_NOTE_ON:
-							{
-								bool newNote = true;
-
-								// Scan keys if this is an additional midi message to an already pressed key
-								// (e.g., double note on, velocity changed)
-								for (Key** it = inKeys.begin(); it < inKeys.end(); ++it)
-								{
-									if ((**it).note == note)
-									{
-										newNote = false;
-										(**it).velocity = msg[2];
-									}
-								}
-
-								// Build new key from MIDI data
-								if (newNote)
-								{
-									key = defaultKey; // stepNr = -1; direction = 1; output.pads, output.playing and jumpOff ()-initialized
-									key.note = note;
-									key.velocity = msg[2];
-									key.startPos = position + ((((double)ev->time.frames) - refFrame) / FRAMES_PER_BEAT) - (1 /STEPS_PER_BEAT);
-									inKeys.push_back (key);										// TODO Alternatively, push_front (key) ?
-								}
-							}
-							break;
-
-						// LV2_MIDI_MSG_NOTE_OFF
-						case LV2_MIDI_MSG_NOTE_OFF:
-							{
-								for (size_t i = 0; i < inKeys.size; ++i)
-								{
-									if (inKeys[i].note == note)
-									{
-										stopMidiOut (ev->time.frames, i, ALL_CH);
-										inKeys.erase (&inKeys.iterator[i]);
-										break;
-									}
-								}
-							}
-							break;
-
-						// All other MIDI signals -> forward
-						default:
-							fprintf (stderr, "BSEQuencer.lv2: Uninterpreted MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
-							break;
-						}
-					}
-					else fprintf (stderr, "BSEQuencer.lv2: MIDI input channel filter passed MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
 				}
 			}
 
-			else fprintf (stderr, "BSEQuencer.lv2: Uninterpreted event in Control port (type = %i, %s)\n", ev->body.type,
-							 (unmap ? unmap->unmap (unmap->handle, ev->body.type) : NULL));
-
-
-			// Update for this iteration
-			if (controllers[PLAY]) runSequencer (position + (((double)last_t) - refFrame) / FRAMES_PER_BEAT, last_t, ev->time.frames);
-
-			last_t = ev->time.frames;
+			else fprintf (stderr, "BSEQuencer.lv2: Uninterpreted object in Control port (otype = %i, %s)\n", obj->body.otype,
+						  (unmap ? unmap->unmap (unmap->handle, obj->body.otype) : NULL));
 		}
 
-		// AUTOPLAY pseudo MIDI in
-		if ((controllers[PLAY]) && (controllers[MODE] == AUTOPLAY))
+
+		// Read incoming MIDI_IN events
+		else if (ev->body.type == uris.midi_Event)
 		{
-			// Exactly one inKey needed for autoplay
-			// No inKeys => create an empty preliminary key
-			if (inKeys.empty())
+			if ((controllers[PLAY]) && (controllers[MODE] == HOST_CONTROLLED))
 			{
-				key = defaultKey;
-				key.note = -99;
-				inKeys.push_back (key);
-			}
+				const uint8_t* const msg = (const uint8_t*)(ev + 1);
+				uint8_t typ = lv2_midi_message_type(msg);
+				uint8_t chn = msg[0] & 0x0F;
+				uint8_t note = msg[1];
 
-			// More than one inKey => shrink to one
-			while (inKeys.size > 1)
-			{
-				stopMidiOut (last_t, inKeys.size - 1, ALL_CH);
-				inKeys.pop_back ();
-			}
+				if ((controllers[MIDI_IN_CHANNEL] == 0) || (controllers[MIDI_IN_CHANNEL] - 1 == chn))
+				{
+					switch (typ) {
 
-			// Check if inKey already plays the root key
-			if (inKeys[0].note != controllers[ROOT] + controllers[SIGNATURE] + (controllers[OCTAVE] + 1) * 12)
-			{
-				stopMidiOut (last_t, 0, ALL_CH);
-				inKeys[0] = defaultKey; // stepNr = -1; direction = 1; output.pads, output.playing and jumpOff ()-initialized
-				inKeys[0].note = controllers[ROOT] + controllers[SIGNATURE] + (controllers[OCTAVE] + 1) * 12;
-				inKeys[0].velocity = 64;
-				inKeys[0].startPos = position + ((((double)last_t) - refFrame) / FRAMES_PER_BEAT) - (1 /STEPS_PER_BEAT);
+					// LV2_MIDI_MSG_NOTE_ON
+					case LV2_MIDI_MSG_NOTE_ON:
+						{
+							bool newNote = true;
+
+							// Scan keys if this is an additional midi message to an already pressed key
+							// (e.g., double note on, velocity changed)
+							for (Key** it = inKeys.begin(); it < inKeys.end(); ++it)
+							{
+								if ((**it).note == note)
+								{
+									newNote = false;
+									(**it).velocity = msg[2];
+								}
+							}
+
+							// Build new key from MIDI data
+							if (newNote)
+							{
+								key = defaultKey; // stepNr = -1; direction = 1; output.pads, output.playing and jumpOff ()-initialized
+								key.note = note;
+								key.velocity = msg[2];
+								key.startPos = position + ((((double)ev->time.frames) - refFrame) / FRAMES_PER_BEAT) - (1 /STEPS_PER_BEAT);
+								inKeys.push_back (key);										// TODO Alternatively, push_front (key) ?
+							}
+						}
+						break;
+
+					// LV2_MIDI_MSG_NOTE_OFF
+					case LV2_MIDI_MSG_NOTE_OFF:
+						{
+							for (size_t i = 0; i < inKeys.size; ++i)
+							{
+								if (inKeys[i].note == note)
+								{
+									stopMidiOut (ev->time.frames, i, ALL_CH);
+									inKeys.erase (&inKeys.iterator[i]);
+									break;
+								}
+							}
+						}
+						break;
+
+					// TODO: interpretation of other MIDI signals, at least ...
+
+					// All other MIDI signals
+					default:
+						fprintf (stderr, "BSEQuencer.lv2: Uninterpreted MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
+						break;
+					}
+				}
+				else fprintf (stderr, "BSEQuencer.lv2: MIDI input channel filter passed MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
 			}
+		}
+
+		else fprintf (stderr, "BSEQuencer.lv2: Uninterpreted event in Control port (type = %i, %s)\n", ev->body.type,
+						 (unmap ? unmap->unmap (unmap->handle, ev->body.type) : NULL));
+
+
+		// Update for this iteration
+		if (controllers[PLAY]) runSequencer (position + (((double)last_t) - refFrame) / FRAMES_PER_BEAT, last_t, ev->time.frames);
+
+		last_t = ev->time.frames;
+	}
+
+	// AUTOPLAY pseudo MIDI in
+	if ((controllers[PLAY]) && (controllers[MODE] == AUTOPLAY))
+	{
+		// Exactly one inKey needed for autoplay
+		// No inKeys => create an empty preliminary key
+		if (inKeys.empty())
+		{
+			key = defaultKey;
+			key.note = -99;
+			inKeys.push_back (key);
+		}
+
+		// More than one inKey => shrink to one
+		while (inKeys.size > 1)
+		{
+			stopMidiOut (last_t, inKeys.size - 1, ALL_CH);
+			inKeys.pop_back ();
+		}
+
+		// Check if inKey already plays the root key
+		if (inKeys[0].note != controllers[ROOT] + controllers[SIGNATURE] + (controllers[OCTAVE] + 1) * 12)
+		{
+			stopMidiOut (last_t, 0, ALL_CH);
+			inKeys[0] = defaultKey; // stepNr = -1; direction = 1; output.pads, output.playing and jumpOff ()-initialized
+			inKeys[0].note = controllers[ROOT] + controllers[SIGNATURE] + (controllers[OCTAVE] + 1) * 12;
+			inKeys[0].velocity = 64;
+			inKeys[0].startPos = position + ((((double)last_t) - refFrame) / FRAMES_PER_BEAT) - (1 /STEPS_PER_BEAT);
 		}
 	}
 
@@ -829,18 +824,11 @@ void BSEQuencer::run (uint32_t n_samples)
 
 	scheduleNotifyStatusToGui = true;
 
-	// Init notify port
-	if (notifyPort)
-	{
-		uint32_t space = notifyPort->atom.size;
-		lv2_atom_forge_set_buffer(&notify_forge, (uint8_t*) notifyPort, space);
-		lv2_atom_forge_sequence_head(&notify_forge, &notify_frame, 0);
+	// Send notifications to GUI
+	if (ui_on && scheduleNotifyStatusToGui) space = space - notifyStatusToGui (space);
+	if (ui_on && scheduleNotifyPadsToGui) space = space - notifyPadsToGui (space);
+	lv2_atom_forge_pop(&output_forge, &output_frame);
 
-		// Send notifications to GUI
-		if (ui_on && scheduleNotifyStatusToGui) space = space - notifyStatusToGui (space);
-		if (ui_on && scheduleNotifyPadsToGui) space = space - notifyPadsToGui (space);
-		lv2_atom_forge_pop(&notify_forge, &notify_frame);
-	}
 }
 
 LV2_State_Status BSEQuencer::state_save (LV2_State_Store_Function store, LV2_State_Handle handle, uint32_t flags,
@@ -880,7 +868,6 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 	if (data && (type == uris.atom_String))
 	{
 		// Stop MIDI out
-		outCapacity = initMidiOut (midiOut);
 		stopMidiOut (0, ALL_CH);
 
 		// Clear all MIDI in
@@ -1032,11 +1019,11 @@ uint32_t BSEQuencer::notifyPadsToGui(const uint32_t space)
 		if (space > 1024 + sizeof(PadMessage) * end)							// TODO calculate the right size
 		{
 			LV2_Atom_Forge_Frame frame;
-			lv2_atom_forge_frame_time(&notify_forge, 0);
-			lv2_atom_forge_object(&notify_forge, &frame, 0, uris.notify_Event);
-			lv2_atom_forge_key(&notify_forge, uris.notify_pad);
-			lv2_atom_forge_vector(&notify_forge, sizeof(float), uris.atom_Float, sizeof(PadMessage) / sizeof(float) * (end + 1), (void*) padMessageBuffer);
-			lv2_atom_forge_pop(&notify_forge, &frame);
+			lv2_atom_forge_frame_time(&output_forge, 0);
+			lv2_atom_forge_object(&output_forge, &frame, 0, uris.notify_Event);
+			lv2_atom_forge_key(&output_forge, uris.notify_pad);
+			lv2_atom_forge_vector(&output_forge, sizeof(float), uris.atom_Float, sizeof(PadMessage) / sizeof(float) * (end + 1), (void*) padMessageBuffer);
+			lv2_atom_forge_pop(&output_forge, &frame);
 
 			// Empty padMessageBuffer
 			padMessageBuffer[0] = endmsg;
@@ -1087,15 +1074,15 @@ uint32_t BSEQuencer::notifyStatusToGui (const uint32_t space)
 	if (space > 1024 + 3 * sizeof(uint32_t))									// TODO calculate the right size
 	{
 		LV2_Atom_Forge_Frame frame;
-		lv2_atom_forge_frame_time(&notify_forge, 0);
-		lv2_atom_forge_object(&notify_forge, &frame, 0, uris.notify_Event);
-		lv2_atom_forge_key(&notify_forge, uris.notify_cursors);
-		lv2_atom_forge_vector(&notify_forge, sizeof (int), uris.atom_Int, MAXSTEPS, (void*) cursorbits);
-		lv2_atom_forge_key(&notify_forge, uris.notify_notes);
-		lv2_atom_forge_int(&notify_forge, notebits);
-		lv2_atom_forge_key(&notify_forge, uris.notify_channels);
-		lv2_atom_forge_int(&notify_forge, chbits);
-		lv2_atom_forge_pop(&notify_forge, &frame);
+		lv2_atom_forge_frame_time(&output_forge, 0);
+		lv2_atom_forge_object(&output_forge, &frame, 0, uris.notify_Event);
+		lv2_atom_forge_key(&output_forge, uris.notify_cursors);
+		lv2_atom_forge_vector(&output_forge, sizeof (int), uris.atom_Int, MAXSTEPS, (void*) cursorbits);
+		lv2_atom_forge_key(&output_forge, uris.notify_notes);
+		lv2_atom_forge_int(&output_forge, notebits);
+		lv2_atom_forge_key(&output_forge, uris.notify_channels);
+		lv2_atom_forge_int(&output_forge, chbits);
+		lv2_atom_forge_pop(&output_forge, &frame);
 
 		scheduleNotifyStatusToGui = false;
 		return 3 * sizeof(uint32_t);											// TODO calculate the right size

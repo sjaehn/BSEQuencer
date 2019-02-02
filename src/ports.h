@@ -2,11 +2,10 @@
 #define PORTS_H_
 
 typedef enum {
-	CONTROL				= 0,
-	NOTIFY				= 1,
-	MIDI_OUT			= 2,
+	INPUT				= 0,
+	OUTPUT				= 1,
 
-	KNOBS				= 3,
+	KNOBS				= 2,
 	MIDI_IN_CHANNEL		= 0,
 	PLAY				= 1,
 	MODE				= 2,

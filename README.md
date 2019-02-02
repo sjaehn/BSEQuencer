@@ -1,7 +1,7 @@
 # B.SEQuencer
 Repository: BSEQuencer
 
-Description: Multi channel 16x16 MIDI step sequencer LV2 plugin
+Description: Multi channel MIDI step sequencer LV2 plugin with a variable matrix
 
 ![screenshot](https://github.com/sjaehn/BSEQuencer/blob/master/docs/screenshot.png "Screenshot from B.SEQuencer")
 
@@ -37,10 +37,10 @@ to run it stand-alone and connect it to the JACK system.
 Key features
 ------------
 * Step sequencer with a selectable matrix size (8x16, 16x16, 24x16, or 32x16)
-* Notes and controls for playing direction, jump, skip, and stop options placeable to any position within the matrix
 * Autoplay or host / MIDI controlled playing
 * Handles multiple MIDI inputs signals (keys) in one sequencer instance
-* Four configurable output channels
+* Controls for playing direction, jump, skip, and stop options placeable to any position within the matrix
+* Notes can be associated with four different, configurable output channels
 * Output channels connectable with individual MIDI channels
 
 
@@ -52,6 +52,7 @@ see https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer
 TODO
 ----
 * Mouse over widgets (showing values of matrix fields, dials, or sliders; direct keybord keyboard entry of values)
+* Extend MIDI support
 * Stability (Note: **This plugin is experimental, yet. Not for production!**)
 * Testing
 * Bugfixes
