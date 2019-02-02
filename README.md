@@ -53,6 +53,8 @@ TODO
 ----
 * Mouse over widgets (showing values of matrix fields, dials, or sliders; direct keybord keyboard entry of values)
 * Extend MIDI support
+* Sort MIDI output messages (bugfix)
+* Display ♭ notes for ♭ signature scales (bugfix C♭)
 * Stability (Note: **This plugin is experimental, yet. Not for production!**)
 * Testing
 * Bugfixes
