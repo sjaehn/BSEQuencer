@@ -358,13 +358,13 @@ void Window::translatePuglEvent (PuglView* view, const PuglEvent* event)
 
 	case PUGL_SCROLL:
 		{
-			Widget* widget = w->getWidgetAt (event->button.x, event->button.y, true, false, false, true, false);
+			Widget* widget = w->getWidgetAt (event->scroll.x, event->scroll.y, true, false, false, true, false);
 			if (widget)
 			{
 				w->addEventToQueue(new BEvents::WheelEvent (widget,
 															BEvents::WHEEL_SCROLL_EVENT,
-															event->scroll.x,
-															event->scroll.y,
+															event->scroll.x - widget->getOriginX (),
+															event->scroll.y - widget->getOriginY (),
 															event->scroll.dx,
 															event->scroll.dy));
 			}

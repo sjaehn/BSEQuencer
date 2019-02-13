@@ -139,10 +139,13 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 
 	// Set callback functions
 	for (int i = 0; i < KNOBS_SIZE; ++i) controllerWidgets[i]->setCallbackFunction (BEvents::VALUE_CHANGED_EVENT, valueChangedCallback);
+	padSurface.setDraggable (true);
+	padSurface.setScrollable (true);
+	//padSurface.setFocusable (true);
 	padSurface.setCallbackFunction (BEvents::BUTTON_PRESS_EVENT, padsPressedCallback);
 	padSurface.setCallbackFunction (BEvents::BUTTON_RELEASE_EVENT, padsPressedCallback);
-	padSurface.setDraggable (true);
 	padSurface.setCallbackFunction (BEvents::POINTER_DRAG_EVENT, padsPressedCallback);
+	padSurface.setCallbackFunction (BEvents::WHEEL_SCROLL_EVENT, padsScrolledCallback);
 	helpLabel.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, helpPressedCallback);
 
 
@@ -619,6 +622,36 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 		{
 			ui->tempTool = false;
 			ui->controllerWidgets[SELECTION_CH]->setValue(ui->tempToolCh);
+		}
+	}
+}
+
+void BSEQuencer_GUI::padsScrolledCallback (BEvents::Event* event)
+{
+	if ((event) && (event->getWidget ()) && (((BWidgets::Widget*)(event->getWidget()))->getMainWindow()) &&
+		((event->getEventType () == BEvents::WHEEL_SCROLL_EVENT)))
+	{
+		BWidgets::DrawingSurface* widget = (BWidgets::DrawingSurface*) event->getWidget ();
+		BSEQuencer_GUI* ui = (BSEQuencer_GUI*) widget->getMainWindow();
+		BEvents::WheelEvent* wheelEvent = (BEvents::WheelEvent*) event;
+
+		// Get size of drawing area
+		const double width = ui->padSurface.getEffectiveWidth ();
+		const double height = ui->padSurface.getEffectiveHeight ();
+
+		int row = (ROWS - 1) - ((int) ((wheelEvent->getY () - widget->getYOffset()) / (height / ROWS)));
+		int step = (wheelEvent->getX () - widget->getXOffset()) / (width / ui->controllerWidgets[NR_OF_STEPS]->getValue ());
+
+		if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < ((int)ui->controllerWidgets[NR_OF_STEPS]->getValue ())))
+		{
+			Pad* pd = &ui->pads[row][step];
+			if (((int)pd->ch) & 0x0F)
+			{
+				pd->velocity += 0.01 * wheelEvent->getDeltaY();
+				pd->velocity = LIMIT (pd->velocity, 0.0, 2.0);
+				ui->drawPad (row, step);
+				ui->send_pad (row, step);
+			}
 		}
 	}
 }

@@ -56,6 +56,7 @@ private:
 	static void valueChangedCallback(BEvents::Event* event);
 	static void helpPressedCallback (BEvents::Event* event);
 	static void padsPressedCallback (BEvents::Event* event);
+	static void padsScrolledCallback (BEvents::Event* event);
 	void drawCaption ();
 	void drawPad ();
 	void drawPad (int row, int step);
