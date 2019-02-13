@@ -38,28 +38,56 @@ Dial::Dial (const double x, const double y, const double width, const double hei
 		fgColors (BWIDGETS_DEFAULT_FGCOLORS), bgColors (BWIDGETS_DEFAULT_BGCOLORS),
 		dialCenterX (width / 2),
 		dialCenterY (height / 2),
-		dialRadius (width < height ? width / 2 : height / 2)
+		dialRadius (width < height ? width / 2 : height / 2),
+		focusLabel (0, 0, 80, 20, name + BWIDGETS_DEFAULT_FOCUS_NAME + BWIDGETS_DEFAULT_FOCUS_LABEL_NAME, "")
 {
 
 	setClickable (true);
-	setDragable (true);
+	setDraggable (true);
+	setScrollable (true);
 	knob.setClickable (false);
-	knob.setDragable (false);
+	knob.setDraggable (false);
+	knob.setScrollable (false);
 	dot.setClickable (false);
-	dot.setDragable (false);
+	dot.setDraggable (false);
+	dot.setScrollable (false);
 	add (knob);
 	add (dot);
+
+	std::string valstr = BValues::toBString (value);
+	focusLabel.setText(valstr);
+	focusLabel.resize (focusLabel.getTextWidth (valstr) + 10, 20);
+	focusWidget = new FocusWidget (this, name + BWIDGETS_DEFAULT_FOCUS_NAME);
+	if (focusWidget)
+	{
+		focusWidget->add (focusLabel);
+		focusWidget->resize ();
+	}
 }
 
 Dial::Dial (const Dial& that) :
 		RangeWidget (that), knob (that.knob), fgColors (that.fgColors), bgColors (that.bgColors),
-		dialCenterX (that.dialCenterX), dialCenterY (that.dialCenterY), dialRadius (that.dialRadius)
+		dialCenterX (that.dialCenterX), dialCenterY (that.dialCenterY), dialRadius (that.dialRadius),
+		focusLabel (0, 0, 80, 20, that.name_ + BWIDGETS_DEFAULT_FOCUS_NAME + BWIDGETS_DEFAULT_FOCUS_LABEL_NAME, "")
 {
 	add (knob);
 	add (dot);
+
+	std::string valstr = BValues::toBString (value);
+	focusLabel.setText(valstr);
+	focusLabel.resize (focusLabel.getTextWidth (valstr) + 10, 20);
+	focusWidget = new FocusWidget (this, that.name_ + BWIDGETS_DEFAULT_FOCUS_NAME);
+	if (focusWidget)
+	{
+		focusWidget->add (focusLabel);
+		focusWidget->resize ();
+	}
 }
 
-Dial:: ~Dial () {}
+Dial:: ~Dial ()
+{
+	if (focusWidget) delete focusWidget;
+}
 
 Dial& Dial::operator= (const Dial& that)
 {
@@ -72,12 +100,31 @@ Dial& Dial::operator= (const Dial& that)
 	dialCenterX = that.dialCenterX;
 	dialCenterY = that.dialCenterY;
 	dialRadius = that.dialRadius;
+
+	if (focusWidget) delete focusWidget;
+	focusLabel = that.focusLabel;
+	focusWidget = new FocusWidget (this, that.name_ + BWIDGETS_DEFAULT_FOCUS_NAME);
+	if (focusWidget)
+	{
+		focusWidget->add (focusLabel);
+		focusWidget->resize ();
+	}
+
 	RangeWidget::operator= (that);
 
 	add (knob);
 	add (dot);
 
 	return *this;
+}
+
+void Dial::setValue (const double val)
+{
+	RangeWidget::setValue (val);
+	std::string valstr = BValues::toBString (value);
+	focusLabel.setText(valstr);
+	focusLabel.resize (focusLabel.getTextWidth (valstr) + 10, 20);
+	if (focusWidget) focusWidget->resize();
 }
 
 void Dial::update ()
@@ -109,6 +156,9 @@ void Dial::applyTheme (BStyles::Theme& theme) {applyTheme (theme, name_);}
 
 void Dial::applyTheme (BStyles::Theme& theme, const std::string& name)
 {
+	if (focusWidget) focusWidget->applyTheme (theme, name + BWIDGETS_DEFAULT_FOCUS_NAME);
+	focusLabel.applyTheme (theme, name + BWIDGETS_DEFAULT_FOCUS_NAME + BWIDGETS_DEFAULT_FOCUS_LABEL_NAME);
+
 	Widget::applyTheme (theme, name);
 	knob.applyTheme (theme, name);
 
@@ -134,23 +184,57 @@ void Dial::onButtonPressed (BEvents::PointerEvent* event)
 		double x = event->getX ();
 		double y = event->getY ();
 		double dist = (sqrt (pow (x - dialCenterX, 2) + pow (y - dialCenterY, 2)));
+		double min = getMin ();
+		double max = getMax ();
 
-		if ((dist >= 0.2 * dialRadius) && (dist <= 1.4 * dialRadius))
+		// Direct dial point setting in hardChangeable mode
+		if (hardChangeable)
 		{
-			double angle = atan2 (x - dialCenterX, dialCenterY - y) + PI;
-			if ((angle >= 0.2 * PI) && (angle <= 1.8 * PI))
+			if (dist >= 0.1 * dialRadius)
 			{
-				double corrAngle = LIMIT (angle, 0.25 * PI, 1.75 * PI);
-				double frac = (corrAngle - 0.25 * PI) / (1.5 * PI);
-				if (getStep () < 0) frac = 1 - frac;
-				setValue (getMin () + frac * (getMax () - getMin ()));
+				double angle = atan2 (x - dialCenterX, dialCenterY - y) + PI;
+				if ((angle >= 0.2 * PI) && (angle <= 1.8 * PI))
+				{
+					double corrAngle = LIMIT (angle, 0.25 * PI, 1.75 * PI);
+					double frac = (corrAngle - 0.25 * PI) / (1.5 * PI);
+					if (getStep () < 0) frac = 1 - frac;
+					setValue (getMin () + frac * (getMax () - getMin ()));
 
+				}
+			}
+		}
+
+		// Otherwise relative value change by dragging up or down
+		// TODO Isn't there really no way to turn the dial in a sensitive but
+		// safe way?
+		else
+		{
+			if ((min != max) && (dialRadius >= 1))
+			{
+				double deltaFrac = -event->getDeltaY () / (dialRadius * 1.5 * PI);
+				if (getStep () < 0) deltaFrac = -deltaFrac;
+				softValue += deltaFrac * (max - min);
+				setValue (getValue() + softValue);
 			}
 		}
 	}
 }
 
-void Dial::onPointerMotionWhileButtonPressed (BEvents::PointerEvent* event) {onButtonPressed (event);}
+void Dial::onButtonReleased (BEvents::PointerEvent* event) {softValue = 0.0;}
+
+void Dial::onPointerDragged (BEvents::PointerEvent* event) {onButtonPressed (event);}
+
+void Dial::onWheelScrolled (BEvents::WheelEvent* event)
+{
+	double min = getMin ();
+	double max = getMax ();
+
+	if ((min != max) && (dialRadius >= 1))
+	{
+		double step = (getStep () != 0 ? getStep () : (max - min) / (dialRadius * 1.5 * PI));
+		setValue (getValue() + event->getDeltaY () * step);
+	}
+}
 
 void Dial::drawDot ()
 {

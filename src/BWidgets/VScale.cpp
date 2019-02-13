@@ -16,6 +16,7 @@
  */
 
 #include "VScale.hpp"
+#include <string>
 
 namespace BWidgets
 {
@@ -26,17 +27,44 @@ VScale::VScale (const double  x, const double y, const double width, const doubl
 				  const double value, const double min, const double max, const double step) :
 		RangeWidget (x, y, width, height, name, value, min, max, step),
 		fgColors (BWIDGETS_DEFAULT_FGCOLORS), bgColors (BWIDGETS_DEFAULT_BGCOLORS),
-		scaleX0 (0), scaleY0 (0), scaleWidth (width), scaleHeight (height), scaleYValue (0)
+		scaleX0 (0), scaleY0 (0), scaleWidth (width), scaleHeight (height), scaleYValue (0),
+		focusLabel (0, 0, 80, 20, name + BWIDGETS_DEFAULT_FOCUS_NAME + BWIDGETS_DEFAULT_FOCUS_LABEL_NAME, "")
 {
 	setClickable (true);
-	setDragable (true);
+	setDraggable (true);
+	setScrollable (true);
+
+	std::string valstr = BValues::toBString (value);
+	focusLabel.setText(valstr);
+	focusLabel.resize (focusLabel.getTextWidth (valstr) + 10, 20);
+	focusWidget = new FocusWidget (this, name + BWIDGETS_DEFAULT_FOCUS_NAME);
+	if (focusWidget)
+	{
+		focusWidget->add (focusLabel);
+		focusWidget->resize ();
+	}
 }
 
 VScale::VScale (const VScale& that) :
 		RangeWidget (that), fgColors (that.fgColors), bgColors (that.bgColors), scaleX0 (that.scaleX0), scaleY0 (that.scaleY0),
-		scaleWidth (that.scaleWidth), scaleHeight (that.scaleHeight), scaleYValue (that.scaleYValue) {}
+		scaleWidth (that.scaleWidth), scaleHeight (that.scaleHeight), scaleYValue (that.scaleYValue),
+		focusLabel (0, 0, 80, 20, that.name_ + BWIDGETS_DEFAULT_FOCUS_NAME + BWIDGETS_DEFAULT_FOCUS_LABEL_NAME, "")
+{
+	std::string valstr = BValues::toBString (value);
+	focusLabel.setText(valstr);
+	focusLabel.resize (focusLabel.getTextWidth (valstr) + 10, 20);
+	focusWidget = new FocusWidget (this, that.name_ + BWIDGETS_DEFAULT_FOCUS_NAME);
+	if (focusWidget)
+	{
+		focusWidget->add (focusLabel);
+		focusWidget->resize ();
+	}
+}
 
-VScale::~VScale () {}
+VScale::~VScale ()
+{
+	if (focusWidget) delete focusWidget;
+}
 
 VScale& VScale::operator= (const VScale& that)
 {
@@ -47,9 +75,26 @@ VScale& VScale::operator= (const VScale& that)
 	scaleWidth = that.scaleWidth;
 	scaleHeight = that.scaleHeight;
 	scaleYValue = that.scaleYValue;
+	if (focusWidget) delete focusWidget;
+	focusLabel = that.focusLabel;
+	focusWidget = new FocusWidget (this, that.name_ + BWIDGETS_DEFAULT_FOCUS_NAME);
+	if (focusWidget)
+	{
+		focusWidget->add (focusLabel);
+		focusWidget->resize ();
+	}
 	RangeWidget::operator= (that);
 
 	return *this;
+}
+
+void VScale::setValue (const double val)
+{
+	RangeWidget::setValue (val);
+	std::string valstr = BValues::toBString (value);
+	focusLabel.setText(valstr);
+	focusLabel.resize (focusLabel.getTextWidth (valstr) + 10, 20);
+	if (focusWidget) focusWidget->resize();
 }
 
 void VScale::update ()
@@ -62,6 +107,9 @@ void VScale::applyTheme (BStyles::Theme& theme) {applyTheme (theme, name_);}
 
 void VScale::applyTheme (BStyles::Theme& theme, const std::string& name)
 {
+	if (focusWidget) focusWidget->applyTheme (theme, name + BWIDGETS_DEFAULT_FOCUS_NAME);
+	focusLabel.applyTheme (theme, name + BWIDGETS_DEFAULT_FOCUS_NAME + BWIDGETS_DEFAULT_FOCUS_LABEL_NAME);
+
 	Widget::applyTheme (theme, name);
 
 	// Foreground colors (scale)
@@ -78,31 +126,49 @@ void VScale::applyTheme (BStyles::Theme& theme, const std::string& name)
 
 void VScale::onButtonPressed (BEvents::PointerEvent* event)
 {
-	if (main_ && isVisible () && (height_ >= 1) && (width_ >= 1) && (event->getButton() == BEvents::LEFT_BUTTON))
+	if (main_ && isVisible () && (height_ >= 1) && (width_ >= 1) && (scaleHeight > 0) && (event->getButton() == BEvents::LEFT_BUTTON))
 	{
-		// Get pointer coords
-		double y = event->getY ();
-		double x = event->getX ();
+		double min = getMin ();
+		double max = getMax ();
 
-		double h = getEffectiveHeight ();
-		double w = getEffectiveWidth ();
-		double x0 = getXOffset ();
-		double y0 = getYOffset ();
-
-		// Pointer within the scale area ? Set value!
-		if ((scaleHeight > 0) && (x >= scaleX0 - scaleWidth) && (x <= scaleX0 + 2 * scaleWidth) && (y >= scaleY0) && (y <= scaleY0 + scaleHeight))
+		// Use pointer coords directly if hardSetable , otherwise apply only
+		// Y movement (drag mode)
+		if (hardChangeable)
 		{
-			double frac = (scaleY0 + scaleHeight - y) / scaleHeight;
+			double frac = (scaleY0 + scaleHeight - event->getY ()) / scaleHeight;
 			if (getStep () < 0) frac = 1 - frac;
-
-			double min = getMin ();
-			double max = getMax ();
-			setValue (min + frac * (max - min));
+			double hardValue = min + frac * (max - min);
+			softValue = 0;
+			setValue (hardValue);
+		}
+		else
+		{
+			if (min != max)
+			{
+				double deltaFrac = -event->getDeltaY () / scaleHeight;
+				if (getStep () < 0) deltaFrac = -deltaFrac;
+				softValue += deltaFrac * (max - min);
+				setValue (getValue() + softValue);
+			}
 		}
 	}
 }
 
-void VScale::onPointerMotionWhileButtonPressed (BEvents::PointerEvent* event) {onButtonPressed (event);}
+void VScale::onButtonReleased (BEvents::PointerEvent* event) {softValue = 0.0;}
+
+void VScale::onPointerDragged (BEvents::PointerEvent* event) {onButtonPressed (event);}
+
+void VScale::onWheelScrolled (BEvents::WheelEvent* event)
+{
+	double min = getMin ();
+	double max = getMax ();
+
+	if (min != max)
+	{
+		double step = (getStep () != 0 ? getStep () : (max - min) / scaleHeight);
+		setValue (getValue() + event->getDeltaY () * step);
+	}
+}
 
 void VScale::updateCoords ()
 {

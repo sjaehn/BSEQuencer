@@ -28,7 +28,9 @@ HSlider::HSlider (const double  x, const double y, const double width, const dou
 		knob (0, 0, 0, 0, BWIDGETS_DEFAULT_KNOB_DEPTH, name), knobRadius (0), knobXCenter (0), knobYCenter (0)
 {
 	knob.setClickable (false);
-	knob.setDragable (false);
+	knob.setDraggable (false);
+	knob.setScrollable (false);
+
 	add (knob);
 }
 

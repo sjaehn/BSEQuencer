@@ -19,6 +19,14 @@
 
 namespace BValues {
 
+std::string toBString (const double value)
+{
+	std::ostringstream os;
+	os << value;
+	std::string str = os.str();
+	return str;
+}
+
 std::string toBString (const std::string& format, const double value)
 {
 	char c[64];

@@ -64,7 +64,7 @@ DisplayVSlider& DisplayVSlider::operator= (const DisplayVSlider& that)
 
 void DisplayVSlider::setValue (const double val)
 {
-	RangeWidget::setValue (val);
+	VScale::setValue (val);
 	valueDisplay.setText(BValues::toBString (valFormat, value));
 }
 

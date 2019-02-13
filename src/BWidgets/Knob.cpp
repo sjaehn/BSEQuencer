@@ -30,7 +30,8 @@ Knob::Knob (const double  x, const double y, const double width, const double he
 		knobDepth (depth), bgColors (BWIDGETS_DEFAULT_BGCOLORS)
 {
 	setClickable (true);
-	setDragable (true);
+	setDraggable (true);
+	setScrollable (true);
 }
 
 Knob::Knob (const Knob& that) : Widget (that), knobDepth (that.knobDepth), bgColors (that.bgColors){}

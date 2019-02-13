@@ -1,5 +1,5 @@
 /* Widget.cpp
- * Copyright (C) 2018 by Sven Jähnichen
+ * Copyright (C) 2018, 2019 by Sven Jähnichen
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@
  */
 
 #include "Widget.hpp"
+#include "Window.hpp"
+#include "FocusWidget.hpp"
 
 namespace BWidgets
 {
@@ -26,19 +28,23 @@ Widget::Widget () : Widget (0.0, 0.0, BWIDGETS_DEFAULT_WIDTH, BWIDGETS_DEFAULT_H
 Widget::Widget (const double x, const double y, const double width, const double height) : Widget (x, y, width, height, "widget") {}
 
 Widget::Widget(const double x, const double y, const double width, const double height, const std::string& name) :
-		extensionData (nullptr), x_ (x), y_ (y), width_ (width), height_ (height), visible (true), clickable (true), dragable (false),
+		extensionData (nullptr), x_ (x), y_ (y), width_ (width), height_ (height), visible (true), clickable (true), draggable (false),
+		scrollable (false), focusable (false), focusWidget (nullptr),
 		main_ (nullptr), parent_ (nullptr), children_ (), border_ (BWIDGETS_DEFAULT_BORDER), background_ (BWIDGETS_DEFAULT_BACKGROUND),
 		name_ (name), widgetState (BWIDGETS_DEFAULT_STATE)
 {
 	cbfunction.fill (Widget::defaultCallback);
-	cbfunction[BEvents::EventType::POINTER_MOTION_WHILE_BUTTON_PRESSED_EVENT] = Widget::dragAndDropCallback;
+	cbfunction[BEvents::EventType::POINTER_DRAG_EVENT] = Widget::dragAndDropCallback;
+	cbfunction[BEvents::EventType::FOCUS_IN_EVENT] = Widget::focusInCallback;
+	cbfunction[BEvents::EventType::FOCUS_OUT_EVENT] = Widget::focusOutCallback;
 	widgetSurface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width, height);
 	id = (long) this;
 }
 
 Widget::Widget (const Widget& that) :
 		extensionData (that.extensionData), x_ (that.x_), y_ (that.y_), width_ (that.width_), height_ (that.height_),
-		visible (that.visible), clickable (that.clickable), dragable (that.dragable),
+		visible (that.visible), clickable (that.clickable), draggable (that.draggable), scrollable (that.scrollable),
+		focusable (that.focusable), focusWidget (nullptr),
 		main_ (nullptr), parent_ (nullptr), children_ (), border_ (that.border_), background_ (that.background_), name_ (that.name_),
 		cbfunction (that.cbfunction), widgetState (that.widgetState)
 {
@@ -73,7 +79,10 @@ Widget& Widget::operator= (const Widget& that)
 	height_ = that.height_;
 	visible = that.visible;
 	clickable = that.clickable;
-	dragable = that.dragable;
+	draggable = that.draggable;
+	scrollable = that.scrollable;
+	focusable = that.focusable;
+	focusWidget = nullptr;
 	border_ = that.border_;
 	background_ = that.background_;
 	cbfunction = that.cbfunction;
@@ -151,7 +160,10 @@ void Widget::release (Widget* child)
 		{
 			for (int i = (int) BEvents::NO_BUTTON; i < (int) BEvents::NR_OF_BUTTONS; ++i)
 			{
-				if (child->main_-> getInput ((BEvents::InputDevice) i) == child) child->main_-> setInput ((BEvents::InputDevice) i, nullptr);
+				if (child->main_->getInputWidget ((BEvents::InputDevice) i) == child)
+				{
+					child->main_->setInput ((BEvents::InputDevice) i, nullptr, 0.0, 0.0);
+				}
 			}
 
 			child->main_ = nullptr;
@@ -165,7 +177,10 @@ void Widget::release (Widget* child)
 			{
 				for (int i = (int) BEvents::NO_BUTTON; i < (int) BEvents::NR_OF_BUTTONS; ++i)
 				{
-					if (w->main_-> getInput ((BEvents::InputDevice) i) == w) w->main_-> setInput ((BEvents::InputDevice) i, nullptr);
+					if (w->main_-> getInputWidget ((BEvents::InputDevice) i) == w)
+					{
+						w->main_->setInput ((BEvents::InputDevice) i, nullptr, 0.0, 0.0);
+					}
 				}
 
 				w->main_ = nullptr;
@@ -303,6 +318,32 @@ void Widget::setHeight (const double height)
 	}
 }
 
+void Widget::resize ()
+{
+	double height = 0.0;
+	double width = 0.0;
+
+	for (Widget* w : children_)
+	{
+		if (w->getX () + w->getWidth() > width) width = w->getX () + w->getWidth();
+		if (w->getY () + w->getHeight() > height) height = w->getY () + w->getHeight();
+	}
+	resize (width, height);
+}
+
+void Widget::resize (const double width, const double height)
+{
+	if ((width_ != width) || (height_ != height))
+	{
+		width_ =  width;
+		height_ = height;
+		cairo_surface_destroy (widgetSurface);	// destroy old surface first
+		widgetSurface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width_, height_);
+		draw (0, 0, width_, height_);
+		if (isVisible () && parent_) parent_->postRedisplay ();
+	}
+}
+
 double Widget::getHeight () const {return height_;}
 
 void Widget::setState (const BColors::State state) {widgetState = state;}
@@ -333,6 +374,10 @@ bool Widget::hasChildren () const {return (children_.size () > 0 ? true : false)
 
 std::vector<Widget*> Widget::getChildren () const {return children_;}
 
+void  Widget::setFocusWidget (FocusWidget* widget) {focusWidget = widget;}
+
+FocusWidget*  Widget::getFocusWidget () {return focusWidget;}
+
 void Widget::rename (const std::string& name) {name_ = name;}
 
 std::string Widget::getName () const {return name_;}
@@ -357,9 +402,17 @@ void Widget::setClickable (const bool status) {clickable = status;}
 
 bool Widget::isClickable () const {return clickable;}
 
-void Widget::setDragable (const bool status) {dragable = status;}
+void Widget::setDraggable (const bool status) {draggable = status;}
 
-bool Widget::isDragable () const {return dragable;}
+bool Widget::isDraggable () const {return draggable;}
+
+void Widget::setScrollable (const bool status) {scrollable = status;}
+
+bool Widget::isScrollable () const {return scrollable;}
+
+void Widget::setFocusable (const bool status) {focusable = status;}
+
+bool Widget::isFocusable () const {return focusable;}
 
 void Widget::update ()
 {
@@ -369,16 +422,24 @@ void Widget::update ()
 
 bool Widget::isPointInWidget (const double x, const double y) const {return ((x >= 0.0) && (x <= width_) && (y >= 0.0) && (y <= height_));}
 
-Widget* Widget::getWidgetAt (const double x, const double y, const bool checkVisibility, const bool checkClickability, const bool checkDragability)
+Widget* Widget::getWidgetAt (const double x, const double y, const bool checkVisibility, const bool checkClickability,
+							 const bool checkDraggability, const bool checkScrollability, const bool checkFocusability)
 {
 	if (main_ && isPointInWidget (x, y) && ((!checkVisibility) || visible))
 	{
-		Widget* finalw = ((!checkClickability) || clickable ? this : nullptr);
+		Widget* finalw = ((((!checkVisibility) || visible) &&
+						   ((!checkClickability) || clickable) &&
+						   ((!checkDraggability) || draggable) &&
+						   ((!checkScrollability) || scrollable) &&
+				   	   	   ((!checkFocusability) || focusable)) ?
+						  this :
+						  nullptr);
 		for (Widget* w : children_)
 		{
 			double xNew = x - w->x_;
 			double yNew = y - w->y_;
-			Widget* nextw = w->getWidgetAt (xNew, yNew, checkVisibility, checkClickability, checkDragability);
+			Widget* nextw = w->getWidgetAt (xNew, yNew, checkVisibility, checkClickability, checkDraggability, checkScrollability,
+											checkFocusability);
 			if (nextw)
 			{
 				finalw = nextw;
@@ -413,10 +474,13 @@ void Widget::onExpose (BEvents::ExposeEvent* event) {} // Empty, only Windows ha
 void Widget::onClose () {} // Empty, only Windows handle close events
 void Widget::onButtonPressed (BEvents::PointerEvent* event) {cbfunction[BEvents::EventType::BUTTON_PRESS_EVENT] (event);}
 void Widget::onButtonReleased (BEvents::PointerEvent* event) {cbfunction[BEvents::EventType::BUTTON_RELEASE_EVENT] (event);}
+void Widget::onButtonClicked (BEvents::PointerEvent* event) {cbfunction[BEvents::EventType::BUTTON_CLICK_EVENT] (event);}
 void Widget::onPointerMotion (BEvents::PointerEvent* event) {cbfunction[BEvents::EventType::POINTER_MOTION_EVENT] (event);}
-void Widget::onPointerMotionWhileButtonPressed (BEvents::PointerEvent* event) {cbfunction[BEvents::EventType::POINTER_MOTION_WHILE_BUTTON_PRESSED_EVENT] (event);}
-
+void Widget::onPointerDragged (BEvents::PointerEvent* event) {cbfunction[BEvents::EventType::POINTER_DRAG_EVENT] (event);}
+void Widget::onWheelScrolled (BEvents::WheelEvent* event){cbfunction[BEvents::EventType::WHEEL_SCROLL_EVENT] (event);}
 void Widget::onValueChanged (BEvents::ValueChangedEvent* event) {cbfunction[BEvents::EventType::VALUE_CHANGED_EVENT] (event);}
+void Widget::onFocusIn (BEvents::FocusEvent* event) {cbfunction[BEvents::EventType::FOCUS_IN_EVENT] (event);}
+void Widget::onFocusOut (BEvents::FocusEvent* event) {cbfunction[BEvents::EventType::FOCUS_OUT_EVENT] (event);}
 
 void Widget::defaultCallback (BEvents::Event* event) {}
 
@@ -428,6 +492,43 @@ void Widget::dragAndDropCallback (BEvents::Event* event)
 		BEvents::PointerEvent* pev = (BEvents::PointerEvent*) event;
 
 		w->moveTo (w->x_ + pev->getDeltaX (), w->y_ + pev->getDeltaY ());
+	}
+}
+
+void Widget::focusInCallback (BEvents::Event* event)
+{
+	if (event && event->getWidget())
+	{
+		Widget* w = (Widget*) (event->getWidget());
+		BEvents::FocusEvent* focusEvent = (BEvents::FocusEvent*) event;
+		if (w->getMainWindow() && w->getFocusWidget())
+		{
+			Window* main = w->getMainWindow();
+			FocusWidget* focusWidget = w->getFocusWidget();
+
+			// Release focusWidget first, if already added (somewhere)
+			if (focusWidget->getParent()) focusWidget->getParent()->release (focusWidget);
+
+			main->add (*focusWidget);
+			focusWidget->moveTo (focusEvent->getX() + 2, focusEvent->getY() - focusWidget->getHeight() - 2);
+			focusWidget->show ();
+		}
+	}
+}
+
+void Widget::focusOutCallback (BEvents::Event* event)
+{
+	if (event && event->getWidget())
+	{
+		Widget* w = (Widget*) (event->getWidget());
+		BEvents::FocusEvent* focusEvent = (BEvents::FocusEvent*) event;
+		if (w->getFocusWidget() && w->getMainWindow())
+		{
+			Window* main = w->getMainWindow();
+			FocusWidget* focusWidget = w->getFocusWidget();
+
+			main->release (focusWidget);
+		}
 	}
 }
 
@@ -619,294 +720,6 @@ bool Widget::fitToArea (double& x, double& y, double& width, double& height)
 	}
 
 	return isInArea;
-}
-
-/*****************************************************************************/
-
-Window::Window () : Window (BWIDGETS_DEFAULT_WIDTH, BWIDGETS_DEFAULT_HEIGHT, "window", 0.0) {}
-
-Window::Window (const double width, const double height, const std::string& title, PuglNativeWindow nativeWindow, bool resizable) :
-		Widget (0.0, 0.0, width, height, title), title_ (title), view_ (NULL), nativeWindow_ (nativeWindow), quit_ (false),
-		input ({nullptr, nullptr, nullptr, nullptr})
-{
-	main_ = this;
-	view_ = puglInit(NULL, NULL);
-
-	if (nativeWindow_ != 0)
-	{
-		puglInitWindowParent(view_, nativeWindow_);
-	}
-
-	puglInitWindowSize (view_, width_, height_);
-	puglInitResizable (view_, resizable);
-	puglInitContextType (view_, PUGL_CAIRO);
-	puglIgnoreKeyRepeat (view_, true);
-	puglCreateWindow (view_, title.c_str ());
-	puglShowWindow (view_);
-	puglSetHandle (view_, this);
-
-	puglSetEventFunc (view_, Window::translatePuglEvent);
-
-	setBackground (BWIDGETS_DEFAULT_WINDOW_BACKGROUND);
-}
-
-Window::~Window ()
-{
-	purgeEventQueue ();
-	puglDestroy(view_);
-	main_ = nullptr;	// Important switch for the super destructor. It took
-						// days of debugging ...
-}
-
-PuglView* Window::getPuglView () {return view_;}
-
-cairo_t* Window::getPuglContext ()
-{
-	if (view_) return (cairo_t*) puglGetContext (view_);
-	else return NULL;
-}
-
-void Window::run ()
-{
-	while (!quit_)
-	{
-		puglWaitForEvent (view_);
-		handleEvents ();
-	}
-}
-
-void Window::onConfigure (BEvents::ExposeEvent* event)
-{
-	if (width_ != event->getWidth ()) setWidth (event->getWidth ());
-	if (height_ != event->getHeight ()) setHeight (event->getHeight ());
-}
-
-void Window::onClose ()
-{
-	quit_ = true;
-}
-
-void Window::onExpose (BEvents::ExposeEvent* event)
-{
-	if (event)
-	{
-		Widget* widget = (Widget*) event->getWidget ();
-
-		// Create a temporal storage surface and store all children surfaces on this
-		cairo_surface_t* storageSurface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width_, height_);
-		redisplay (storageSurface, event->getX (), event->getY (),
-				   event->getWidth (), event->getHeight ());
-
-		// Copy storage surface onto pugl provided surface
-		cairo_t* cr = main_->getPuglContext ();
-		cairo_save (cr);
-		cairo_set_source_surface (cr, storageSurface, 0, 0);
-		cairo_paint (cr);
-		cairo_restore (cr);
-
-		cairo_surface_destroy (storageSurface);
-	}
-}
-
-void Window::addEventToQueue (BEvents::Event* event)
-{
-	eventQueue.push_back (event);
-}
-
-void Window::setInput (const BEvents::InputDevice device, Widget* widget)
-{
-	if ((device > BEvents::NO_BUTTON) && (device < BEvents::NR_OF_BUTTONS)) input[device] = widget;
-}
-
-Widget* Window::getInput (BEvents::InputDevice device) const
-{
-	if ((device > BEvents::NO_BUTTON) && (device < BEvents::NR_OF_BUTTONS)) return input[device];
-	else return nullptr;
-}
-
-void Window::handleEvents ()
-{
-	puglProcessEvents (view_);
-
-	while (!eventQueue.empty ())
-	{
-		BEvents::Event* event = eventQueue.front ();
-		if (event)
-		{
-			Widget* widget = (Widget*) event->getWidget ();
-			if (widget)
-			{
-				BEvents::EventType eventType = event->getEventType ();
-
-				switch (eventType)
-				{
-				case BEvents::CONFIGURE_EVENT:
-					onConfigure ((BEvents::ExposeEvent*) event);
-					break;
-
-				case BEvents::EXPOSE_EVENT:
-					onExpose ((BEvents::ExposeEvent*) event);
-					break;
-
-				case BEvents::CLOSE_EVENT:
-					onClose ();
-					break;
-
-				case BEvents::BUTTON_PRESS_EVENT:
-					{
-						BEvents::PointerEvent* be = (BEvents::PointerEvent*) event;
-						setInput (be->getButton (), widget);
-						widget->onButtonPressed (be);
-					}
-					break;
-
-				case BEvents::BUTTON_RELEASE_EVENT:
-					{
-						BEvents::PointerEvent* be = (BEvents::PointerEvent*) event;
-						setInput (be->getButton (), nullptr);
-						widget->onButtonReleased (be);
-					}
-					break;
-
-				case BEvents::POINTER_MOTION_EVENT:
-					widget->onPointerMotion((BEvents::PointerEvent*) event);
-					break;
-
-				case BEvents::POINTER_MOTION_WHILE_BUTTON_PRESSED_EVENT:
-					widget->onPointerMotionWhileButtonPressed((BEvents::PointerEvent*) event);
-					break;
-
-				case BEvents::VALUE_CHANGED_EVENT:
-					widget->onValueChanged((BEvents::ValueChangedEvent*) event);
-					break;
-
-				default:
-					break;
-				}
-
-			}
-			delete event;
-		}
-		eventQueue.erase (eventQueue.begin ());
-	}
-}
-
-void Window::translatePuglEvent (PuglView* view, const PuglEvent* event)
-{
-	Window* w = (Window*) puglGetHandle (view);
-	switch (event->type) {
-	case PUGL_BUTTON_PRESS:
-		{
-			Widget* widget = w->getWidgetAt (event->button.x, event->button.y, true, true, false);
-			if (widget)
-			{
-				w->addEventToQueue (new BEvents::PointerEvent (widget,
-															  BEvents::BUTTON_PRESS_EVENT,
-															  event->button.x - widget->getOriginX (),
-															  event->button.y - widget->getOriginY (),
-															  0, 0,
-															  (BEvents::InputDevice) event->button.button));
-			}
-
-			w->pointerX = event->button.x;
-			w->pointerY = event->button.y;
-		}
-		break;
-
-	case PUGL_BUTTON_RELEASE:
-		{
-			Widget* widget = w->getInput ((BEvents::InputDevice) event->button.button);
-			if (widget)
-			{
-				w->addEventToQueue (new BEvents::PointerEvent (widget,
-															  BEvents::BUTTON_RELEASE_EVENT,
-															  event->button.x - widget->getOriginX (),
-															  event->button.y - widget->getOriginY (),
-															  0, 0,
-															  (BEvents::InputDevice) event->button.button));
-			}
-
-			w->pointerX = event->button.x;
-			w->pointerY = event->button.y;
-		}
-		break;
-
-	case PUGL_MOTION_NOTIFY:
-		{
-			BEvents::InputDevice device = BEvents::NO_BUTTON;
-
-			// Scan for pressed buttons associated with a widget
-			for (int i = BEvents::NO_BUTTON + 1; i < BEvents::NR_OF_BUTTONS; ++i)
-			{
-				if (w->getInput ((BEvents::InputDevice) i))
-				{
-					device = (BEvents::InputDevice) i;
-					Widget* widget = w->getInput (device);
-					if (widget->isDragable ())
-					{
-						w->addEventToQueue (new BEvents::PointerEvent (widget,
-																	   BEvents::POINTER_MOTION_WHILE_BUTTON_PRESSED_EVENT,
-																	   event->motion.x - widget->getOriginX (),
-																	   event->motion.y - widget->getOriginY (),
-																	   event->motion.x - w->pointerX,
-																	   event->motion.y - w->pointerY,
-																	   device));
-					}
-				}
-			}
-
-			// No button associated with a widget? Only POINTER_MOTION_EVENT
-			if (device == BEvents::NO_BUTTON)
-			{
-				Widget* widget = w->getWidgetAt (event->motion.x, event->motion.y, true, false, false);
-				if (widget)
-				{
-					w->addEventToQueue (new BEvents::PointerEvent (widget,
-																   BEvents::POINTER_MOTION_EVENT,
-																   event->motion.x - widget->getOriginX (),
-																   event->motion.y - widget->getOriginY (),
-																   event->motion.x - w->pointerX,
-																   event->motion.y - w->pointerY,
-																   device));
-				}
-
-			}
-
-			w->pointerX = event->motion.x;
-			w->pointerY = event->motion.y;
-		}
-		break;
-
-	case PUGL_CONFIGURE:
-		w->addEventToQueue (new BEvents::ExposeEvent (w,
-													  BEvents::CONFIGURE_EVENT,
-													  event->configure.x,
-													  event->configure.y,
-													  event->configure.width,
-													  event->configure.height));
-		break;
-
-	case PUGL_EXPOSE:
-		w->postRedisplay ();
-		break;
-
-	case PUGL_CLOSE:
-		w->addEventToQueue (new BEvents::Event (w, BEvents::CLOSE_EVENT));
-		break;
-
-	default: break;
-	}
-
-}
-
-void Window::purgeEventQueue ()
-{
-	while (!eventQueue.empty ())
-	{
-		BEvents::Event* event = eventQueue.back ();
-		if (event) delete event;
-		eventQueue.pop_back ();
-	}
 }
 
 }

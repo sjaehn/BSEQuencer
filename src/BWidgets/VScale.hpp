@@ -19,10 +19,13 @@
 #define BWIDGETS_VSCALE_HPP_
 
 #include "RangeWidget.hpp"
+#include "Label.hpp"
 
 #define BWIDGETS_DEFAULT_VSCALE_WIDTH 100.0
 #define BWIDGETS_DEFAULT_VSCALE_HEIGHT 6.0
 #define BWIDGETS_DEFAULT_VSCALE_DEPTH 1.0
+
+#define BWIDGETS_DEFAULT_FOCUS_LABEL_NAME "/label"
 
 namespace BWidgets
 {
@@ -57,6 +60,14 @@ public:
 	VScale& operator= (const VScale& that);
 
 	/**
+	 * Changes the value of the widget and keeps it within the defined range.
+	 * Passes the value to its predefined child widgets.
+	 * Emits a value changed event and (if visible) an expose event.
+	 * @param val Value
+	 */
+	virtual void setValue (const double val) override;
+
+	/**
 	 * Calls a redraw of the widget and calls postRedisplay () if the the
 	 * Widget is visible.
 	 * This method should be called if the widgets properties are indirectly
@@ -85,11 +96,24 @@ public:
 	virtual void onButtonPressed (BEvents::PointerEvent* event) override;
 
 	/**
-	 * Handles the BEvents::POINTER_MOTION_WHILE_BUTTON_PRESSED_EVENT to move
+	 * Handles the BEvents::EventType::BUTTON_RELEASE_EVENT to move the slider.
+	 * @param event Pointer event
+	 */
+	virtual void onButtonReleased (BEvents::PointerEvent* event) override;
+
+	/**
+	 * Handles the BEvents::POINTER_DRAG_EVENT to move
 	 * the slider.
 	 * @param event Pointer to a pointer event emitted by the same widget.
 	 */
-	virtual void onPointerMotionWhileButtonPressed (BEvents::PointerEvent* event) override;
+	virtual void onPointerDragged (BEvents::PointerEvent* event) override;
+
+	/**
+	 * Handles the BEvents::WHEEL_SCROLL_EVENT to turn
+	 * the dial.
+	 * @param event Pointer to a wheel event emitted by the same widget.
+	 */
+	virtual void onWheelScrolled (BEvents::WheelEvent* event) override;
 
 protected:
 	virtual void updateCoords ();
@@ -102,6 +126,7 @@ protected:
 	double scaleWidth;
 	double scaleHeight;
 	double scaleYValue;
+	Label focusLabel;
 };
 
 }

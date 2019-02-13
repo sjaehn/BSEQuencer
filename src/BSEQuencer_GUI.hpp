@@ -13,8 +13,19 @@
 #include <lv2/lv2plug.in/ns/ext/midi/midi.h>
 #include <iostream>
 
+#include "BWidgets/Widget.hpp"
+#include "BWidgets/Window.hpp"
+#include "BWidgets/FocusWidget.hpp"
+#include "BWidgets/Label.hpp"
+#include "BWidgets/DrawingSurface.hpp"
+#include "BWidgets/DisplayHSlider.hpp"
+#include "BWidgets/DisplayDial.hpp"
+#include "BWidgets/HSwitch.hpp"
+#include "BWidgets/TextToggleButton.hpp"
+#include "BWidgets/PopupListBox.hpp"
+
+
 #include "BScale.hpp"
-#include "BWidgets/BWidgets.hpp"
 #include "drawbutton.hpp"
 #include "PlayStopButton.hpp"
 #include "ButtonBox.hpp"

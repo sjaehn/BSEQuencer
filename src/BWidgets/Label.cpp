@@ -76,6 +76,16 @@ void Label::setFont (const BStyles::Font& font)
 }
 BStyles::Font* Label::getFont () {return &labelFont;}
 
+double Label::getTextWidth (std::string& text)
+{
+	double textwidth = 0.0;
+	cairo_t* cr = cairo_create (widgetSurface);
+	cairo_text_extents_t ext = labelFont.getTextExtents(cr, text.c_str ());
+	textwidth = ext.width;
+	cairo_destroy (cr);
+	return textwidth;
+}
+
 void Label::applyTheme (BStyles::Theme& theme) {applyTheme (theme, name_);}
 
 void Label::applyTheme (BStyles::Theme& theme, const std::string& name)

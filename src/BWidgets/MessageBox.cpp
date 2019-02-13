@@ -62,7 +62,7 @@ MessageBox::MessageBox (const double x, const double y, const double width, cons
 
 	background_ = BWIDGETS_DEFAULT_MENU_BACKGROUND;
 	border_ = BWIDGETS_DEFAULT_MENU_BORDER;
-	setDragable (true);
+	setDraggable (true);
 }
 
 MessageBox::MessageBox (const MessageBox& that) : ValueWidget (that)

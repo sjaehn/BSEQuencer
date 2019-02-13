@@ -20,6 +20,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <sstream>
 
 
 namespace BValues {
@@ -30,6 +31,7 @@ namespace BValues {
  * @param format Number format, see printf.
  * @return Converted value as a std:string.
  */
+std::string toBString (const double value);
 std::string toBString (const std::string& format, const double value);
 
 }

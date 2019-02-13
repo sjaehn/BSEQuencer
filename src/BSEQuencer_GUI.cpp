@@ -141,8 +141,8 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	for (int i = 0; i < KNOBS_SIZE; ++i) controllerWidgets[i]->setCallbackFunction (BEvents::VALUE_CHANGED_EVENT, valueChangedCallback);
 	padSurface.setCallbackFunction (BEvents::BUTTON_PRESS_EVENT, padsPressedCallback);
 	padSurface.setCallbackFunction (BEvents::BUTTON_RELEASE_EVENT, padsPressedCallback);
-	padSurface.setDragable (true);
-	padSurface.setCallbackFunction (BEvents::POINTER_MOTION_WHILE_BUTTON_PRESSED_EVENT, padsPressedCallback);
+	padSurface.setDraggable (true);
+	padSurface.setCallbackFunction (BEvents::POINTER_DRAG_EVENT, padsPressedCallback);
 	helpLabel.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, helpPressedCallback);
 
 
@@ -514,7 +514,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 	if ((event) && (event->getWidget ()) && (((BWidgets::Widget*)(event->getWidget()))->getMainWindow()) &&
 		((event->getEventType () == BEvents::BUTTON_PRESS_EVENT) ||
 		 (event->getEventType () == BEvents::BUTTON_RELEASE_EVENT) ||
-		 (event->getEventType () == BEvents::POINTER_MOTION_WHILE_BUTTON_PRESSED_EVENT)))
+		 (event->getEventType () == BEvents::POINTER_DRAG_EVENT)))
 	{
 		BWidgets::DrawingSurface* widget = (BWidgets::DrawingSurface*) event->getWidget ();
 		BSEQuencer_GUI* ui = (BSEQuencer_GUI*) widget->getMainWindow();
@@ -536,7 +536,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 			// Left button: apply properties to pad
 			if ((pointerEvent->getButton() == BEvents::LEFT_BUTTON) &&
 				((event->getEventType () == BEvents::BUTTON_PRESS_EVENT) ||
-				 (event->getEventType () == BEvents::POINTER_MOTION_WHILE_BUTTON_PRESSED_EVENT)))
+				 (event->getEventType () == BEvents::POINTER_DRAG_EVENT)))
 
 			{
 				if (ui->controllerWidgets[SELECTION_CH]->getValue() <= NR_SEQUENCER_CHS)
@@ -605,7 +605,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 			// Right button: copy pad to properties
 			else if ((pointerEvent->getButton() == BEvents::RIGHT_BUTTON) &&
 					 ((event->getEventType () == BEvents::BUTTON_PRESS_EVENT) ||
-					  (event->getEventType () == BEvents::POINTER_MOTION_WHILE_BUTTON_PRESSED_EVENT)))
+					  (event->getEventType () == BEvents::POINTER_DRAG_EVENT)))
 			{
 				ui->controllerWidgets[SELECTION_CH]->setValue (((int)pd->ch) & 0x0F);
 				ui->controllerWidgets[SELECTION_OCTAVE]->setValue(pd->pitchOctave);

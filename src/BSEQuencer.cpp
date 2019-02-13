@@ -486,6 +486,7 @@ void BSEQuencer::run (uint32_t n_samples)
 
 	if ((!inputPort) || (!outputPort)) return;
 
+
 	// Init notify port
 	uint32_t space = outputPort->atom.size;
 	lv2_atom_forge_set_buffer(&output_forge, (uint8_t*) outputPort, space);

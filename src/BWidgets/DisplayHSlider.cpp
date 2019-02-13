@@ -64,7 +64,7 @@ DisplayHSlider& DisplayHSlider::operator= (const DisplayHSlider& that)
 
 void DisplayHSlider::setValue (const double val)
 {
-	RangeWidget::setValue (val);
+	HScale::setValue (val);
 	valueDisplay.setText(BValues::toBString (valFormat, value));
 }
 

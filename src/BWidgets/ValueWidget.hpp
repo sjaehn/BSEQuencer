@@ -19,6 +19,7 @@
 #define BWIDGETS_VALUEWIDGET_HPP_
 
 #include "Widget.hpp"
+#include "Window.hpp"
 
 #define BWIDGETS_DEFAULT_VALUE 0.0
 #define BWIDGETS_DEFAULT_VALUE_FORMAT "%3.2f"
@@ -67,9 +68,25 @@ public:
 	 */
 	virtual double getValue () const;
 
+	/**
+	 * Defines whether the widget may allow direct setting of a value by
+	 * clicking or it only allows relative changes by dragging.
+	 * @param status TRUE if direct setting is allowed, otherwise false
+	 */
+	void setHardChangeable (const bool status);
+
+	/**
+	 * Gets whether the widget may allow direct setting of a value by
+	 * clicking or it only allows relative changes by dragging.
+	 * @return TRUE if direct setting is allowed, otherwise false
+	 */
+	bool isHardChangeable () const;
+
 protected:
 	void postValueChanged ();
 	double value;
+	bool hardChangeable;
+	double softValue;
 };
 
 }

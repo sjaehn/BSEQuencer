@@ -1,5 +1,5 @@
 /* Widget.hpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,9 +32,6 @@
 #define BWIDGETS_DEFAULT_SHADOWED -0.333
 #define BWIDGETS_DEFAULT_DARKENED -0.5
 
-// Default BWidgets::Window settings (Note: use non-transparent backgrounds only)
-#define BWIDGETS_DEFAULT_WINDOW_BACKGROUND BStyles::blackFill
-
 // Default settings for all text containing widgets
 #define BWIDGETS_DEFAULT_TEXT_COLORS BColors::lights
 #define BWIDGETS_DEFAULT_TEXT_ALIGN BStyles::TEXT_ALIGN_LEFT
@@ -62,6 +59,7 @@
 #include <string>
 #include <iostream>
 #include <functional>
+#include <chrono>
 
 #include "BColors.hpp"
 #include "BStyles.hpp"
@@ -80,6 +78,7 @@ namespace BWidgets
  * also be containers for other widgets (= have children).
  */
 class Window; // Forward declaration
+class FocusWidget; // Forward declaration
 
 class Widget
 {
@@ -216,6 +215,16 @@ public:
 	double getHeight () const;
 
 	/**
+	 * Resizes the widget, redraw and emits a BEvents::ExposeEvent if the
+	 * widget is visible. If no parameters are given, the widget will be
+	 * resized to the size of the containing child widgets.
+	 * @param width		New widgets width
+	 * @param height	New widgets height
+	 */
+	void resize ();
+	void resize (const double width, const double height);
+
+	/**
 	 * Gets the x offset of the widget content. This is distance between the
 	 * outer border and the widget content. It is also the sum of margin,
 	 * border, and padding.
@@ -310,6 +319,19 @@ public:
 	std::vector<Widget*> getChildren () const;
 
 	/**
+	 * Links a widget that will pop up following a BEvents::FOCUS_EVENT.
+	 * @param widget	Pointer to a widget or nullptr
+	 */
+	void setFocusWidget (FocusWidget* widget);
+
+	/**
+	 * Fets the link to the widget that will pop up following a
+	 * BEvents::FOCUS_EVENT.
+	 * @param return	Pointer to a widget or nullptr
+	 */
+	FocusWidget* getFocusWidget ();
+
+	/**
 	 * Renames the widget.
 	 * @param name New name
 	 */
@@ -345,18 +367,50 @@ public:
 
 	/**
 	 * Defines whether the widget may emit
-	 * BEvents::POINER_MOTION_WHILE_BUTTON_PRESSED_EVENT's following a host
-	 * button event.
-	 * @param status TRUE if widget is clickable, otherwise false
+	 * BEvents::POINER_DRAG_EVENT's following a host pointer event.
+	 * By default, "draggable" widgets can be dragged over the window as
+	 * result of calling the default dragAndDropCallback method from the
+	 * onPointerDragged method. This behavior can be changed by overriding the
+	 * onPointerDragged method or by setting a callback function different from
+	 * dragAndDropCallback.
+	 * @param status TRUE if widget is draggable, otherwise false
 	 */
-	void setDragable (const bool status);
+	void setDraggable (const bool status);
 
 	/**
-	 * Gets whether the widget may emit BEvents::BUTTON_PRESS_EVENT's or
-	 * BEvents::BUTTON_RELEASE_Event's following a host button event.
-	 * @return TRUE if widget is clickable, otherwise false
+	 * Gets whether the widget may emit BEvents::POINTER_DRAG_EVENT's following
+	 * a host pointer event.
+	 * @return TRUE if widget is draggable, otherwise false
 	 */
-	bool isDragable () const;
+	bool isDraggable () const;
+
+	/**
+	 * Defines whether the widget may emit
+	 * BEvents::WHEEL_SCROLL_EVENT's following a host (mouse) wheel event.
+	 * @param status TRUE if widget is scrollable, otherwise false
+	 */
+	void setScrollable (const bool status);
+
+	/**
+	 * Gets whether the widget may emit BEvents::WHEEL_SCROLL_EVENT's following
+	 * a host (mouse) wheel event.
+	 * @return TRUE if widget is scrollable, otherwise false
+	 */
+	bool isScrollable () const;
+
+	/**
+	 * Defines whether the widget may emit BEvents::FOCUS_EVENT's if the
+	 * pointer rests for a predefined time over the widget.
+	 * @param status TRUE if widget is focusable, otherwise false
+	 */
+	void setFocusable (const bool status);
+
+	/**
+	 * Gets whether the widget may emit BEvents::FOCUS_EVENT's if the
+	 * pointer rests for a predefined time over the widget.
+	 * @return TRUE if widget is focusable, otherwise false
+	 */
+	bool isFocusable () const;
 
 	/**
 	 * Calls a redraw of the widget and calls postRedisplay () if the the
@@ -396,6 +450,10 @@ public:
 	 */
 	static void dragAndDropCallback (BEvents::Event* event);
 
+	static void focusInCallback (BEvents::Event* event);
+
+	static void focusOutCallback (BEvents::Event* event);
+
 	/**
 	 * Predefined empty method to handle a BEvents::EventType::CONFIGURE_EVENT.
 	 * BEvents::EventType::CONFIGURE_EVENTs will only be handled by
@@ -433,6 +491,14 @@ public:
 
 	/**
 	 * Predefined empty method to handle a
+	 * BEvents::EventType::BUTTON_CLICK_EVENT. This event is emitted i a button
+	 * is pressed and released over the same widget.
+	 * @param event Pointer event
+	 */
+	virtual void onButtonClicked (BEvents::PointerEvent* event);
+
+	/**
+	 * Predefined empty method to handle a
 	 * BEvents::EventType::POINTER_MOTION_EVENT.
 	 * @param event Pointer event
 	 */
@@ -440,11 +506,17 @@ public:
 
 	/**
 	 * Predefined empty method to handle a
-	 * BEvents::EventType::POINTER_MOTION_WHILE_BUTTON_PRESSED_EVENT.
-	 * By default linked to dragAndDropCallback.
+	 * BEvents::EventType::POINTER_DRAG_EVENT.
 	 * @param event Pointer event
 	 */
-	virtual void onPointerMotionWhileButtonPressed (BEvents::PointerEvent* event);
+	virtual void onPointerDragged (BEvents::PointerEvent* event);
+
+	/**
+	 * Predefined empty method to handle a
+	 * BEvents::EventType::WHEEL_SCROLL_EVENT.
+	 * @param event Value changed event
+	 */
+	virtual void onWheelScrolled (BEvents::WheelEvent* event);
 
 	/**
 	 * Predefined empty method to handle a
@@ -452,6 +524,20 @@ public:
 	 * @param event Value changed event
 	 */
 	virtual void onValueChanged (BEvents::ValueChangedEvent* event);
+
+	/**
+	 * Predefined empty method to handle a
+	 * BEvents::EventType::FOCUS_IN_EVENT.
+	 * @param event Focus event
+	 */
+	virtual void onFocusIn (BEvents::FocusEvent* event);
+
+	/**
+	 * Predefined empty method to handle a
+	 * BEvents::EventType::FOCUS_OUT_EVENT.
+	 * @param event Focus event
+	 */
+	virtual void onFocusOut (BEvents::FocusEvent* event);
 
 	/**
 	 * Scans theme for widget properties and applies these properties.
@@ -484,7 +570,8 @@ protected:
 	std::vector <Widget*> getChildrenAsQueue (std::vector <Widget*> queue = {}) const;
 
 	bool isPointInWidget (const double x, const double y) const;
-	Widget* getWidgetAt (const double x, const double y, const bool checkVisibility, const bool checkClickability, const bool checkDragability);
+	Widget* getWidgetAt (const double x, const double y, const bool checkVisibility, const bool checkClickability,
+						 const bool checkDraggability, const bool checkScrollability, const bool checkFocusability);
 
 	void postRedisplay (const double x, const double y, const double width, const double height);
 	void redisplay (cairo_surface_t* surface, double x, double y, double width, double height);
@@ -497,7 +584,9 @@ protected:
 	double x_, y_, width_, height_;
 	bool visible;
 	bool clickable;
-	bool dragable;
+	bool draggable;
+	bool scrollable;
+	bool focusable;
 	Window* main_;
 	Widget* parent_;
 	std::vector <Widget*> children_;
@@ -507,120 +596,9 @@ protected:
 	std::array<std::function<void (BEvents::Event*)>, BEvents::EventType::NO_EVENT> cbfunction;
 	cairo_surface_t* widgetSurface;
 	BColors::State widgetState;
+	FocusWidget* focusWidget;
+
 };
-
-/**
- * Class BWidgets::Window
- *
- * Main window class of BWidgets. Add all other widgets (directly or
- * indirectly) to this window.
- * A BWidgets::Window is the BWidgets::Widget that is controlled by the host
- * via Pugl, receives host events via Pugl and coordinates handling of all
- * events. Configure, expose, and close events will be handled directly and
- * exclusively by this widget.
- */
-class Window : public Widget
-{
-public:
-	Window ();
-	Window (const double width, const double height, const std::string& title, PuglNativeWindow nativeWindow, bool resizable = false);
-
-	Window (const Window& that) = delete;	// Only one window in this version
-
-	~Window ();
-
-	Window& operator= (const Window& that) = delete;	// Only one Window in this version
-
-	/**
-	 * Gets in contact to the host system via Pugl
-	 * @return Pointer to the PuglView
-	 */
-	PuglView* getPuglView ();
-
-	/**
-	 * Gets the Cairo context provided by the host system via Pugl
-	 * @return Pointer to the Cairo context
-	 */
-	cairo_t* getPuglContext ();
-
-	/**
-	 * Runs the window until the close flag is set and thus it will be closed.
-	 * For stand-alone applications.
-	 */
-	void run ();
-
-	/**
-	 * Queues an event until the next call of the handleEvents method.
-	 * @param event Event
-	 */
-	void addEventToQueue (BEvents::Event* event);
-
-	/**
-	 * Main Event handler. Walks through the event queue and sorts the events
-	 * to their respective onXXX handling methods
-	 */
-	void handleEvents ();
-
-	/**
-	 * Executes an reexposure of the area given by the expose event.
-	 * @param event Expose event containing the widget that emitted the event
-	 * 				and the area that should be reexposed.
-	 */
-	virtual void onExpose (BEvents::ExposeEvent* event) override;
-
-	/**
-	 * Predefined empty method to handle a BEvents::EventType::CONFIGURE_EVENT.
-	 * BEvents::EventType::CONFIGURE_EVENTs will only be handled by
-	 * BWidget::Window.
-	 */
-	virtual void onConfigure (BEvents::ExposeEvent* event) override;
-
-	/**
-	 * Sets the close flag and thus ends the run method.
-	 */
-	virtual void onClose () override;
-
-	/*
-	 * Links or unlinks a mouse button to a widget.
-	 * @param device Button
-	 * @param widget Pointer to the widget to be linked or nullptr to unlink
-	 */
-	void setInput (const BEvents::InputDevice device, Widget* widget);
-
-	/*
-	 * Gets the links from mouse button to a widget.
-	 * @param device Button
-	 * @return Pointer to the linked widget or nullptr
-	 */
-	Widget* getInput (BEvents::InputDevice device) const;
-
-protected:
-
-	/**
-	 * Communication interface to the host via Pugl. Translates PuglEvents to
-	 * BEvents::Event derived objects.
-	 */
-	static void translatePuglEvent (PuglView* view, const PuglEvent* event);
-
-	void purgeEventQueue ();
-
-	std::string title_;
-	PuglView* view_;
-	PuglNativeWindow nativeWindow_;
-	bool quit_;
-
-	double pointerX;
-	double pointerY;
-
-	/**
-	 * Stores either nullptr or (a pointer to) the widget that emitted the
-	 * BEvents::BUTTON_PRESS_EVENT until a BEvents::BUTTON_RELEASE_EVENT or
-	 * the linked widget is released or destroyed.
-	 */
-	std::array<Widget*, BEvents::InputDevice::NR_OF_BUTTONS> input;
-	std::vector<BEvents::Event*> eventQueue;
-};
-
 }
 
 

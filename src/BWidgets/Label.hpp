@@ -94,6 +94,13 @@ public:
 	BStyles::Font* getFont ();
 
 	/**
+	 * Gets the effective width of a text with the given font
+	 * @param text		Text string
+	 * @param return	Effective width of the text
+	 */
+	double getTextWidth (std::string& text);
+
+	/**
 	 * Scans theme for widget properties and applies these properties.
 	 * @param theme Theme to be scanned.
 	 * 				Styles used are:

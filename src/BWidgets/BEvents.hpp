@@ -45,9 +45,13 @@ typedef enum {
 	CLOSE_EVENT,
 	BUTTON_PRESS_EVENT,
 	BUTTON_RELEASE_EVENT,
+	BUTTON_CLICK_EVENT,
 	POINTER_MOTION_EVENT,
-	POINTER_MOTION_WHILE_BUTTON_PRESSED_EVENT,
+	POINTER_DRAG_EVENT,
+	WHEEL_SCROLL_EVENT,
 	VALUE_CHANGED_EVENT,
+	FOCUS_IN_EVENT,
+	FOCUS_OUT_EVENT,
 	NO_EVENT
 } EventType;
 
@@ -173,8 +177,8 @@ class PointerEvent : public Event
 {
 public:
 	PointerEvent ();
-	PointerEvent (void* widget, const EventType type, const double x, const double y, const double deltaX, const double deltaY,
-				  const InputDevice button);
+	PointerEvent (void* widget, const EventType type, const double x, const double y, const double xOrigin, const double yOrigin,
+				  const double deltaX, const double deltaY, const InputDevice button);
 
 	/**
 	 * Redefines the x coordinate of the pointer event
@@ -200,8 +204,58 @@ public:
 	 */
 	double getY () const;
 
+	/**
+	 * Redefines the x coordinate of the position where the button was
+	 * initially pressed
+	 * @param xOrigin X coordinate relative to the widgets origin
+	 */
+	void setXOrigin (const double xOrigin);
+
+	/**
+	 * Gets the x coordinate of the pointer position where the respective
+	 * button was initially pressed. The returned value is the same as getX ()
+	 * for BUTTON_PRESS_EVENTs, 0.0 for POINTER_MOTION_EVENTs.
+	 * @return X coordinate relative to the widgets origin
+	 */
+	double getXOrigin () const;
+
+	/**
+	 * Redefines the y coordinate of the position where the button was
+	 * initially pressed
+	 * @param yOrigin Y coordinate relative to the widgets origin
+	 */
+	void setYOrigin (const double xOrigin);
+
+	/**
+	 * Gets the y coordinate of the pointer position where the respective
+	 * button was initially pressed. The returned value is the same as getY ()
+	 * for BUTTON_PRESS_EVENTs, 0.0 for POINTER_MOTION_EVENTs.
+	 * @return Y coordinate relative to the widgets origin
+	 */
+	double getYOrigin () const;
+
+	/**
+	 * Redefines the pointers x movement
+	 * @param deltaX Movement of the pointer on x axis
+	 */
+	void setDeltaX (const double deltaX);
+
+	/**
+	 * Gets the x movement (relative to the last PointerEvent)
+	 * @return Change in x coordinate
+	 */
 	double getDeltaX () const;
 
+	/**
+	 * Redefines the pointers y movement
+	 * @param deltaY Movement of the pointer on y axis
+	 */
+	void setDeltaY (const double deltaY);
+
+	/**
+	 * Gets the y movement (relative to the last PointerEvent)
+	 * @return Change in y coordinate
+	 */
 	double getDeltaY () const;
 
 	/**
@@ -219,12 +273,88 @@ public:
 protected:
 	double xpos;
 	double ypos;
+	double xOrigin;
+	double yOrigin;
 	double deltaX;
 	double deltaY;
 	InputDevice buttonNr;
 };
 /*
  * End of class BEvents::PointerEvent
+ *****************************************************************************/
+
+/**
+ * Class BEvents::WheelEvent
+ *
+ * Wheel events are emitted by the system (via pugl and the main window) if
+ * a (mouse) wheel is turned.
+ * The wheel event contains data about the relative change of the wheel and
+ * about the pointer position (relative to the respective widget.
+ * Wheel events will be handled by the respective widget and can be
+ * redirected to external callback functions.
+ */
+class WheelEvent : public Event
+{
+public:
+	WheelEvent ();
+	WheelEvent (void* widget, const EventType type, const double x, const double y, const double deltaX, const double deltaY);
+
+	/**
+	 * Redefines the pointers x coordinate
+	 * @param x X coordinate relative to the widgets origin
+	 */
+	void setX (const double x);
+
+	/**
+	 * Gets the pointers x coordinate of the wheel event
+	 * @return X coordinate relative to the widgets origin
+	 */
+	double getX () const;
+
+	/**
+	 * Redefines the pointers y coordinate
+	 * @param y y coordinate relative to the widgets origin
+	 */
+	void setY (const double y);
+
+	/**
+	 * Gets the pointers y coordinate
+	 * @return Y coordinate relative to the widgets origin
+	 */
+	double getY () const;
+
+	/**
+	 * Redefines the wheels x movement
+	 * @param deltaX Movement of the wheel on x axis
+	 */
+	void setDeltaX (const double deltaX);
+
+	/**
+	 * Gets the x movement of the wheel
+	 * @return Change in x coordinate
+	 */
+	double getDeltaX () const;
+
+	/**
+	 * Redefines the wheels y movement
+	 * @param deltaY Movement of the wheel on y axis
+	 */
+	void setDeltaY (const double deltaY);
+
+	/**
+	 * Gets the y movement of the wheel
+	 * @return Change in y coordinate
+	 */
+	double getDeltaY () const;
+
+protected:
+	double xpos;
+	double ypos;
+	double deltaX;
+	double deltaY;
+};
+/*
+ * End of class BEvents::WheelEvent
  *****************************************************************************/
 
 
@@ -259,6 +389,50 @@ public:
 
 protected:
 	double value;
+};
+/*
+ * End of class BEvents::ValueChangedEvent
+ *****************************************************************************/
+
+/**
+ * Class BEvents::FocusEvent
+ *
+ * Focus events are emitted by widgets if the pointer rests for a predefined
+ * time over the widget
+ */
+class FocusEvent : public Event
+{
+public:
+	FocusEvent ();
+	FocusEvent (void* widget, const EventType type, const double x, const double y);
+
+	/**
+	 * Redefines the pointers x coordinate
+	 * @param x X coordinate relative to the widgets origin
+	 */
+	void setX (const double x);
+
+	/**
+	 * Gets the pointers x coordinate of the wheel event
+	 * @return X coordinate relative to the widgets origin
+	 */
+	double getX () const;
+
+	/**
+	 * Redefines the pointers y coordinate
+	 * @param y y coordinate relative to the widgets origin
+	 */
+	void setY (const double y);
+
+	/**
+	 * Gets the pointers y coordinate
+	 * @return Y coordinate relative to the widgets origin
+	 */
+	double getY () const;
+
+protected:
+	double xpos;
+	double ypos;
 };
 /*
  * End of class BEvents::ValueChangedEvent

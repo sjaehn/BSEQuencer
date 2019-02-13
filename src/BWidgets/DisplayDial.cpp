@@ -58,7 +58,7 @@ DisplayDial& DisplayDial::operator= (const DisplayDial& that)
 
 void DisplayDial::setValue (const double val)
 {
-	RangeWidget::setValue (val);
+	Dial::setValue (val);
 	valueDisplay.setText(BValues::toBString (valFormat, value));
 }
 
