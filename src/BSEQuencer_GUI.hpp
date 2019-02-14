@@ -22,6 +22,7 @@
 #include "BWidgets/DisplayDial.hpp"
 #include "BWidgets/HSwitch.hpp"
 #include "BWidgets/TextToggleButton.hpp"
+#include "BWidgets/Text.hpp"
 #include "BWidgets/PopupListBox.hpp"
 
 
@@ -57,6 +58,7 @@ private:
 	static void helpPressedCallback (BEvents::Event* event);
 	static void padsPressedCallback (BEvents::Event* event);
 	static void padsScrolledCallback (BEvents::Event* event);
+	static void padsFocusedCallback (BEvents::Event* event);
 	void drawCaption ();
 	void drawPad ();
 	void drawPad (int row, int step);
@@ -97,6 +99,7 @@ private:
 	//Widgets
 	BWidgets::Widget mContainer;
 	BWidgets::DrawingSurface padSurface;
+	BWidgets::Text padSurfaceFocusText;
 	BWidgets::DrawingSurface captionSurface;
 
 	BWidgets::Widget modeBox;
@@ -180,6 +183,7 @@ private:
 		  {{0.0, 0.03, 0.06, 1.0}, "●●"}, {{0.0, 0.03, 0.06, 1.0}, "●"}, {{0.0, 0.03, 0.06, 1.0}, "▶▶●"},  {{0.0, 0.03, 0.06, 1.0}, "●◀◀"},
 		  {{0.0, 0.03, 0.06, 1.0}, "✖"}, {{0.0, 0.03, 0.06, 1.0}, "◼"}}};
 	BStyles::Border border = {{ink, 1.0}, 0.0, 2.0, 0.0};
+	BStyles::Border txtboxborder = {BStyles::noLine, 4.0, 0.0, 0.0};
 	BStyles::Fill widgetBg = BStyles::noFill;
 	BStyles::Fill screenBg = BStyles::Fill (BColors::Color (0.0, 0.0, 0.0, 0.8));
 	BStyles::Fill boxBg = BStyles::Fill (BColors::Color (0.0, 0.0, 0.0, 0.9));
@@ -243,6 +247,10 @@ private:
 							 {"font", STYLEPTR (&ctLabelFont)}}},
 		{"ctlabel",	 		{{"uses", STYLEPTR (&labelStyles)}}},
 		{"lflabel",	 		{{"uses", STYLEPTR (&labelStyles)},
+							 {"font", STYLEPTR (&lfLabelFont)}}},
+		{"txtbox",	 		{{"background", STYLEPTR (&BStyles::noFill)},
+							 {"border", STYLEPTR (&txtboxborder)},
+							 //{"textcolors", STYLEPTR (&txColors)},
 							 {"font", STYLEPTR (&lfLabelFont)}}},
 		{"ilabel",	 		{{"uses", STYLEPTR (&labelStyles)},
 							 {"font", STYLEPTR (&iLabelFont)}}}

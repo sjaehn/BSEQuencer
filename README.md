@@ -51,7 +51,7 @@ see https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer
 
 TODO
 ----
-* Mouse over widgets (showing values of matrix fields, dials, or sliders; direct keybord keyboard entry of values)
+* Direct keybord keyboard entry of values
 * Enable GUI resize
 * Extend MIDI support
 * Sort MIDI output messages (bugfix)

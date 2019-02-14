@@ -510,7 +510,7 @@ void Widget::focusInCallback (BEvents::Event* event)
 			if (focusWidget->getParent()) focusWidget->getParent()->release (focusWidget);
 
 			main->add (*focusWidget);
-			focusWidget->moveTo (focusEvent->getX() + 2, focusEvent->getY() - focusWidget->getHeight() - 2);
+			focusWidget->moveTo (w->getOriginX () + focusEvent->getX() + 2, w->getOriginY () + focusEvent->getY() - focusWidget->getHeight() - 2);
 			focusWidget->show ();
 		}
 	}

@@ -27,6 +27,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		map (NULL),
 		mContainer (0, 0, 1200, 820, "main"),
 		padSurface (98, 88, 804, 484, "box"),
+		padSurfaceFocusText (0, 0, 100, 60, "txtbox", ""),
 		captionSurface (18, 88, 64, 484, "box"),
 
 		modeBox (920, 88, 260, 205, "box"),
@@ -139,13 +140,25 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 
 	// Set callback functions
 	for (int i = 0; i < KNOBS_SIZE; ++i) controllerWidgets[i]->setCallbackFunction (BEvents::VALUE_CHANGED_EVENT, valueChangedCallback);
+
 	padSurface.setDraggable (true);
-	padSurface.setScrollable (true);
-	//padSurface.setFocusable (true);
 	padSurface.setCallbackFunction (BEvents::BUTTON_PRESS_EVENT, padsPressedCallback);
 	padSurface.setCallbackFunction (BEvents::BUTTON_RELEASE_EVENT, padsPressedCallback);
 	padSurface.setCallbackFunction (BEvents::POINTER_DRAG_EVENT, padsPressedCallback);
+
+	padSurface.setScrollable (true);
 	padSurface.setCallbackFunction (BEvents::WHEEL_SCROLL_EVENT, padsScrolledCallback);
+
+	padSurface.setFocusable (true);
+	BWidgets::FocusWidget* focus = new BWidgets::FocusWidget (this, "screen");
+	if (!focus) throw std::bad_alloc ();
+	padSurface.setFocusWidget (focus);
+	focus->add (padSurfaceFocusText);
+	focus->resize ();
+	focus->applyTheme (theme);
+	padSurface.setCallbackFunction (BEvents::FOCUS_IN_EVENT, padsFocusedCallback);
+	padSurface.setCallbackFunction (BEvents::FOCUS_OUT_EVENT, padsFocusedCallback);
+
 	helpLabel.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, helpPressedCallback);
 
 
@@ -153,6 +166,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	widgetBg = BStyles::Fill (pluginPath + BG_FILE);
 	mContainer.applyTheme (theme);
 	padSurface.applyTheme (theme);
+	padSurfaceFocusText.applyTheme (theme);
 	captionSurface.applyTheme (theme);
 
 	modeBox.applyTheme (theme);
@@ -316,6 +330,8 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 
 BSEQuencer_GUI::~BSEQuencer_GUI ()
 {
+	BWidgets::FocusWidget* focus = padSurface.getFocusWidget();
+	if (focus) delete focus;
 	send_ui_off ();
 }
 
@@ -654,6 +670,35 @@ void BSEQuencer_GUI::padsScrolledCallback (BEvents::Event* event)
 			}
 		}
 	}
+}
+
+void BSEQuencer_GUI::padsFocusedCallback (BEvents::Event* event)
+{
+	if ((event) && (event->getWidget ()) && (((BWidgets::Widget*)(event->getWidget()))->getMainWindow()))
+	{
+		BWidgets::DrawingSurface* widget = (BWidgets::DrawingSurface*) event->getWidget ();
+		BSEQuencer_GUI* ui = (BSEQuencer_GUI*) widget->getMainWindow();
+		BEvents::FocusEvent* focusEvent = (BEvents::FocusEvent*) event;
+
+		// Get size of drawing area
+		const double width = ui->padSurface.getEffectiveWidth ();
+		const double height = ui->padSurface.getEffectiveHeight ();
+
+		int row = (ROWS - 1) - ((int) ((focusEvent->getY () - widget->getYOffset()) / (height / ROWS)));
+		int step = (focusEvent->getX () - widget->getXOffset()) / (width / ui->controllerWidgets[NR_OF_STEPS]->getValue ());
+
+		if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < ((int)ui->controllerWidgets[NR_OF_STEPS]->getValue ())))
+		{
+			Pad* pd = &ui->pads[row][step];
+			ui->padSurfaceFocusText.setText("Channel: " + std::to_string ((int)pd->ch) + "\n" +
+											"Octave: " + std::to_string ((int)pd->pitchOctave) + "\n" +
+											"Velocity: " + BValues::toBString ("%1.2f", pd->velocity) + "\n" +
+											"Duration: " + BValues::toBString ("%1.2f", pd->duration));
+		}
+	}
+
+	if (event->getEventType () == BEvents::FOCUS_IN_EVENT) focusInCallback (event);
+	else if (event->getEventType () == BEvents::FOCUS_OUT_EVENT) focusOutCallback (event);
 }
 
 void BSEQuencer_GUI::drawCaption ()

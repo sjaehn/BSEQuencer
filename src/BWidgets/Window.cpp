@@ -240,7 +240,10 @@ void Window::translatePuglEvent (PuglView* view, const PuglEvent* event)
 	// All PUGL events cause FOCUS_OUT
 	if (w->pointer.widget && w->pointer.widget->getFocusWidget() && w->pointer.widget->getFocusWidget()->isFocused())
 	{
-		w->addEventToQueue(new BEvents::FocusEvent ((void*)w->pointer.widget, BEvents::FOCUS_OUT_EVENT, w->pointer.x, w->pointer.y));
+		w->addEventToQueue(new BEvents::FocusEvent ((void*)w->pointer.widget,
+													BEvents::FOCUS_OUT_EVENT,
+													w->pointer.x - w->pointer.widget->getOriginX (),
+													w->pointer.y - w->pointer.widget->getOriginY ()));
 		w->pointer.widget->getFocusWidget()->setFocused(false);
 	}
 
@@ -410,7 +413,10 @@ void Window::translateTimeEvent ()
 		{
 			if (focusWidget->isFocused())
 			{
-				addEventToQueue(new BEvents::FocusEvent (pointer.widget, BEvents::FOCUS_OUT_EVENT, pointer.x, pointer.y));
+				addEventToQueue(new BEvents::FocusEvent (pointer.widget,
+														 BEvents::FOCUS_OUT_EVENT,
+														 pointer.x - pointer.widget->getOriginX (),
+														 pointer.y - pointer.widget->getOriginY ()));
 				focusWidget->setFocused(false);
 			}
 		}
@@ -418,7 +424,10 @@ void Window::translateTimeEvent ()
 		{
 			if (!focusWidget->isFocused())
 			{
-				addEventToQueue(new BEvents::FocusEvent (pointer.widget, BEvents::FOCUS_IN_EVENT, pointer.x, pointer.y));
+				addEventToQueue(new BEvents::FocusEvent (pointer.widget,
+														 BEvents::FOCUS_IN_EVENT,
+														 pointer.x - pointer.widget->getOriginX (),
+														 pointer.y - pointer.widget->getOriginY ()));
 				focusWidget->setFocused(true);
 			}
 		}
