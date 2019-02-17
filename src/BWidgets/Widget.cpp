@@ -299,7 +299,7 @@ void Widget::setWidth (const double width)
 		width_ =  width;
 		cairo_surface_destroy (widgetSurface);	// destroy old surface first
 		widgetSurface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width_, height_);
-		draw (0, 0, width_, height_);
+		update ();
 		if (isVisible () && parent_) parent_->postRedisplay ();
 	}
 }
@@ -313,7 +313,7 @@ void Widget::setHeight (const double height)
 		height_ = height;
 		cairo_surface_destroy (widgetSurface);	// destroy old surface first
 		widgetSurface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width_, height_);
-		draw (0, 0, width_, height_);
+		update ();
 		if (isVisible () && parent_) parent_->postRedisplay ();
 	}
 }
@@ -339,7 +339,7 @@ void Widget::resize (const double width, const double height)
 		height_ = height;
 		cairo_surface_destroy (widgetSurface);	// destroy old surface first
 		widgetSurface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width_, height_);
-		draw (0, 0, width_, height_);
+		update ();
 		if (isVisible () && parent_) parent_->postRedisplay ();
 	}
 }

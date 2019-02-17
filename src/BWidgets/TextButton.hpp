@@ -70,6 +70,15 @@ public:
 	virtual void setHeight (const double height) override;
 
 	/**
+	 * Resizes the widget, redraw and emits a BEvents::ExposeEvent if the
+	 * widget is visible. If no parameters are given, the widget will be
+	 * resized to the size of the containing child widgets.
+	 * @param width		New widgets width
+	 * @param height	New widgets height
+	 */
+	virtual void resize (const double width, const double height) override;
+
+	/**
 	 * Changes the value of the widget (0.0 == off,  0.0 != off) and relocates
 	 * the embedded label widget..
 	 * Emits a value changed event and (if visible) an expose event.

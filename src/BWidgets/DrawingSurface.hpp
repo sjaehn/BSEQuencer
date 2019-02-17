@@ -75,6 +75,16 @@ public:
 	virtual void setHeight (const double height) override;
 
 	/**
+	 * Resizes the widget and the drawing surface,
+	 * redraw and emits a BEvents::ExposeEvent if the
+	 * widget is visible. If no parameters are given, the widget will be
+	 * resized to the size of the containing child widgets.
+	 * @param width		New widgets width
+	 * @param height	New widgets height
+	 */
+	virtual void resize (const double width, const double height) override;
+
+	/**
 	 * (Re-)Defines the border of the widget and resizes the drawing surface.
 	 *  Redraws widget and emits a BEvents::ExposeEvent if the widget is
 	 *  visible.

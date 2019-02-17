@@ -29,16 +29,26 @@ public:
 	PlayStopButton (const double x, const double y, const double width, const double height, const std::string name, const double defaultvalue) :
 		ValueWidget (x, y, width, height, name, defaultvalue),
 		drawingSurface (0, 0, width, height, "")
-{
-	drawSymbol (value);
-	drawingSurface.setClickable (false);
-	add (drawingSurface);
-}
+	{
+		drawSymbol (value);
+		drawingSurface.setClickable (false);
+		add (drawingSurface);
+	}
 
 	void setValue (const double val)
 	{
 		ValueWidget::setValue (val);
 		drawSymbol (value);
+	}
+
+	virtual void resize (const double width, const double height) override
+	{
+		if ((width != width_) || (height != height_))
+		{
+			Widget::resize (width, height);
+			drawingSurface.resize (width, height);
+			drawSymbol (value);
+		}
 	}
 
 	void onButtonPressed (BEvents::PointerEvent* event)

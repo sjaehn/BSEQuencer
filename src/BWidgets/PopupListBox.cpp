@@ -108,6 +108,21 @@ void PopupListBox::setValue (const double val)
 		setItemText (listBox.getItem (val).string);
 	}
 }
+
+void PopupListBox::moveListBox (const double xOffset, const double yOffset)
+{
+	listBoxXOffset = xOffset;
+	listBoxYOffset = yOffset;
+	if (listBox.isVisible()) update ();
+}
+
+void PopupListBox::resizeListBox (const double width, const double height)
+{
+	listBoxWidth = width;
+	listBoxHeight = height;
+	if (listBox.isVisible()) update ();
+}
+
 void PopupListBox::update ()
 {
 	// Update super widget first
@@ -132,8 +147,8 @@ void PopupListBox::update ()
 		main_->add (listBox);
 	}
 	if ((!main_) && (listBox.getMainWindow())) listBox.getMainWindow()->release (&listBox);
-	if ((listBoxXOffset == 0.0) && (listBoxYOffset == 0.0)) listBox.moveTo (getOriginX () + x0, getOriginY () + y0 + h);
-	else listBox.moveTo (getOriginX () + x0 + listBoxXOffset, getOriginY () + y0 + listBoxYOffset);
+	if ((listBoxXOffset == 0.0) && (listBoxYOffset == 0.0)) listBox.moveTo (getOriginX (), getOriginY () + getHeight ());
+	else listBox.moveTo (getOriginX () + listBoxXOffset, getOriginY () + listBoxYOffset);
 	listBox.setWidth (listBoxWidth);
 	listBox.setHeight (listBoxHeight);
 }

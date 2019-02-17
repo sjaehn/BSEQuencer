@@ -65,6 +65,12 @@ void TextButton::setHeight (const double height)
 	buttonLabel.setHeight (height);
 }
 
+void TextButton::resize (const double width, const double height)
+{
+	Button::resize (width, height);
+	buttonLabel.resize (width, height);
+}
+
 void TextButton::setValue (const double val)
 {
 	if (val) buttonLabel.moveTo (BWIDGETS_DEFAULT_BUTTON_DEPTH, BWIDGETS_DEFAULT_BUTTON_DEPTH);

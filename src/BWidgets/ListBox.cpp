@@ -101,19 +101,18 @@ void ListBox::updateLabels ()
 	double y0 = getYOffset ();
 	double width = getEffectiveWidth ();
 	double height = getEffectiveHeight ();
-	double labelHeight = (height >= 2 * BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT ? height - 2 * BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT : 0);
+	double listHeight = (height >= 2 * BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT ? height - 2 * BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT : 0);
 	double upButtonHeight = (height >= BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT ? BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT : height);
-	int lines = (labelHeight / BWIDGETS_DEFAULT_CHOICEBOX_LABEL_HEIGHT) + 1;
+	double lineHeight = (labels.empty () ? 20 : labels[0]->getFont()->getFontSize() * BWIDGETS_DEFAULT_CHOICEBOX_LINE_HEIGHT);
+	int lines = (listHeight > lineHeight ? listHeight / lineHeight : 1);
 
 	for (int i = 0; i < labels.size (); ++i)
 	{
 		if ((i + 1 >= listTop) && (i + 1 < listTop + lines))
 		{
-			labels[i]->moveTo (x0 + BWIDGETS_DEFAULT_CHOICEBOX_PADDING, y0 + upButtonHeight + (i + 1 - listTop) * BWIDGETS_DEFAULT_CHOICEBOX_LABEL_HEIGHT);
+			labels[i]->moveTo (x0 + BWIDGETS_DEFAULT_CHOICEBOX_PADDING, y0 + upButtonHeight + (i + 1 - listTop) * lineHeight);
 			labels[i]->setWidth (width > 2 * BWIDGETS_DEFAULT_CHOICEBOX_PADDING ? width - 2 * BWIDGETS_DEFAULT_CHOICEBOX_PADDING : 0);
-
-			if (i + 1 == (int) (getBottom () + 0.5)) labels[i]->setHeight (labelHeight - (lines - 1) * BWIDGETS_DEFAULT_CHOICEBOX_LABEL_HEIGHT);
-			else labels[i]->setHeight (BWIDGETS_DEFAULT_CHOICEBOX_LABEL_HEIGHT);
+			labels[i]->setHeight (lineHeight);
 
 			if (i + 1 == activeNr) labels[i]->setState (BColors::ACTIVE);
 			else labels[i]->setState (BColors::NORMAL);
@@ -131,8 +130,9 @@ void ListBox::updateLabels ()
 int ListBox::getLines ()
 {
 	double height = getEffectiveHeight ();
-	double labelHeight = (height >= 2 * BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT ? height - 2 * BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT : 0);
-	int lines = (labelHeight / BWIDGETS_DEFAULT_CHOICEBOX_LABEL_HEIGHT) + 1;
+	double listHeight = (height >= 2 * BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT ? height - 2 * BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT : 0);
+	double lineHeight = (labels.empty () ? 20 : labels[0]->getFont()->getFontSize() * BWIDGETS_DEFAULT_CHOICEBOX_LINE_HEIGHT);
+	int lines = (listHeight > lineHeight ? listHeight / lineHeight : 1);
 	return lines;
 }
 

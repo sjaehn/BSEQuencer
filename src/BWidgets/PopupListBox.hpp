@@ -108,6 +108,10 @@ public:
 	 */
 	virtual void setValue (const double val) override;
 
+	virtual void moveListBox (const double xOffset, const double yOffset);
+
+	virtual void resizeListBox (const double width, const double height);
+
 	/**
 	 * Calls a redraw of the widget and calls postRedisplay () if the the
 	 * Widget is visible.

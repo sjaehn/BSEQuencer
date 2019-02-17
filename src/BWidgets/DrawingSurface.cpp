@@ -81,6 +81,22 @@ void DrawingSurface::setHeight (const double height)
 	update ();
 }
 
+void DrawingSurface::resize (const double width, const double height)
+{
+	double oldEffectiveHeight = getEffectiveHeight ();
+	double oldEffectiveWidth = getEffectiveWidth ();
+	Widget::resize (width, height);
+
+	if ((oldEffectiveWidth != getEffectiveWidth ()) || (oldEffectiveHeight != getEffectiveHeight ()))
+	{
+		if (drawingSurface) cairo_surface_destroy (drawingSurface);
+		drawingSurface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, getEffectiveWidth (), getEffectiveHeight ());
+		//TODO copy surface data
+	}
+
+	update ();
+}
+
 void DrawingSurface::setBorder (const BStyles::Border& border)
 {
 	double oldTotalBorderWidth = getXOffset ();

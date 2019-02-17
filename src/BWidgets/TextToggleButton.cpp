@@ -65,6 +65,12 @@ void TextToggleButton::setHeight (const double height)
 	buttonLabel.setHeight (height);
 }
 
+void TextToggleButton::resize (const double width, const double height)
+{
+	Button::resize (width, height);
+	buttonLabel.resize (width, height);
+}
+
 void TextToggleButton::setValue (const double val)
 {
 	if (val) buttonLabel.moveTo (BWIDGETS_DEFAULT_BUTTON_DEPTH, BWIDGETS_DEFAULT_BUTTON_DEPTH);

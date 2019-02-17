@@ -221,8 +221,8 @@ public:
 	 * @param width		New widgets width
 	 * @param height	New widgets height
 	 */
-	void resize ();
-	void resize (const double width, const double height);
+	virtual void resize ();
+	virtual void resize (const double width, const double height);
 
 	/**
 	 * Gets the x offset of the widget content. This is distance between the

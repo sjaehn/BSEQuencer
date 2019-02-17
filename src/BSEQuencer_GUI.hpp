@@ -24,6 +24,7 @@
 #include "BWidgets/TextToggleButton.hpp"
 #include "BWidgets/Text.hpp"
 #include "BWidgets/PopupListBox.hpp"
+#include "screen.h"
 
 
 #include "BScale.hpp"
@@ -40,6 +41,8 @@
 #define BG_FILE "surface.png"
 #define HELP_URL "https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer"
 #define OPEN_CMD "xdg-open"
+
+#define RESIZE(widget, x, y, w, h, sz) widget.moveTo ((x) * (sz), (y) * (sz)); widget.resize ((w) * (sz), (h) * (sz));
 class BSEQuencer_GUI : public BWidgets::Window
 {
 public:
@@ -49,6 +52,8 @@ public:
 	void send_ui_on ();
 	void send_ui_off ();
 	void send_pad (int row, int step);
+	virtual void onConfigure (BEvents::ExposeEvent* event) override;
+	void applyTheme (BStyles::Theme& theme) override;
 
 	LV2UI_Controller controller;
 	LV2UI_Write_Function write_function;
@@ -59,12 +64,15 @@ private:
 	static void padsPressedCallback (BEvents::Event* event);
 	static void padsScrolledCallback (BEvents::Event* event);
 	static void padsFocusedCallback (BEvents::Event* event);
+	void scale ();
 	void drawCaption ();
 	void drawPad ();
 	void drawPad (int row, int step);
 	void drawPad (cairo_t* cr, int row, int step);
 
 	std::string pluginPath;
+	double sz;
+	cairo_surface_t* bgImageSurface;
 
 	BSEQuencerURIs uris;
 	LV2_URID_Map* map;
@@ -253,7 +261,23 @@ private:
 							 //{"textcolors", STYLEPTR (&txColors)},
 							 {"font", STYLEPTR (&lfLabelFont)}}},
 		{"ilabel",	 		{{"uses", STYLEPTR (&labelStyles)},
-							 {"font", STYLEPTR (&iLabelFont)}}}
+							 {"font", STYLEPTR (&iLabelFont)}}},
+		{"menu",	 		{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
+							 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
+		{"menu/item",	 	{{"uses", STYLEPTR (&defaultStyles)},
+							 {"textcolors", STYLEPTR (&BColors::whites)},
+							 {"font", STYLEPTR (&lfLabelFont)}}},
+		{"menu/button",	 	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
+							 {"background", STYLEPTR (&BStyles::grey20Fill)},
+							 {"bgcolors", STYLEPTR (&BColors::darks)}}},
+		{"menu/listbox",	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
+							 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
+		{"menu/listbox/item",	{{"uses", STYLEPTR (&defaultStyles)},
+							 {"textcolors", STYLEPTR (&BColors::whites)},
+							 {"font", STYLEPTR (&lfLabelFont)}}},
+		{"menu/listbox//button",	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
+							 {"background", STYLEPTR (&BStyles::grey20Fill)},
+							 {"bgcolors", STYLEPTR (&BColors::darks)}}}
 	});
 
 };
