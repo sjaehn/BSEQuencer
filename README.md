@@ -51,8 +51,8 @@ see https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer
 
 TODO
 ----
-* Direct keybord keyboard entry of values
-* Enable GUI resize
+* Direct value input via keyboard
+* User defined scales
 * Extend MIDI support
 * Sort MIDI output messages (bugfix)
 * Display ♭ notes for ♭ signature scales (bugfix C♭)

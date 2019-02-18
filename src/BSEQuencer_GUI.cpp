@@ -814,7 +814,7 @@ void BSEQuencer_GUI::padsFocusedCallback (BEvents::Event* event)
 		if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < ((int)ui->controllerWidgets[NR_OF_STEPS]->getValue ())))
 		{
 			Pad* pd = &ui->pads[row][step];
-			ui->padSurfaceFocusText.setText("Channel: " + std::to_string ((int)pd->ch) + "\n" +
+			ui->padSurfaceFocusText.setText("Channel: " + std::to_string (((int)pd->ch) & 0x0f) + "\n" +
 											"Octave: " + std::to_string ((int)pd->pitchOctave) + "\n" +
 											"Velocity: " + BValues::toBString ("%1.2f", pd->velocity) + "\n" +
 											"Duration: " + BValues::toBString ("%1.2f", pd->duration));
