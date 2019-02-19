@@ -110,8 +110,6 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		chBoxes[i].noteOffsetDial.rename ("ch" + std::to_string (i + 1));
 		chBoxes[i].noteOffsetLabel = BWidgets::Label (113.5, 180, 60, 20, "ctlabel", "Offset");
 		chBoxes[i].noteOffsetLabel.rename ("ctlabel");
-
-		drawButton (chBoxes[i].chSymbol.getDrawingSurface(), 0, 0, 20, 20, chButtonStyles[i + 1]);
 	}
 
 
@@ -178,7 +176,10 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	modeBoxLabel.setState (BColors::ACTIVE);
 	toolBoxLabel.setState (BColors::ACTIVE);
 	propertiesBoxLabel.setState (BColors::ACTIVE);
-	for (int i = 0; i < NR_SEQUENCER_CHS; ++i) chBoxes[i].chLabel.setState (BColors::ACTIVE);
+	for (int i = 0; i < NR_SEQUENCER_CHS; ++i) {
+		chBoxes[i].chLabel.setState (BColors::ACTIVE);
+		drawButton (chBoxes[i].chSymbol.getDrawingSurface(), 0, 0, 20, 20, chButtonStyles[i + 1]);
+	}
 
 
 	// Pack widgets

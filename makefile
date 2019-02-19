@@ -10,11 +10,11 @@ all: $(BUNDLE)
 
 BSEQuencer.so: ./src/BSEQuencer.cpp
 	mkdir -p $(BUNDLE)
-	$(CC) $< -o $(BUNDLE)/$@ -std=c++11 -shared -fPIC -DPIC `pkg-config --cflags --libs lv2`
+	$(CC) $< -o $(BUNDLE)/$@ -std=c++11 -shared -fvisibility=hidden -fPIC -DPIC `pkg-config --cflags --libs lv2`
 	
 BSEQuencer_GUI.so: ./src/BSEQuencer_GUI.cpp	
 	mkdir -p $(BUNDLE)	
-	$(CC) $< $(TK) -o $(BUNDLE)/$@ -std=c++11 -shared -DPUGL_HAVE_CAIRO -fPIC -DPIC `pkg-config --cflags --libs lv2 x11 cairo`
+	$(CC) $< $(TK) -o $(BUNDLE)/$@ -std=c++11 -shared -fvisibility=hidden -DPUGL_HAVE_CAIRO -fPIC -DPIC `pkg-config --cflags --libs lv2 x11 cairo`
 
 install: $(BUNDLE)
 	mkdir -p $(INSTALL_DIR)
