@@ -126,6 +126,14 @@ public:
 	 */
 	virtual void onButtonPressed (BEvents::PointerEvent* event);
 
+	/**
+	 * Handles the BEvents::WHEEL_SCROLL_EVENT to scroll through the items
+	 * in the ItemBox. Changes the widgets value. Scrolling in the ListBox
+	 * is NOT handled by this method.
+	 * @param event Pointer to a wheel event emitted by the same widget.
+	 */
+	virtual void onWheelScrolled (BEvents::WheelEvent* event) override;
+
 protected:
 	static void handleValueChanged (BEvents::Event* event);
 	static void handleDownButtonClicked (BEvents::Event* event);

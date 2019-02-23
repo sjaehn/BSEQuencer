@@ -51,6 +51,8 @@ PopupListBox::PopupListBox (const double x, const double y, const double width, 
 		listBoxXOffset (listXOffset), listBoxYOffset (listYOffset), listBoxWidth (listWidth), listBoxHeight (listHeight)
 
 {
+	setScrollable (true);
+
 	itemLabel.setText (listBox.getItem (preselection).string);
 
 	downButton.setCallbackFunction (BEvents::EventType::BUTTON_PRESS_EVENT, PopupListBox::handleDownButtonClicked);
@@ -164,6 +166,11 @@ void PopupListBox::onButtonPressed (BEvents::PointerEvent* event)
 	}
 
 	//Widget::cbfunction[BEvents::EventType::BUTTON_PRESS_EVENT] (event);
+}
+
+void PopupListBox::onWheelScrolled (BEvents::WheelEvent* event)
+{
+	setValue (getValue() - event->getDeltaY ());
 }
 
 void PopupListBox::handleDownButtonClicked (BEvents::Event* event)

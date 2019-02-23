@@ -75,6 +75,11 @@ void ListBox::setTop (const int top)
 
 int ListBox::getTop () const {return listTop;}
 
+void ListBox::onWheelScrolled (BEvents::WheelEvent* event)
+{
+	setTop (getTop() - event->getDeltaY ());
+}
+
 void ListBox::handleButtonClicked (BEvents::Event* event)
 {
 	if (event && (event->getEventType () == BEvents::EventType::BUTTON_PRESS_EVENT) && event->getWidget ())

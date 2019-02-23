@@ -73,6 +73,13 @@ public:
 	 */
 	virtual int getTop () const override;
 
+	/**
+	 * Handles the BEvents::WHEEL_SCROLL_EVENT to scroll the displayed part of
+	 * the list (via setTop).
+	 * @param event Pointer to a wheel event emitted by the same widget.
+	 */
+	virtual void onWheelScrolled (BEvents::WheelEvent* event) override;
+
 protected:
 	static void handleButtonClicked (BEvents::Event* event);
 	virtual void updateLabels () override;

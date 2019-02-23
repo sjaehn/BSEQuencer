@@ -52,6 +52,8 @@
 #include "ItemBox.hpp"
 #include "ListBox.hpp"
 #include "PopupListBox.hpp"
+#include "PianoWidget.hpp"
+#include "HPianoRoll.hpp"
 
 #endif /*BWIDGETS_HPP_*/
 

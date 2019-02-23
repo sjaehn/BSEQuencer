@@ -180,6 +180,13 @@ public:
 	 */
 	virtual void update () override;
 
+	/**
+	 * Handles the BEvents::WHEEL_SCROLL_EVENT to scroll through the items.
+	 * Changes the widgets value.
+	 * @param event Pointer to a wheel event emitted by the same widget.
+	 */
+	virtual void onWheelScrolled (BEvents::WheelEvent* event) override;
+
 protected:
 	void deleteLabels ();
 	void validateLabels ();

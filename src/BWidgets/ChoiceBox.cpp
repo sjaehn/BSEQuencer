@@ -42,6 +42,8 @@ ChoiceBox::ChoiceBox (const double x, const double y, const double width, const 
 		activeNr (0)
 
 {
+	setScrollable (true);
+
 	for (int i = 0; i < items.size (); ++ i)
 	{
 		if (preselection == items[i].value)
@@ -151,7 +153,6 @@ void ChoiceBox::addItemText (const std::vector<std::string>& newItemTexts)
 	if (isVisible ()) update ();
 }
 
-
 BStyles::Font* ChoiceBox::getFont () {return &itemFont;}
 
 void ChoiceBox::applyTheme (BStyles::Theme& theme) {applyTheme (theme, name_);}
@@ -236,6 +237,11 @@ void ChoiceBox::update ()
 		downButton.setWidth (width);
 		downButton.setHeight (downButtonHeight);
 	}
+}
+
+void ChoiceBox::onWheelScrolled (BEvents::WheelEvent* event)
+{
+	setValue (getValue() - event->getDeltaY ());
 }
 
 void ChoiceBox::deleteLabels ()
