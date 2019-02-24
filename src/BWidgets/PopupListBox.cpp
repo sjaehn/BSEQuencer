@@ -170,7 +170,9 @@ void PopupListBox::onButtonPressed (BEvents::PointerEvent* event)
 
 void PopupListBox::onWheelScrolled (BEvents::WheelEvent* event)
 {
-	setValue (getValue() - event->getDeltaY ());
+	std::vector<BItems::Item>* itemList = listBox.getItemList ();
+	double newNr = LIMIT (listBox.getActive () - event->getDeltaY (), 1, itemList->size ());
+	setValue ((*itemList)[newNr - 1].value);
 }
 
 void PopupListBox::handleDownButtonClicked (BEvents::Event* event)

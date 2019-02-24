@@ -200,6 +200,8 @@ void ChoiceBox::setValue (const double val)
 
 int ChoiceBox::getTop () const {return activeNr;}
 
+int ChoiceBox::getActive () const {return activeNr;}
+
 int ChoiceBox::getBottom () {return (getTop () + getLines () - 1);}
 
 void ChoiceBox::update ()
@@ -241,7 +243,8 @@ void ChoiceBox::update ()
 
 void ChoiceBox::onWheelScrolled (BEvents::WheelEvent* event)
 {
-	setValue (getValue() - event->getDeltaY ());
+	double newNr = LIMIT (activeNr - event->getDeltaY (), 1, items.size ());
+	setValue (items[newNr - 1].value);
 }
 
 void ChoiceBox::deleteLabels ()

@@ -167,6 +167,12 @@ public:
 	virtual int getTop () const;
 
 	/**
+	 * Gets the number (NOT the value!) of the active line of the shown list.
+	 * @param return Active line of the list (starting with 1.0)
+	 */
+	virtual int getActive () const;
+
+	/**
 	 * Gets the bottom line of the shown list.
 	 * @param return Bottom line of the list (starting with 1.0)
 	 */
