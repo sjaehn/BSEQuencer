@@ -33,11 +33,18 @@ typedef struct
 	LV2_URID ui_on;
 	LV2_URID ui_off;
 	LV2_URID state_pad;
-	LV2_URID notify_Event;
+	LV2_URID notify_padEvent;
 	LV2_URID notify_pad;
+	LV2_URID notify_statusEvent;
 	LV2_URID notify_cursors;
 	LV2_URID notify_notes;
 	LV2_URID notify_channels;
+	LV2_URID notify_scaleMapsEvent;
+	LV2_URID notify_scaleID;
+	LV2_URID notify_scaleName;
+	LV2_URID notify_scaleElements;
+	LV2_URID notify_scaleAltSymbols;
+	LV2_URID notify_scale;
 }  BSEQuencerURIs;
 
 void getURIs (LV2_URID_Map* m, BSEQuencerURIs* uris)
@@ -63,11 +70,18 @@ void getURIs (LV2_URID_Map* m, BSEQuencerURIs* uris)
 	uris->ui_on = m->map(m->handle, BSEQUENCER_URI "#UIon");
 	uris->ui_off = m->map(m->handle, BSEQUENCER_URI "#UIoff");
 	uris->state_pad = m->map(m->handle, BSEQUENCER_URI "#STATEpad");
-	uris->notify_Event = m->map(m->handle, BSEQUENCER_URI "#NOTIFYev");
+	uris->notify_padEvent = m->map(m->handle, BSEQUENCER_URI "#NOTIFYpadEvent");
 	uris->notify_pad = m->map(m->handle, BSEQUENCER_URI "#NOTIFYpad");
+	uris->notify_statusEvent = m->map(m->handle, BSEQUENCER_URI "#NOTIFYstatusEvent");
 	uris->notify_cursors = m->map(m->handle, BSEQUENCER_URI "#NOTIFYcursors");
 	uris->notify_notes = m->map(m->handle, BSEQUENCER_URI "#NOTIFYnotes");
 	uris->notify_channels = m->map(m->handle, BSEQUENCER_URI "#NOTIFYchannels");
+	uris->notify_scaleMapsEvent = m->map(m->handle, BSEQUENCER_URI "#NOTIFYscaleMapsEvent");
+	uris->notify_scaleID = m->map(m->handle, BSEQUENCER_URI "#NOTIFYscaleID");
+	uris->notify_scaleName = m->map(m->handle, BSEQUENCER_URI "#NOTIFYscaleName");
+	uris->notify_scaleElements = m->map(m->handle, BSEQUENCER_URI "#NOTIFYscaleElements");
+	uris->notify_scaleAltSymbols = m->map(m->handle, BSEQUENCER_URI "#NOTIFYscaleAltSymbols");
+	uris->notify_scale = m->map(m->handle, BSEQUENCER_URI "#NOTIFYscale");
 }
 
 #endif /* URIDS_H_ */

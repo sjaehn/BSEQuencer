@@ -23,7 +23,8 @@
 BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
 	map (NULL), inputPort (NULL), outputPort (NULL), outCapacity (0),
 	rate (samplerate), bar (0), bpm (120.0f), speed (1.0f), position (0.0), beatsPerBar (4.0f), barBeats (4),
-	beatUnit (4), key (defaultKey), scale (60, defaultScale), scheduleNotifyPadsToGui (false), scheduleNotifyStatusToGui (false)
+	beatUnit (4), key (defaultKey), scale (60, defaultScale), scheduleNotifyPadsToGui (false), scheduleNotifyStatusToGui (false),
+	scheduleNotifyScaleMapsToGui (true)
 
 {
 	//Scan host features for URID map
@@ -55,6 +56,19 @@ BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
 
 	// Initialize notify
 	lv2_atom_forge_init (&output_forge, map);
+
+	// Init scale maps
+	for (int scaleNr = 0; scaleNr < NR_SYSTEM_SCALES + NR_USER_SCALES; ++scaleNr)
+	{
+		if (scaleNr >= NR_SYSTEM_SCALES) strncpy (scaleMaps[scaleNr].name, ("User scale " + std::to_string (scaleNr + 1 - NR_SYSTEM_SCALES)).c_str(), 64);
+		else scaleMaps[scaleNr].name[0] = '\0';
+
+		for (int row = 0; row < ROWS; ++row)
+		{
+			scaleMaps[scaleNr].elements[row] = row;
+			scaleMaps[scaleNr].altSymbols[row][0] = '\0';
+		}
+	}
 
 	// Initialize padMessageBuffer
 	padMessageBuffer[0] = PadMessage (ENDPADMESSAGE);
@@ -143,9 +157,22 @@ bool BSEQuencer::makeMidi (const int64_t frames, const uint8_t status, const int
 			if (((uint8_t)pd->ch) & chbits & 0x0F)
 			{
 				uint8_t outCh = pd->ch;
-				int outNote = scale.getMIDInote((controllers[CH + ((int)(pd->ch - 1)) * CH_SIZE + PITCH]) ? inKeyElement + row : row) +
-							  pd->pitchOctave * 12 +
-							  controllers[CH + ((int)(pd->ch - 1)) * CH_SIZE + NOTE_OFFSET];
+				int scaleNr = controllers[SCALE];
+				int outNote;
+
+				// Drumkit: absolute MIDI notes, not input pitched
+				if (scaleMaps[scaleNr].elements[row] &0x100) outNote = scaleMaps[scaleNr].elements[row] & 0x0FF;
+
+				// Scale: relative Notes obtained from actual scale, input pitched
+				else
+				{
+					int pitch = ((controllers[CH + ((int)(pd->ch - 1)) * CH_SIZE + PITCH]) ? inKeyElement : 0);
+					outNote = scale.getMIDInote((scaleMaps[scaleNr].elements[row] & 0x0FF) + pitch);
+				}
+
+				// Apply octave shift, note offset
+				outNote += pd->pitchOctave * 12 + controllers[CH + ((int)(pd->ch - 1)) * CH_SIZE + NOTE_OFFSET];
+
 				float outVelocity = ((float)inKeys[key].velocity) * pd->velocity * controllers[CH + ((int)(pd->ch) - 1) * CH_SIZE + VELOCITY];
 				if ((outNote >=0) && (outNote <= 127))
 				{
@@ -579,8 +606,8 @@ void BSEQuencer::run (uint32_t n_samples)
 				ui_on = false;
 			}
 
-			// GUI pad notifications
-			else if (obj->body.otype == uris.notify_Event)
+			// GUI pad changed notifications
+			else if (obj->body.otype == uris.notify_padEvent)
 			{
 				LV2_Atom *oPd = NULL;
 				lv2_atom_object_get (obj, uris.notify_pad,  &oPd,
@@ -616,6 +643,63 @@ void BSEQuencer::run (uint32_t n_samples)
 					}
 				}
 			}
+
+			// GUI user scales changed notifications
+			else if (obj->body.otype == uris.notify_scaleMapsEvent)
+			{
+				int iD = 0;
+
+				LV2_Atom *oId = NULL, *oName = NULL, *oElements = NULL, *oAltSymbols = NULL, *oScale = NULL;
+				lv2_atom_object_get (obj, uris.notify_scaleID,  &oId,
+										  uris.notify_scaleName, &oName,
+										  uris.notify_scaleElements, &oElements,
+										  uris.notify_scaleAltSymbols, &oAltSymbols,
+										  uris.notify_scale, &oScale,
+										  NULL);
+
+				if (oId && (oId->type == uris.atom_Int)) iD = ((LV2_Atom_Int*)oId)->body;
+
+				if ((iD >= NR_SYSTEM_SCALES) && (iD < NR_SYSTEM_SCALES + NR_USER_SCALES))
+				{
+					// Name
+					if (oName && (oName->type == uris.atom_String))
+					{
+						strncpy (scaleMaps[iD].name, (char*) LV2_ATOM_BODY(oName), 64);
+					}
+
+					// Elements TODO safety
+					if (oElements && (oElements->type == uris.atom_Vector))
+					{
+						const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oElements;
+						if (vec->body.child_type == uris.atom_Int)
+						{
+							memcpy (scaleMaps[iD].elements, &vec->body + 1, 16 * sizeof (int));
+						}
+					}
+
+					// Alt Symbols TODO safety
+					if (oAltSymbols && (oAltSymbols->type == uris.atom_Vector))
+					{
+						const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oAltSymbols;
+						if (vec->body.child_type == uris.atom_String)
+						{
+							memcpy (scaleMaps[iD].altSymbols, &vec->body + 1, 16 * 16);
+						}
+					}
+
+					// Scale TODO safety
+					if (oScale && (oScale->type == uris.atom_Vector))
+					{
+						const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oScale;
+						if (vec->body.child_type == uris.atom_Int)
+						{
+							BScaleNotes* notes = (BScaleNotes*) (&vec->body + 1);
+							scaleNotes[iD] = *notes;
+						}
+					}
+				}
+			}
+
 
 			// Host time notifications
 			else if (obj->body.otype == uris.time_Position)
@@ -826,6 +910,7 @@ void BSEQuencer::run (uint32_t n_samples)
 	// Send notifications to GUI
 	if (ui_on && scheduleNotifyStatusToGui) space = space - notifyStatusToGui (space);
 	if (ui_on && scheduleNotifyPadsToGui) space = space - notifyPadsToGui (space);
+	if (ui_on && scheduleNotifyScaleMapsToGui) space = space - notifyScaleMapsToGui (space);
 	lv2_atom_forge_pop(&output_forge, &output_frame);
 
 }
@@ -833,6 +918,7 @@ void BSEQuencer::run (uint32_t n_samples)
 LV2_State_Status BSEQuencer::state_save (LV2_State_Store_Function store, LV2_State_Handle handle, uint32_t flags,
 			const LV2_Feature* const* features)
 {
+	// Store pads
 	char padDataString[0x8010] = "Matrix data:\n";
 
 	for (int step = 0; step < MAXSTEPS; ++step)
@@ -848,7 +934,10 @@ LV2_State_Status BSEQuencer::state_save (LV2_State_Store_Function store, LV2_Sta
 			strcat (padDataString, valueString);
 		}
 	}
-	store (handle, uris.state_pad, padDataString, strlen (padDataString), uris.atom_String, LV2_STATE_IS_POD);
+	store (handle, uris.state_pad, padDataString, strlen (padDataString) + 1, uris.atom_String, LV2_STATE_IS_POD);
+
+	// TODO Store user scales
+
 	//fprintf (stderr, "BSEQuencer.lv2: State saved.\n");
 	return LV2_STATE_SUCCESS;
 }
@@ -872,7 +961,8 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 		// Clear all MIDI in
 		while (!inKeys.empty()) inKeys.pop_back();
 
-		// TODO Parse retrieved data
+		// Restore pads
+		// Parse retrieved data
 		std::string padDataString = (char*) data;
 		const std::string keywords[5] = {"id:", "ch:", "oc:", "ve:", "du:"};
 		while (!padDataString.empty())
@@ -940,6 +1030,8 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 
 		// Force GUI notification
 		scheduleNotifyPadsToGui = true;
+
+		// TODO Restore user scales
 	}
 	return LV2_STATE_SUCCESS;
 }
@@ -1019,7 +1111,7 @@ uint32_t BSEQuencer::notifyPadsToGui(const uint32_t space)
 		{
 			LV2_Atom_Forge_Frame frame;
 			lv2_atom_forge_frame_time(&output_forge, 0);
-			lv2_atom_forge_object(&output_forge, &frame, 0, uris.notify_Event);
+			lv2_atom_forge_object(&output_forge, &frame, 0, uris.notify_padEvent);
 			lv2_atom_forge_key(&output_forge, uris.notify_pad);
 			lv2_atom_forge_vector(&output_forge, sizeof(float), uris.atom_Float, sizeof(PadMessage) / sizeof(float) * (end + 1), (void*) padMessageBuffer);
 			lv2_atom_forge_pop(&output_forge, &frame);
@@ -1074,7 +1166,7 @@ uint32_t BSEQuencer::notifyStatusToGui (const uint32_t space)
 	{
 		LV2_Atom_Forge_Frame frame;
 		lv2_atom_forge_frame_time(&output_forge, 0);
-		lv2_atom_forge_object(&output_forge, &frame, 0, uris.notify_Event);
+		lv2_atom_forge_object(&output_forge, &frame, 0, uris.notify_statusEvent);
 		lv2_atom_forge_key(&output_forge, uris.notify_cursors);
 		lv2_atom_forge_vector(&output_forge, sizeof (int), uris.atom_Int, MAXSTEPS, (void*) cursorbits);
 		lv2_atom_forge_key(&output_forge, uris.notify_notes);
@@ -1085,6 +1177,36 @@ uint32_t BSEQuencer::notifyStatusToGui (const uint32_t space)
 
 		scheduleNotifyStatusToGui = false;
 		return 3 * sizeof(uint32_t);											// TODO calculate the right size
+	}
+	return 0;
+}
+
+uint32_t BSEQuencer::notifyScaleMapsToGui (const uint32_t space)
+{
+	if (space > 1024 + 4 * 512)					// TODO calculate the right size
+	{
+		for (int i = NR_SYSTEM_SCALES; i < NR_SYSTEM_SCALES + NR_USER_SCALES; ++i)
+		{
+			LV2_Atom_Forge_Frame frame;
+			lv2_atom_forge_frame_time(&output_forge, 0);
+			lv2_atom_forge_object(&output_forge, &frame, 0, uris.notify_scaleMapsEvent);
+			lv2_atom_forge_key(&output_forge, uris.notify_scaleID);
+			lv2_atom_forge_int(&output_forge, i);
+			lv2_atom_forge_key(&output_forge, uris.notify_scaleName);
+			lv2_atom_forge_string (&output_forge, scaleMaps[i].name, 64);
+			lv2_atom_forge_key(&output_forge, uris.notify_scaleElements);
+			lv2_atom_forge_vector(&output_forge, sizeof (int), uris.atom_Int, 16, (void*) scaleMaps[i].elements);
+			lv2_atom_forge_key(&output_forge, uris.notify_scaleAltSymbols);
+			lv2_atom_forge_vector(&output_forge, 16, uris.atom_String, 16, (void*) scaleMaps[i].altSymbols);
+			lv2_atom_forge_key(&output_forge, uris.notify_scale);
+			BScaleNotes* notes = &scaleNotes[i];
+			lv2_atom_forge_vector(&output_forge, sizeof (int), uris.atom_Int, 12, (void*) notes);
+			lv2_atom_forge_pop(&output_forge, &frame);
+
+			scheduleNotifyScaleMapsToGui = false;
+		}
+
+		return 4 * 512;							// TODO calculate the right size
 	}
 	return 0;
 }

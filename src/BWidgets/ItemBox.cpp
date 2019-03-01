@@ -48,7 +48,7 @@ ItemBox& ItemBox::operator= (const ItemBox& that)
 {
 	itemLabel = that.itemLabel;
 
-	Widget::operator= (that);
+	ValueWidget::operator= (that);
 	return *this;
 }
 

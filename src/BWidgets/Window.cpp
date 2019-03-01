@@ -144,6 +144,88 @@ double Window::getInputY (BEvents::InputDevice device) const
 	else return 0.0;
 }
 
+void Window::mergeEvents ()
+{
+	if ((eventQueue.size () > 1) && (eventQueue.front()))
+	{
+		BEvents::Event* event = eventQueue.front ();
+
+		// Check for mergeable events
+
+		// TODO EXPOSE_EVENT
+
+		// POINTER_MOTION_EVENT
+		if (event->getEventType() == BEvents::POINTER_MOTION_EVENT)
+		{
+			BEvents::PointerEvent* firstEvent = (BEvents::PointerEvent*) event;
+			while ((eventQueue.size () > 1) && (eventQueue[1]))
+			{
+				BEvents::PointerEvent* nextEvent = (BEvents::PointerEvent*) eventQueue[1];
+				if ((nextEvent->getEventType() == BEvents::POINTER_MOTION_EVENT) && (nextEvent->getWidget() == firstEvent->getWidget()))
+				{
+					firstEvent->setX (nextEvent->getX());
+					firstEvent->setY (nextEvent->getY());
+					firstEvent->setDeltaX (nextEvent->getDeltaX() + firstEvent->getDeltaX());
+					firstEvent->setDeltaY (nextEvent->getDeltaY() + firstEvent->getDeltaY());
+					eventQueue.erase (eventQueue.begin() + 1);
+				}
+
+				else break;
+			}
+		}
+
+		// POINTER_DRAG_EVENT
+		if (event->getEventType() == BEvents::POINTER_DRAG_EVENT)
+		{
+			BEvents::PointerEvent* firstEvent = (BEvents::PointerEvent*) event;
+			while ((eventQueue.size () > 1) && (eventQueue[1]))
+			{
+				BEvents::PointerEvent* nextEvent = (BEvents::PointerEvent*) eventQueue[1];
+				if (
+						(nextEvent->getEventType() == BEvents::POINTER_DRAG_EVENT) &&
+						(nextEvent->getWidget() == firstEvent->getWidget()) &&
+						(nextEvent->getButton() == firstEvent->getButton()) &&
+						(nextEvent->getXOrigin() == firstEvent->getXOrigin()) &&
+						(nextEvent->getYOrigin() == firstEvent->getYOrigin())
+					)
+				{
+					firstEvent->setX (nextEvent->getX());
+					firstEvent->setY (nextEvent->getY());
+					firstEvent->setDeltaX (nextEvent->getDeltaX() + firstEvent->getDeltaX());
+					firstEvent->setDeltaY (nextEvent->getDeltaY() + firstEvent->getDeltaY());
+					eventQueue.erase (eventQueue.begin() + 1);
+				}
+
+				else break;
+			}
+		}
+
+
+		// WHEEL_SCROLL_EVENT
+		if (event->getEventType() == BEvents::WHEEL_SCROLL_EVENT)
+		{
+			BEvents::WheelEvent* firstEvent = (BEvents::WheelEvent*) event;
+			while ((eventQueue.size () > 1) && (eventQueue[1]))
+			{
+				BEvents::WheelEvent* nextEvent = (BEvents::WheelEvent*) eventQueue[1];
+				if (
+						(nextEvent->getEventType() == BEvents::WHEEL_SCROLL_EVENT) &&
+						(nextEvent->getWidget() == firstEvent->getWidget()) &&
+						(nextEvent->getX() == firstEvent->getX()) &&
+						(nextEvent->getY() == firstEvent->getY())
+					)
+				{
+					firstEvent->setDeltaX (nextEvent->getDeltaX() + firstEvent->getDeltaX());
+					firstEvent->setDeltaY (nextEvent->getDeltaY() + firstEvent->getDeltaY());
+					eventQueue.erase (eventQueue.begin() + 1);
+				}
+
+				else break;
+			}
+		}
+	}
+}
+
 void Window::handleEvents ()
 {
 	puglProcessEvents (view_);
@@ -151,6 +233,8 @@ void Window::handleEvents ()
 
 	while (!eventQueue.empty ())
 	{
+		mergeEvents ();
+
 		BEvents::Event* event = eventQueue.front ();
 		if (event)
 		{

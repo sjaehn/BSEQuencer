@@ -1,7 +1,7 @@
 /* B.SEQuencer
  * MIDI Step Sequencer LV2 Plugin
  *
- * Copyright (C) 2018 by Sven Jähnichen
+ * Copyright (C) 2018, 2019 by Sven Jähnichen
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,11 +71,26 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		propertiesOctaveLabel (10, 145, 55, 20, "lflabel", "Octave"),
 		propertiesOctaveListBox (180, 145, 70, 20, 0, -220, 70, 220, "menu", {{-1, "-1"}, {0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}}, 4.0),
 		propertiesScaleLabel (10, 175, 50, 20, "lflabel", "Scale"),
-		propertiesScaleListBox (80, 175, 170, 20, 0, -300, 170, 300, "menu", scaleItems, 0.0),
+		propertiesScaleEditLabel (70, 175, 20, 20, "editlabel", "⚙"),
+		propertiesScaleListBox (100, 175, 150, 20, 0, -380, 150, 380, "menu", scaleItems, 0.0),
 
-		helpLabel (1140, 40, 30, 30, "ilabel", "?")
+		helpLabel (1140, 40, 30, 30, "ilabel", "?"),
+		scaleEditor (200, 80, 800, 640, "scaleeditor", (bundle_path ? std::string (bundle_path) : std::string ("")), 0, ScaleMap (), BScale (0,defaultScale))
 
 {
+	// Init scale maps
+	for (int scaleNr = 0; scaleNr < NR_SYSTEM_SCALES + NR_USER_SCALES; ++scaleNr)
+	{
+		if (scaleNr >= NR_SYSTEM_SCALES) strncpy (scaleMaps[scaleNr].name, ("User scale " + std::to_string (scaleNr + 1 - NR_SYSTEM_SCALES)).c_str(), 64);
+		else scaleMaps[scaleNr].name[0] = '\0';
+
+		for (int row = 0; row < ROWS; ++row)
+		{
+			scaleMaps[scaleNr].elements[row] = row;
+			scaleMaps[scaleNr].altSymbols[row][0] = '\0';
+		}
+	}
+
 	// Init toolbox buttons
 	toolButtonBox.addButton (80, 70, 20, 20, {{0.0, 0.03, 0.06, 1.0}, ""});
 	for (int i = 1; i < NR_SEQUENCER_CHS + 1; ++i) toolButtonBox.addButton (80 + i * 30, 70, 20, 20, chButtonStyles[i]);
@@ -161,11 +176,12 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	padSurface.setCallbackFunction (BEvents::FOCUS_OUT_EVENT, padsFocusedCallback);
 
 	helpLabel.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, helpPressedCallback);
-
+	propertiesScaleEditLabel.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, editPressedCallback);
+	scaleEditor.setCallbackFunction(BEvents::VALUE_CHANGED_EVENT, editorCloseCallback);
 
 	// Apply theme
 	bgImageSurface = cairo_image_surface_create_from_png ((pluginPath + BG_FILE).c_str());
-	widgetBg = BStyles::Fill (pluginPath + BG_FILE);
+	widgetBg.loadFillFromCairoSurface (bgImageSurface);
 	applyTheme (theme);
 
 	modeAutoplayBpmLabel.hide ();
@@ -176,6 +192,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	modeBoxLabel.setState (BColors::ACTIVE);
 	toolBoxLabel.setState (BColors::ACTIVE);
 	propertiesBoxLabel.setState (BColors::ACTIVE);
+	propertiesScaleEditLabel.hide ();
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i) {
 		chBoxes[i].chLabel.setState (BColors::ACTIVE);
 		drawButton (chBoxes[i].chSymbol.getDrawingSurface(), 0, 0, 20, 20, chButtonStyles[i + 1]);
@@ -222,6 +239,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	propertiesBox.add (propertiesOctaveLabel);
 	propertiesBox.add (propertiesOctaveListBox);
 	propertiesBox.add (propertiesScaleLabel);
+	propertiesBox.add (propertiesScaleEditLabel);
 	propertiesBox.add (propertiesScaleListBox);
 
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
@@ -287,16 +305,14 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 		if ((atom->type == uris.atom_Blank) || (atom->type == uris.atom_Object))
 		{
 			const LV2_Atom_Object* obj = (const LV2_Atom_Object*) atom;
-			if (obj->body.otype == uris.notify_Event)
+
+			// Pad notification
+			if (obj->body.otype == uris.notify_padEvent)
 			{
 				LV2_Atom *oPad = NULL, *oCursors = NULL, *oNotes = NULL, *oChs = NULL;
 				lv2_atom_object_get(obj, uris.notify_pad, &oPad,
-										 uris.notify_cursors, &oCursors,
-										 uris.notify_notes, &oNotes,
-										 uris.notify_channels, &oChs,
 										 NULL);
 
-				// Pad notification
 				if (oPad && (oPad->type == uris.atom_Vector))
 				{
 					const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oPad;
@@ -316,6 +332,16 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 						drawPad ();
 					}
 				}
+			}
+
+			// Status notifications
+			else if (obj->body.otype == uris.notify_statusEvent)
+			{
+				LV2_Atom *oPad = NULL, *oCursors = NULL, *oNotes = NULL, *oChs = NULL;
+				lv2_atom_object_get(obj, uris.notify_cursors, &oCursors,
+										 uris.notify_notes, &oNotes,
+										 uris.notify_channels, &oChs,
+										 NULL);
 
 				// Cursor notifications
 				if (oCursors && (oCursors->type == uris.atom_Vector))
@@ -348,6 +374,67 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 						if ((1 << i) & chBits) chBoxes[i].chLabel.setTextColors (ltColors);
 						else chBoxes[i].chLabel.setTextColors (txColors);
 					}
+				}
+			}
+
+			// GUI user scales changed notifications
+			else if (obj->body.otype == uris.notify_scaleMapsEvent)
+			{
+				int iD = 0;
+
+				LV2_Atom *oId = NULL, *oName = NULL, *oElements = NULL, *oAltSymbols = NULL, *oScale = NULL;
+				lv2_atom_object_get (obj, uris.notify_scaleID,  &oId,
+										  uris.notify_scaleName, &oName,
+										  uris.notify_scaleElements, &oElements,
+										  uris.notify_scaleAltSymbols, &oAltSymbols,
+										  uris.notify_scale, &oScale,
+										  NULL);
+
+				if (oId && (oId->type == uris.atom_Int)) iD = ((LV2_Atom_Int*)oId)->body;
+
+				if ((iD >= NR_SYSTEM_SCALES) && (iD < NR_SYSTEM_SCALES + NR_USER_SCALES))
+				{
+					// Name
+					if (oName && (oName->type == uris.atom_String))
+					{
+						strncpy (scaleMaps[iD].name, (char*) LV2_ATOM_BODY(oName), 64);
+						scaleItems[iD].string = (char*) LV2_ATOM_BODY(oName);
+						propertiesScaleListBox.getItemList()->at(iD).string = (char*) LV2_ATOM_BODY(oName);
+						propertiesScaleListBox.update();
+					}
+
+					// Elements TODO exceptions
+					if (oElements && (oElements->type == uris.atom_Vector))
+					{
+						const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oElements;
+						if (vec->body.child_type == uris.atom_Int)
+						{
+							memcpy (scaleMaps[iD].elements, &vec->body + 1, 16 * sizeof (int));
+						}
+					}
+
+					// Alt Symbols TODO exceptions
+					if (oAltSymbols && (oAltSymbols->type == uris.atom_Vector))
+					{
+						const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oAltSymbols;
+						if (vec->body.child_type == uris.atom_String)
+						{
+							memcpy (scaleMaps[iD].altSymbols, &vec->body + 1, 16 * 16);
+							drawCaption();
+						}
+					}
+
+					// Scale TODO exceptions
+					if (oScale && (oScale->type == uris.atom_Vector))
+					{
+						const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oScale;
+						if (vec->body.child_type == uris.atom_Int)
+						{
+							BScaleNotes* notes = (BScaleNotes*) (&vec->body + 1);
+							scaleNotes[iD] = *notes;
+						}
+					}
+
 				}
 			}
 		}
@@ -437,11 +524,13 @@ void BSEQuencer_GUI::scale ()
 	propertiesOctaveListBox.resizeListBox (70 * sz, 220 * sz);
 	propertiesOctaveListBox.moveListBox (0, -220 * sz);
 	RESIZE (propertiesScaleLabel, 10, 175, 50, 20, sz);
-	RESIZE (propertiesScaleListBox, 80, 175, 170, 20, sz);
-	propertiesScaleListBox.resizeListBox (170 * sz, 300 * sz);
-	propertiesScaleListBox.moveListBox (0, -300 * sz);
+	RESIZE (propertiesScaleEditLabel, 70, 175, 20, 20, sz);
+	RESIZE (propertiesScaleListBox, 100, 175, 150, 20, sz);
+	propertiesScaleListBox.resizeListBox (150 * sz, 380 * sz);
+	propertiesScaleListBox.moveListBox (0, -380 * sz);
 
 	RESIZE (helpLabel, 1140, 40, 30, 30, sz);
+	RESIZE (scaleEditor, 200, 80, 800, 640, sz);
 
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
 	{
@@ -517,6 +606,7 @@ void BSEQuencer_GUI::applyTheme (BStyles::Theme& theme)
 	propertiesOctaveLabel.applyTheme (theme);
 	propertiesOctaveListBox.applyTheme (theme);
 	propertiesScaleLabel.applyTheme (theme);
+	propertiesScaleEditLabel.applyTheme (theme);
 	propertiesScaleListBox.applyTheme (theme);
 
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
@@ -536,6 +626,7 @@ void BSEQuencer_GUI::applyTheme (BStyles::Theme& theme)
 	}
 
 	helpLabel.applyTheme (theme);
+	//scaleEditor.applyTheme (theme);
 }
 
 void BSEQuencer_GUI::onConfigure (BEvents::ExposeEvent* event)
@@ -577,9 +668,31 @@ void BSEQuencer_GUI::send_pad (int row, int step)
 	lv2_atom_forge_set_buffer(&forge, obj_buf, sizeof(obj_buf));
 
 	LV2_Atom_Forge_Frame frame;
-	LV2_Atom* msg = (LV2_Atom*)lv2_atom_forge_object(&forge, &frame, 0, uris.notify_Event);
+	LV2_Atom* msg = (LV2_Atom*)lv2_atom_forge_object(&forge, &frame, 0, uris.notify_padEvent);
 	lv2_atom_forge_key(&forge, uris.notify_pad);
 	lv2_atom_forge_vector(&forge, sizeof(float), uris.atom_Float, sizeof(PadMessage) / sizeof(float), (void*) &padmsg);
+	lv2_atom_forge_pop(&forge, &frame);
+	write_function(controller, INPUT, lv2_atom_total_size(msg), uris.atom_eventTransfer, msg);
+}
+
+void BSEQuencer_GUI::send_scaleMaps (int scaleNr)
+{
+	uint8_t obj_buf[2048];
+	lv2_atom_forge_set_buffer(&forge, obj_buf, sizeof(obj_buf));
+
+	LV2_Atom_Forge_Frame frame;
+	LV2_Atom* msg = (LV2_Atom*)lv2_atom_forge_object(&forge, &frame, 0, uris.notify_scaleMapsEvent);
+	lv2_atom_forge_key(&forge, uris.notify_scaleID);
+	lv2_atom_forge_int(&forge, scaleNr);
+	lv2_atom_forge_key(&forge, uris.notify_scaleName);
+	lv2_atom_forge_string (&forge, scaleMaps[scaleNr].name, 64);
+	lv2_atom_forge_key(&forge, uris.notify_scaleElements);
+	lv2_atom_forge_vector(&forge, sizeof (int), uris.atom_Int, 16, (void*) scaleMaps[scaleNr].elements);
+	lv2_atom_forge_key(&forge, uris.notify_scaleAltSymbols);
+	lv2_atom_forge_vector(&forge, 16, uris.atom_String, 16, (void*) scaleMaps[scaleNr].altSymbols);
+	lv2_atom_forge_key(&forge, uris.notify_scale);
+	BScaleNotes* notes = &scaleNotes[scaleNr];
+	lv2_atom_forge_vector(&forge, sizeof (int), uris.atom_Int, 12, (void*) notes);
 	lv2_atom_forge_pop(&forge, &frame);
 	write_function(controller, INPUT, lv2_atom_total_size(msg), uris.atom_eventTransfer, msg);
 }
@@ -640,6 +753,13 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 					}
 				}
 
+				// Scale changed
+				if ((widgetNr == SCALE))
+				{
+					if (value < NR_SYSTEM_SCALES) ui->propertiesScaleEditLabel.hide();
+					else ui->propertiesScaleEditLabel.show();
+				}
+
 				// Pad relevant changes
 				if ((widgetNr == NR_OF_STEPS) || (widgetNr == STEPS_PER) ||(widgetNr == ROOT) || (widgetNr == SIGNATURE) ||
 					(widgetNr == SCALE)) ui->drawPad ();
@@ -652,6 +772,49 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 }
 
 void BSEQuencer_GUI::helpPressedCallback (BEvents::Event* event) {system(OPEN_CMD " " HELP_URL);}
+
+void BSEQuencer_GUI::editPressedCallback (BEvents::Event* event)
+{
+	if ((event) && (event->getWidget ()) && (((BWidgets::Widget*)(event->getWidget()))->getMainWindow()))
+	{
+		BSEQuencer_GUI* ui = (BSEQuencer_GUI*)(((BWidgets::Widget*)(event->getWidget()))->getMainWindow());
+		int mapNr = ui->propertiesScaleListBox.getValue();
+
+		if (ui->scaleEditor.getParent()) ui->scaleEditor.getParent()->release (&(ui->scaleEditor));
+
+		ui->scaleEditor.setValue (0.0);
+		ui->scaleEditor.setMapNr (mapNr);
+		ui->scaleEditor.setScale (BScale (ui->propertiesRootListBox.getValue() + ui->propertiesSignatureListBox.getValue(),
+										  ui->scaleNotes[mapNr]));
+		ui->scaleEditor.setScaleMap (ui->scaleMaps[mapNr]);
+		ui->scaleEditor.moveTo (200, 80);
+		ui->add (ui->scaleEditor);
+	}
+}
+
+void BSEQuencer_GUI::editorCloseCallback (BEvents::Event* event)
+{
+	if ((event) && (event->getWidget ()) && (((BWidgets::Widget*)(event->getWidget()))->getMainWindow()))
+	{
+		ScaleEditor* scaleEditor = (ScaleEditor*)(event->getWidget());
+		BSEQuencer_GUI* ui = (BSEQuencer_GUI*)(scaleEditor->getMainWindow());
+		double val = scaleEditor->getValue();
+		if (val == 1.0)
+		{
+			int mapNr = scaleEditor->getMapNr();
+			ui->scaleNotes[mapNr] = scaleEditor->getScale().getScale();
+			ui->scaleMaps[mapNr] = scaleEditor->getScaleMap();
+
+			// Update captions
+			if (ui->propertiesScaleListBox.getValue() == mapNr) ui->drawCaption();
+
+			// Notify plugin
+			ui->send_scaleMaps (mapNr);
+		}
+
+		if ((val == 1.0) || (val == -1.0)) ui->release (scaleEditor);
+	}
+}
 
 void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 {
@@ -836,11 +999,11 @@ void BSEQuencer_GUI::drawCaption ()
 	BColors::Color textcolor = *txColors. getColor(BColors::ACTIVE);
 	cairo_set_source_rgba (cr, CAIRO_RGBA (textcolor));
 	cairo_select_font_face (cr, ctLabelFont.getFontFamily ().c_str (), ctLabelFont.getFontSlant (), ctLabelFont.getFontWeight ());
-	cairo_set_font_size (cr, ctLabelFont.getFontSize ());
 
-	BScale scale (controllers[ROOT] + controllers[SIGNATURE], scaleNotes[controllers[SCALE]]);
+	int scaleNr = controllers[SCALE];
+	BScale scale (controllers[ROOT] + controllers[SIGNATURE], scaleNotes[scaleNr]);
 	int size = scale.getSize ();
-	char label[8] = "";
+	char label[16] = "";
 
 	for (int i = 0; i < ROWS; ++i)
 	{
@@ -848,22 +1011,39 @@ void BSEQuencer_GUI::drawCaption ()
 		if (noteBits & (1 << i)) {color = ink; color.applyBrightness (0.75);}
 		drawButton (surface, 0, (ROWS - i - 1) * height / ROWS + 1, width, height / ROWS - 2, {color, ""});
 
-		int note = scale.getMIDInote (i);
-		if (note != ENOTE)
+		ScaleMap* map = &(scaleMaps[scaleNr]);
+
+		if (map->altSymbols[i][0])
 		{
-			scale.getSymbol (label, i);
-			if (note >= 12)
-			{
-				strcat (label, " +");
-				char oct[8];
-				sprintf (oct,"%i", (int) (note / 12));
-				strcat (label, oct);
-			}
+			strncpy (label, map->altSymbols[i], 15);
 		}
-		else strcpy(label, "ERR");
+		else
+		{
+			int element = map->elements[i];
+			int note = scale.getMIDInote (element);
+			if (note != ENOTE)
+			{
+				scale.getSymbol (label, element);
+				if (note >= 12)
+				{
+					strcat (label, " +");
+					char oct[8];
+					sprintf (oct,"%i", (int) (note / 12));
+					strcat (label, oct);
+				}
+			}
+			else strcpy(label, "ERR");
+		}
 
 		cairo_text_extents_t ext;
-		cairo_text_extents (cr, label, &ext);
+
+		double fontsize = ctLabelFont.getFontSize () * sqrt (2);
+		do
+		{
+			fontsize = fontsize / sqrt (2);
+			cairo_set_font_size (cr, fontsize);
+			cairo_text_extents (cr, label, &ext);
+		} while ((ext.width > width) && (fontsize >= ctLabelFont.getFontSize () * 0.5));
 
 		cairo_move_to (cr, width / 2 - ext.width / 2, (15.5 - i) * height / 16 + ext.height / 2);
 		cairo_show_text (cr, label);

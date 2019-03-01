@@ -1,7 +1,7 @@
-/* B.Notes
+/* B.Scale
  * Basic music note operation tools
  *
- * Copyright (C) 2018 by Sven Jähnichen
+ * Copyright (C) 2018, 2019 by Sven Jähnichen
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #define BSCALE_HPP_
 
 #include <cstdint>
+#include <cstring>
 #include <array>
 #include <cmath>
 
@@ -44,7 +45,7 @@
 
 typedef std::array<int, 12> BScaleNotes;
 
-BScaleNotes defaultScale = {CROMATICSCALE};
+const BScaleNotes defaultScale = {CROMATICSCALE};
 
 typedef enum {
 	FLAT			= -1,
@@ -52,17 +53,18 @@ typedef enum {
 	SHARP			= 1
 } SignatureIndex;
 
-char flatSymbol[] = "♭";
-char sharpSymbol[] = "♯";
-char noteSymbols[12] = {'C', 0, 'D', 0, 'E', 'F', 0, 'G', 0, 'A', 0, 'B'};
+const char flatSymbol[] = "♭";
+const char sharpSymbol[] = "♯";
+const char noteSymbols[12] = {'C', 0, 'D', 0, 'E', 'F', 0, 'G', 0, 'A', 0, 'B'};
 
 class BScale {
 public:
-	BScale (int root, BScaleNotes& elementarray);
-	BScale (int root, SignatureIndex signature, BScaleNotes& elementarray);
+	BScale (const int root, const BScaleNotes& elementarray);
+	BScale (const int root, const SignatureIndex signature, const BScaleNotes& elementarray);
 	void setRoot (int root);
 	int getRoot ();
 	void setScale (BScaleNotes& elementarray);
+	BScaleNotes getScale ();
 	int getMIDInote (int element);
 	int getElement (int midiNote);
 	int getSize ();
@@ -74,8 +76,8 @@ protected:
 	SignatureIndex signature;
 };
 
-BScale::BScale (int root, BScaleNotes& elementarray) : BScale (root, NATURAL, elementarray) {}
-BScale::BScale (int root, SignatureIndex signature, BScaleNotes& elementarray) :
+BScale::BScale (const int root, const BScaleNotes& elementarray) : BScale (root, NATURAL, elementarray) {}
+BScale::BScale (const int root, const SignatureIndex signature, const BScaleNotes& elementarray) :
 	rootNote (root), signature (signature), scale (elementarray) {}
 
 
@@ -84,6 +86,8 @@ void BScale::setRoot (int root) {rootNote = root;}
 int BScale::getRoot () {return rootNote;}
 
 void BScale::setScale (BScaleNotes& elementarray) {scale = elementarray;}
+
+BScaleNotes BScale::getScale () {return scale;}
 
 /* Calculates a MIDI note for an element within a BScale
  * @param element: note position relative to root note in number of (scale-specific) notes,

@@ -28,11 +28,12 @@ HPianoRoll::HPianoRoll (const double x, const double y, const double width, cons
 HPianoRoll::HPianoRoll (const double x, const double y, const double width, const double height, const std::string& name,
 						const int startMidiKey, const int endMidiKey) :
 		PianoWidget (x, y, width, height, name, startMidiKey, endMidiKey),
-		blackBgColors ({{0.1, 0.1, 0.1, 1.0}, {0.4, 0.1, 0.1, 1.0}, {0.25, 0.25, 0.25, 1.0}, {0.0, 0.0, 0.0, 1.0}}),
-		whiteBgColors ({{0.9, 0.9, 0.9, 1.0}, {1.0, 0.75, 0.75, 1.0}, {0.5, 0.5, 0.5, 1.0}, {0.0, 0.0, 0.0, 1.0}}),
+		blackBgColors ({{0.05, 0.05, 0.05, 1.0}, {0.4, 0.1, 0.1, 1.0}, {0.25, 0.25, 0.25, 1.0}, {0.0, 0.0, 0.0, 1.0}}),
+		whiteBgColors ({{0.9, 0.9, 0.9, 1.0}, {1.0, 0.6, 0.6, 1.0}, {0.5, 0.5, 0.5, 1.0}, {0.0, 0.0, 0.0, 1.0}}),
 		toggleKeys (false), actKeyNr (-1)
 {
 	setDraggable (true);
+	cbfunction[BEvents::EventType::POINTER_DRAG_EVENT] = Widget::defaultCallback;
 }
 
 void HPianoRoll::setKeysToggleable (const bool toggle) {toggleKeys = toggle;}
@@ -68,6 +69,9 @@ void HPianoRoll::onButtonPressed (BEvents::PointerEvent* event)
 
 			actKeyNr = newKeyNr;
 		}
+
+		if (event->getEventType() == BEvents::BUTTON_PRESS_EVENT) Widget::onButtonPressed (event);
+		else if (event->getEventType() == BEvents::POINTER_DRAG_EVENT) Widget::onPointerDragged (event);
 	}
 }
 
@@ -82,6 +86,8 @@ void HPianoRoll::onButtonReleased (BEvents::PointerEvent* event)
 		}
 		actKeyNr = -1;
 	}
+
+	Widget::onButtonReleased (event);
 }
 
 void HPianoRoll::onPointerDragged (BEvents::PointerEvent* event)

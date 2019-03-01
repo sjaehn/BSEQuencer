@@ -1,3 +1,23 @@
+/* B.SEQuencer
+ * MIDI Step Sequencer LV2 Plugin
+ *
+ * Copyright (C) 2018, 2019 by Sven Jähnichen
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
 #ifndef BSEQUENCER_GUI_HPP_
 #define BSEQUENCER_GUI_HPP_
 
@@ -37,6 +57,7 @@
 #include "urids.h"
 #include "Pad.hpp"
 #include "PadMessage.hpp"
+#include "ScaleEditor.hpp"
 
 #define BG_FILE "surface.png"
 #define HELP_URL "https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer"
@@ -52,6 +73,7 @@ public:
 	void send_ui_on ();
 	void send_ui_off ();
 	void send_pad (int row, int step);
+	void send_scaleMaps (int scaleNr);
 	virtual void onConfigure (BEvents::ExposeEvent* event) override;
 	void applyTheme (BStyles::Theme& theme) override;
 
@@ -61,9 +83,11 @@ public:
 private:
 	static void valueChangedCallback(BEvents::Event* event);
 	static void helpPressedCallback (BEvents::Event* event);
+	static void editPressedCallback (BEvents::Event* event);
 	static void padsPressedCallback (BEvents::Event* event);
 	static void padsScrolledCallback (BEvents::Event* event);
 	static void padsFocusedCallback (BEvents::Event* event);
+	static void editorCloseCallback (BEvents::Event* event);
 	void scale ();
 	void drawCaption ();
 	void drawPad ();
@@ -94,14 +118,25 @@ private:
 	double tempToolCh;
 	bool tempTool;
 
-	std::array<BScaleNotes, 14> scaleNotes	=
-				{{{CROMATICSCALE}, {MAJORSCALE}, {MINORSCALE}, {HARMONICMAJORSCALE}, {HARMONICMINORSCALE}, {MELODICMINORSCALE},
-				  {DORIANSCALE}, {PHRYGIANSCALE}, {LYDIANSCALE}, {MIXOLYDIANSCALE}, {LOKRIANSCALE}, {HUNGARIANMINORSCALE},
-				  {MAJORPENTATONICSCALE}, {MINORPENTATONICSCALE}}};
+	std::array<BScaleNotes, NR_SYSTEM_SCALES + NR_USER_SCALES> scaleNotes	=
+	{{// System scales
+			{CROMATICSCALE}, {MAJORSCALE}, {MINORSCALE}, {HARMONICMAJORSCALE}, {HARMONICMINORSCALE}, {MELODICMINORSCALE},
+			{DORIANSCALE}, {PHRYGIANSCALE}, {LYDIANSCALE}, {MIXOLYDIANSCALE}, {LOKRIANSCALE}, {HUNGARIANMINORSCALE},
+			{MAJORPENTATONICSCALE}, {MINORPENTATONICSCALE},
+			// User scales
+			{CROMATICSCALE}, {CROMATICSCALE}, {CROMATICSCALE}, {CROMATICSCALE}
+	}};
+
+
 	std::vector<BItems::Item> scaleItems =
-				{{0, "Chromatic"}, {1, "Major"}, {2, "Minor"}, {3, "Harmonic major"}, {4, "Harmonic minor"}, {5, "Melodic minor"},
-				 {6, "Dorian"}, {7, "Phygian"}, {8, "Lydian"}, {9, "Mixolydian"}, {10, "Lokrian"}, {11, "Hungarian minor"},
-				 {12, "Major pentatonic"}, {13, "Minor pentatonic"}};
+	{
+			{0, "Chromatic"}, {1, "Major"}, {2, "Minor"}, {3, "Harmonic major"}, {4, "Harmonic minor"}, {5, "Melodic minor"},
+			{6, "Dorian"}, {7, "Phygian"}, {8, "Lydian"}, {9, "Mixolydian"}, {10, "Lokrian"}, {11, "Hungarian minor"},
+			{12, "Major pentatonic"}, {13, "Minor pentatonic"}, {14, "User scale 1"}, {15, "User scale 2"}, {16, "User scale 3"},
+			{17, "User scale 4"}
+	};
+
+	ScaleMap scaleMaps[NR_SYSTEM_SCALES + NR_USER_SCALES];
 
 
 	//Widgets
@@ -149,6 +184,7 @@ private:
 	BWidgets::Label propertiesOctaveLabel;
 	BWidgets::PopupListBox propertiesOctaveListBox;
 	BWidgets::Label propertiesScaleLabel;
+	BWidgets::Label propertiesScaleEditLabel;
 	BWidgets::PopupListBox propertiesScaleListBox;
 
 	typedef struct {
@@ -169,6 +205,7 @@ private:
 	std::array<ChBox, NR_SEQUENCER_CHS> chBoxes;
 
 	CircledSymbol helpLabel;
+	ScaleEditor scaleEditor;
 
 	// Definition of styles
 	BColors::ColorSet fgColors = {{{0.0, 0.25, 0.75, 1.0}, {0.25, 0.75, 0.75, 1.0}, {0.0, 0.0, 0.1, 1.0}, {0.0, 0.0, 0.0, 0.0}}};
@@ -199,7 +236,7 @@ private:
 											   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
 	BStyles::Font tgLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 12.0,
 											   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
-	BStyles::Font iLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 24.0,
+	BStyles::Font iLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD, 24.0,
 											   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
 	BStyles::Font lfLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 12.0,
 											   BStyles::TEXT_ALIGN_LEFT, BStyles::TEXT_VALIGN_MIDDLE);
@@ -261,7 +298,11 @@ private:
 							 //{"textcolors", STYLEPTR (&txColors)},
 							 {"font", STYLEPTR (&lfLabelFont)}}},
 		{"ilabel",	 		{{"uses", STYLEPTR (&labelStyles)},
-							 {"font", STYLEPTR (&iLabelFont)}}},
+							 {"font", STYLEPTR (&iLabelFont)},
+							 {"textcolors", STYLEPTR (&BColors::whites)}}},
+		{"editlabel",	 	{{"uses", STYLEPTR (&labelStyles)},
+				 	 	 	 {"font", STYLEPTR (&iLabelFont)},
+							 {"textcolors", STYLEPTR (&BColors::whites)}}},
 		{"menu",	 		{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
 							 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
 		{"menu/item",	 	{{"uses", STYLEPTR (&defaultStyles)},

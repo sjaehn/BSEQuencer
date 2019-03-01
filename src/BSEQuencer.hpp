@@ -101,6 +101,7 @@ private:
 	void padMessageBufferAllPads ();
 	uint32_t notifyPadsToGui (const uint32_t space);
 	uint32_t notifyStatusToGui (const uint32_t space);
+	uint32_t notifyScaleMapsToGui (const uint32_t space);
 
 	// URIs
 	BSEQuencerURIs uris;
@@ -128,7 +129,7 @@ private:
 										   {0, 11, 1},	// ROOT
 										   {-1, 1, 1},	// SIGNATURE
 										   {-1, 8, 1},	// OCTAVE
-										   {0, 13, 1},	// SCALE
+										   {0, 17, 1},	// SCALE
 										   {1, 300, 0},	// AUTOPLAY_BPM
 										   {1, 16, 1},	// AUTOPLAY_BPB
 										   {0, NR_SEQUENCER_CHS + NR_CTRL_BUTTONS, 1},	// SELECTION_CH
@@ -172,15 +173,22 @@ private:
 	bool ui_on;
 	bool scheduleNotifyPadsToGui;
 	bool scheduleNotifyStatusToGui;
+	bool scheduleNotifyScaleMapsToGui;
 	StaticArrayList<Key, 16> inKeys;
 	Key key;
 	Key defaultKey;
 	BScale scale;
 
-	std::array<BScaleNotes, 14> scaleNotes	=
-				{{{CROMATICSCALE}, {MAJORSCALE}, {MINORSCALE}, {HARMONICMAJORSCALE}, {HARMONICMINORSCALE}, {MELODICMINORSCALE},
+	std::array<BScaleNotes, NR_SYSTEM_SCALES + NR_USER_SCALES> scaleNotes	=
+				{{// System scales
+				  {CROMATICSCALE}, {MAJORSCALE}, {MINORSCALE}, {HARMONICMAJORSCALE}, {HARMONICMINORSCALE}, {MELODICMINORSCALE},
 				  {DORIANSCALE}, {PHRYGIANSCALE}, {LYDIANSCALE}, {MIXOLYDIANSCALE}, {LOKRIANSCALE}, {HUNGARIANMINORSCALE},
-				  {MAJORPENTATONICSCALE}, {MINORPENTATONICSCALE}}};
+				  {MAJORPENTATONICSCALE}, {MINORPENTATONICSCALE},
+				  // User scales
+				  {CROMATICSCALE}, {CROMATICSCALE}, {CROMATICSCALE}, {CROMATICSCALE}
+				}};
+
+	ScaleMap scaleMaps[NR_SYSTEM_SCALES + NR_USER_SCALES];
 
 
 };

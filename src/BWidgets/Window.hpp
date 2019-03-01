@@ -140,6 +140,7 @@ protected:
 	static void translatePuglEvent (PuglView* view, const PuglEvent* event);
 	void translateTimeEvent ();
 
+	void mergeEvents ();
 	void purgeEventQueue ();
 
 	std::string title_;

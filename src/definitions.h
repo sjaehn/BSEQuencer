@@ -1,7 +1,7 @@
 /*  B.SEQuencer
  * MIDI Step Sequencer LV2 Plugin
  *
- * Copyright (C) 2018 by Sven Jähnichen
+ * Copyright (C) 2018, 2019 by Sven Jähnichen
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,8 @@
 #ifndef DEFINITIONS_H_
 #define DEFINITIONS_H_
 
+#define NR_SYSTEM_SCALES 14
+#define NR_USER_SCALES 4
 #define MAXSTEPS 32
 #define ROWS 16
 #define NR_SEQUENCER_CHS 4
@@ -64,6 +66,12 @@ typedef enum {
 	CTRL_SKIP		= 0x70,
 	CTRL_STOP		= 0x80
 } CtrlButtons;
+
+typedef struct {
+	char name[64];
+	int elements[ROWS];
+	char altSymbols[ROWS][16];
+} ScaleMap;
 
 
 #endif /* DEFINITIONS_H_ */
