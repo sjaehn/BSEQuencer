@@ -154,9 +154,9 @@ bool BSEQuencer::makeMidi (const int64_t frames, const uint8_t status, const int
 		if (inKeyElement != ENOTE)
 		{
 			Pad* pd = &inKeys[key].output[row].pad;
-			if (((uint8_t)pd->ch) & chbits & 0x0F)
+			uint8_t outCh = (((uint8_t)pd->ch) & 0x0F);
+			if ((1 << (outCh - 1)) & chbits)
 			{
-				uint8_t outCh = pd->ch;
 				int scaleNr = controllers[SCALE];
 				int outNote;
 
@@ -171,9 +171,9 @@ bool BSEQuencer::makeMidi (const int64_t frames, const uint8_t status, const int
 				}
 
 				// Apply octave shift, note offset
-				outNote += pd->pitchOctave * 12 + controllers[CH + ((int)(pd->ch - 1)) * CH_SIZE + NOTE_OFFSET];
+				outNote += pd->pitchOctave * 12 + controllers[CH + (outCh - 1) * CH_SIZE + NOTE_OFFSET];
 
-				float outVelocity = ((float)inKeys[key].velocity) * pd->velocity * controllers[CH + ((int)(pd->ch) - 1) * CH_SIZE + VELOCITY];
+				float outVelocity = ((float)inKeys[key].velocity) * pd->velocity * controllers[CH + (outCh - 1) * CH_SIZE + VELOCITY];
 				if ((outNote >=0) && (outNote <= 127))
 				{
 					appendMidiMsg (frames, outCh, status, outNote, LIMIT (outVelocity, 0, 127));
