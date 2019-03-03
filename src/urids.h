@@ -33,6 +33,7 @@ typedef struct
 	LV2_URID ui_on;
 	LV2_URID ui_off;
 	LV2_URID state_pad;
+	LV2_URID state_scales;
 	LV2_URID notify_padEvent;
 	LV2_URID notify_pad;
 	LV2_URID notify_statusEvent;
@@ -70,6 +71,7 @@ void getURIs (LV2_URID_Map* m, BSEQuencerURIs* uris)
 	uris->ui_on = m->map(m->handle, BSEQUENCER_URI "#UIon");
 	uris->ui_off = m->map(m->handle, BSEQUENCER_URI "#UIoff");
 	uris->state_pad = m->map(m->handle, BSEQUENCER_URI "#STATEpad");
+	uris->state_scales = m->map(m->handle, BSEQUENCER_URI "#STATEscales");
 	uris->notify_padEvent = m->map(m->handle, BSEQUENCER_URI "#NOTIFYpadEvent");
 	uris->notify_pad = m->map(m->handle, BSEQUENCER_URI "#NOTIFYpad");
 	uris->notify_statusEvent = m->map(m->handle, BSEQUENCER_URI "#NOTIFYstatusEvent");

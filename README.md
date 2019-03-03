@@ -52,7 +52,6 @@ see https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer
 TODO
 ----
 * Direct value input via keyboard
-* User defined scales
 * Extend MIDI support
 * Sort MIDI output messages (bugfix)
 * Display ♭ notes for ♭ signature scales (bugfix C♭)

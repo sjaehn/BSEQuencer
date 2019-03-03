@@ -936,7 +936,35 @@ LV2_State_Status BSEQuencer::state_save (LV2_State_Store_Function store, LV2_Sta
 	}
 	store (handle, uris.state_pad, padDataString, strlen (padDataString) + 1, uris.atom_String, LV2_STATE_IS_POD);
 
-	// TODO Store user scales
+	// Store user scales
+	std::string mapDataString = "Scale data:\n";
+
+	for (int nr = NR_SYSTEM_SCALES; nr < NR_SYSTEM_SCALES + NR_USER_SCALES; ++nr)
+	{
+		mapDataString += "id:" + std::to_string (nr) + ";\n";
+
+		std::string namestr = std::string (scaleMaps[nr].name);
+		while (namestr.find ("\"") != std::string::npos) namestr.replace (namestr.find ("\""), 1, "&quot;");
+		mapDataString += "nm:\"" + namestr + "\";\n";
+
+		mapDataString += "el:";
+		for (int row = 0; row < ROWS; ++row) mapDataString += std::to_string (scaleMaps[nr].elements[row]) + ";";
+		mapDataString += "\n";
+
+		mapDataString += "as:";
+		for (int row = 0; row < ROWS; ++row)
+		{
+			std::string altstr = std::string (scaleMaps[nr].altSymbols[row]);
+			while (altstr.find ("\"") != std::string::npos) altstr.replace (namestr.find ("\""), 1, "&quot;");
+			mapDataString += "\"" + altstr + "\";";
+		}
+		mapDataString += "\n";
+
+		mapDataString += "sc:";
+		for (int el = 0; el < 12; ++el) mapDataString += std::to_string (scaleNotes[nr][el]) + ";";
+		mapDataString += "\n";
+	}
+	store (handle, uris.state_scales, mapDataString.c_str(), mapDataString.size() + 1, uris.atom_String, LV2_STATE_IS_POD);
 
 	//fprintf (stderr, "BSEQuencer.lv2: State saved.\n");
 	return LV2_STATE_SUCCESS;
@@ -945,15 +973,15 @@ LV2_State_Status BSEQuencer::state_save (LV2_State_Store_Function store, LV2_Sta
 LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve, LV2_State_Handle handle, uint32_t flags,
 			const LV2_Feature* const* features)
 {
-	fprintf (stderr, "BSEQuencer.lv2: state_restore ()\n");
+	//fprintf (stderr, "BSEQuencer.lv2: state_restore ()\n");
 
-	// Retrieve data
+	// Retrieve pad data
 	size_t   size;
 	uint32_t type;
 	uint32_t valflags;
-	const void* data = retrieve(handle, uris.state_pad, &size, &type, &valflags);
+	const void* padData = retrieve(handle, uris.state_pad, &size, &type, &valflags);
 
-	if (data && (type == uris.atom_String))
+	if (padData && (type == uris.atom_String))
 	{
 		// Stop MIDI out
 		stopMidiOut (0, ALL_CH);
@@ -963,7 +991,7 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 
 		// Restore pads
 		// Parse retrieved data
-		std::string padDataString = (char*) data;
+		std::string padDataString = (char*) padData;
 		const std::string keywords[5] = {"id:", "ch:", "oc:", "ve:", "du:"};
 		while (!padDataString.empty())
 		{
@@ -973,11 +1001,18 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 			if (strPos == std::string::npos) break;	// No "id:" found => end
 			if (strPos + 3 > padDataString.length()) break;	// Nothing more after id => end
 			padDataString.erase (0, strPos + 3);
-			int id = std::stof (padDataString, &nextPos);			// TODO exceptions
+			int id;
+			try {id = std::stof (padDataString, &nextPos);}
+			catch  (const std::exception& e)
+			{
+				fprintf (stderr, "BSEQuencer.lv2: Restore pad state incomplete. Can't parse ID from \"%s...\"", padDataString.substr (0, 63).c_str());
+				break;
+			}
+
 			if (nextPos > 0) padDataString.erase (0, nextPos);
 			if ((id < 0) || (id >= MAXSTEPS * ROWS))
 			{
-				fprintf (stderr, "BSEQuencer.lv2: Invalid matrix data block loaded with ID %i. Try to use the data before this id.\n", id);
+				fprintf (stderr, "BSEQuencer.lv2: Restore pad state incomplete. Invalid matrix data block loaded with ID %i. Try to use the data before this id.\n", id);
 				break;
 			}
 			int row = id % ROWS;
@@ -994,7 +1029,15 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 					break;
 				}
 				if (strPos > 0) padDataString.erase (0, strPos + 3);
-				float val = std::stof (padDataString, &nextPos);		// TODO exceptions
+				float val;
+				try {val = std::stof (padDataString, &nextPos);}
+				catch  (const std::exception& e)
+				{
+					fprintf (stderr, "BSEQuencer.lv2: Restore padstate incomplete. Can't parse %s from \"%s...\"",
+							 keywords[i].substr(0,2).c_str(), padDataString.substr (0, 63).c_str());
+					break;
+				}
+
 				if (nextPos > 0) padDataString.erase (0, nextPos);
 				switch (i) {
 				case 1: pads[row][step].ch = val;
@@ -1030,9 +1073,145 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 
 		// Force GUI notification
 		scheduleNotifyPadsToGui = true;
-
-		// TODO Restore user scales
 	}
+
+	// Restore user scales
+	const void* scaleData = retrieve(handle, uris.state_scales, &size, &type, &valflags);
+
+	if (scaleData && (type == uris.atom_String))
+	{
+		std::string scaleDataString = (char*) scaleData;
+		const std::string keywords[5] = {"id:", "nm:", "el:", "as:", "sc:"};
+		while (!scaleDataString.empty())
+		{
+			// Look for next "id:"
+			size_t strPos = scaleDataString.find ("id:");
+			size_t nextPos = 0;
+			if (strPos == std::string::npos) break;	// No "id:" found => end
+			if (strPos + 3 > scaleDataString.length()) break;	// Nothing more after id => end
+			scaleDataString.erase (0, strPos + 3);
+
+			int id;
+			try {id = std::stof (scaleDataString, &nextPos);}
+			catch  (const std::exception& e)
+			{
+				fprintf (stderr, "BSEQuencer.lv2: Restore scale map state incomplete. Can't parse ID from \"%s...\"", scaleDataString.substr (0, 63).c_str());
+				break;
+			}
+
+			if (nextPos > 0) scaleDataString.erase (0, nextPos);
+			if ((id < 0) || (id >= NR_SYSTEM_SCALES + NR_USER_SCALES))
+			{
+				fprintf (stderr, "BSEQuencer.lv2: Restore scale map state incomplete. Invalid scale data block loaded with ID %i. Try to use the data before this id.\n", id);
+				break;
+			}
+
+			// Look for scale data
+			for (int i = 1; i < 5; ++i)
+			{
+				strPos = scaleDataString.find (keywords[i]);
+				if (strPos == std::string::npos) continue;	// Keyword not found => next keyword
+				if (strPos + 3 >= scaleDataString.length())	// Nothing more after keyword => end
+				{
+					scaleDataString ="";
+					break;
+				}
+				if (strPos > 0) scaleDataString.erase (0, strPos + 3);
+				switch (i) {
+				case 1: {
+							nextPos = scaleDataString.find ("\"");
+							scaleDataString.erase (0, nextPos + 1);
+							nextPos = scaleDataString.find ("\"");
+							std::string namestr = scaleDataString.substr (0, nextPos);
+							while (namestr.find ("&quot") != std::string::npos) namestr.replace (namestr.find ("&quot;"), 1, "\"");
+							strncpy (scaleMaps[id].name, namestr.c_str(), 63);
+							scaleDataString.erase (0, nextPos + 1);
+						}
+						break;
+				case 2:	{
+							int el;
+
+							for (int i = 0; i < ROWS; ++i)
+							{
+								try
+								{
+									el = std::stoi (scaleDataString, &nextPos);
+								}
+								catch (const std::exception& e)
+								{
+									fprintf (stderr, "BSEQuencer.lv2: Restore scale map state incomplete. Incomplete scale data block loaded with ID %i.\n", id);
+									break;
+								}
+
+								scaleMaps[id].elements[i] = el;
+								scaleDataString.erase (0, nextPos);
+								nextPos = scaleDataString.find (";");
+								scaleDataString.erase (0, nextPos + 1);
+							}
+
+						}
+						break;
+				case 3: {
+							for (int i = 0; i < ROWS; ++i)
+							{
+								nextPos = scaleDataString.find ("\"");
+
+								// Check if a string is following or a keyword
+								size_t keyPos = std::string::npos;
+								for (int j = 0; j < 5; ++j)
+								{
+									size_t pos = scaleDataString.find (keywords[j]);
+									if (pos < keyPos) keyPos = pos;
+								}
+
+								// No string => break
+								if (keyPos < nextPos)
+								{
+									fprintf (stderr, "BSEQuencer.lv2: Restore scale map state incomplete. Incomplete scale data block loaded with ID %i.\n", id);
+									break;
+								}
+
+								// Copy string contents
+								scaleDataString.erase (0, nextPos + 1);
+								nextPos = scaleDataString.find ("\"");
+								std::string altstr = scaleDataString.substr (0, nextPos);
+								while (altstr.find ("&quot") != std::string::npos) altstr.replace (altstr.find ("&quot;"), 1, "\"");
+								strncpy (scaleMaps[id].altSymbols[i], altstr.c_str(), 15);
+								scaleDataString.erase (0, nextPos + 1);
+							}
+						}
+						break;
+				case 4:	{
+							int sc;
+
+							for (int i = 0; i < 12; ++i)
+							{
+								try
+								{
+									sc = std::stoi (scaleDataString, &nextPos);
+								}
+								catch (const std::exception& e)
+								{
+									fprintf (stderr, "BSEQuencer.lv2: Restore scale map state incomplete. Incomplete scale data block loaded with ID %i.\n", id);
+									break;
+								}
+
+								scaleNotes[id][i] = sc;
+								scaleDataString.erase (0, nextPos);
+								nextPos = scaleDataString.find (";");
+								scaleDataString.erase (0, nextPos + 1);
+							}
+						}
+						break;
+				default:break;
+				}
+			}
+		}
+	}
+
+	// Force GUI notification
+	scheduleNotifyStatusToGui = true;
+
 	return LV2_STATE_SUCCESS;
 }
 

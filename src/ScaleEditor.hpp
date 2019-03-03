@@ -378,6 +378,7 @@ void ScaleEditor::setScaleMap (const ScaleMap& scaleMap)
 		if (scaleMap.elements[i] & 0x0100)
 		{
 			nrNoteLabel[i].hide ();
+			nrListbox[i].setValue (scaleMap.elements[i] & 0x0FF);
 			nrListbox[i].show ();
 		}
 
