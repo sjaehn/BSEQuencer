@@ -30,6 +30,7 @@
 #include "BWidgets/Label.hpp"
 #include "BWidgets/PopupListBox.hpp"
 #include "BWidgets/TextButton.hpp"
+#include "CircledSymbol.hpp"
 
 class ScaleEditor : public BWidgets::ValueWidget
 {
@@ -52,6 +53,7 @@ protected:
 	static void symbolDragCallback (BEvents::Event* event);
 	static void listboxValueChangedCallback (BEvents::Event* event);
 	static void buttonClickCallback (BEvents::Event* event);
+	static void closeClickCallback (BEvents::Event* event);
 	static void pianoClickCallback (BEvents::Event* event);
 
 	BWidgets::Label nameLabel;
@@ -71,6 +73,7 @@ protected:
 	BWidgets::HPianoRoll piano;
 	BWidgets::TextButton cancelButton;
 	BWidgets::TextButton applyButton;
+	CircledSymbol closeSymbol;
 
 	int pianoRoot;
 	BScale scale;
@@ -115,6 +118,9 @@ protected:
 		{"lflabel",	 		{{"uses", STYLEPTR (&labelStyles)},
 							 {"font", STYLEPTR (&lfLabelFont)}}},
 		{"button", 			{{"font", STYLEPTR (&ctLabelFont)}}},
+		{"xsymbol",	 		{{"uses", STYLEPTR (&defaultStyles)},
+							 {"textcolors", STYLEPTR (&BColors::whites)},
+							 {"font", STYLEPTR (&ctLabelFont)}}},
 		{"menu",	 		{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
 							 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
 		{"menu/item",	 	{{"uses", STYLEPTR (&defaultStyles)},
@@ -153,6 +159,7 @@ ScaleEditor::ScaleEditor(const double x, const double y, const double width, con
 		cancelButton (320, 600, 60, 20, "button", "Cancel"),
 		applyButton (420, 600, 60, 20, "button", "Apply"),
 		piano (340, 440, 440, 120, "widget", 0, 35), pianoRoot (0),
+		closeSymbol (770, 10, 20, 20, "xsymbol", "✕"),
 		sz (width / 800 < height / 640 ? width / 800 : height / 640)
 
 
@@ -225,6 +232,7 @@ ScaleEditor::ScaleEditor(const double x, const double y, const double width, con
 
 	cancelButton.setCallbackFunction(BEvents::BUTTON_CLICK_EVENT, buttonClickCallback);
 	applyButton.setCallbackFunction(BEvents::BUTTON_CLICK_EVENT, buttonClickCallback);
+	closeSymbol.setCallbackFunction(BEvents::BUTTON_CLICK_EVENT, closeClickCallback);
 
 	piano.setKeysToggleable (true);
 	piano.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, pianoClickCallback);
@@ -245,6 +253,7 @@ ScaleEditor::ScaleEditor(const double x, const double y, const double width, con
 	cancelButton.applyTheme (theme);
 	applyButton.applyTheme (theme);
 	piano.applyTheme (theme);
+	closeSymbol.applyTheme (theme);
 	applyTheme (theme);
 
 	add (nameLabel);
@@ -258,6 +267,7 @@ ScaleEditor::ScaleEditor(const double x, const double y, const double width, con
 	add (cancelButton);
 	add (applyButton);
 	add (piano);
+	add (closeSymbol);
 
 	if (sz != 1.0) szScaleEditor();
 }
@@ -322,6 +332,7 @@ void ScaleEditor::szScaleEditor ()
 	cancelButton.moveTo (320 * sz, 600 * sz); cancelButton.resize (60 * sz, 20 * sz);
 	applyButton.moveTo (420 * sz, 600 * sz); applyButton.resize (60 * sz, 20 * sz);
 	piano.moveTo (340 * sz, 440 * sz); piano.resize (440 * sz, 120 * sz);
+	closeSymbol.moveTo (770 * sz, 10 * sz); closeSymbol.resize (20 * sz, 20 * sz);
 
 	for (int i = 0; i < ROWS; ++i)
 	{
@@ -348,6 +359,7 @@ void ScaleEditor::szScaleEditor ()
 	cancelButton.applyTheme (theme);
 	applyButton.applyTheme (theme);
 	piano.applyTheme (theme);
+	closeSymbol.applyTheme (theme);
 
 	for (int i = 0; i < ROWS; ++i)
 	{
@@ -557,6 +569,19 @@ void ScaleEditor::buttonClickCallback (BEvents::Event* event)
 
 			if (button == &(scaleEditor->cancelButton)) scaleEditor->setValue (-1.0);
 			else if (button == &(scaleEditor->applyButton)) scaleEditor->setValue (1.0);
+		}
+	}
+}
+
+void ScaleEditor::closeClickCallback (BEvents::Event* event)
+{
+	if ((event) && (event->getEventType() == BEvents::BUTTON_CLICK_EVENT) && (event->getWidget()))
+	{
+		CircledSymbol* button = (CircledSymbol*) event->getWidget();
+		if (button->getParent())
+		{
+			ScaleEditor* scaleEditor = (ScaleEditor*)(button->getParent());
+			scaleEditor->setValue (-1.0);
 		}
 	}
 }
