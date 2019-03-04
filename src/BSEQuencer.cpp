@@ -166,7 +166,7 @@ bool BSEQuencer::makeMidi (const int64_t frames, const uint8_t status, const int
 				// Scale: relative Notes obtained from actual scale, input pitched
 				else
 				{
-					int pitch = ((controllers[CH + ((int)(pd->ch - 1)) * CH_SIZE + PITCH]) ? inKeyElement : 0);
+					int pitch = ((controllers[CH + (outCh - 1) * CH_SIZE + PITCH]) ? inKeyElement : 0);
 					outNote = scale.getMIDInote((scaleMaps[scaleNr].elements[row] & 0x0FF) + pitch);
 				}
 
@@ -785,7 +785,7 @@ void BSEQuencer::run (uint32_t n_samples)
 				}
 			}
 
-			else fprintf (stderr, "BSEQuencer.lv2: Uninterpreted object in Control port (otype = %i, %s)\n", obj->body.otype,
+			else fprintf (stderr, "BSEQuencer.lv2: Ignored object in Control port (otype = %i, %s)\n", obj->body.otype,
 						  (unmap ? unmap->unmap (unmap->handle, obj->body.otype) : NULL));
 		}
 
@@ -827,7 +827,7 @@ void BSEQuencer::run (uint32_t n_samples)
 								key.note = note;
 								key.velocity = msg[2];
 								key.startPos = position + ((((double)ev->time.frames) - refFrame) / FRAMES_PER_BEAT) - (1 /STEPS_PER_BEAT);
-								inKeys.push_back (key);										// TODO Alternatively, push_front (key) ?
+								inKeys.push_back (key);
 							}
 						}
 						break;
@@ -847,11 +847,49 @@ void BSEQuencer::run (uint32_t n_samples)
 						}
 						break;
 
-					// TODO: interpretation of other MIDI signals, at least ...
+					// LV2_MIDI_MSG_CONTROLLER
+					case LV2_MIDI_MSG_CONTROLLER:
+						{
+							switch (note)
+							{
+
+							// LV2_MIDI_CTL_SUSTAIN: Forward to all outputs
+							case LV2_MIDI_CTL_SUSTAIN:
+								for (int ch = 1; ch <= NR_SEQUENCER_CHS; ++ch)
+								{
+									appendMidiMsg (ev->time.frames, ch, LV2_MIDI_MSG_CONTROLLER, LV2_MIDI_CTL_SUSTAIN, msg[2]);
+								}
+								break;
+
+
+							// LV2_MIDI_CTL_ALL_SOUNDS_OFF: Stop all outputs
+							case LV2_MIDI_CTL_ALL_SOUNDS_OFF:
+								for (size_t i = 0; i < inKeys.size; ++i) stopMidiOut (ev->time.frames, i, ALL_CH);
+								break;
+
+							// LV2_MIDI_CTL_ALL_NOTES_OFF: Stop all outputs and delete all keys
+							// As B.SEQuencer doesn't support hold, the result is the same as in LV2_MIDI_CTL_ALL_SOUNDS_OFF
+							case LV2_MIDI_CTL_ALL_NOTES_OFF:
+								while (!inKeys.empty())
+								{
+									stopMidiOut (ev->time.frames, inKeys.size - 1, ALL_CH);
+									inKeys.pop_back();
+								}
+								break;
+
+							// All other MIDI signals
+							default:
+								fprintf (stderr, "BSEQuencer.lv2: Ignored MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
+								break;
+							}
+
+						}
+						break;
+
 
 					// All other MIDI signals
 					default:
-						fprintf (stderr, "BSEQuencer.lv2: Uninterpreted MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
+						fprintf (stderr, "BSEQuencer.lv2: Ignored MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
 						break;
 					}
 				}
