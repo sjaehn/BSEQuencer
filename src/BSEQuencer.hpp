@@ -163,7 +163,6 @@ private:
 	float speed;
 	float beatsPerBar;
 	float barBeats;
-	uint32_t beatUnit;															// TODO Really needed ?
 	uint32_t outCapacity;
 
 	// Data derived from controllers or host

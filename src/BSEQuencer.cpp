@@ -23,7 +23,7 @@
 BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
 	map (NULL), inputPort (NULL), outputPort (NULL), outCapacity (0),
 	rate (samplerate), bar (0), bpm (120.0f), speed (1.0f), position (0.0), beatsPerBar (4.0f), barBeats (4),
-	beatUnit (4), key (defaultKey), scale (60, defaultScale), scheduleNotifyPadsToGui (false), scheduleNotifyStatusToGui (false),
+	key (defaultKey), scale (60, defaultScale), scheduleNotifyPadsToGui (false), scheduleNotifyStatusToGui (false),
 	scheduleNotifyScaleMapsToGui (true)
 
 {
@@ -707,10 +707,9 @@ void BSEQuencer::run (uint32_t n_samples)
 				if (controllers[MODE] == HOST_CONTROLLED)
 				{
 					bool scheduleStopMidi = false;
-					LV2_Atom *oBpm = NULL, *oSpeed = NULL, *oBpb = NULL, *oBu = NULL, *oBbeat = NULL, *oBar = NULL;
+					LV2_Atom *oBpm = NULL, *oSpeed = NULL, *oBpb = NULL, *oBbeat = NULL, *oBar = NULL;
 					lv2_atom_object_get (obj, uris.time_beatsPerMinute,  &oBpm,
 											  uris.time_beatsPerBar,  &oBpb,
-											  uris.time_beatUnit,  &oBu,
 											  uris.time_bar,  &oBar,
 											  uris.time_speed, &oSpeed,
 											  uris.time_barBeat, &oBbeat,
@@ -729,14 +728,6 @@ void BSEQuencer::run (uint32_t n_samples)
 					{
 						beatsPerBar = ((LV2_Atom_Float*)oBpb)->body;
 						//fprintf (stderr, "BSEQuencer.lv2: bpb set to %f.\n", beatsPerBar);
-						if (controllers[MODE] == HOST_CONTROLLED) scheduleStopMidi = true;
-					}
-
-					// BeatUnit changed?
-					if (oBu && (oBu->type == uris.atom_Int) && (beatUnit != ((LV2_Atom_Int*)oBu)->body) &&(((LV2_Atom_Int*)oBu)->body > 0))
-					{
-						beatUnit = ((LV2_Atom_Int*)oBu)->body;
-						//fprintf (stderr, "BSEQuencer.lv2: bu set to %i.\n", beatUnit);
 						if (controllers[MODE] == HOST_CONTROLLED) scheduleStopMidi = true;
 					}
 
@@ -868,7 +859,8 @@ void BSEQuencer::run (uint32_t n_samples)
 								break;
 
 							// LV2_MIDI_CTL_ALL_NOTES_OFF: Stop all outputs and delete all keys
-							// As B.SEQuencer doesn't support hold, the result is the same as in LV2_MIDI_CTL_ALL_SOUNDS_OFF
+							// As B.SEQuencer doesn't interpret LV2_MIDI_CTL_SUSTAIN itself, the
+							// result is the same as in LV2_MIDI_CTL_ALL_SOUNDS_OFF
 							case LV2_MIDI_CTL_ALL_NOTES_OFF:
 								while (!inKeys.empty())
 								{
