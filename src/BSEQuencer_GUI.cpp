@@ -420,7 +420,6 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 						if (vec->body.child_type == uris.atom_String)
 						{
 							memcpy (scaleMaps[iD].altSymbols, &vec->body + 1, 16 * 16);
-							drawCaption();
 						}
 					}
 
@@ -434,6 +433,8 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 							scaleNotes[iD] = *notes;
 						}
 					}
+
+					if (iD == controllers[SCALE]) drawCaption ();
 
 				}
 			}
