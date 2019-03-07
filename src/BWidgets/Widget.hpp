@@ -413,6 +413,26 @@ public:
 	bool isFocusable () const;
 
 	/**
+	 * Defines whether events emitted by this widget MAY be merged to precursor
+	 * events of the same type (and (optional) the same widget and (optional)
+	 * the same position, depending on the event type) or not.
+	 * This flag is ignored if merging doesn't make sense (e.g., in case of
+	 * BEvents::CLOSE_EVENT).
+	 * @param eventType	BEvents::EventType for which the status is defined
+	 * 		  status 	TRUE if the the events emitted by this widget and
+	 * 					specified by eventType may be merged, otherwise FALSE
+	 */
+	void setMergeable (const BEvents::EventType eventType, const bool status);
+
+	/**
+	 * Gets whether events emitted by this widget MAY be merged to precursor
+	 * events of the same type or not.
+	 * @return	TRUE if the the events emitted by this widget and specified by
+	 * 			eventType may be merged, otherwise FALSE
+	 */
+	bool isMergeable (const BEvents::EventType eventType) const;
+
+	/**
 	 * Calls a redraw of the widget and calls postRedisplay () if the the
 	 * Widget is visible.
 	 * This method should be called if the widgets properties are indirectly
@@ -587,6 +607,7 @@ protected:
 	bool draggable;
 	bool scrollable;
 	bool focusable;
+	std::array<bool, BEvents::EventType::NO_EVENT> mergeable;
 	Window* main_;
 	Widget* parent_;
 	std::vector <Widget*> children_;

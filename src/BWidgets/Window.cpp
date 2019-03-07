@@ -111,6 +111,109 @@ void Window::onExpose (BEvents::ExposeEvent* event)
 
 void Window::addEventToQueue (BEvents::Event* event)
 {
+	// Try to merge with precursor event
+	if ((event) && (!eventQueue.empty ()) && (eventQueue.back()))
+	{
+		BEvents::Event* precursor = eventQueue.back ();
+
+		// Check for mergeable events
+		// EXPOSE_EVENT
+		if ((event->getEventType() == BEvents::EXPOSE_EVENT) && (precursor->getEventType() == BEvents::EXPOSE_EVENT))
+		{
+			// Only merge if this Window allows merging (ignore children mergeable flags)
+			if (isMergeable(BEvents::EXPOSE_EVENT))
+			{
+				BEvents::ExposeEvent* firstEvent = (BEvents::ExposeEvent*) precursor;
+				BEvents::ExposeEvent* nextEvent = (BEvents::ExposeEvent*) event;
+
+				double first_x0 = firstEvent->getX();
+				double first_x1 = first_x0 + firstEvent->getWidth();
+				double first_y0 = firstEvent->getY();
+				double first_y1 = first_y0 + firstEvent->getHeight();
+
+				double next_x0 = nextEvent->getX();
+				double next_x1 = next_x0 + nextEvent->getWidth();
+				double next_y0 = nextEvent->getY();
+				double next_y1 = next_y0 + nextEvent->getHeight();
+
+				double x0 = (first_x0 < next_x0 ? first_x0 : next_x0);
+				double y0 = (first_y0 < next_y0 ? first_y0 : next_y0);
+				double x1 = (first_x1 > next_x1 ? first_x1 : next_x1);
+				double y1 = (first_y1 > next_y1 ? first_y1 : next_y1);
+
+				firstEvent->setX (x0);
+				firstEvent->setY (y0);
+				firstEvent->setWidth (x1 - x0);
+				firstEvent->setHeight (y1 - y0);
+
+				return;
+			}
+		}
+
+		// POINTER_MOTION_EVENT
+		else if ((event->getEventType() == BEvents::POINTER_MOTION_EVENT) && (precursor->getEventType() == BEvents::POINTER_MOTION_EVENT))
+		{
+			BEvents::PointerEvent* firstEvent = (BEvents::PointerEvent*) precursor;
+			BEvents::PointerEvent* nextEvent = (BEvents::PointerEvent*) event;
+
+			if (
+					(nextEvent->getWidget() == firstEvent->getWidget()) &&
+					(((Widget*)(nextEvent->getWidget()))->isMergeable(BEvents::POINTER_MOTION_EVENT)))
+			{
+				firstEvent->setX (nextEvent->getX());
+				firstEvent->setY (nextEvent->getY());
+				firstEvent->setDeltaX (nextEvent->getDeltaX() + firstEvent->getDeltaX());
+				firstEvent->setDeltaY (nextEvent->getDeltaY() + firstEvent->getDeltaY());
+
+				return;
+			}
+		}
+
+		// POINTER_DRAG_EVENT
+		else if ((event->getEventType() == BEvents::POINTER_DRAG_EVENT) && (precursor->getEventType() == BEvents::POINTER_DRAG_EVENT))
+		{
+			BEvents::PointerEvent* firstEvent = (BEvents::PointerEvent*) precursor;
+			BEvents::PointerEvent* nextEvent = (BEvents::PointerEvent*) event;
+
+			if (
+					(nextEvent->getWidget() == firstEvent->getWidget()) &&
+					(((Widget*)(nextEvent->getWidget()))->isMergeable(BEvents::POINTER_DRAG_EVENT)) &&
+					(nextEvent->getButton() == firstEvent->getButton()) &&
+					(nextEvent->getXOrigin() == firstEvent->getXOrigin()) &&
+					(nextEvent->getYOrigin() == firstEvent->getYOrigin())
+				)
+			{
+				firstEvent->setX (nextEvent->getX());
+				firstEvent->setY (nextEvent->getY());
+				firstEvent->setDeltaX (nextEvent->getDeltaX() + firstEvent->getDeltaX());
+				firstEvent->setDeltaY (nextEvent->getDeltaY() + firstEvent->getDeltaY());
+
+				return;
+			}
+		}
+
+
+		// WHEEL_SCROLL_EVENT
+		else if ((event->getEventType() == BEvents::WHEEL_SCROLL_EVENT) && (precursor->getEventType() == BEvents::WHEEL_SCROLL_EVENT))
+		{
+			BEvents::WheelEvent* firstEvent = (BEvents::WheelEvent*) precursor;
+			BEvents::WheelEvent* nextEvent = (BEvents::WheelEvent*) event;
+
+			if (
+					(nextEvent->getWidget() == firstEvent->getWidget()) &&
+					(((Widget*)(nextEvent->getWidget()))->isMergeable(BEvents::WHEEL_SCROLL_EVENT)) &&
+					(nextEvent->getX() == firstEvent->getX()) &&
+					(nextEvent->getY() == firstEvent->getY())
+				)
+			{
+				firstEvent->setDeltaX (nextEvent->getDeltaX() + firstEvent->getDeltaX());
+				firstEvent->setDeltaY (nextEvent->getDeltaY() + firstEvent->getDeltaY());
+
+				return;
+			}
+		}
+	}
+
 	eventQueue.push_back (event);
 }
 
@@ -142,120 +245,6 @@ double Window::getInputY (BEvents::InputDevice device) const
 	else return 0.0;
 }
 
-void Window::mergeEvents ()
-{
-	if ((eventQueue.size () > 1) && (eventQueue.front()))
-	{
-		BEvents::Event* event = eventQueue.front ();
-
-		// Check for mergeable events
-		// EXPOSE_EVENT
-		if (event->getEventType() == BEvents::EXPOSE_EVENT)
-		{
-			BEvents::ExposeEvent* firstEvent = (BEvents::ExposeEvent*) event;
-			while ((eventQueue.size () > 1) && (eventQueue[1]))
-			{
-				BEvents::ExposeEvent* nextEvent = (BEvents::ExposeEvent*) eventQueue[1];
-				if (nextEvent->getEventType() == BEvents::EXPOSE_EVENT)
-				{
-					double first_x0 = firstEvent->getX();
-					double first_x1 = first_x0 + firstEvent->getWidth();
-					double first_y0 = firstEvent->getY();
-					double first_y1 = first_y0 + firstEvent->getHeight();
-
-					double next_x0 = nextEvent->getX();
-					double next_x1 = next_x0 + nextEvent->getWidth();
-					double next_y0 = nextEvent->getY();
-					double next_y1 = next_y0 + nextEvent->getHeight();
-
-					double x0 = (first_x0 < next_x0 ? first_x0 : next_x0);
-					double y0 = (first_y0 < next_y0 ? first_y0 : next_y0);
-					double x1 = (first_x1 > next_x1 ? first_x1 : next_x1);
-					double y1 = (first_y1 > next_y1 ? first_y1 : next_y1);
-
-					firstEvent->setX (x0);
-					firstEvent->setY (y0);
-					firstEvent->setWidth (x1 - x0);
-					firstEvent->setHeight (y1 - y0);
-					eventQueue.erase (eventQueue.begin() + 1);
-				}
-
-				else break;
-			}
-		}
-
-		// POINTER_MOTION_EVENT
-		else if (event->getEventType() == BEvents::POINTER_MOTION_EVENT)
-		{
-			BEvents::PointerEvent* firstEvent = (BEvents::PointerEvent*) event;
-			while ((eventQueue.size () > 1) && (eventQueue[1]))
-			{
-				BEvents::PointerEvent* nextEvent = (BEvents::PointerEvent*) eventQueue[1];
-				if ((nextEvent->getEventType() == BEvents::POINTER_MOTION_EVENT) && (nextEvent->getWidget() == firstEvent->getWidget()))
-				{
-					firstEvent->setX (nextEvent->getX());
-					firstEvent->setY (nextEvent->getY());
-					firstEvent->setDeltaX (nextEvent->getDeltaX() + firstEvent->getDeltaX());
-					firstEvent->setDeltaY (nextEvent->getDeltaY() + firstEvent->getDeltaY());
-					eventQueue.erase (eventQueue.begin() + 1);
-				}
-
-				else break;
-			}
-		}
-
-		// POINTER_DRAG_EVENT
-		else if (event->getEventType() == BEvents::POINTER_DRAG_EVENT)
-		{
-			BEvents::PointerEvent* firstEvent = (BEvents::PointerEvent*) event;
-			while ((eventQueue.size () > 1) && (eventQueue[1]))
-			{
-				BEvents::PointerEvent* nextEvent = (BEvents::PointerEvent*) eventQueue[1];
-				if (
-						(nextEvent->getEventType() == BEvents::POINTER_DRAG_EVENT) &&
-						(nextEvent->getWidget() == firstEvent->getWidget()) &&
-						(nextEvent->getButton() == firstEvent->getButton()) &&
-						(nextEvent->getXOrigin() == firstEvent->getXOrigin()) &&
-						(nextEvent->getYOrigin() == firstEvent->getYOrigin())
-					)
-				{
-					firstEvent->setX (nextEvent->getX());
-					firstEvent->setY (nextEvent->getY());
-					firstEvent->setDeltaX (nextEvent->getDeltaX() + firstEvent->getDeltaX());
-					firstEvent->setDeltaY (nextEvent->getDeltaY() + firstEvent->getDeltaY());
-					eventQueue.erase (eventQueue.begin() + 1);
-				}
-
-				else break;
-			}
-		}
-
-
-		// WHEEL_SCROLL_EVENT
-		else if (event->getEventType() == BEvents::WHEEL_SCROLL_EVENT)
-		{
-			BEvents::WheelEvent* firstEvent = (BEvents::WheelEvent*) event;
-			while ((eventQueue.size () > 1) && (eventQueue[1]))
-			{
-				BEvents::WheelEvent* nextEvent = (BEvents::WheelEvent*) eventQueue[1];
-				if (
-						(nextEvent->getEventType() == BEvents::WHEEL_SCROLL_EVENT) &&
-						(nextEvent->getWidget() == firstEvent->getWidget()) &&
-						(nextEvent->getX() == firstEvent->getX()) &&
-						(nextEvent->getY() == firstEvent->getY())
-					)
-				{
-					firstEvent->setDeltaX (nextEvent->getDeltaX() + firstEvent->getDeltaX());
-					firstEvent->setDeltaY (nextEvent->getDeltaY() + firstEvent->getDeltaY());
-					eventQueue.erase (eventQueue.begin() + 1);
-				}
-
-				else break;
-			}
-		}
-	}
-}
-
 void Window::handleEvents ()
 {
 	puglProcessEvents (view_);
@@ -263,8 +252,6 @@ void Window::handleEvents ()
 
 	while (!eventQueue.empty ())
 	{
-		mergeEvents ();
-
 		BEvents::Event* event = eventQueue.front ();
 		if (event)
 		{

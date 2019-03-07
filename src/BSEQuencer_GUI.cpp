@@ -174,6 +174,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	focus->applyTheme (theme);
 	padSurface.setCallbackFunction (BEvents::FOCUS_IN_EVENT, padsFocusedCallback);
 	padSurface.setCallbackFunction (BEvents::FOCUS_OUT_EVENT, padsFocusedCallback);
+	padSurface.setMergeable (BEvents::POINTER_DRAG_EVENT, false);
 
 	helpLabel.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, helpPressedCallback);
 	propertiesScaleEditLabel.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, editPressedCallback);

@@ -33,6 +33,11 @@ Widget::Widget(const double x, const double y, const double width, const double 
 		main_ (nullptr), parent_ (nullptr), children_ (), border_ (BWIDGETS_DEFAULT_BORDER), background_ (BWIDGETS_DEFAULT_BACKGROUND),
 		name_ (name), widgetState (BWIDGETS_DEFAULT_STATE)
 {
+	mergeable.fill (false);
+	mergeable[BEvents::EXPOSE_EVENT] = true;
+	mergeable[BEvents::POINTER_MOTION_EVENT] = true;
+	mergeable[BEvents::POINTER_DRAG_EVENT] = true;
+	mergeable[BEvents::WHEEL_SCROLL_EVENT] = true;
 	cbfunction.fill (Widget::defaultCallback);
 	cbfunction[BEvents::EventType::POINTER_DRAG_EVENT] = Widget::dragAndDropCallback;
 	cbfunction[BEvents::EventType::FOCUS_IN_EVENT] = Widget::focusInCallback;
@@ -44,7 +49,7 @@ Widget::Widget(const double x, const double y, const double width, const double 
 Widget::Widget (const Widget& that) :
 		extensionData (that.extensionData), x_ (that.x_), y_ (that.y_), width_ (that.width_), height_ (that.height_),
 		visible (that.visible), clickable (that.clickable), draggable (that.draggable), scrollable (that.scrollable),
-		focusable (that.focusable), focusWidget (nullptr),
+		focusable (that.focusable), focusWidget (nullptr), mergeable (that.mergeable),
 		main_ (nullptr), parent_ (nullptr), children_ (), border_ (that.border_), background_ (that.background_), name_ (that.name_),
 		cbfunction (that.cbfunction), widgetState (that.widgetState)
 {
@@ -83,6 +88,7 @@ Widget& Widget::operator= (const Widget& that)
 	scrollable = that.scrollable;
 	focusable = that.focusable;
 	focusWidget = nullptr;
+	mergeable = that.mergeable;
 	border_ = that.border_;
 	background_ = that.background_;
 	cbfunction = that.cbfunction;
@@ -413,6 +419,10 @@ bool Widget::isScrollable () const {return scrollable;}
 void Widget::setFocusable (const bool status) {focusable = status;}
 
 bool Widget::isFocusable () const {return focusable;}
+
+void Widget::setMergeable (const BEvents::EventType eventType, const bool status) {mergeable[eventType] = status;}
+
+bool Widget::isMergeable (const BEvents::EventType eventType) const {return mergeable[eventType];}
 
 void Widget::update ()
 {
