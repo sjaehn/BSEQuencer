@@ -498,7 +498,7 @@ void Widget::dragAndDropCallback (BEvents::Event* event)
 {
 	if (event && event->getWidget())
 	{
-		Widget* w = (Widget*) (event->getWidget());
+		Widget* w = event->getWidget();
 		BEvents::PointerEvent* pev = (BEvents::PointerEvent*) event;
 
 		w->moveTo (w->x_ + pev->getDeltaX (), w->y_ + pev->getDeltaY ());
@@ -509,7 +509,7 @@ void Widget::focusInCallback (BEvents::Event* event)
 {
 	if (event && event->getWidget())
 	{
-		Widget* w = (Widget*) (event->getWidget());
+		Widget* w = event->getWidget();
 		BEvents::FocusEvent* focusEvent = (BEvents::FocusEvent*) event;
 		if (w->getMainWindow() && w->getFocusWidget())
 		{
@@ -530,7 +530,7 @@ void Widget::focusOutCallback (BEvents::Event* event)
 {
 	if (event && event->getWidget())
 	{
-		Widget* w = (Widget*) (event->getWidget());
+		Widget* w = event->getWidget();
 		BEvents::FocusEvent* focusEvent = (BEvents::FocusEvent*) event;
 		if (w->getFocusWidget() && w->getMainWindow())
 		{

@@ -185,6 +185,10 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	widgetBg.loadFillFromCairoSurface (bgImageSurface);
 	applyTheme (theme);
 
+	toolOctaveDial.setHardChangeable (false);
+	toolVelocityDial.setHardChangeable (false);
+	toolDurationDial.setHardChangeable (false);
+
 	modeAutoplayBpmLabel.hide ();
 	modeAutoplayBpmSlider.hide ();
 	modeAutoplayBpbLabel.hide ();
@@ -197,6 +201,8 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i) {
 		chBoxes[i].chLabel.setState (BColors::ACTIVE);
 		drawButton (chBoxes[i].chSymbol.getDrawingSurface(), 0, 0, 20, 20, chButtonStyles[i + 1]);
+		chBoxes[i].noteOffsetDial.setHardChangeable (false);
+		chBoxes[i].velocityDial.setHardChangeable (false);
 	}
 
 
@@ -777,7 +783,7 @@ void BSEQuencer_GUI::helpPressedCallback (BEvents::Event* event) {system(OPEN_CM
 
 void BSEQuencer_GUI::editPressedCallback (BEvents::Event* event)
 {
-	if ((event) && (event->getWidget ()) && (((BWidgets::Widget*)(event->getWidget()))->getMainWindow()))
+	if ((event) && (event->getWidget ()) && (event->getWidget()->getMainWindow()))
 	{
 		BSEQuencer_GUI* ui = (BSEQuencer_GUI*)(((BWidgets::Widget*)(event->getWidget()))->getMainWindow());
 		int mapNr = ui->propertiesScaleListBox.getValue();
@@ -796,7 +802,7 @@ void BSEQuencer_GUI::editPressedCallback (BEvents::Event* event)
 
 void BSEQuencer_GUI::editorCloseCallback (BEvents::Event* event)
 {
-	if ((event) && (event->getWidget ()) && (((BWidgets::Widget*)(event->getWidget()))->getMainWindow()))
+	if ((event) && (event->getWidget ()) && (event->getWidget()->getMainWindow()))
 	{
 		ScaleEditor* scaleEditor = (ScaleEditor*)(event->getWidget());
 		BSEQuencer_GUI* ui = (BSEQuencer_GUI*)(scaleEditor->getMainWindow());
@@ -820,7 +826,7 @@ void BSEQuencer_GUI::editorCloseCallback (BEvents::Event* event)
 
 void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 {
-	if ((event) && (event->getWidget ()) && (((BWidgets::Widget*)(event->getWidget()))->getMainWindow()) &&
+	if ((event) && (event->getWidget ()) && (event->getWidget()->getMainWindow()) &&
 		((event->getEventType () == BEvents::BUTTON_PRESS_EVENT) ||
 		 (event->getEventType () == BEvents::BUTTON_RELEASE_EVENT) ||
 		 (event->getEventType () == BEvents::POINTER_DRAG_EVENT)))
@@ -934,7 +940,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 
 void BSEQuencer_GUI::padsScrolledCallback (BEvents::Event* event)
 {
-	if ((event) && (event->getWidget ()) && (((BWidgets::Widget*)(event->getWidget()))->getMainWindow()) &&
+	if ((event) && (event->getWidget ()) && (event->getWidget()->getMainWindow()) &&
 		((event->getEventType () == BEvents::WHEEL_SCROLL_EVENT)))
 	{
 		BWidgets::DrawingSurface* widget = (BWidgets::DrawingSurface*) event->getWidget ();
@@ -964,7 +970,7 @@ void BSEQuencer_GUI::padsScrolledCallback (BEvents::Event* event)
 
 void BSEQuencer_GUI::padsFocusedCallback (BEvents::Event* event)
 {
-	if ((event) && (event->getWidget ()) && (((BWidgets::Widget*)(event->getWidget()))->getMainWindow()))
+	if ((event) && (event->getWidget ()) && (event->getWidget()->getMainWindow()))
 	{
 		BWidgets::DrawingSurface* widget = (BWidgets::DrawingSurface*) event->getWidget ();
 		BSEQuencer_GUI* ui = (BSEQuencer_GUI*) widget->getMainWindow();

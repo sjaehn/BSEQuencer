@@ -20,6 +20,11 @@
 
 #include <stdint.h>
 
+namespace BWidgets
+{
+class Widget;	// Forward declaration
+}
+
 namespace BEvents
 {
 
@@ -66,13 +71,13 @@ class Event
 {
 public:
 	Event ();
-	Event (void* widget, const EventType type);
+	Event (BWidgets::Widget* widget, const EventType type);
 
 	/**
 	 * Gets a pointer to the widget which caused the event.
 	 * @return Pointer to the widget
 	 */
-	void* getWidget ();
+	BWidgets::Widget* getWidget ();
 
 	/**
 	 * Gets the type of the event
@@ -81,7 +86,7 @@ public:
 	EventType getEventType () const;
 
 protected:
-	void* eventWidget;
+	BWidgets::Widget* eventWidget;
 	EventType eventType;
 };
 /*
@@ -102,7 +107,7 @@ class ExposeEvent : public Event
 {
 public:
 	ExposeEvent ();
-	ExposeEvent (void* widget, const EventType type, const double x, const double y, const double width, const double heigth);
+	ExposeEvent (BWidgets::Widget* widget, const EventType type, const double x, const double y, const double width, const double heigth);
 
 	/**
 	 * Redefines the x coordinate of the output region for the expose event
@@ -177,7 +182,7 @@ class PointerEvent : public Event
 {
 public:
 	PointerEvent ();
-	PointerEvent (void* widget, const EventType type, const double x, const double y, const double xOrigin, const double yOrigin,
+	PointerEvent (BWidgets::Widget* widget, const EventType type, const double x, const double y, const double xOrigin, const double yOrigin,
 				  const double deltaX, const double deltaY, const InputDevice button);
 
 	/**
@@ -297,7 +302,7 @@ class WheelEvent : public Event
 {
 public:
 	WheelEvent ();
-	WheelEvent (void* widget, const EventType type, const double x, const double y, const double deltaX, const double deltaY);
+	WheelEvent (BWidgets::Widget* widget, const EventType type, const double x, const double y, const double deltaX, const double deltaY);
 
 	/**
 	 * Redefines the pointers x coordinate
@@ -372,7 +377,7 @@ class ValueChangedEvent : public Event
 {
 public:
 	ValueChangedEvent ();
-	ValueChangedEvent (void* widget, const double val);
+	ValueChangedEvent (BWidgets::Widget* widget, const double val);
 
 	/**
 	 * Redefines the value exposed by the event. This method doesn't change the
@@ -404,7 +409,7 @@ class FocusEvent : public Event
 {
 public:
 	FocusEvent ();
-	FocusEvent (void* widget, const EventType type, const double x, const double y);
+	FocusEvent (BWidgets::Widget* widget, const EventType type, const double x, const double y);
 
 	/**
 	 * Redefines the pointers x coordinate

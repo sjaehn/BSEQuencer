@@ -158,7 +158,7 @@ void Window::addEventToQueue (BEvents::Event* event)
 
 			if (
 					(nextEvent->getWidget() == firstEvent->getWidget()) &&
-					(((Widget*)(nextEvent->getWidget()))->isMergeable(BEvents::POINTER_MOTION_EVENT)))
+					(nextEvent->getWidget()->isMergeable(BEvents::POINTER_MOTION_EVENT)))
 			{
 				firstEvent->setX (nextEvent->getX());
 				firstEvent->setY (nextEvent->getY());
@@ -177,7 +177,7 @@ void Window::addEventToQueue (BEvents::Event* event)
 
 			if (
 					(nextEvent->getWidget() == firstEvent->getWidget()) &&
-					(((Widget*)(nextEvent->getWidget()))->isMergeable(BEvents::POINTER_DRAG_EVENT)) &&
+					(nextEvent->getWidget()->isMergeable(BEvents::POINTER_DRAG_EVENT)) &&
 					(nextEvent->getButton() == firstEvent->getButton()) &&
 					(nextEvent->getXOrigin() == firstEvent->getXOrigin()) &&
 					(nextEvent->getYOrigin() == firstEvent->getYOrigin())
@@ -201,7 +201,7 @@ void Window::addEventToQueue (BEvents::Event* event)
 
 			if (
 					(nextEvent->getWidget() == firstEvent->getWidget()) &&
-					(((Widget*)(nextEvent->getWidget()))->isMergeable(BEvents::WHEEL_SCROLL_EVENT)) &&
+					(nextEvent->getWidget()->isMergeable(BEvents::WHEEL_SCROLL_EVENT)) &&
 					(nextEvent->getX() == firstEvent->getX()) &&
 					(nextEvent->getY() == firstEvent->getY())
 				)
@@ -255,7 +255,7 @@ void Window::handleEvents ()
 		BEvents::Event* event = eventQueue.front ();
 		if (event)
 		{
-			Widget* widget = (Widget*) event->getWidget ();
+			Widget* widget = event->getWidget ();
 			if (widget)
 			{
 				BEvents::EventType eventType = event->getEventType ();
@@ -341,7 +341,7 @@ void Window::translatePuglEvent (PuglView* view, const PuglEvent* event)
 	// All PUGL events cause FOCUS_OUT
 	if (w->pointer.widget && w->pointer.widget->getFocusWidget() && w->pointer.widget->getFocusWidget()->isFocused())
 	{
-		w->addEventToQueue(new BEvents::FocusEvent ((void*)w->pointer.widget,
+		w->addEventToQueue(new BEvents::FocusEvent (w->pointer.widget,
 													BEvents::FOCUS_OUT_EVENT,
 													w->pointer.x - w->pointer.widget->getOriginX (),
 													w->pointer.y - w->pointer.widget->getOriginY ()));

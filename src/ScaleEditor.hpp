@@ -454,7 +454,7 @@ void ScaleEditor::symbolDragCallback (BEvents::Event* event)
 	if ((!event) || (!event->getWidget())) return;
 
 	BEvents::PointerEvent* pointerEvent = (BEvents::PointerEvent*) event;
-	Widget* symbolWidget = (Widget*)(pointerEvent->getWidget());
+	Widget* symbolWidget = pointerEvent->getWidget();
 	if (symbolWidget->getParent())
 	{
 		ScaleEditor* scaleEditor = (ScaleEditor*)(symbolWidget->getParent());
@@ -535,7 +535,7 @@ void ScaleEditor::symbolDragCallback (BEvents::Event* event)
 
 void ScaleEditor::listboxValueChangedCallback (BEvents::Event* event)
 {
-	if ((!event) || (!event->getWidget()) || (!((Widget*)(event->getWidget()))->getParent())) return;
+	if ((!event) || (!event->getWidget()) || (!event->getWidget()->getParent())) return;
 
 	BWidgets::PopupListBox* listbox = (BWidgets::PopupListBox*)(event->getWidget());
 	ScaleEditor* scaleEditor = (ScaleEditor*)(listbox->getParent());

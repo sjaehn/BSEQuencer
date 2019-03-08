@@ -36,7 +36,7 @@ public:
 		if (event && (event->getEventType () == BEvents::EventType::BUTTON_PRESS_EVENT) && event->getWidget ())
 		{
 			BEvents::PointerEvent* ev = (BEvents::PointerEvent*) event;
-			Widget* w = (Widget*) ev->getWidget ();
+			Widget* w = ev->getWidget ();
 			if (w->getParent ())
 			{
 				ButtonBox* p = (ButtonBox*) w->getParent ();

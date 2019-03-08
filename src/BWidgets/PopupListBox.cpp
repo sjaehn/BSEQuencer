@@ -180,13 +180,13 @@ void PopupListBox::handleDownButtonClicked (BEvents::Event* event)
 	if (event && (event->getEventType () == BEvents::EventType::BUTTON_PRESS_EVENT) && event->getWidget ())
 	{
 		BEvents::PointerEvent* ev = (BEvents::PointerEvent*) event;
-		Widget* w = (Widget*) ev->getWidget ();
+		Widget* w = ev->getWidget ();
 		if (w->getParent ())
 		{
 			PopupListBox* p = (PopupListBox*) w->getParent ();
 			if (p->getParent ())
 			{
-				if (w == (Widget*) &(p->downButton)) p->onButtonPressed (ev);
+				if (w == &(p->downButton)) p->onButtonPressed (ev);
 			}
 		}
 	}
