@@ -538,6 +538,7 @@ void BSEQuencer::run (uint32_t n_samples)
 		CONTROLLER_CHANGED(NR_OF_STEPS) ||
 		CONTROLLER_CHANGED(PLAY) ||
 		CONTROLLER_CHANGED(MODE) ||
+		CONTROLLER_CHANGED(SCALE) ||
 		CONTROLLER_CHANGED(ROOT) ||
 		CONTROLLER_CHANGED(SIGNATURE) ||
 		CONTROLLER_CHANGED(OCTAVE))
@@ -561,7 +562,7 @@ void BSEQuencer::run (uint32_t n_samples)
 		 CONTROLLER_CHANGED(SIGNATURE) ||
 		 CONTROLLER_CHANGED(OCTAVE)))
 	{
-		int newScaleNr = LIMIT (*new_controllers[SCALE], 1, scaleNotes.size ());
+		int newScaleNr = LIMIT (*new_controllers[SCALE], 0, scaleNotes.size () - 1);
 		scale.setScale(scaleNotes[newScaleNr]);
 		scale.setRoot (*new_controllers[ROOT] + *new_controllers[SIGNATURE] + (*new_controllers[OCTAVE] + 1) * 12);
 	}
@@ -695,6 +696,17 @@ void BSEQuencer::run (uint32_t n_samples)
 						{
 							BScaleNotes* notes = (BScaleNotes*) (&vec->body + 1);
 							scaleNotes[iD] = *notes;
+						}
+					}
+
+					// Playing scale changed => update and stop output
+					if (iD == controllers[SCALE])
+					{
+						scale.setScale(scaleNotes[iD]);
+						for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
+						{
+							if (!midiStopped[i]) stopMidiOut(0, 1 << i);
+							midiStopped[i] = true;
 						}
 					}
 				}
