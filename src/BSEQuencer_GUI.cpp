@@ -857,7 +857,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 				if (ui->controllerWidgets[SELECTION_CH]->getValue() <= NR_SEQUENCER_CHS)
 				{
 					//std::cerr << "BSEQuencer.lv2#GUI: Pad CH at " << row << ", " << step << "\n";
-					Pad props (ui->controllerWidgets[SELECTION_CH]->getValue() + (((int)pd->ch) & 0xF0),
+					Pad props (ui->controllerWidgets[SELECTION_CH]->getValue() + pdctrl * 0x10,
 							   ui->controllerWidgets[SELECTION_OCTAVE]->getValue(),
 							   ui->controllerWidgets[SELECTION_VELOCITY]->getValue(),
 							   ui->controllerWidgets[SELECTION_DURATION]->getValue());
@@ -867,8 +867,8 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 					{
 						ui->tempTool = true;
 						ui->tempToolCh = ui->controllerWidgets[SELECTION_CH]->getValue();
-						props.ch = 0;
-						ui->controllerWidgets[SELECTION_CH]->setValue(props.ch);
+						props.ch = pdctrl * 0x10;
+						ui->controllerWidgets[SELECTION_CH]->setValue (0);
 					}
 
 					// Overwrite if new data
