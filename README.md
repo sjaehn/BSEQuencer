@@ -52,7 +52,6 @@ see https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer
 TODO
 ----
 * Sort MIDI output messages (bugfix)
-* Display ♭ notes for ♭ signature scales (bugfix C♭)
 * Stability (Note: **This plugin is experimental, yet. Not for production!**)
 * Testing
 * Bugfixes

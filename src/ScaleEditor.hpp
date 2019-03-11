@@ -179,10 +179,8 @@ ScaleEditor::ScaleEditor(const double x, const double y, const double width, con
 	BItems::Item item;
 	for (int i = 0; i < 120; ++i)
 	{
-		char chrNote[8];
-		sc.getSymbol(chrNote, i % 12);
 		int octave = (i / 12) - 1;
-		std::string strNote = std::to_string(i) + " (" + std::string (chrNote) + (octave != 0 ? std::to_string(octave) : "") + ")";
+		std::string strNote = std::to_string(i) + " (" + sc.getSymbol (i) + (octave != 0 ? std::to_string(octave) : "") + ")";
 		item.value = i;
 		item.string = strNote;
 		noteSymbols.push_back (item);
@@ -440,12 +438,7 @@ void ScaleEditor::updateAltSymbol (int nr)
 {
 	std::string symbol;
 	if (scaleMap.altSymbols[nr][0] != '\0') symbol = std::string (scaleMap.altSymbols[nr]);
-	else if (!(scaleMap.elements[nr] & 0x0100))
-	{
-		char csymbol[8];
-		scale.getSymbol (csymbol, scaleMap.elements[nr]);
-		symbol = std::string (csymbol);
-	}
+	else if (!(scaleMap.elements[nr] & 0x0100)) symbol = scale.getSymbol (scaleMap.elements[nr]);
 	nrAltSymbolLabel[nr].setText (symbol);
 }
 

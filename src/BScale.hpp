@@ -22,8 +22,8 @@
 #define BSCALE_HPP_
 
 #include <cstdint>
-#include <cstring>
 #include <array>
+#include <string>
 #include <cmath>
 
 #define ENOTE -128
@@ -47,20 +47,11 @@ typedef std::array<int, 12> BScaleNotes;
 
 const BScaleNotes defaultScale = {CROMATICSCALE};
 
-typedef enum {
-	FLAT			= -1,
-	NATURAL			= 0,
-	SHARP			= 1
-} SignatureIndex;
-
-const char flatSymbol[] = "♭";
-const char sharpSymbol[] = "♯";
 const char noteSymbols[12] = {'C', 0, 'D', 0, 'E', 'F', 0, 'G', 0, 'A', 0, 'B'};
 
 class BScale {
 public:
 	BScale (const int root, const BScaleNotes& elementarray);
-	BScale (const int root, const SignatureIndex signature, const BScaleNotes& elementarray);
 	void setRoot (int root);
 	int getRoot ();
 	void setScale (BScaleNotes& elementarray);
@@ -68,24 +59,84 @@ public:
 	int getMIDInote (int element);
 	int getElement (int midiNote);
 	int getSize ();
-	void getSymbol (char* symbol, int element);
+	std::string getSymbol (int element);
 
 protected:
+	void createSymbols ();
 	BScaleNotes scale;
 	int rootNote;
-	SignatureIndex signature;
+	char symbols[12][6];
 };
 
-BScale::BScale (const int root, const BScaleNotes& elementarray) : BScale (root, NATURAL, elementarray) {}
-BScale::BScale (const int root, const SignatureIndex signature, const BScaleNotes& elementarray) :
-	rootNote (root), signature (signature), scale (elementarray) {}
+BScale::BScale (const int root, const BScaleNotes& elementarray) :
+	rootNote (root), scale (elementarray)
+{
+	memset (symbols, 0, sizeof symbols);
+	createSymbols ();
+}
 
+void BScale::createSymbols ()
+{
+	// Build a flat scale and a sharp scale
+	char flatSymbols[12][6];
+	char sharpSymbols[12][6];
+	memset (flatSymbols, 0, sizeof flatSymbols);
+	memset (sharpSymbols, 0, sizeof sharpSymbols);
+	for (int i = 0; (i < 12) && (scale[i] != ENOTE); ++i)
+	{
+		int midiNote = getMIDInote (i);
+		if ((midiNote >= 0) && (midiNote <= 127))
+		{
+			// Note without signature => take this symbol
+			if (noteSymbols[midiNote % 12])
+			{
+				flatSymbols[i][0] = noteSymbols[midiNote % 12];
+				sharpSymbols[i][0] = noteSymbols[midiNote % 12];
+			}
 
-void BScale::setRoot (int root) {rootNote = root;}
+			// Or with signature => build from neighbor
+			else
+			{
+				flatSymbols[i][0] = noteSymbols[(midiNote + 1) % 12];
+				strcat (flatSymbols[i], "♭");
+				sharpSymbols[i][0] = noteSymbols[(midiNote + 11) % 12];
+				strcat (sharpSymbols[i], "♯");
+			}
+		}
+
+		// Note out of range => break
+		else break;
+	}
+
+	// Count redundant symbols
+	int flatRedunds = 0;
+	int sharpRedunds = 0;
+	for (int i = 1; (i < 12) && (flatSymbols[i][0]); ++i)
+	{
+		if (flatSymbols[i][0] == flatSymbols[i - 1][0]) ++flatRedunds;
+		if (sharpSymbols[i][0] == sharpSymbols[i - 1][0]) ++sharpRedunds;
+	}
+
+	// Store the more relevant scale
+	if (flatRedunds < sharpRedunds) memcpy (symbols, flatSymbols, sizeof symbols);
+	else memcpy (symbols, sharpSymbols, sizeof symbols);
+}
+
+void BScale::setRoot (int root)
+{
+	rootNote = root;
+	createSymbols ();
+}
 
 int BScale::getRoot () {return rootNote;}
 
-void BScale::setScale (BScaleNotes& elementarray) {scale = elementarray;}
+void BScale::setScale (BScaleNotes& elementarray)
+{
+	int i = 0;
+	for (; (i < 12) && (elementarray[i] != ENOTE); ++i) scale[i] = elementarray[i] % 12;
+	for (; i < 12; ++i) scale[i] = ENOTE;
+	createSymbols ();
+}
 
 BScaleNotes BScale::getScale () {return scale;}
 
@@ -135,37 +186,19 @@ int BScale::getSize()
 
 }
 
-/* Composes the note symbol for an element (note) within a BScale
- * @param symbol: Returned symbol as a cstring (at least char[3])
+/* Returns the note symbol for an element (note) within a BScale.
+ * !!! Don't use this method in a realtime process !!!
  * @param element: note position relative to root note in number of (scale-specific) notes,
  *                 e.g. note F in C major will be element 3
- *
- * TODO Sometimes a natural note need to be forced to the next flat or sharp note (e.g., E -> F♭ in C minor)
+ * @return	Note symbol string
  *
  */
-void BScale::getSymbol (char* symbol, int element)
+std::string BScale::getSymbol (int element)
 {
-	symbol[0] = 0; symbol[1] = 0;
-	int midiNote = getMIDInote (element);
+	if (element < 0) return "";
 
-	if ((midiNote >= 0) && (midiNote <= 127))
-	{
-		int8_t note = midiNote % 12;
-		if (noteSymbols[note] == 0)
-		{
-			if (signature == FLAT)
-			{
-				symbol[0] = noteSymbols[(midiNote + 1) % 12];
-				strcat (symbol, flatSymbol);
-			}
-			else
-			{
-				symbol[0] = noteSymbols[(midiNote - 1) % 12];
-				strcat (symbol, sharpSymbol);
-			}
-		}
-		else symbol[0] = noteSymbols[note];
-	}
+	int ssize = getSize ();
+	return std::string (symbols[element % ssize]);
 }
 
 

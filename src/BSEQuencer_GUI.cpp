@@ -792,7 +792,7 @@ void BSEQuencer_GUI::editPressedCallback (BEvents::Event* event)
 
 		ui->scaleEditor.setValue (0.0);
 		ui->scaleEditor.setMapNr (mapNr);
-		ui->scaleEditor.setScale (BScale (ui->propertiesRootListBox.getValue() + ui->propertiesSignatureListBox.getValue(),
+		ui->scaleEditor.setScale (BScale (((int)(ui->propertiesRootListBox.getValue() + ui->propertiesSignatureListBox.getValue() + 12)) % 12,
 										  ui->scaleNotes[mapNr]));
 		ui->scaleEditor.setScaleMap (ui->scaleMaps[mapNr]);
 		ui->scaleEditor.moveTo (200, 80);
@@ -1009,9 +1009,9 @@ void BSEQuencer_GUI::drawCaption ()
 	cairo_select_font_face (cr, ctLabelFont.getFontFamily ().c_str (), ctLabelFont.getFontSlant (), ctLabelFont.getFontWeight ());
 
 	int scaleNr = controllers[SCALE];
-	BScale scale (controllers[ROOT] + controllers[SIGNATURE], scaleNotes[scaleNr]);
+	BScale scale (((int)(controllers[ROOT] + controllers[SIGNATURE] + 12)) % 12, scaleNotes[scaleNr]);
 	int size = scale.getSize ();
-	char label[16] = "";
+	std::string label = "";
 
 	for (int i = 0; i < ROWS; ++i)
 	{
@@ -1021,26 +1021,17 @@ void BSEQuencer_GUI::drawCaption ()
 
 		ScaleMap* map = &(scaleMaps[scaleNr]);
 
-		if (map->altSymbols[i][0])
-		{
-			strncpy (label, map->altSymbols[i], 15);
-		}
+		if (map->altSymbols[i][0]) label = std::string (map->altSymbols[i]);
 		else
 		{
 			int element = map->elements[i];
+			label = scale.getSymbol (element);
 			int note = scale.getMIDInote (element);
 			if (note != ENOTE)
 			{
-				scale.getSymbol (label, element);
-				if (note >= 12)
-				{
-					strcat (label, " +");
-					char oct[8];
-					sprintf (oct,"%i", (int) (note / 12));
-					strcat (label, oct);
-				}
+				if (note >= 12) label += " +" + std::to_string ((int) (note / 12));
 			}
-			else strcpy(label, "ERR");
+			else label = "ERR";
 		}
 
 		cairo_text_extents_t ext;
@@ -1050,11 +1041,11 @@ void BSEQuencer_GUI::drawCaption ()
 		{
 			fontsize = fontsize / sqrt (2);
 			cairo_set_font_size (cr, fontsize);
-			cairo_text_extents (cr, label, &ext);
+			cairo_text_extents (cr, label.c_str(), &ext);
 		} while ((ext.width > width) && (fontsize >= ctLabelFont.getFontSize () * 0.5));
 
 		cairo_move_to (cr, width / 2 - ext.width / 2, (15.5 - i) * height / 16 + ext.height / 2);
-		cairo_show_text (cr, label);
+		cairo_show_text (cr, label.c_str());
 	}
 
 	cairo_destroy (cr);
