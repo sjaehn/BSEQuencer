@@ -792,7 +792,8 @@ void BSEQuencer_GUI::editPressedCallback (BEvents::Event* event)
 
 		ui->scaleEditor.setValue (0.0);
 		ui->scaleEditor.setMapNr (mapNr);
-		ui->scaleEditor.setScale (BScale (((int)(ui->propertiesRootListBox.getValue() + ui->propertiesSignatureListBox.getValue() + 12)) % 12,
+		ui->scaleEditor.setScale (BScale (((int)(ui->controllers[ROOT] + ui->controllers[SIGNATURE] + 12)) % 12,
+										  (SignatureIndex) ui->controllers[SIGNATURE],
 										  ui->scaleNotes[mapNr]));
 		ui->scaleEditor.setScaleMap (ui->scaleMaps[mapNr]);
 		ui->scaleEditor.moveTo (200, 80);
@@ -814,7 +815,7 @@ void BSEQuencer_GUI::editorCloseCallback (BEvents::Event* event)
 			ui->scaleMaps[mapNr] = scaleEditor->getScaleMap();
 
 			// Update captions
-			if (ui->propertiesScaleListBox.getValue() == mapNr) ui->drawCaption();
+			if (ui->controllers[SCALE] == mapNr) ui->drawCaption();
 
 			// Notify plugin
 			ui->send_scaleMaps (mapNr);
@@ -1009,7 +1010,7 @@ void BSEQuencer_GUI::drawCaption ()
 	cairo_select_font_face (cr, ctLabelFont.getFontFamily ().c_str (), ctLabelFont.getFontSlant (), ctLabelFont.getFontWeight ());
 
 	int scaleNr = controllers[SCALE];
-	BScale scale (((int)(controllers[ROOT] + controllers[SIGNATURE] + 12)) % 12, scaleNotes[scaleNr]);
+	BScale scale (((int)(controllers[ROOT] + controllers[SIGNATURE] + 12)) % 12, (SignatureIndex) controllers[SIGNATURE], scaleNotes[scaleNr]);
 	int size = scale.getSize ();
 	std::string label = "";
 

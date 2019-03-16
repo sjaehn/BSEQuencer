@@ -420,7 +420,7 @@ void ScaleEditor::setScale (const BScale& scale)
 		if ((i >= pianoRoot) && (i < pianoRoot + 12)) acKeys.push_back (true);
 		else acKeys.push_back (false);
 
-		if (this->scale.getElement (i + this->scale.getRoot()) != ENOTE) prKeys.push_back (true);
+		if (this->scale.getElement (i/* + this->scale.getRoot()*/) != ENOTE) prKeys.push_back (true);
 		else prKeys.push_back (false);
 	}
 

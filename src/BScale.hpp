@@ -45,6 +45,12 @@
 
 typedef std::array<int, 12> BScaleNotes;
 
+typedef enum {
+	FLAT			= -1,
+	NATURAL			= 0,
+	SHARP			= 1
+} SignatureIndex;
+
 const BScaleNotes defaultScale = {CROMATICSCALE};
 
 const char noteSymbols[12] = {'C', 0, 'D', 0, 'E', 'F', 0, 'G', 0, 'A', 0, 'B'};
@@ -52,6 +58,7 @@ const char noteSymbols[12] = {'C', 0, 'D', 0, 'E', 'F', 0, 'G', 0, 'A', 0, 'B'};
 class BScale {
 public:
 	BScale (const int root, const BScaleNotes& elementarray);
+	BScale (const int root, const SignatureIndex signature, const BScaleNotes& elementarray);
 	void setRoot (int root);
 	int getRoot ();
 	void setScale (BScaleNotes& elementarray);
@@ -65,11 +72,13 @@ protected:
 	void createSymbols ();
 	BScaleNotes scale;
 	int rootNote;
+	SignatureIndex signature;
 	char symbols[12][6];
 };
 
-BScale::BScale (const int root, const BScaleNotes& elementarray) :
-	rootNote (root), scale (elementarray)
+BScale::BScale (const int root, const BScaleNotes& elementarray) : BScale (root, NATURAL, elementarray) {}
+BScale::BScale (const int root, const SignatureIndex signature, const BScaleNotes& elementarray) :
+rootNote (root), signature (signature), scale (elementarray)
 {
 	memset (symbols, 0, sizeof symbols);
 	createSymbols ();
@@ -108,18 +117,29 @@ void BScale::createSymbols ()
 		else break;
 	}
 
-	// Count redundant symbols
-	int flatRedunds = 0;
-	int sharpRedunds = 0;
-	for (int i = 1; (i < 12) && (flatSymbols[i][0]); ++i)
+	switch (signature)
 	{
-		if (flatSymbols[i][0] == flatSymbols[i - 1][0]) ++flatRedunds;
-		if (sharpSymbols[i][0] == sharpSymbols[i - 1][0]) ++sharpRedunds;
-	}
+		case FLAT:	memcpy (symbols, flatSymbols, sizeof symbols);
+					break;
 
-	// Store the more relevant scale
-	if (flatRedunds < sharpRedunds) memcpy (symbols, flatSymbols, sizeof symbols);
-	else memcpy (symbols, sharpSymbols, sizeof symbols);
+		case SHARP:	memcpy (symbols, sharpSymbols, sizeof symbols);
+					break;
+
+		default:	{
+						// Count redundant symbols
+						int flatRedunds = 0;
+						int sharpRedunds = 0;
+						for (int i = 1; (i < 12) && (flatSymbols[i][0]); ++i)
+						{
+							if (flatSymbols[i][0] == flatSymbols[i - 1][0]) ++flatRedunds;
+							if (sharpSymbols[i][0] == sharpSymbols[i - 1][0]) ++sharpRedunds;
+						}
+
+						// Store the more relevant scale
+						if (flatRedunds < sharpRedunds) memcpy (symbols, flatSymbols, sizeof symbols);
+						else memcpy (symbols, sharpSymbols, sizeof symbols);
+					}
+	}
 }
 
 void BScale::setRoot (int root)
