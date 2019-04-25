@@ -17,7 +17,7 @@ template<typename T, std::size_t sz> struct StaticArrayList
 		for (size_t i = 0; i < size; ++i)
 		{
 			iterator[i] = &data[i];
-			reverse_iterator = &iterator[i];
+			reverse_iterator[i] = &iterator[i];
 		}
 	}*/
 
@@ -26,7 +26,7 @@ template<typename T, std::size_t sz> struct StaticArrayList
 		for (size_t i = 0; i < that.size; ++i)
 		{
 			iterator[i] = &data[i];
-			reverse_iterator = &iterator[i];
+			reverse_iterator[i] = &iterator[i];
 			data[i] = *that.iterator[i];
 			++size;
 		}
@@ -38,7 +38,7 @@ template<typename T, std::size_t sz> struct StaticArrayList
 		for (size_t i = 0; i < that.size; ++i)
 		{
 			iterator[i] = &data[i];
-			reverse_iterator = &iterator[i];
+			reverse_iterator[i] = &iterator[i];
 			data[i] = *that.iterator[i];
 			++size;
 		}
