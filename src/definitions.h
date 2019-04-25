@@ -52,7 +52,6 @@ typedef enum {
 	Chromatic		= 1,
 	Major			= 2,
 	Minor			= 3
-
 } ScaleIndex;
 
 typedef enum {
@@ -66,6 +65,7 @@ typedef enum {
 	CTRL_SKIP		= 0x70,
 	CTRL_STOP		= 0x80
 } CtrlButtons;
+
 
 typedef struct {
 	char name[64];

@@ -1,14 +1,16 @@
 #ifndef DRAWBUTTON_HPP_
 #define DRAWBUTTON_HPP_
 
-#include <cairo.h>
+#include <cairo/cairo.h>
+#include <cmath>
 #include "BWidgets/cairoplus.h"
 #include "BWidgets/BColors.hpp"
+#include "definitions.h"
 
 typedef struct
 {
 	BColors::Color color;
-	std::string symbol;
+	CtrlButtons symbol;
 } ButtonStyle;
 
 void drawButton (cairo_t* cr, double x, double y, double width, double height, ButtonStyle style)
@@ -31,26 +33,87 @@ void drawButton (cairo_t* cr, double x, double y, double width, double height, B
 	cairo_pattern_destroy (pat);
 
 	// Draw symbol
-	if (style.symbol != "")
+	if (style.symbol != NO_CTRL)
 	{
 		if (style.color.getRed() + style.color.getGreen() + style.color.getBlue() > 0.33) cairo_set_source_rgba(cr, CAIRO_RGBA (darkened2));
 		else cairo_set_source_rgba(cr, CAIRO_RGBA (illuminated2));
-		cairo_select_font_face(cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-		double fontWidth = (width > height ? height / 2 : width / 2);
-		cairo_text_extents_t ext;
-		cairo_set_font_size(cr, fontWidth);
-		cairo_text_extents (cr, style.symbol.c_str(), &ext);
+		cairo_set_line_width (cr, 0);
+		double symbolSize = (width > height ? 0.8 * height : 0.8 * width);
 
-		// Shrink font size, if needed
-		for (int i = 0; (i < 8) && (ext.width > width); ++i)
+		switch (style.symbol)
 		{
-			fontWidth = fontWidth / sqrt (2);
-			cairo_set_font_size(cr, fontWidth);
-			cairo_text_extents (cr, style.symbol.c_str(), &ext);
-		}
+			case CTRL_PLAY_FWD:
+			cairo_move_to (cr, x + width / 2 - symbolSize / 4, y + height / 2 - symbolSize / 3);
+			cairo_line_to (cr, x + width / 2 + symbolSize / 4, y + height / 2);
+			cairo_line_to (cr, x + width / 2 - symbolSize / 4, y + height / 2 + symbolSize / 3);
+			cairo_close_path (cr);
+			cairo_fill (cr);
+			break;
 
-		cairo_move_to (cr, x + width / 2 - ext.width / 2 - ext.x_bearing, y + height / 2 - ext.height / 2 - ext.y_bearing);
-		cairo_show_text(cr, style.symbol.c_str());
+			case CTRL_PLAY_REW:
+			cairo_move_to (cr, x + width / 2 + symbolSize / 4, y + height / 2 - symbolSize / 3);
+			cairo_line_to (cr, x + width / 2 - symbolSize / 4, y + height / 2);
+			cairo_line_to (cr, x + width / 2 + symbolSize / 4, y + height / 2 + symbolSize / 3);
+			cairo_close_path (cr);
+			cairo_fill (cr);
+			break;
+
+			case CTRL_ALL_MARK:
+			cairo_arc (cr, x + width / 2 - symbolSize / 4, y + height / 2, symbolSize / 6, 0, 2 * M_PI);
+			cairo_fill (cr);
+			cairo_arc (cr, x + width / 2 + symbolSize / 4, y + height / 2, symbolSize / 6, 0, 2 * M_PI);
+			cairo_fill (cr);
+			break;
+
+			case CTRL_MARK:
+			cairo_arc (cr, x + width / 2, y + height / 2, symbolSize / 4, 0, 2 * M_PI);
+			cairo_fill (cr);
+			break;
+
+			case CTRL_JUMP_FWD:
+			cairo_move_to (cr, x + width / 2 - symbolSize / 2, y + height / 2 - symbolSize / 6);
+			cairo_line_to (cr, x + width / 2 - symbolSize / 4, y + height / 2);
+			cairo_line_to (cr, x + width / 2 - symbolSize / 2, y + height / 2 + symbolSize / 6);
+			cairo_close_path (cr);
+			cairo_fill (cr);
+			cairo_move_to (cr, x + width / 2 - symbolSize / 8, y + height / 2 - symbolSize / 6);
+			cairo_line_to (cr, x + width / 2 + symbolSize / 8, y + height / 2);
+			cairo_line_to (cr, x + width / 2 - symbolSize / 8, y + height / 2 + symbolSize / 6);
+			cairo_close_path (cr);
+			cairo_fill (cr);
+			cairo_arc (cr, x + width / 2 + symbolSize / 3, y + height / 2, symbolSize / 6, 0, 2 * M_PI);
+			cairo_fill (cr);
+			break;
+
+			case CTRL_JUMP_BACK:
+			cairo_arc (cr, x + width / 2 - symbolSize / 3, y + height / 2, symbolSize / 6, 0, 2 * M_PI);
+			cairo_fill (cr);
+			cairo_move_to (cr, x + width / 2 + symbolSize / 8, y + height / 2 - symbolSize / 6);
+			cairo_line_to (cr, x + width / 2 - symbolSize / 8, y + height / 2);
+			cairo_line_to (cr, x + width / 2 + symbolSize / 8, y + height / 2 + symbolSize / 6);
+			cairo_close_path (cr);
+			cairo_fill (cr);
+			cairo_move_to (cr, x + width / 2 + symbolSize / 2, y + height / 2 - symbolSize / 6);
+			cairo_line_to (cr, x + width / 2 + symbolSize / 4, y + height / 2);
+			cairo_line_to (cr, x + width / 2 + symbolSize / 2, y + height / 2 + symbolSize / 6);
+			cairo_close_path (cr);
+			cairo_fill (cr);
+			break;
+
+			case CTRL_SKIP:
+			cairo_set_line_width (cr, symbolSize / 8);
+			cairo_move_to (cr, x + width / 2 - symbolSize / 4, y + height / 2 - symbolSize / 4);
+			cairo_line_to (cr, x + width / 2 + symbolSize / 4, y + height / 2 + symbolSize / 4);
+			cairo_move_to (cr, x + width / 2 + symbolSize / 4, y + height / 2 - symbolSize / 4);
+			cairo_line_to (cr, x + width / 2 - symbolSize / 4, y + height / 2 + symbolSize / 4);
+			cairo_stroke (cr);
+			break;
+
+			case CTRL_STOP:
+			cairo_rectangle (cr, x + width / 2 - symbolSize / 4, y + height / 2 - symbolSize / 4, symbolSize / 2, symbolSize / 2);
+			cairo_fill (cr);
+			break;
+		}
 	}
 }
 

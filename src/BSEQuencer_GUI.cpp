@@ -92,9 +92,9 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	}
 
 	// Init toolbox buttons
-	toolButtonBox.addButton (80, 70, 20, 20, {{0.0, 0.03, 0.06, 1.0}, ""});
+	toolButtonBox.addButton (80, 70, 20, 20, {{0.0, 0.03, 0.06, 1.0}, NO_CTRL});
 	for (int i = 1; i < NR_SEQUENCER_CHS + 1; ++i) toolButtonBox.addButton (80 + i * 30, 70, 20, 20, chButtonStyles[i]);
-	toolButtonBox.addButton (80 , 10, 20, 20, {{0.0, 0.03, 0.06, 1.0}, ""});
+	toolButtonBox.addButton (80 , 10, 20, 20, {{0.0, 0.03, 0.06, 1.0}, NO_CTRL});
 	for (int i = 1; i < NR_CTRL_BUTTONS; ++i) toolButtonBox.addButton (80 + (i % 6) * 30, 10 + ((int) (i / 6)) * 30, 20, 20, ctrlButtonStyles[i]);
 
 	// Init ChBoxes
@@ -316,7 +316,7 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 			// Pad notification
 			if (obj->body.otype == uris.notify_padEvent)
 			{
-				LV2_Atom *oPad = NULL, *oCursors = NULL, *oNotes = NULL, *oChs = NULL;
+				LV2_Atom *oPad = NULL;
 				lv2_atom_object_get(obj, uris.notify_pad, &oPad,
 										 NULL);
 
@@ -1018,7 +1018,7 @@ void BSEQuencer_GUI::drawCaption ()
 	{
 		BColors::Color color = BColors::invisible;
 		if (noteBits & (1 << i)) {color = ink; color.applyBrightness (0.75);}
-		drawButton (surface, 0, (ROWS - i - 1) * height / ROWS + 1, width, height / ROWS - 2, {color, ""});
+		drawButton (surface, 0, (ROWS - i - 1) * height / ROWS + 1, width, height / ROWS - 2, {color, NO_CTRL});
 
 		ScaleMap* map = &(scaleMaps[scaleNr]);
 
@@ -1221,5 +1221,3 @@ LV2_SYMBOL_EXPORT const LV2UI_Descriptor *lv2ui_descriptor(uint32_t index)
  *
  *
  */
-
-

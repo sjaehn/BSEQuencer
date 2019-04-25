@@ -3,6 +3,7 @@
 
 #include "BWidgets/ValueWidget.hpp"
 #include "BWidgets/DrawingSurface.hpp"
+#include "definitions.h"
 #include "drawbutton.hpp"
 
 class PlayStopButton : public BWidgets::ValueWidget
@@ -15,11 +16,11 @@ private:
 		ButtonStyle style;
 		if (val == 0.0)
 		{
-			style = {BColors::green, "▶"};
+			style = {BColors::green, CTRL_PLAY_FWD};
 		}
 		else
 		{
-			style = {BColors::red, "◼"};
+			style = {BColors::red, CTRL_STOP};
 		}
 		drawButton (drawingSurface.getDrawingSurface (), 2, 2, drawingSurface.getWidth () - 4, drawingSurface.getHeight () - 4, style);
 		drawingSurface.update ();
