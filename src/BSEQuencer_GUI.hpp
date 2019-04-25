@@ -44,6 +44,7 @@
 #include "BWidgets/TextToggleButton.hpp"
 #include "BWidgets/Text.hpp"
 #include "BWidgets/PopupListBox.hpp"
+#include "BWidgets/ImageIcon.hpp"
 #include "screen.h"
 
 
@@ -184,7 +185,7 @@ private:
 	BWidgets::Label propertiesOctaveLabel;
 	BWidgets::PopupListBox propertiesOctaveListBox;
 	BWidgets::Label propertiesScaleLabel;
-	BWidgets::Label propertiesScaleEditLabel;
+	BWidgets::ImageIcon propertiesScaleEditIcon;
 	BWidgets::PopupListBox propertiesScaleListBox;
 
 	typedef struct {

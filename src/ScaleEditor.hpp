@@ -31,6 +31,7 @@
 #include "BWidgets/PopupListBox.hpp"
 #include "BWidgets/TextButton.hpp"
 #include "CircledSymbol.hpp"
+#include "CloseSymbol.hpp"
 
 class ScaleEditor : public BWidgets::ValueWidget
 {
@@ -73,7 +74,7 @@ protected:
 	BWidgets::HPianoRoll piano;
 	BWidgets::TextButton cancelButton;
 	BWidgets::TextButton applyButton;
-	CircledSymbol closeSymbol;
+	CloseSymbol closeSymbol;
 
 	int pianoRoot;
 	BScale scale;
@@ -119,7 +120,7 @@ protected:
 							 {"font", STYLEPTR (&lfLabelFont)}}},
 		{"button", 			{{"font", STYLEPTR (&ctLabelFont)}}},
 		{"xsymbol",	 		{{"uses", STYLEPTR (&defaultStyles)},
-							 {"textcolors", STYLEPTR (&BColors::whites)},
+							 {"fgcolors", STYLEPTR (&BColors::whites)},
 							 {"font", STYLEPTR (&ctLabelFont)}}},
 		{"menu",	 		{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
 							 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
@@ -159,7 +160,7 @@ ScaleEditor::ScaleEditor(const double x, const double y, const double width, con
 		cancelButton (320, 600, 60, 20, "button", "Cancel"),
 		applyButton (420, 600, 60, 20, "button", "Apply"),
 		piano (340, 440, 440, 120, "widget", 0, 35), pianoRoot (0),
-		closeSymbol (770, 10, 20, 20, "xsymbol", "✕"),
+		closeSymbol (770, 10, 20, 20, "xsymbol"),
 		sz (width / 800 < height / 640 ? width / 800 : height / 640)
 
 

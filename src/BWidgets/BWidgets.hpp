@@ -54,6 +54,7 @@
 #include "PopupListBox.hpp"
 #include "PianoWidget.hpp"
 #include "HPianoRoll.hpp"
+#include "ImageIcon.hpp"
 
 #endif /*BWIDGETS_HPP_*/
 

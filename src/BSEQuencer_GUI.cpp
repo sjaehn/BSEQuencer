@@ -71,7 +71,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		propertiesOctaveLabel (10, 145, 55, 20, "lflabel", "Octave"),
 		propertiesOctaveListBox (180, 145, 70, 20, 0, -220, 70, 220, "menu", {{-1, "-1"}, {0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}}, 4.0),
 		propertiesScaleLabel (10, 175, 50, 20, "lflabel", "Scale"),
-		propertiesScaleEditLabel (70, 175, 20, 20, "editlabel", "⚙"),
+		propertiesScaleEditIcon (70, 175, 20, 20, "widget", "EditSymbol.png"),
 		propertiesScaleListBox (100, 175, 150, 20, 0, -380, 150, 380, "menu", scaleItems, 0.0),
 
 		helpLabel (1140, 40, 30, 30, "ilabel", "?"),
@@ -177,7 +177,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	padSurface.setMergeable (BEvents::POINTER_DRAG_EVENT, false);
 
 	helpLabel.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, helpPressedCallback);
-	propertiesScaleEditLabel.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, editPressedCallback);
+	propertiesScaleEditIcon.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, editPressedCallback);
 	scaleEditor.setCallbackFunction(BEvents::VALUE_CHANGED_EVENT, editorCloseCallback);
 
 	// Apply theme
@@ -197,7 +197,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	modeBoxLabel.setState (BColors::ACTIVE);
 	toolBoxLabel.setState (BColors::ACTIVE);
 	propertiesBoxLabel.setState (BColors::ACTIVE);
-	propertiesScaleEditLabel.hide ();
+	propertiesScaleEditIcon.hide ();
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i) {
 		chBoxes[i].chLabel.setState (BColors::ACTIVE);
 		drawButton (chBoxes[i].chSymbol.getDrawingSurface(), 0, 0, 20, 20, chButtonStyles[i + 1]);
@@ -246,7 +246,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	propertiesBox.add (propertiesOctaveLabel);
 	propertiesBox.add (propertiesOctaveListBox);
 	propertiesBox.add (propertiesScaleLabel);
-	propertiesBox.add (propertiesScaleEditLabel);
+	propertiesBox.add (propertiesScaleEditIcon);
 	propertiesBox.add (propertiesScaleListBox);
 
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
@@ -532,7 +532,7 @@ void BSEQuencer_GUI::scale ()
 	propertiesOctaveListBox.resizeListBox (70 * sz, 220 * sz);
 	propertiesOctaveListBox.moveListBox (0, -220 * sz);
 	RESIZE (propertiesScaleLabel, 10, 175, 50, 20, sz);
-	RESIZE (propertiesScaleEditLabel, 70, 175, 20, 20, sz);
+	RESIZE (propertiesScaleEditIcon, 70, 175, 20, 20, sz);
 	RESIZE (propertiesScaleListBox, 100, 175, 150, 20, sz);
 	propertiesScaleListBox.resizeListBox (150 * sz, 380 * sz);
 	propertiesScaleListBox.moveListBox (0, -380 * sz);
@@ -614,7 +614,7 @@ void BSEQuencer_GUI::applyTheme (BStyles::Theme& theme)
 	propertiesOctaveLabel.applyTheme (theme);
 	propertiesOctaveListBox.applyTheme (theme);
 	propertiesScaleLabel.applyTheme (theme);
-	propertiesScaleEditLabel.applyTheme (theme);
+	propertiesScaleEditIcon.applyTheme (theme);
 	propertiesScaleListBox.applyTheme (theme);
 
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
@@ -764,8 +764,8 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 				// Scale changed
 				if ((widgetNr == SCALE))
 				{
-					if (value < NR_SYSTEM_SCALES) ui->propertiesScaleEditLabel.hide();
-					else ui->propertiesScaleEditLabel.show();
+					if (value < NR_SYSTEM_SCALES) ui->propertiesScaleEditIcon.hide();
+					else ui->propertiesScaleEditIcon.show();
 				}
 
 				// Pad relevant changes
