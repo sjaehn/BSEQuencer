@@ -107,9 +107,9 @@ void BScale::createSymbols ()
 			else
 			{
 				flatSymbols[i][0] = noteSymbols[(midiNote + 1) % 12];
-				strcat (flatSymbols[i], "♭");
+				strcat (flatSymbols[i], "b");
 				sharpSymbols[i][0] = noteSymbols[(midiNote + 11) % 12];
-				strcat (sharpSymbols[i], "♯");
+				strcat (sharpSymbols[i], "#");
 			}
 		}
 
@@ -223,4 +223,3 @@ std::string BScale::getSymbol (int element)
 
 
 #endif /* BSCALE_HPP_ */
-

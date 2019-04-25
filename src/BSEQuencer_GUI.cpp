@@ -67,7 +67,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		propertiesBaseListBox (180, 85, 70, 20, 70, 60, "menu", std::vector<std::string> {"beat", "bar"}, 1.0),
 		propertiesRootLabel (10, 115, 40, 20, "lflabel", "Root"),
 		propertiesRootListBox (100, 115, 70, 20, 0, -160, 70, 160, "menu", {{0, "C"}, {2, "D"}, {4, "E"}, {5, "F"}, {7, "G"}, {9, "A"}, {11, "B"}}, 0.0),
-		propertiesSignatureListBox (180, 115, 70, 20, 70, 80, "menu", {{-1, "♭"}, {0, ""}, {1, "♯"}}, 0.0),
+		propertiesSignatureListBox (180, 115, 70, 20, 70, 80, "menu", {{-1, "b"}, {0, ""}, {1, "#"}}, 0.0),
 		propertiesOctaveLabel (10, 145, 55, 20, "lflabel", "Octave"),
 		propertiesOctaveListBox (180, 145, 70, 20, 0, -220, 70, 220, "menu", {{-1, "-1"}, {0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}}, 4.0),
 		propertiesScaleLabel (10, 175, 50, 20, "lflabel", "Scale"),
