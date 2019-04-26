@@ -102,6 +102,14 @@ void ListBox::updateLabels ()
 {
 	validateLabels ();
 
+	// Keep Buttons on top
+	int cs = children_.size ();
+	if ((cs >= 2) && ((children_[cs - 1] != (Widget*) &upButton) || (children_[cs - 2] != (Widget*) &downButton)))
+	{
+		downButton.moveToTop ();
+		upButton.moveToTop ();
+	}
+
 	double x0 = getXOffset ();
 	double y0 = getYOffset ();
 	double width = getEffectiveWidth ();
@@ -109,7 +117,7 @@ void ListBox::updateLabels ()
 	double listHeight = (height >= 2 * BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT ? height - 2 * BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT : 0);
 	double upButtonHeight = (height >= BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT ? BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT : height);
 	double lineHeight = (labels.empty () ? 20 : labels[0]->getFont()->getFontSize() * BWIDGETS_DEFAULT_CHOICEBOX_LINE_HEIGHT);
-	int lines = (listHeight > lineHeight ? listHeight / lineHeight : 1);
+	int lines = ceil (listHeight / lineHeight);
 
 	for (int i = 0; i < labels.size (); ++i)
 	{
