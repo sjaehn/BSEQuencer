@@ -81,67 +81,23 @@ void Button::draw (const double x, const double y, const double width, const dou
 			cairo_rectangle (cr, x, y, width, height);
 			cairo_clip (cr);
 
-			BColors::Color butColorLo = *bgColors.getColor (getState ()); butColorLo.applyBrightness (BWIDGETS_DEFAULT_NORMALLIGHTED);
-			BColors::Color butColorHi = *bgColors.getColor (getState ()); butColorHi.applyBrightness (BWIDGETS_DEFAULT_ILLUMINATED);
-			BColors::Color butColorMid = *bgColors.getColor (getState ()); butColorMid.applyBrightness ((BWIDGETS_DEFAULT_NORMALLIGHTED));
-			BColors::Color butColorSh = *bgColors.getColor (getState ()); butColorSh.applyBrightness (BWIDGETS_DEFAULT_SHADOWED);
+			double x0 = getXOffset ();
+			double y0 = getYOffset ();
+			double w = getEffectiveWidth ();
+			double h = getEffectiveHeight ();
+			BColors::Color butColor = *bgColors.getColor (getState ()); butColor.applyBrightness (BWIDGETS_DEFAULT_NORMALLIGHTED);
+			BColors::Color frColor= *bgColors.getColor (getState ());
 
-
-			double xb, yb, wb, hb;
-			double xf, yf, wf, hf;
+			if (value) frColor.applyBrightness (2 * BWIDGETS_DEFAULT_ILLUMINATED);
+			else frColor.applyBrightness (2 * BWIDGETS_DEFAULT_SHADOWED);
 
 			cairo_set_line_width (cr, 0.0);
+			cairo_set_source_rgba (cr, CAIRO_RGBA (butColor));
+			cairo_rectangle_rounded (cr, x0, y0, w, h, BWIDGETS_DEFAULT_BUTTON_RAD);
+			cairo_fill_preserve (cr);
 
-			if (value)
-			{
-				xb = 0.5 + BWIDGETS_DEFAULT_BUTTON_DEPTH;
-				yb = 0.5 + BWIDGETS_DEFAULT_BUTTON_DEPTH;
-				hf = 0.0;
-			}
-			else
-			{
-				xb = 0.5;
-				yb = 0.5;
-				hf = BWIDGETS_DEFAULT_BUTTON_DEPTH;
-			}
-
-			wb = width_ - 1;
-			hb = height_ - 1 - BWIDGETS_DEFAULT_BUTTON_DEPTH;
-			xf = xb;
-			yf = yb + hb;
-			wf = wb;
-
-			// Button top
-			cairo_set_source_rgba (cr, butColorMid.getRed (), butColorMid.getGreen (), butColorMid.getBlue (), butColorMid.getAlpha ());
-			cairo_rectangle (cr, xb, yb, wb, hb);
-			cairo_fill (cr);
-
-
-			// Button front
-			cairo_move_to (cr, xb, yf);
-			cairo_line_to (cr, xb + wb, yf);
-			cairo_line_to (cr, xb + wb, yb);
-			cairo_line_to (cr, xb + wb + hf, yb + hf);
-			cairo_line_to (cr, xb + wb + hf, yf + hf);
-			cairo_line_to (cr, xb + hf, yf + hf);
-			cairo_close_path (cr);
-			cairo_set_source_rgba (cr, butColorHi.getRed (), butColorHi.getGreen (), butColorHi.getBlue (), butColorHi.getAlpha ());
-			cairo_fill (cr);
-
-			// Button edges
-			cairo_set_source_rgba (cr, butColorSh.getRed (), butColorSh.getGreen (), butColorSh.getBlue (), butColorSh.getAlpha ());
-			cairo_set_line_width (cr, 0.2 * BWIDGETS_DEFAULT_BUTTON_DEPTH);
-			cairo_move_to (cr, xb, yb + hb);
-			cairo_line_to (cr, xb, yb);
-			cairo_line_to (cr, xb + wb, yb);
-			cairo_stroke (cr);
-
-			cairo_set_source_rgba (cr, butColorHi.getRed (), butColorHi.getGreen (), butColorHi.getBlue (), butColorHi.getAlpha ());
-			cairo_move_to (cr, xb, yb + hb);
-			cairo_line_to (cr, xb + wb, yb + hb);
-			cairo_line_to (cr, xb + wb, yb);
-			cairo_move_to (cr, xb + wb, yf);
-			cairo_line_to (cr, xb + wb + hf, yf + hf);
+			cairo_set_line_width (cr, BWIDGETS_DEFAULT_BUTTON_BORDER);
+			cairo_set_source_rgba (cr, CAIRO_RGBA (frColor));
 			cairo_stroke (cr);
 
 		}

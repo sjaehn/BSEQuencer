@@ -215,6 +215,7 @@ private:
 	BColors::ColorSet fgColors_ch3 = {{{0.875, 0.4235, 0.0, 1.0}, {0.875, 0.75, 0.25, 1.0}, {0.1, 0.05, 0.0, 1.0}, {0.0, 0.0, 0.0, 0.0}}};
 	BColors::ColorSet fgColors_ch4 = {{{0.75, 0.75, 0.0, 1.0}, {0.75, 0.75, 0.75, 1.0}, {0.1, 0.1, 0.0, 1.0}, {0.0, 0.0, 0.0, 0.0}}};
 	BColors::ColorSet txColors = {{{0.167, 0.37, 0.80, 1.0}, {0.33, 0.5, 0.85, 1.0}, {0.0, 0.0, 0.25, 1.0}, {0.0, 0.0, 0.0, 0.0}}};
+	BColors::ColorSet tgColors = {{BColors::grey, BColors::white, BColors::grey, BColors::darkgrey}};
 	BColors::ColorSet bgColors = {{{0.15, 0.15, 0.15, 1.0}, {0.3, 0.3, 0.3, 1.0}, {0.05, 0.05, 0.05, 1.0}, {0.0, 0.0, 0.0, 1.0}}};
 	BColors::ColorSet ltColors = {{{1.0, 1.0, 1.0, 1.0}, {1.0, 1.0, 1.0, 1.0}, {0.25, 0.25, 0.25, 1.0}, {0.0, 0.0, 0.0, 1.0}}};
 	BColors::Color ink = {0.0, 0.25, 0.5, 1.0};
@@ -270,7 +271,10 @@ private:
 							 {"border", STYLEPTR (&border)}}},
 		{"button", 			{{"background", STYLEPTR (&BStyles::blackFill)},
 							 {"border", STYLEPTR (&border)}}},
-		{"tgbutton", 		{{"font", STYLEPTR (&tgLabelFont)}}},
+		{"tgbutton", 		{{"border", STYLEPTR (&BStyles::noBorder)},
+							 {"textcolors", STYLEPTR (&tgColors)},
+							 {"bgcolors", STYLEPTR (&BColors::darks)},
+							 {"font", STYLEPTR (&tgLabelFont)}}},
 		{"dial", 			{{"uses", STYLEPTR (&defaultStyles)},
 							 {"fgcolors", STYLEPTR (&fgColors)},
 							 {"bgcolors", STYLEPTR (&bgColors)},

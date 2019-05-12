@@ -28,9 +28,10 @@ TextButton::TextButton (const double x, const double y, const double width, cons
 TextButton::TextButton (const double x, const double y, const double width, const double height,
 						const std::string& name, const std::string& label, double defaultValue) :
 		Button (x, y, width, height, name, defaultValue),
-		buttonLabel (0, 0, width - BWIDGETS_DEFAULT_BUTTON_DEPTH, height - BWIDGETS_DEFAULT_BUTTON_DEPTH, name, label)
+		buttonLabel (0, 0, width, height, name, label)
 {
 	buttonLabel.setClickable  (false);
+	buttonLabel.setState (defaultValue ? BColors::ACTIVE : BColors::NORMAL);
 	add (buttonLabel);
 }
 
@@ -73,8 +74,8 @@ void TextButton::resize (const double width, const double height)
 
 void TextButton::setValue (const double val)
 {
-	if (val) buttonLabel.moveTo (BWIDGETS_DEFAULT_BUTTON_DEPTH, BWIDGETS_DEFAULT_BUTTON_DEPTH);
-	else buttonLabel.moveTo (0, 0);
+	if (val) buttonLabel.setState (BColors::ACTIVE);
+	else buttonLabel.setState (BColors::NORMAL);
 	Button::setValue (val);
 }
 

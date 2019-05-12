@@ -41,60 +41,23 @@ void DownButton::draw (const double x, const double y, const double width, const
 			cairo_rectangle (cr, x, y, width, height);
 			cairo_clip (cr);
 
-			BColors::Color butColorLo = *bgColors.getColor (getState ()); butColorLo.applyBrightness (BWIDGETS_DEFAULT_NORMALLIGHTED);
-			BColors::Color butColorHi = *bgColors.getColor (getState ()); butColorHi.applyBrightness (BWIDGETS_DEFAULT_ILLUMINATED);
-			BColors::Color butColorSh = *bgColors.getColor (getState ()); butColorSh.applyBrightness (BWIDGETS_DEFAULT_SHADOWED);
-
-
-			double w = getEffectiveWidth () - BWIDGETS_DEFAULT_BUTTON_DEPTH - 1;
-			double h = getEffectiveHeight () - BWIDGETS_DEFAULT_BUTTON_DEPTH - 1;
+			double x0 = getXOffset ();
+			double y0 = getYOffset ();
+			double w = getEffectiveWidth ();
+			double h = getEffectiveHeight ();
 			double size = (w < h ? w * 0.6 : h * 0.6);
-			double x0, y0;
+			BColors::Color butColor = *bgColors.getColor (getState ()); butColor.applyBrightness (BWIDGETS_DEFAULT_NORMALLIGHTED);
+			BColors::Color frColor= *bgColors.getColor (getState ());
 
-			if (value)
-			{
-				x0 = 0.5 + BWIDGETS_DEFAULT_BUTTON_DEPTH;
-				y0 = 0.5 + BWIDGETS_DEFAULT_BUTTON_DEPTH;
-			}
-			else
-			{
-				x0 = 0.5;
-				y0 = 0.5;
-			}
+			if (value) frColor.applyBrightness (2 * BWIDGETS_DEFAULT_ILLUMINATED);
+			else frColor.applyBrightness (2 * BWIDGETS_DEFAULT_SHADOWED);
 
 			// Symbol
-			cairo_save (cr);
-
-			cairo_set_line_width (cr, 0.0);
-			cairo_move_to (cr, x0 + w/2 - size/2, y0 + h/2 - size/2);
-			cairo_line_to (cr, x0 + w/2, y0 + h/2 + size/2);
-			cairo_line_to (cr, x0 + w/2 + size/2, y0 + h/2 - size/2);
-			cairo_close_path (cr);
-			cairo_clip_preserve (cr);
-
-			cairo_set_source_rgba (cr, butColorHi.getRed (), butColorHi.getGreen (), butColorHi.getBlue (), butColorHi.getAlpha ());
-			cairo_fill (cr);
-
-			cairo_move_to (cr, x0 + w/2 - size/2 + BWIDGETS_DEFAULT_BUTTON_DEPTH, y0 + h/2 - size/2 + BWIDGETS_DEFAULT_BUTTON_DEPTH);
-			cairo_line_to (cr, x0 + w/2 + BWIDGETS_DEFAULT_BUTTON_DEPTH, y0 + h/2 + size/2 + BWIDGETS_DEFAULT_BUTTON_DEPTH);
-			cairo_line_to (cr, x0 + w/2 + size/2 + BWIDGETS_DEFAULT_BUTTON_DEPTH, y0 + h/2 - size/2 + BWIDGETS_DEFAULT_BUTTON_DEPTH);
-			cairo_close_path (cr);
-			cairo_set_source_rgba (cr, butColorSh.getRed (), butColorSh.getGreen (), butColorSh.getBlue (), butColorSh.getAlpha ());
-			cairo_fill (cr);
-
-			cairo_restore (cr);
-
-			// Symbol frame
-			cairo_set_line_width (cr, 0.2 * BWIDGETS_DEFAULT_BUTTON_DEPTH);
-			cairo_move_to (cr, x0 + w/2 + size/2, y0 + h/2 - size/2);
-			cairo_line_to (cr, x0 + w/2 - size/2, y0 + h/2 - size/2);
-			cairo_line_to (cr, x0 + w/2, y0 + h/2 + size/2);
-			cairo_set_source_rgba (cr, butColorHi.getRed (), butColorHi.getGreen (), butColorHi.getBlue (), butColorHi.getAlpha ());
-			cairo_stroke (cr);
-
-			cairo_move_to (cr, x0 + w/2, y0 + h/2 + size/2);
-			cairo_line_to (cr, x0 + w/2 + size/2, y0 + h/2 - size/2);
-			cairo_set_source_rgba (cr, butColorSh.getRed (), butColorSh.getGreen (), butColorSh.getBlue (), butColorSh.getAlpha ());
+			cairo_set_line_width (cr, BWIDGETS_DEFAULT_BUTTON_BORDER);
+			cairo_move_to (cr, x0 + w/2 - size/2, y0 + h/2 - size/4);
+			cairo_line_to (cr, x0 + w/2, y0 + h/2 + size/4);
+			cairo_line_to (cr, x0 + w/2 + size/2, y0 + h/2 - size/4);
+			cairo_set_source_rgba (cr, CAIRO_RGBA (frColor));
 			cairo_stroke (cr);
 
 			cairo_destroy (cr);

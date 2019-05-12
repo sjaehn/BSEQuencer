@@ -352,7 +352,11 @@ void Widget::resize (const double width, const double height)
 
 double Widget::getHeight () const {return height_;}
 
-void Widget::setState (const BColors::State state) {widgetState = state;}
+void Widget::setState (const BColors::State state)
+{
+	widgetState = state;
+	update ();
+}
 
 BColors::State Widget::getState () const {return widgetState;}
 
