@@ -53,6 +53,54 @@ double ExposeEvent::getHeight () const {return exposeHeight;}
  * End of class BEvents::ExposeEvent
  *****************************************************************************/
 
+ /*****************************************************************************
+  * Class BEvents::KeyEvent
+  *****************************************************************************/
+
+ KeyEvent::KeyEvent () : KeyEvent (nullptr, NO_EVENT, 0, 0, 0) {}
+ KeyEvent::KeyEvent (BWidgets::Widget* widget, const EventType type, const double x, const double y, const uint32_t unicode) :
+		Event (widget, type), xpos (x), ypos (y), key (unicode) {}
+ void KeyEvent::setX (const double x) {xpos = x;}
+ double KeyEvent::getX () const {return xpos;}
+ void KeyEvent::setY (const double y) {ypos = y;}
+ double KeyEvent::getY () const {return ypos;}
+ uint32_t KeyEvent::getKey () const {return key;}
+
+ std::string KeyEvent::getKeyUTF8 () const
+ {
+	 // Invalide unicode
+	 if (key > 0x0010ffff) return "";
+
+	 std::string s = "";
+
+	 // 7 bit ASCII: utf-8 = unicode
+	 if (key < 0x80) s += char (key);
+
+	 // 2/3/4(/5/6) byte utf-8
+	 else
+	 {
+		 uint32_t steps = 2;
+		 for (uint32_t i = 3; i <= 6; ++i)
+		 {
+			 if (key >= (uint32_t (2) << (5 * (i - 1)))) steps = i;
+		 }
+
+		 char c = char ((0xFF & (0xFF << (8 - steps))) | (key >> (6 * (steps - 1))));
+		 s += c;
+
+		 for (uint32_t i = steps - 1; i >= 1; --i)
+		 {
+			 char c = char (0x80 | ((key >> (6 * (i - 1))) & 0x3f));
+			 s += c;
+		 }
+	 }
+
+	 return s;
+ }
+
+ /*
+  * End of class BEvents::KeyEvent
+  *****************************************************************************/
 
 /*****************************************************************************
  * Class BEvents::PointerEvent

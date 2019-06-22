@@ -312,6 +312,14 @@ public:
 	bool hasChildren () const;
 
 	/**
+	 * Tests whether child is on of children of the widget.
+	 * @param child		Pointer to the child widget.
+	 * @return 				TRUE if child is one of the children ofthe widget, otherwise
+	 *								FALSE.
+	 */
+	bool isChild (Widget* child);
+
+	/**
 	 * Gets the widgets children vector. The vector contains all children of
 	 * the widgets from background to foreground.
 	 * @return Children vector.
@@ -498,7 +506,22 @@ public:
 
 	/**
 	 * Predefined empty method to handle a
+	 * BEvents::EventType::KEY_PRESS_EVENT.
+	 * @param event Key event
+	 */
+	virtual void onKeyPressed (BEvents::KeyEvent* event);
+
+	/**
+	 * Predefined empty method to handle a
+	 * BEvents::EventType::KEY_RELEASE_EVENT.
+	 * @param event Key event
+	 */
+	virtual void onKeyReleased (BEvents::KeyEvent* event);
+
+	/**
+	 * Predefined empty method to handle a
 	 * BEvents::EventType::BUTTON_PRESS_EVENT.
+	 * @param event Pointer event
 	 */
 	virtual void onButtonPressed (BEvents::PointerEvent* event);
 

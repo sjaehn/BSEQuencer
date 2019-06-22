@@ -131,6 +131,31 @@ public:
 	 */
 	double getInputY (BEvents::InputDevice device) const;
 
+	/*
+	 * Adds (or replaces) a widget to the top of the KeyGrab stack and associates
+	 * this widget with the given key(s). The top widget of the stack associated
+	 * with the key(s) pressed or released will emit the respective
+	 * BEvents::KeyEvent.
+	 * @param widget	Widget that will emit the BEvents::KeyEvent.
+	 * @param key			0 for all keys (default) or unicode of the key
+	 * 								(or BEvent::KeyCode) or
+	 * @param keys		vector of unicodes
+	 */
+	void setKeyGrab (Widget* widget, uint32_t key = 0);
+	void setKeyGrab (Widget* widget, std::vector<uint32_t>& keys);
+
+	/*
+	 * Removes a widget (and its associated keys) from the KeyGrab stack.
+	 * @param widget	Widget to remove.
+	 */
+	void removeKeyGrab (Widget* widget);
+
+	/*
+	 * Removes events (emited by a given widget) from the event queue
+	 * @param widget	Emitting widget (nullptr for all widgets)
+	 */
+	void purgeEventQueue (Widget* widget = nullptr);
+
 protected:
 
 	/**
@@ -141,7 +166,13 @@ protected:
 	void translateTimeEvent ();
 
 	void mergeEvents ();
-	void purgeEventQueue ();
+
+	/* Gets the widget that is resposible for emitting BEvents::KeyEvent's if
+	 * the respective key has been pressed or released.
+	 * @param key		Unicode of the key (or BEvent::KeyCode).
+	 * @return			Responsible widget or nullptr.
+	 */
+	Widget* getKeyGrabWidget (uint32_t key);
 
 	std::string title_;
 	PuglView* view_;
@@ -170,6 +201,15 @@ protected:
 	 * the linked widget is released or destroyed.
 	 */
 	std::array<Input, BEvents::InputDevice::NR_OF_BUTTONS> input;
+
+	typedef struct
+	{
+		std::vector<uint32_t> keys;
+		Widget* widget;
+	} KeyGrab;
+
+	std::vector<KeyGrab> keyGrabStack;
+
 	std::vector<BEvents::Event*> eventQueue;
 };
 

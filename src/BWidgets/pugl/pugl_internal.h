@@ -28,39 +28,22 @@
    PUGL_HAVE_GL:    Include OpenGL support code.
 */
 
+#include "pugl.h"
+#include "pugl_internal_types.h"
+
 #include <stdlib.h>
 #include <string.h>
 
-#include "pugl.h"
-
-typedef struct PuglInternalsImpl PuglInternals;
-
-struct PuglViewImpl {
-	PuglHandle       handle;
-	PuglEventFunc    eventFunc;
-
-	PuglInternals* impl;
-
-	char*            windowClass;
-	PuglNativeWindow parent;
-	PuglContextType  ctx_type;
-	uintptr_t        transient_parent;
-
-	int      width;
-	int      height;
-	int      min_width;
-	int      min_height;
-	int      min_aspect_x;
-	int      min_aspect_y;
-	int      max_aspect_x;
-	int      max_aspect_y;
-	bool     ignoreKeyRepeat;
-	bool     redisplay;
-	bool     resizable;
-	bool     visible;
-};
-
 PuglInternals* puglInitInternals(void);
+
+static PuglHints
+puglDefaultHints()
+{
+	static const PuglHints hints = {
+		2, 0, 4, 4, 4, 4, 24, 8, 0, true, true, false
+	};
+	return hints;
+}
 
 PuglView*
 puglInit(int* pargc, char** argv)
@@ -69,6 +52,8 @@ puglInit(int* pargc, char** argv)
 	if (!view) {
 		return NULL;
 	}
+
+	view->hints = puglDefaultHints();
 
 	PuglInternals* impl = puglInitInternals();
 	if (!impl) {
@@ -81,6 +66,49 @@ puglInit(int* pargc, char** argv)
 	view->height   = 480;
 
 	return view;
+}
+
+void
+puglInitWindowHint(PuglView* view, PuglWindowHint hint, int value)
+{
+	switch (hint) {
+	case PUGL_USE_COMPAT_PROFILE:
+		view->hints.use_compat_profile = value;
+		break;
+	case PUGL_CONTEXT_VERSION_MAJOR:
+		view->hints.context_version_major = value;
+		break;
+	case PUGL_CONTEXT_VERSION_MINOR:
+		view->hints.context_version_minor = value;
+		break;
+	case PUGL_RED_BITS:
+		view->hints.red_bits = value;
+		break;
+	case PUGL_GREEN_BITS:
+		view->hints.green_bits = value;
+		break;
+	case PUGL_BLUE_BITS:
+		view->hints.blue_bits = value;
+		break;
+	case PUGL_ALPHA_BITS:
+		view->hints.alpha_bits = value;
+		break;
+	case PUGL_DEPTH_BITS:
+		view->hints.depth_bits = value;
+		break;
+	case PUGL_STENCIL_BITS:
+		view->hints.stencil_bits = value;
+		break;
+	case PUGL_SAMPLES:
+		view->hints.samples = value;
+		break;
+	case PUGL_DOUBLE_BUFFER:
+		view->hints.double_buffer = value;
+		break;
+	case PUGL_RESIZABLE:
+		view->hints.resizable = value;
+		break;
+	}
 }
 
 void
@@ -129,7 +157,7 @@ puglInitWindowParent(PuglView* view, PuglNativeWindow parent)
 void
 puglInitResizable(PuglView* view, bool resizable)
 {
-	view->resizable = resizable;
+	view->hints.resizable = resizable;
 }
 
 void
@@ -222,8 +250,8 @@ puglDispatchEvent(PuglView* view, const PuglEvent* event)
 	case PUGL_NOTHING:
 		break;
 	case PUGL_CONFIGURE:
-		view->width  = event->configure.width;
-		view->height = event->configure.height;
+		view->width  = (int)event->configure.width;
+		view->height = (int)event->configure.height;
 		puglEnterContext(view);
 		view->eventFunc(view, event);
 		puglLeaveContext(view, false);

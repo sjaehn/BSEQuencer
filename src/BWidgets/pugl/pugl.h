@@ -21,6 +21,7 @@
 #ifndef PUGL_H_INCLUDED
 #define PUGL_H_INCLUDED
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifdef PUGL_SHARED
@@ -42,8 +43,6 @@
 
 #ifdef __cplusplus
 extern "C" {
-#else
-#    include <stdbool.h>
 #endif
 
 /**
@@ -82,10 +81,36 @@ typedef enum {
    Drawing context type.
 */
 typedef enum {
-	PUGL_GL       = 0x1,
-	PUGL_CAIRO    = 0x2,
-	PUGL_CAIRO_GL = 0x3
+	PUGL_GL    = 1 << 0,  /**< OpenGL (3D) */
+	PUGL_CAIRO = 1 << 1   /**< Cairo (2D) */
 } PuglContextType;
+
+/**
+   Window hint.
+*/
+typedef enum {
+	PUGL_USE_COMPAT_PROFILE,    /**< Use compatible (not core) OpenGL profile */
+	PUGL_CONTEXT_VERSION_MAJOR, /**< OpenGL context major version */
+	PUGL_CONTEXT_VERSION_MINOR, /**< OpenGL context minor version */
+	PUGL_RED_BITS,              /**< Number of bits for red channel */
+	PUGL_GREEN_BITS,            /**< Number of bits for green channel */
+	PUGL_BLUE_BITS,             /**< Number of bits for blue channel */
+	PUGL_ALPHA_BITS,            /**< Number of bits for alpha channel */
+	PUGL_DEPTH_BITS,            /**< Number of bits for depth buffer */
+	PUGL_STENCIL_BITS,          /**< Number of bits for stencil buffer */
+	PUGL_SAMPLES,               /**< Number of samples per pixel (AA) */
+	PUGL_DOUBLE_BUFFER,         /**< True if double buffering should be used */
+	PUGL_RESIZABLE,             /**< True if window should be resizable */
+} PuglWindowHint;
+
+/**
+   Special window hint value.
+*/
+typedef enum {
+	PUGL_DONT_CARE = -1,  /**< Use best available value */
+	PUGL_FALSE     = 0,   /**< Explicitly false */
+	PUGL_TRUE      = 1    /**< Explicitly true */
+} PuglWindowHintValue;
 
 /**
    Convenience symbols for ASCII control characters.
@@ -383,6 +408,12 @@ PUGL_API PuglView*
 puglInit(int* pargc, char** argv);
 
 /**
+   Set a hint before creating a window.
+*/
+PUGL_API void
+puglInitWindowHint(PuglView* view, PuglWindowHint hint, int value);
+
+/**
    Set the window class name before creating a window.
 */
 PUGL_API void
@@ -522,7 +553,6 @@ puglGetSize(PuglView* view, int* width, int* height);
 PUGL_API void*
 puglGetContext(PuglView* view);
 
-
 /**
    Enter the drawing context.
 
@@ -598,6 +628,17 @@ puglProcessEvents(PuglView* view);
 /**
    @}
 */
+
+/**
+   OpenGL extension function.
+*/
+typedef void (*PuglGlFunc)();
+
+/**
+   Return the address of an OpenGL extension function.
+*/
+PUGL_API PuglGlFunc
+puglGetProcAddress(const char* name);
 
 /**
    Request a redisplay on the next call to puglProcessEvents().

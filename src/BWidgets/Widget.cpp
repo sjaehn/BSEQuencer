@@ -59,10 +59,11 @@ Widget::Widget (const Widget& that) :
 
 Widget::~Widget()
 {
-	// Release from parent (and main) if still linked
-	if (parent_) parent_->release (this);
+	// Hide widget first (prevents filling the event stack with superfluous expose
+	// events from released child widgets)
+	hide ();
 
-	//Release children
+	// Release children
 	while (!children_.empty ())
 	{
 		Widget* w = children_.back ();
@@ -71,6 +72,9 @@ Widget::~Widget()
 		// Hard kick out if release failed
 		if (w == children_.back ()) children_.pop_back ();
 	}
+
+	// Release from parent (and main) if still linked
+	if (parent_) parent_->release (this);
 
 	cairo_surface_destroy (widgetSurface);
 }
@@ -172,6 +176,8 @@ void Widget::release (Widget* child)
 				}
 			}
 
+			child->main_->purgeEventQueue (child);
+			child->main_->removeKeyGrab (child);
 			child->main_ = nullptr;
 		}
 
@@ -189,6 +195,8 @@ void Widget::release (Widget* child)
 					}
 				}
 
+				w->main_->purgeEventQueue (w);
+				w->main_->removeKeyGrab (w);
 				w->main_ = nullptr;
 			}
 		}
@@ -382,6 +390,17 @@ Widget* Widget::getParent () const {return parent_;}
 
 bool Widget::hasChildren () const {return (children_.size () > 0 ? true : false);}
 
+bool Widget::isChild (Widget* child)
+{
+	for (Widget* w : children_)
+	{
+		if (w == child) return true;
+		if ((!w->children_.empty()) && w->isChild (child)) return true;
+	}
+
+	return false;
+}
+
 std::vector<Widget*> Widget::getChildren () const {return children_;}
 
 void  Widget::setFocusWidget (FocusWidget* widget) {focusWidget = widget;}
@@ -486,6 +505,8 @@ void Widget::applyTheme (BStyles::Theme& theme, const std::string& name)
 void Widget::onConfigure (BEvents::ExposeEvent* event) {} // Empty, only Windows handle configure events
 void Widget::onExpose (BEvents::ExposeEvent* event) {} // Empty, only Windows handle expose events
 void Widget::onClose () {} // Empty, only Windows handle close events
+void Widget::onKeyPressed (BEvents::KeyEvent* event) {cbfunction[BEvents::EventType::KEY_PRESS_EVENT] (event);}
+void Widget::onKeyReleased (BEvents::KeyEvent* event) {cbfunction[BEvents::EventType::KEY_RELEASE_EVENT] (event);}
 void Widget::onButtonPressed (BEvents::PointerEvent* event) {cbfunction[BEvents::EventType::BUTTON_PRESS_EVENT] (event);}
 void Widget::onButtonReleased (BEvents::PointerEvent* event) {cbfunction[BEvents::EventType::BUTTON_RELEASE_EVENT] (event);}
 void Widget::onButtonClicked (BEvents::PointerEvent* event) {cbfunction[BEvents::EventType::BUTTON_CLICK_EVENT] (event);}

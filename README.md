@@ -16,11 +16,16 @@ Step 2: Install the development packages for x11, cairo, and lv2 if not done yet
 
 Step 3: Building and installing into the default lv2 directory (/usr/lib/lv2/) is easy. Simply call:
 ```
+make
 sudo make install
 ```
 from the directory where you downloaded the repository files.
 
-For installation into an alternative directory (e.g., /usr/local/lib/lv2), modify line 2 in the makefile.
+For installation into an alternative directory (e.g., /usr/local/lib/lv2), change the variable `INSTALL_DIR` while installing:
+
+```
+sudo make INSTALL_DIR=/usr/local/lib/lv2 install
+```
 
 
 Running
@@ -53,17 +58,11 @@ see https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer
 
 TODO
 ----
-* Sort MIDI output messages (bugfix)
-* Stability (Note: **This plugin is experimental, yet. Not for production!**)
-* Testing
-* Bugfixes
+* Copy & paste pattern
+* Internal: sort MIDI output messages
 
 
 See also
 --------
 * Feature tour: https://www.youtube.com/watch?v=J6bU4GdUVYc
 * Preview: https://www.youtube.com/watch?v=iERRKL7J-KU
-
-
-
-

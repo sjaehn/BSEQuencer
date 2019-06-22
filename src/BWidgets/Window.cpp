@@ -245,6 +245,46 @@ double Window::getInputY (BEvents::InputDevice device) const
 	else return 0.0;
 }
 
+void Window::setKeyGrab (Widget* widget, uint32_t key)
+{
+	std::vector<uint32_t> keys = {key};
+	setKeyGrab (widget, keys);
+}
+
+void Window::setKeyGrab (Widget* widget, std::vector<uint32_t>& keys)
+{
+	if (isChild (widget))
+	{
+		KeyGrab newKeyGrab = {keys, widget};
+		removeKeyGrab (widget);
+		keyGrabStack.push_back (newKeyGrab);
+	}
+}
+
+void Window::removeKeyGrab (Widget* widget)
+{
+	for (std::vector<KeyGrab>::iterator it = keyGrabStack.begin(); it != keyGrabStack.end(); )
+	{
+		KeyGrab* gr = (KeyGrab*) &it;
+		if (gr->widget == widget) it = keyGrabStack.erase (it);
+		else ++it;
+	}
+}
+
+Widget* Window::getKeyGrabWidget (uint32_t key)
+{
+	for (int i = keyGrabStack.size () - 1; i >= 0; --i)
+	{
+		KeyGrab gr = keyGrabStack.at (i);
+		for (uint32_t k : gr.keys)
+		{
+			if ((k == 0) || (k == key)) return gr.widget;
+		}
+	}
+
+	return nullptr;
+}
+
 void Window::handleEvents ()
 {
 	puglProcessEvents (view_);
@@ -253,6 +293,8 @@ void Window::handleEvents ()
 	while (!eventQueue.empty ())
 	{
 		BEvents::Event* event = eventQueue.front ();
+		eventQueue.erase (eventQueue.begin ());
+
 		if (event)
 		{
 			Widget* widget = event->getWidget ();
@@ -272,6 +314,20 @@ void Window::handleEvents ()
 
 				case BEvents::CLOSE_EVENT:
 					onClose ();
+					break;
+
+				case BEvents::KEY_PRESS_EVENT:
+					{
+						BEvents::KeyEvent* be = (BEvents::KeyEvent*) event;
+						widget->onKeyPressed (be);
+					}
+					break;
+
+				case BEvents::KEY_RELEASE_EVENT:
+					{
+						BEvents::KeyEvent* be = (BEvents::KeyEvent*) event;
+						widget->onKeyReleased (be);
+					}
 					break;
 
 				case BEvents::BUTTON_PRESS_EVENT:
@@ -329,7 +385,6 @@ void Window::handleEvents ()
 			}
 			delete event;
 		}
-		eventQueue.erase (eventQueue.begin ());
 	}
 }
 
@@ -349,6 +404,31 @@ void Window::translatePuglEvent (PuglView* view, const PuglEvent* event)
 	}
 
 	switch (event->type) {
+
+	case PUGL_KEY_PRESS:
+		{
+			uint32_t key = (event->key.character != 0 ? event->key.character : event->key.special);
+			Widget* widget = w->getKeyGrabWidget (key);
+			w->addEventToQueue (new BEvents::KeyEvent (widget,
+																								 BEvents::KEY_PRESS_EVENT,
+																							 	 event->key.x,
+																							 	 event->key.y,
+																							 	 key));
+		}
+		break;
+
+	case PUGL_KEY_RELEASE:
+		{
+			uint32_t key = (event->key.character != 0 ? event->key.character : event->key.special);
+			Widget* widget = w->getKeyGrabWidget (key);
+			w->addEventToQueue (new BEvents::KeyEvent (widget,
+																								 BEvents::KEY_RELEASE_EVENT,
+																							 	 event->key.x,
+																							 	 event->key.y,
+																							 	 key));
+		}
+		break;
+
 	case PUGL_BUTTON_PRESS:
 		{
 			Widget* widget = w->getWidgetAt (event->button.x, event->button.y, true, true, false, false, false);
@@ -535,13 +615,17 @@ void Window::translateTimeEvent ()
 	}
 }
 
-void Window::purgeEventQueue ()
+void Window::purgeEventQueue (Widget* widget)
 {
-	while (!eventQueue.empty ())
+	for (std::vector<BEvents::Event*>::iterator it = eventQueue.begin (); it != eventQueue.end (); )
 	{
-		BEvents::Event* event = eventQueue.back ();
-		if (event) delete event;
-		eventQueue.pop_back ();
+		BEvents::Event* event = *it;
+		if ((event) && ((widget == nullptr) || (widget == event->getWidget ())))
+		{
+			it = eventQueue.erase (it);
+			delete event;
+		}
+		else ++it;
 	}
 }
 
