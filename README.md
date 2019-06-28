@@ -17,14 +17,14 @@ Step 2: Install the development packages for x11, cairo, and lv2 if not done yet
 Step 3: Building and installing into the default lv2 directory (/usr/lib/lv2/) is easy. Simply call:
 ```
 make
-sudo make install
+sudo make install PREFIX=/usr
 ```
 from the directory where you downloaded the repository files.
 
-For installation into an alternative directory (e.g., /usr/local/lib/lv2), change the variable `INSTALL_DIR` while installing:
+For installation into an alternative directory (e.g., /usr/local/lib/lv2), change the variable `PREFIX` while installing:
 
 ```
-sudo make INSTALL_DIR=/usr/local/lib/lv2 install
+sudo make install PREFIX=/usr/local
 ```
 
 
