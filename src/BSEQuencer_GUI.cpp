@@ -1158,10 +1158,13 @@ LV2UI_Handle instantiate (const LV2UI_Descriptor *descriptor,
 	int screenHeight = getScreenHeight ();
 	if ((screenWidth < 840) || (screenHeight < 580)) sz = 0.5;
 	else if ((screenWidth < 1240) || (screenHeight < 860)) sz = 0.66;
+
+	/*
 	std::cerr << "B.SEQuencer_GUI.lv2 screen size " << screenWidth << " x " << screenHeight <<
 			". Set GUI size to " << 1200 * sz << " x " << 820 * sz << ".\n";
+	*/
 
-	 if (resize) resize->ui_resize(resize->handle, 1200 * sz, 820 * sz);
+	if (resize) resize->ui_resize(resize->handle, 1200 * sz, 820 * sz);
 
 	*widget = (LV2UI_Widget) puglGetNativeWindow (ui->getPuglView ());
 

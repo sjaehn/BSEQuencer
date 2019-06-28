@@ -788,8 +788,8 @@ void BSEQuencer::run (uint32_t n_samples)
 				}
 			}
 
-			else fprintf (stderr, "BSEQuencer.lv2: Ignored object in Control port (otype = %i, %s)\n", obj->body.otype,
-						  (unmap ? unmap->unmap (unmap->handle, obj->body.otype) : NULL));
+			//else fprintf (stderr, "BSEQuencer.lv2: Ignored object in Control port (otype = %i, %s)\n", obj->body.otype,
+			//			  (unmap ? unmap->unmap (unmap->handle, obj->body.otype) : NULL));
 		}
 
 
@@ -883,7 +883,7 @@ void BSEQuencer::run (uint32_t n_samples)
 
 							// All other MIDI signals
 							default:
-								fprintf (stderr, "BSEQuencer.lv2: Ignored MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
+								//fprintf (stderr, "BSEQuencer.lv2: Ignored MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
 								break;
 							}
 
@@ -893,16 +893,16 @@ void BSEQuencer::run (uint32_t n_samples)
 
 					// All other MIDI signals
 					default:
-						fprintf (stderr, "BSEQuencer.lv2: Ignored MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
+						//fprintf (stderr, "BSEQuencer.lv2: Ignored MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
 						break;
 					}
 				}
-				else fprintf (stderr, "BSEQuencer.lv2: MIDI input channel filter passed MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
+				//else fprintf (stderr, "BSEQuencer.lv2: MIDI input channel filter passed MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
 			}
 		}
 
-		else fprintf (stderr, "BSEQuencer.lv2: Uninterpreted event in Control port (type = %i, %s)\n", ev->body.type,
-						 (unmap ? unmap->unmap (unmap->handle, ev->body.type) : NULL));
+		//else fprintf (stderr, "BSEQuencer.lv2: Uninterpreted event in Control port (type = %i, %s)\n", ev->body.type,
+		//				 (unmap ? unmap->unmap (unmap->handle, ev->body.type) : NULL));
 
 
 		// Update for this iteration
