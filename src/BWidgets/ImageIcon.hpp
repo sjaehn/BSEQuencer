@@ -18,7 +18,7 @@
 #ifndef IMAGEICON_HPP_
 #define IMAGEICON_HPP_
 
-#include "Widget.hpp"
+#include "Icon.hpp"
 
 namespace BWidgets
 {
@@ -27,44 +27,29 @@ namespace BWidgets
  *
  * Icon widget displaying an image file or a Cairo surface.
  */
-class ImageIcon : public Widget
+class ImageIcon : public Icon
 {
 public:
 	ImageIcon ();
 	ImageIcon (const double x, const double y, const double width, const double height, const std::string& name);
 	ImageIcon (const double x, const double y, const double width, const double height, const std::string& name, cairo_surface_t* surface);
 	ImageIcon (const double x, const double y, const double width, const double height, const std::string& name, const std::string& filename);
+	ImageIcon (const double x, const double y, const double width, const double height, const std::string& name, const std::vector<cairo_surface_t*>& surfaces);
+	ImageIcon (const double x, const double y, const double width, const double height, const std::string& name, const std::vector<std::string>& filenames);
 
 	/**
-	 * Creates a new (orphan) image icon widget and copies the widget
-	 * properties from a source image icon widget. This method doesn't
-	 * copy any parent or child widgets.
-	 * @param that Source drawing surface widget
+	 * Pattern cloning. Creates a new instance of the widget and copies all
+	 * its properties.
 	 */
-	ImageIcon (const ImageIcon& that);
-
-	~ImageIcon ();
-
-	/**
-	 * Assignment. Copies the widget properties from a source widget and keeps
-	 * its name and its position within the widget tree. Emits a
-	 * BEvents::ExposeEvent if the widget is visible.
-	 * @param that Source widget
-	 */
-	ImageIcon& operator= (const ImageIcon& that);
+	virtual Widget* clone () const override;
 
 	/**
 	 * Loads an image from a Cairo surface or an image file.
 	 * @param surface	Cairo surface
 	 * @param filename	Filename
 	 */
-	void loadImage (cairo_surface_t* surface);
-	void loadImage (const std::string& filename);
-
-protected:
-	virtual void draw (const double x, const double y, const double width, const double height) override;
-
-	cairo_surface_t* originalSurface;
+	void loadImage (BColors::State state, cairo_surface_t* surface);
+	void loadImage (BColors::State state, const std::string& filename);
 };
 
 }

@@ -1,4 +1,4 @@
-/* DisplayHSlider.hpp
+/* HSliderValue.hpp
  * Copyright (C) 2018  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,28 +15,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BWIDGETS_DISPLAYHSLIDER_HPP_
-#define BWIDGETS_DISPLAYHSLIDER_HPP_
+#ifndef BWIDGETS_HSLIDERVALUE_HPP_
+#define BWIDGETS_HSLIDERVALUE_HPP_
 
 #include "Label.hpp"
 #include "HSlider.hpp"
 
-#define BWIDGETS_DEFAULT_DISPLAYHSLIDER_WIDTH BWIDGETS_DEFAULT_HSLIDER_WIDTH
-#define BWIDGETS_DEFAULT_DISPLAYHSLIDER_HEIGHT (BWIDGETS_DEFAULT_HSLIDER_HEIGHT + BWIDGETS_DEFAULT_LABEL_HEIGHT)
+#define BWIDGETS_DEFAULT_HSLIDERVALUE_WIDTH BWIDGETS_DEFAULT_HSLIDER_WIDTH
+#define BWIDGETS_DEFAULT_HSLIDERVALUE_HEIGHT (BWIDGETS_DEFAULT_HSLIDER_HEIGHT + BWIDGETS_DEFAULT_LABEL_HEIGHT)
 
 namespace BWidgets
 {
 
 /**
- * Class BWidgets::DisplayHSlider
+ * Class BWidgets::HSliderValue
  *
  * Composite BWidgets::HSlider widget that additionally displays the value.
  */
-class DisplayHSlider : public HSlider
+class HSliderValue : public HSlider
 {
 public:
-	DisplayHSlider ();
-	DisplayHSlider (const double x, const double y, const double width, const double height, const std::string& name,
+	HSliderValue ();
+	HSliderValue (const double x, const double y, const double width, const double height, const std::string& name,
 				    const double value, const double min, const double max, const double step,
 				    const std::string& valueFormat);
 
@@ -45,9 +45,9 @@ public:
 	 * source slider.
 	 * @param that Source slider
 	 */
-	DisplayHSlider (const DisplayHSlider& that);
+	HSliderValue (const HSliderValue& that);
 
-	~DisplayHSlider ();
+	~HSliderValue ();
 
 	/**
 	 * Assignment. Copies the slider properties from a source slider and keeps
@@ -55,7 +55,13 @@ public:
 	 * if the widget is visible and a value changed event.
 	 * @param that Source slider
 	 */
-	DisplayHSlider& operator= (const DisplayHSlider& that);
+	HSliderValue& operator= (const HSliderValue& that);
+
+	/**
+	 * Pattern cloning. Creates a new instance of the widget and copies all
+	 * its properties.
+	 */
+	virtual Widget* clone () const override;
 
 	/**
 	 * Changes the value of the widget and keeps it within the defined range.
@@ -121,4 +127,4 @@ protected:
 
 }
 
-#endif /* BWIDGETS_DISPLAYHSLIDER_HPP_ */
+#endif /* BWIDGETS_HSLIDERVALUE_HPP_ */

@@ -1,5 +1,5 @@
 /* ItemBox.cpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,74 +19,82 @@
 
 namespace BWidgets
 {
-ItemBox::ItemBox () : ItemBox (0.0, 0.0, 0.0, 0.0, "itembox", {UNSELECTED, ""}) {}
+ItemBox::ItemBox () :
+	ItemBox (0.0, 0.0, 0.0, 0.0, "itembox", BItems::Item {UNSELECTED, nullptr}) {}
 
-ItemBox::ItemBox (const double x, const double y, const double width, const double height, const std::string& name, const BItems::Item& item) :
-		ValueWidget (x, y, width, height, name, item.value),
-		itemLabel (0, 0, 0, 0, name + BWIDGETS_DEFAULT_ITEMBOX_ITEM_NAME, item.string)
+ItemBox::ItemBox (const double x, const double y, const double width,
+		  const double height, const std::string& name, const BItems::Item item) :
+	ValueWidget (x, y, width, height, name, UNSELECTED), item (item)
 
 {
-	itemLabel.getBorder () -> setPadding (BWIDGETS_DEFAULT_ITEMBOX_ITEM_PADDING);
-	itemLabel.getFont ()->setTextAlign (BWIDGETS_DEFAULT_TEXT_ALIGN);
-	itemLabel.getFont ()->setTextVAlign (BWIDGETS_DEFAULT_TEXT_VALIGN);
-	itemLabel.setClickable (false);
-
+	value = this->item.getValue ();
 	background_ = BWIDGETS_DEFAULT_MENU_BACKGROUND;
 	border_ = BWIDGETS_DEFAULT_MENU_BORDER;
 
-	add (itemLabel);
+	Widget* w = this->item.getWidget ();
+	if (w)
+	{
+		w->getBorder ()->setPadding (BWIDGETS_DEFAULT_ITEMBOX_ITEM_PADDING);
+		w->setClickable (false);
+
+		add (*w);
+	}
 }
 
-ItemBox::ItemBox (const ItemBox& that) : ValueWidget (that), itemLabel (that.itemLabel)
+ItemBox::ItemBox (const ItemBox& that) :
+	ValueWidget (that), item (that.item)
 {
-	add (itemLabel);
+	if (item.getWidget ()) add (*item.getWidget ());
 }
 
 ItemBox::~ItemBox () {}
 
 ItemBox& ItemBox::operator= (const ItemBox& that)
 {
-	itemLabel = that.itemLabel;
-
+	Widget* w = item.getWidget ();
+	if (w && isChild (w)) release (w);
+	item = that.item;
+	if (item.getWidget ()) add (*item.getWidget ());
 	ValueWidget::operator= (that);
 	return *this;
 }
 
-void ItemBox::setItem (const BItems::Item& item)
+Widget* ItemBox::clone () const {return new ItemBox (*this);}
+
+void ItemBox::setItem (const BItems::Item item)
 {
-	setValue (item.value);
-	itemLabel.setText (item.string);
+	bool wasClickable = false;
+
+	Widget* w = item.getWidget ();
+	if (w && isChild (w)) release (w);
+
+	// Set widget
+	this->item = item;
+	setValue (this->item.getValue());
+
+	// Configure widget
+	w = item.getWidget ();
+	if (w)
+	{
+		w->getBorder ()->setPadding (BWIDGETS_DEFAULT_ITEMBOX_ITEM_PADDING);
+		w->setClickable (wasClickable);
+		add (*w);
+	}
+
+	update ();
 }
 
-void ItemBox::setItemText (const std::string& text) {itemLabel.setText (text);}
-
-BItems::Item ItemBox::getItem () const {return {getValue (), itemLabel.getText ()};}
-
-void ItemBox::setTextColors (const BColors::ColorSet& colorset) {itemLabel.setTextColors (colorset);}
-
-BColors::ColorSet* ItemBox::getTextColors () {return itemLabel.getTextColors ();}
-
-void ItemBox::setFont (const BStyles::Font& font) {itemLabel.setFont (font);}
-
-BStyles::Font* ItemBox::getFont () {return itemLabel.getFont ();}
-
-Label* ItemBox::getLabel () {return &itemLabel;}
+BItems::Item* ItemBox::getItem () {return &item;}
 
 void ItemBox::applyTheme (BStyles::Theme& theme) {applyTheme (theme, name_);}
 
 void ItemBox::applyTheme (BStyles::Theme& theme, const std::string& name)
 {
 	Widget::applyTheme (theme, name);
-
-	// Item styles
-	void* borderPtr = theme.getStyle(name + BWIDGETS_DEFAULT_ITEMBOX_ITEM_NAME, BWIDGETS_KEYWORD_BORDER);
-	if (borderPtr) itemLabel.setBorder (*((BStyles::Border*) borderPtr));
-	void* backgroundPtr = theme.getStyle(name + BWIDGETS_DEFAULT_ITEMBOX_ITEM_NAME, BWIDGETS_KEYWORD_BACKGROUND);
-	if (backgroundPtr) itemLabel.setBackground (*((BStyles::Fill*) backgroundPtr));
-	void* colorsPtr = theme.getStyle(name + BWIDGETS_DEFAULT_ITEMBOX_ITEM_NAME, BWIDGETS_KEYWORD_TEXTCOLORS);
-	if (colorsPtr) itemLabel.setTextColors (*((BColors::ColorSet*) colorsPtr));
-	void* fontPtr = theme.getStyle(name + BWIDGETS_DEFAULT_ITEMBOX_ITEM_NAME, BWIDGETS_KEYWORD_FONT);
-	if (fontPtr) itemLabel.setFont (*((BStyles::Font*) fontPtr));
+	if (item.getWidget ())
+	{
+		item.getWidget ()->applyTheme (theme, name + BWIDGETS_DEFAULT_ITEMBOX_ITEM_NAME);
+	}
 
 	update ();
 }
@@ -96,15 +104,20 @@ void ItemBox::update ()
 	// Update super widget first
 	Widget::update ();
 
-	// Set position of label
-	double x0 = getXOffset ();
-	double y0 = getYOffset ();
-	double w = getEffectiveWidth ();
-	double h = getEffectiveHeight ();
+	Widget* widget = item.getWidget ();
+	if (widget)
+	{
+		// Set position of label
+		double x0 = getXOffset ();
+		double y0 = getYOffset ();
+		double w = getEffectiveWidth ();
+		double h = getEffectiveHeight ();
 
-	itemLabel.moveTo (x0 + BWIDGETS_DEFAULT_ITEMBOX_PADDING, y0);
-	itemLabel.setWidth (w - 2 * BWIDGETS_DEFAULT_ITEMBOX_PADDING > 0 ? w - 2 * BWIDGETS_DEFAULT_ITEMBOX_PADDING : 0);
-	itemLabel.setHeight (h);
+		widget -> moveTo (x0 + BWIDGETS_DEFAULT_ITEMBOX_PADDING, y0);
+		widget -> setWidth (w - 2 * BWIDGETS_DEFAULT_ITEMBOX_PADDING > 0 ?
+				    w - 2 * BWIDGETS_DEFAULT_ITEMBOX_PADDING : 0);
+		widget -> setHeight (h);
+	}
 }
 
 }

@@ -36,6 +36,8 @@ HPianoRoll::HPianoRoll (const double x, const double y, const double width, cons
 	cbfunction[BEvents::EventType::POINTER_DRAG_EVENT] = Widget::defaultCallback;
 }
 
+Widget* HPianoRoll::clone () const {return new HPianoRoll (*this);}
+
 void HPianoRoll::setKeysToggleable (const bool toggle) {toggleKeys = toggle;}
 
 bool HPianoRoll::isKeysToggleable () const {return toggleKeys;}

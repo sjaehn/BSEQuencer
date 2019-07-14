@@ -253,7 +253,7 @@ void Window::setKeyGrab (Widget* widget, uint32_t key)
 
 void Window::setKeyGrab (Widget* widget, std::vector<uint32_t>& keys)
 {
-	if (isChild (widget))
+	if ((widget == this) || isChild (widget))
 	{
 		KeyGrab newKeyGrab = {keys, widget};
 		removeKeyGrab (widget);

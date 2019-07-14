@@ -88,6 +88,8 @@ VScale& VScale::operator= (const VScale& that)
 	return *this;
 }
 
+Widget* VScale::clone () const {return new VScale (*this);}
+
 void VScale::setValue (const double val)
 {
 	RangeWidget::setValue (val);

@@ -1,5 +1,5 @@
-/* VSwitch.hpp
- * Copyright (C) 2018  Sven Jähnichen
+/* Display.hpp
+ * Copyright (C) 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,29 +15,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BWIDGETS_VSWITCH_HPP_
-#define BWIDGETS_VSWITCH_HPP_
+#ifndef BWIDGETS_DISPLAY_HPP_
+#define BWIDGETS_DISPLAY_HPP_
 
-#include "Knob.hpp"
-#include "VSlider.hpp"
-
-#define BWIDGETS_DEFAULT_VSWITCH_WIDTH 40.0
-#define BWIDGETS_DEFAULT_VSWITCH_HEIGHT 20.0
-#define BWIDGETS_DEFAULT_VSWITCH_DEPTH 1.0
+#include "Widget.hpp"
 
 namespace BWidgets
 {
+
 /**
- * Class BWidgets::VSwitch
+ * Class BWidgets::Display
  *
- * On/OFF switch widget. Is is a BWidgets::VSlider having two conditions: on
- * (value != 0) or off (value == 0)
+ * Container widget. Children of this widget will only be displayed (and handled
+ * by the event handler) if the passWidget method returns true (default). This
+ * class allows filtering of child widgets.
  */
-class VSwitch : public VSlider
+class Display : public Widget
 {
 public:
-	VSwitch ();
-	VSwitch (const double x, const double y, const double width, const double height, const std::string& name, const double defaultvalue);
+	Display ();
+	Display (const double x, const double y, const double width, const double height,
+		 const std::string& text);
 
 	/**
 	 * Pattern cloning. Creates a new instance of the widget and copies all
@@ -46,9 +44,9 @@ public:
 	virtual Widget* clone () const override;
 
 protected:
-	virtual void updateCoords () override;
+	virtual bool filter (Widget* widget) override;
 };
 
 }
 
-#endif /* BWIDGETS_VSWITCH_HPP_ */
+#endif /* BWIDGETS_DISPLAY_HPP_ */

@@ -19,9 +19,8 @@ Step 3: Building and installing into the default lv2 directory (/usr/lib/lv2/) i
 make
 sudo make install PREFIX=/usr
 ```
-from the directory where you downloaded the repository files.
-
-For installation into an alternative directory (e.g., /usr/local/lib/lv2), change the variable `PREFIX` while installing:
+from the directory where you downloaded the repository files. For installation into an
+alternative directory (e.g., /usr/local/lib/lv2/), change the variable `PREFIX` while installing:
 
 ```
 sudo make install PREFIX=/usr/local

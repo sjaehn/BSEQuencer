@@ -50,6 +50,8 @@ Text& Text::operator= (const Text& that)
 	return *this;
 }
 
+Widget* Text::clone () const {return new Text (*this);}
+
 void Text::setText (const std::string& text)
 {
 	if (text != textString)

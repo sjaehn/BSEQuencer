@@ -51,6 +51,8 @@ RangeWidget& RangeWidget::operator= (const RangeWidget& that)
 	return *this;
 }
 
+Widget* RangeWidget::clone () const {return new RangeWidget (*this);}
+
 void RangeWidget::setValue (const double val)
 {
 	double valRounded = LIMIT (val, rangeMin, rangeMax);

@@ -136,6 +136,8 @@ MessageBox& MessageBox::operator= (const MessageBox& that)
 	return *this;
 }
 
+Widget* MessageBox::clone () const {return new MessageBox (*this);}
+
 void MessageBox::setTitle (const std::string& title)
 {
 	if (title != "")

@@ -87,6 +87,8 @@ HScale& HScale::operator= (const HScale& that)
 	return *this;
 }
 
+Widget* HScale::clone () const {return new HScale (*this);}
+
 void HScale::setValue (const double val)
 {
 	RangeWidget::setValue (val);

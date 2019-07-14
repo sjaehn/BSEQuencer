@@ -44,9 +44,9 @@ GUI_INCL = \
 	src/BWidgets/DownButton.cpp \
 	src/BWidgets/Button.cpp \
 	src/BWidgets/DrawingSurface.cpp \
-	src/BWidgets/DisplayDial.cpp \
+	src/BWidgets/DialValue.cpp \
 	src/BWidgets/Dial.cpp \
-	src/BWidgets/DisplayHSlider.cpp \
+	src/BWidgets/HSliderValue.cpp \
 	src/BWidgets/HSlider.cpp \
 	src/BWidgets/HScale.cpp \
 	src/BWidgets/RangeWidget.cpp \
@@ -59,6 +59,7 @@ GUI_INCL = \
 	src/BWidgets/BStyles.cpp \
 	src/BWidgets/BColors.cpp \
 	src/BWidgets/BEvents.cpp \
+	src/BWidgets/BItems.cpp \
 	src/BWidgets/BValues.cpp \
 	src/screen.c \
 	src/BWidgets/cairoplus.c \

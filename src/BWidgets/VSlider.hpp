@@ -58,6 +58,12 @@ public:
 	VSlider& operator= (const VSlider& that);
 
 	/**
+	 * Pattern cloning. Creates a new instance of the widget and copies all
+	 * its properties.
+	 */
+	virtual Widget* clone () const override;
+
+	/**
 	 * Calls a redraw of the widget and calls postRedisplay () if the the
 	 * Widget is visible.
 	 * This method should be called if the widgets properties are indirectly

@@ -1,4 +1,4 @@
-/* DisplayDial.cpp
+/* DialValue.cpp
  * Copyright (C) 2018  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,18 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "DisplayDial.hpp"
+#include "DialValue.hpp"
 
 namespace BWidgets
 {
 
-DisplayDial::DisplayDial () :
-		DisplayDial (0.0, 0.0, BWIDGETS_DEFAULT_DISPLAYDIAL_WIDTH, BWIDGETS_DEFAULT_DISPLAYDIAL_HEIGHT,
-							  "displaydial",
+DialValue::DialValue () :
+		DialValue (0.0, 0.0, BWIDGETS_DEFAULT_DIALVALUE_WIDTH, BWIDGETS_DEFAULT_DIALVALUE_HEIGHT,
+							  "dialvalue",
 							  BWIDGETS_DEFAULT_VALUE, BWIDGETS_DEFAULT_RANGE_MIN, BWIDGETS_DEFAULT_RANGE_MAX, BWIDGETS_DEFAULT_RANGE_STEP,
 							  BWIDGETS_DEFAULT_VALUE_FORMAT) {}
 
-DisplayDial::DisplayDial (const double x, const double y, const double width, const double height, const std::string& name,
+DialValue::DialValue (const double x, const double y, const double width, const double height, const std::string& name,
 											const double value, const double min, const double max, const double step,
 											const std::string& valueFormat) :
 	Dial (x, y, width, height, name, value, min, max, step),
@@ -37,15 +37,15 @@ DisplayDial::DisplayDial (const double x, const double y, const double width, co
 	add (valueDisplay);
 }
 
-DisplayDial::DisplayDial (const DisplayDial& that) :
+DialValue::DialValue (const DialValue& that) :
 		Dial (that), valueDisplay (that.valueDisplay), valFormat (that.valFormat)
 {
 	add (valueDisplay);
 }
 
-DisplayDial::~DisplayDial () {}
+DialValue::~DialValue () {}
 
-DisplayDial& DisplayDial::operator= (const DisplayDial& that)
+DialValue& DialValue::operator= (const DialValue& that)
 {
 	release (&valueDisplay);
 	valFormat = that.valFormat;
@@ -56,23 +56,25 @@ DisplayDial& DisplayDial::operator= (const DisplayDial& that)
 	return *this;
 }
 
-void DisplayDial::setValue (const double val)
+Widget* DialValue::clone () const {return new DialValue (*this);}
+
+void DialValue::setValue (const double val)
 {
 	Dial::setValue (val);
 	valueDisplay.setText(BValues::toBString (valFormat, value));
 }
 
-void DisplayDial::setValueFormat (const std::string& valueFormat)
+void DialValue::setValueFormat (const std::string& valueFormat)
 {
 	valFormat = valueFormat;
 	update ();
 }
 
-std::string DisplayDial::getValueFormat () const {return valFormat;}
+std::string DialValue::getValueFormat () const {return valFormat;}
 
-Label* DisplayDial::getDisplayLabel () {return &valueDisplay;}
+Label* DialValue::getDisplayLabel () {return &valueDisplay;}
 
-void DisplayDial::update ()
+void DialValue::update ()
 {
 	Dial::update();
 
@@ -89,15 +91,15 @@ void DisplayDial::update ()
 
 }
 
-void DisplayDial::applyTheme (BStyles::Theme& theme) {applyTheme (theme, name_);}
-void DisplayDial::applyTheme (BStyles::Theme& theme, const std::string& name)
+void DialValue::applyTheme (BStyles::Theme& theme) {applyTheme (theme, name_);}
+void DialValue::applyTheme (BStyles::Theme& theme, const std::string& name)
 {
 	Dial::applyTheme (theme, name);
 	valueDisplay.applyTheme (theme, name);
 	update ();
 }
 
-void DisplayDial::updateCoords ()
+void DialValue::updateCoords ()
 {
 	double w = getEffectiveWidth ();
 	double h = getEffectiveHeight ();

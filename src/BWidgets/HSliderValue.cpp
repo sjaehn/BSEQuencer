@@ -1,4 +1,4 @@
-/* DisplayVSlider.cpp
+/* HSliderValue.cpp
  * Copyright (C) 2018  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,37 +15,37 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "DisplayVSlider.hpp"
+#include "HSliderValue.hpp"
 
 namespace BWidgets
 {
-DisplayVSlider::DisplayVSlider () :
-		DisplayVSlider (0.0, 0.0, BWIDGETS_DEFAULT_DISPLAYVSLIDER_WIDTH, BWIDGETS_DEFAULT_DISPLAYVSLIDER_HEIGHT,
-								 "displayvslider",
+HSliderValue::HSliderValue () :
+		HSliderValue (0.0, 0.0, BWIDGETS_DEFAULT_HSLIDERVALUE_WIDTH, BWIDGETS_DEFAULT_HSLIDERVALUE_HEIGHT,
+								 "hslidervalue",
 								 BWIDGETS_DEFAULT_VALUE, BWIDGETS_DEFAULT_RANGE_MIN, BWIDGETS_DEFAULT_RANGE_MAX, BWIDGETS_DEFAULT_RANGE_STEP,
 								 BWIDGETS_DEFAULT_VALUE_FORMAT) {}
 
-DisplayVSlider::DisplayVSlider (const double x, const double y, const double width, const double height, const std::string& name,
+HSliderValue::HSliderValue (const double x, const double y, const double width, const double height, const std::string& name,
 												  const double value, const double min, const double max, const double step,
 												  const std::string& valueFormat) :
-	VSlider (x, y, width, height, name, value, min, max, step),
-	valueDisplay(0, 0, width, height, name),
+	HSlider (x, y, width, height, name, value, min, max, step),
+	valueDisplay(0, 0, width, height / 2, name),
 	valFormat (valueFormat), displayHeight (0), displayWidth (0), displayX0 (0), displayY0 (0)
 {
 	valueDisplay.setText (BValues::toBString (valueFormat, value));
 	add (valueDisplay);
 }
 
-DisplayVSlider::DisplayVSlider (const DisplayVSlider& that) :
-		VSlider (that), valueDisplay (that.valueDisplay), valFormat (that.valFormat),
+HSliderValue::HSliderValue (const HSliderValue& that) :
+		HSlider (that), valueDisplay (that.valueDisplay), valFormat (that.valFormat),
 		displayHeight (that.displayHeight), displayWidth (that.displayWidth), displayX0 (that.displayX0), displayY0 (that.displayY0)
 {
 	add (valueDisplay);
 }
 
-DisplayVSlider::~DisplayVSlider () {}
+HSliderValue::~HSliderValue () {}
 
-DisplayVSlider& DisplayVSlider::operator= (const DisplayVSlider& that)
+HSliderValue& HSliderValue::operator= (const HSliderValue& that)
 {
 	release (&valueDisplay);
 
@@ -55,32 +55,28 @@ DisplayVSlider& DisplayVSlider::operator= (const DisplayVSlider& that)
 	displayY0 = that.displayY0;
 	valFormat = that.valFormat;
 	valueDisplay = that.valueDisplay;
-	VSlider::operator= (that);
+	HSlider::operator= (that);
 
 	add (valueDisplay);
 
 	return *this;
 }
 
-void DisplayVSlider::setValue (const double val)
+Widget* HSliderValue::clone () const {return new HSliderValue (*this);}
+
+void HSliderValue::setValue (const double val)
 {
-	VScale::setValue (val);
+	HScale::setValue (val);
 	valueDisplay.setText(BValues::toBString (valFormat, value));
 }
 
-void DisplayVSlider::setValueFormat (const std::string& valueFormat)
+void HSliderValue::setValueFormat (const std::string& valueFormat) {valFormat = valueFormat;}
+std::string HSliderValue::getValueFormat () const {return valFormat;}
+Label* HSliderValue::getDisplayLabel () {return &valueDisplay;}
+
+void HSliderValue::update ()
 {
-	valFormat = valueFormat;
-	update ();
-}
-
-std::string DisplayVSlider::getValueFormat () const {return valFormat;}
-
-Label* DisplayVSlider::getDisplayLabel () {return &valueDisplay;}
-
-void DisplayVSlider::update ()
-{
-	VSlider::update ();
+	HSlider::update ();
 
 	// Update display
 	valueDisplay.moveTo (displayX0, displayY0);
@@ -94,33 +90,32 @@ void DisplayVSlider::update ()
 	valueDisplay.setText (BValues::toBString (valFormat, value));
 }
 
-void DisplayVSlider::applyTheme (BStyles::Theme& theme) {applyTheme (theme, name_);}
-void DisplayVSlider::applyTheme (BStyles::Theme& theme, const std::string& name)
+void HSliderValue::applyTheme (BStyles::Theme& theme) {applyTheme (theme, name_);}
+void HSliderValue::applyTheme (BStyles::Theme& theme, const std::string& name)
 {
-	VSlider::applyTheme (theme, name);
+	HSlider::applyTheme (theme, name);
 	valueDisplay.applyTheme (theme, name);
 }
 
-void DisplayVSlider::updateCoords ()
+void HSliderValue::updateCoords ()
 {
 	double w = getEffectiveWidth ();
-	double h = getEffectiveHeight ();
+	double h = getEffectiveHeight () / 2;
 
-	displayWidth = (w < h ? w : h);
-	displayHeight = displayWidth / 2.2;
-	displayX0 = getXOffset () + w / 2 - displayWidth / 2;
-	displayY0 = getYOffset ();
+	knobRadius = (h < w / 2 ? h / 2 : w / 4);
+	scaleX0 = getXOffset () + knobRadius;
+	scaleY0 = getYOffset () + h + knobRadius / 2;
+	scaleWidth = w - 2 * knobRadius;
+	scaleHeight = knobRadius;
+	scaleXValue = scaleX0 + getRelativeValue () * scaleWidth;
 
-	double h2 = h - displayHeight;
-	double w2 = displayWidth / 2;
-	knobRadius = (w2 < h2 / 2 ? w2 / 2 : h2 / 4);
-	scaleX0 = getXOffset () + w / 2 - knobRadius / 2;
-	scaleY0 = getYOffset () + displayHeight + knobRadius;
-	scaleWidth = knobRadius;
-	scaleHeight = h2 - 2 * knobRadius;
-	scaleYValue = scaleY0 + (1 - getRelativeValue ()) * scaleHeight;
-	knobXCenter = scaleX0 + scaleWidth / 2;
-	knobYCenter = scaleYValue;
+	knobXCenter = scaleXValue;
+	knobYCenter = scaleY0 + scaleHeight / 2;
+
+	displayHeight = knobRadius * 2;
+	displayWidth = 2.2 * displayHeight;
+	displayY0 = getYOffset () + h - displayHeight;
+	displayX0 = LIMIT (scaleXValue - displayWidth / 2, getXOffset (), getXOffset () + getEffectiveWidth () - displayWidth);
 }
 
 }

@@ -55,6 +55,12 @@ public:
 	Knob& operator= (const Knob& that);
 
 	/**
+	 * Pattern cloning. Creates a new instance of the widget and copies all
+	 * its properties.
+	 */
+	virtual Widget* clone () const override;
+
+	/**
 	 * Sets the depth of the 3d knob
 	 * @param depth Depth
 	 */

@@ -56,6 +56,8 @@ VSlider& VSlider::operator= (const VSlider& that)
 	return *this;
 }
 
+Widget* VSlider::clone () const {return new VSlider (*this);}
+
 void VSlider::update ()
 {
 	VScale::update ();

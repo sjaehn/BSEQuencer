@@ -56,6 +56,12 @@ public:
 	ValueWidget& operator= (const ValueWidget& that);
 
 	/**
+	 * Pattern cloning. Creates a new instance of the widget and copies all
+	 * its properties.
+	 */
+	virtual Widget* clone () const override;
+
+	/**
 	 * Changes the value of the widget. Emits a value changed event and (if
 	 * visible) an expose event.
 	 * @param val Value

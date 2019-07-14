@@ -1,5 +1,5 @@
 /* ChoiceBox.hpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,15 +18,15 @@
 #ifndef BWIDGETS_CHOICEBOX_HPP_
 #define BWIDGETS_CHOICEBOX_HPP_
 
-#include "BItems.hpp"
 #include "ValueWidget.hpp"
-#include "Label.hpp"
 #include "UpButton.hpp"
 #include "DownButton.hpp"
+#include "BItems.hpp"
 #include <cmath>
 
 #define BWIDGETS_DEFAULT_CHOICEBOX_WIDTH 100.0
 #define BWIDGETS_DEFAULT_CHOICEBOX_HEIGHTH 40.0
+#define BWIDGETS_DEFAULT_CHOICEBOX_ITEM_HEIGHTH 20.0
 #define BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT 9.0
 #define BWIDGETS_DEFAULT_CHOICEBOX_LINE_HEIGHT 1.6666
 
@@ -45,21 +45,21 @@ namespace BWidgets
 /**
  * Class BWidgets::ChoiceBox
  *
- * Base Widget for selection of one item (string) out of a vector of strings.
- * It is a composite value widget consisting of a vector of labels, an up
+ * Base Widget for selection of one item out of a vector of items.
+ * It is a composite value widget consisting of a vector of items, an up
  * button, and a down button. Selection directly results using the buttons.
- * The widget only shows the selected label. The value of this widget reflects
- * the number the item selected starting with 1.0. On change, a value changed
- * event is emitted and this widget.
+ * The widget only shows the selected item. The value of this widget reflects
+ * the number the item selected starting with 1.0 (default). On change, a value
+ * changed event is emitted and this widget.
  */
 class ChoiceBox : public ValueWidget
 {
 public:
 	ChoiceBox ();
 	ChoiceBox (const double x, const double y, const double width, const double height,
-				const std::string& name, std::vector<std::string> strings = {}, double preselection = UNSELECTED);
+		   const std::string& name);
 	ChoiceBox (const double x, const double y, const double width, const double height,
-				const std::string& name, std::vector<BItems::Item> items = {}, double preselection = UNSELECTED);
+		   const std::string& name, const BItems::ItemList& items, double preselection = UNSELECTED);
 
 	/**
 	 * Creates a new (orphan) choice box and copies the properties from a
@@ -79,24 +79,31 @@ public:
 	ChoiceBox& operator= (const ChoiceBox& that);
 
 	/**
+	 * Pattern cloning. Creates a new instance of the widget and copies all
+	 * its properties.
+	 */
+	virtual Widget* clone () const override;
+
+	/**
 	 * Gets (a pointer to) the vector of items and thus gets access to the
 	 * internally stored list of items.
-	 * @return Pointer to a string vector
+	 * @return Pointer to a BItems::ItemList
 	 */
-	std::vector<BItems::Item>* getItemList ();
+	BItems::ItemList* getItemList ();
 
 	/**
-	 * Gets an item of the internally stored list of items.
-	 * @param value Value of the item.
-	 * @return Active item
+	 * Gets (a pointer to) the item of the internally stored list of items
+	 * that is represented by a value.
+	 * @param value	Value of the item.
+	 * @return	Pointer to the item.
 	 */
-	BItems::Item getItem (const double value) const;
+	BItems::Item* getItem (const double value);
 
 	/**
-	 * Gets the active item.
-	 * @return Active item
+	 * Gets (a pointer to) the active item of the internally stored list.
+	 * @return	Pointer to the active item
 	 */
-	BItems::Item getActiveItem () const;
+	BItems::Item* getActiveItem ();
 
 	/**
 	 * Adds a new item or new items to the end of the internally stored list of
@@ -105,42 +112,7 @@ public:
 	 * @param newBItems::Items	A vector of new items to add.
 	 */
 	void addItem (const BItems::Item& newItem);
-	void addItem (const std::vector<BItems::Item>& newItems);
-
-	/**
-	 * Creates a new item from a text string or new items from a vector of text
-	 * strings and appends it or them to the end of the internally stored list
-	 * of items. The value of the added item will be set to the next full
-	 * number following to the value of the last item before.
-	 * @param newBItems::ItemText	Text string of a single new item to add.
-	 * @param newBItems::ItemTexts	A vector of text strings of new items to add.
-	 */
-	void addItemText (const std::string& newItemText);
-	void addItemText (const std::vector<std::string>& newItemTexts);
-
-	/**
-	 * Sets the BColors::ColorSet for this widget
-	 * @param colors Color set.
-	 */
-	void setTextColors (const BColors::ColorSet& colorset);
-
-	/**
-	 * Gets (a pointer to) the BColors::ColorSet of this widget.
-	 * @return Pointer to the color set.
-	 */
-	BColors::ColorSet* getTextColors ();
-
-	/**
-	 * Sets the font for the text output.
-	 * @param font Font
-	 */
-	void setFont (const BStyles::Font& font);
-
-	/**
-	 * Gets (a pointer to) the font for the text output.
-	 * @return Pointer to font
-	 */
-	BStyles::Font* getFont ();
+	void addItem (const BItems::ItemList& newItems);
 
 	/**
 	 * Scans theme for widget properties and applies these properties.
@@ -174,7 +146,7 @@ public:
 
 	/**
 	 * Gets the bottom line of the shown list.
-	 * @param return Bottom line of the list (starting with 1.0)
+	 * @param return Bottom line of the list (Top starting with 1.0)
 	 */
 	int getBottom ();
 
@@ -194,21 +166,15 @@ public:
 	virtual void onWheelScrolled (BEvents::WheelEvent* event) override;
 
 protected:
-	void deleteLabels ();
-	void validateLabels ();
-	virtual void updateLabels ();
+	void removeItems ();
+	virtual void updateItems ();
 	virtual int getLines ();
 	static void handleButtonClicked (BEvents::Event* event);
-	static void handleLabelClicked (BEvents::Event* event);
+	static void handleItemClicked (BEvents::Event* event);
 
-	BColors::ColorSet itemColors;
-	BStyles::Font itemFont;
-	BStyles::Border itemBorder;
-	BStyles::Fill itemBackground;
 	UpButton upButton;
 	DownButton downButton;
-	std::vector<BItems::Item> items;
-	std::vector<Label*> labels;
+	BItems::ItemList items;
 
 	int activeNr;
 };

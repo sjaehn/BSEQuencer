@@ -54,6 +54,8 @@ TextButton& TextButton::operator= (const TextButton& that)
 	return *this;
 }
 
+Widget* TextButton::clone () const {return new TextButton (*this);}
+
 void TextButton::setWidth (const double width)
 {
 	Button::setWidth (width);

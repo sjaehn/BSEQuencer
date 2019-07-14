@@ -33,13 +33,14 @@
 #include <lv2/lv2plug.in/ns/ext/midi/midi.h>
 #include <iostream>
 
+#include "BWidgets/BItems.hpp"
 #include "BWidgets/Widget.hpp"
 #include "BWidgets/Window.hpp"
 #include "BWidgets/FocusWidget.hpp"
 #include "BWidgets/Label.hpp"
 #include "BWidgets/DrawingSurface.hpp"
-#include "BWidgets/DisplayHSlider.hpp"
-#include "BWidgets/DisplayDial.hpp"
+#include "BWidgets/HSliderValue.hpp"
+#include "BWidgets/DialValue.hpp"
 #include "BWidgets/HSwitch.hpp"
 #include "BWidgets/TextToggleButton.hpp"
 #include "BWidgets/Text.hpp"
@@ -121,21 +122,21 @@ private:
 
 	std::array<BScaleNotes, NR_SYSTEM_SCALES + NR_USER_SCALES> scaleNotes	=
 	{{// System scales
-			{CROMATICSCALE}, {MAJORSCALE}, {MINORSCALE}, {HARMONICMAJORSCALE}, {HARMONICMINORSCALE}, {MELODICMINORSCALE},
-			{DORIANSCALE}, {PHRYGIANSCALE}, {LYDIANSCALE}, {MIXOLYDIANSCALE}, {LOKRIANSCALE}, {HUNGARIANMINORSCALE},
-			{MAJORPENTATONICSCALE}, {MINORPENTATONICSCALE},
-			// User scales
-			{CROMATICSCALE}, {CROMATICSCALE}, {CROMATICSCALE}, {CROMATICSCALE}
+		{CROMATICSCALE}, {MAJORSCALE}, {MINORSCALE}, {HARMONICMAJORSCALE}, {HARMONICMINORSCALE}, {MELODICMINORSCALE},
+		{DORIANSCALE}, {PHRYGIANSCALE}, {LYDIANSCALE}, {MIXOLYDIANSCALE}, {LOKRIANSCALE}, {HUNGARIANMINORSCALE},
+		{MAJORPENTATONICSCALE}, {MINORPENTATONICSCALE},
+		// User scales
+		{CROMATICSCALE}, {CROMATICSCALE}, {CROMATICSCALE}, {CROMATICSCALE}
 	}};
 
 
-	std::vector<BItems::Item> scaleItems =
-	{
-			{0, "Chromatic"}, {1, "Major"}, {2, "Minor"}, {3, "Harmonic major"}, {4, "Harmonic minor"}, {5, "Melodic minor"},
-			{6, "Dorian"}, {7, "Phygian"}, {8, "Lydian"}, {9, "Mixolydian"}, {10, "Lokrian"}, {11, "Hungarian minor"},
-			{12, "Major pentatonic"}, {13, "Minor pentatonic"}, {14, "User scale 1"}, {15, "User scale 2"}, {16, "User scale 3"},
-			{17, "User scale 4"}
-	};
+	BItems::ItemList scaleItems =
+	{{
+		{0, "Chromatic"}, {1, "Major"}, {2, "Minor"}, {3, "Harmonic major"}, {4, "Harmonic minor"}, {5, "Melodic minor"},
+		{6, "Dorian"}, {7, "Phygian"}, {8, "Lydian"}, {9, "Mixolydian"}, {10, "Lokrian"}, {11, "Hungarian minor"},
+		{12, "Major pentatonic"}, {13, "Minor pentatonic"}, {14, "User scale 1"}, {15, "User scale 2"}, {16, "User scale 3"},
+		{17, "User scale 4"}
+	}};
 
 	ScaleMap scaleMaps[NR_SYSTEM_SCALES + NR_USER_SCALES];
 
@@ -151,9 +152,9 @@ private:
 	BWidgets::Label modeLabel;
 	BWidgets::PopupListBox modeListBox;
 	BWidgets::Label modeAutoplayBpmLabel;
-	BWidgets::DisplayHSlider modeAutoplayBpmSlider;
+	BWidgets::HSliderValue modeAutoplayBpmSlider;
 	BWidgets::Label modeAutoplayBpbLabel;
-	BWidgets::DisplayHSlider modeAutoplayBpbSlider;
+	BWidgets::HSliderValue modeAutoplayBpbSlider;
 	BWidgets::Label modeMidiInChannelLabel;
 	BWidgets::PopupListBox modeMidiInChannelListBox;
 	BWidgets::Label modePlayLabel;
@@ -166,18 +167,18 @@ private:
 	BWidgets::Label toolButtonBoxCtrlLabel;
 	BWidgets::Label toolButtonBoxChLabel;
 	BWidgets::Label toolOctaveLabel;
-	BWidgets::DisplayDial toolOctaveDial;
+	BWidgets::DialValue toolOctaveDial;
 	BWidgets::Label toolVelocityLabel;
-	BWidgets::DisplayDial toolVelocityDial;
+	BWidgets::DialValue toolVelocityDial;
 	BWidgets::Label toolDurationLabel;
-	BWidgets::DisplayDial toolDurationDial;
+	BWidgets::DialValue toolDurationDial;
 
 	BWidgets::Widget propertiesBox;
 	BWidgets::Label propertiesBoxLabel;
 	BWidgets::Label propertiesNrStepsLabel;
 	BWidgets::PopupListBox propertiesNrStepsListBox;
 	BWidgets::Label propertiesStepsPerLabel;
-	BWidgets::DisplayHSlider propertiesStepsPerSlider;
+	BWidgets::HSliderValue propertiesStepsPerSlider;
 	BWidgets::PopupListBox propertiesBaseListBox;
 	BWidgets::Label propertiesRootLabel;
 	BWidgets::PopupListBox propertiesRootListBox;
@@ -188,7 +189,8 @@ private:
 	BWidgets::ImageIcon propertiesScaleEditIcon;
 	BWidgets::PopupListBox propertiesScaleListBox;
 
-	typedef struct {
+	struct ChBox
+	{
 		BWidgets::Widget box;
 		BWidgets::Label chLabel;
 		BWidgets::DrawingSurface chSymbol;
@@ -198,10 +200,10 @@ private:
 		BWidgets::Label channelLabel;
 		BWidgets::PopupListBox channelListBox;
 		BWidgets::Label velocityLabel;
-		BWidgets::DisplayDial velocityDial;
+		BWidgets::DialValue velocityDial;
 		BWidgets::Label noteOffsetLabel;
-		BWidgets::DisplayDial noteOffsetDial;
-	} ChBox;
+		BWidgets::DialValue noteOffsetDial;
+	};
 
 	std::array<ChBox, NR_SEQUENCER_CHS> chBoxes;
 
@@ -224,116 +226,120 @@ private:
 	BColors::Color evenPadBgColor = {0.0, 0.03, 0.06, 1.0};
 	BColors::Color oddPadBgColor = {0.0, 0.0, 0.0, 1.0};
 	std::array<ButtonStyle, NR_SEQUENCER_CHS + 1> chButtonStyles =
-		{{{{0.0, 0.0, 0.0, 0.5}, NO_CTRL},
-			{{0.0, 0.0, 1.0, 1.0}, NO_CTRL},
-			{{1.0, 0.0, 1.0, 1.0}, NO_CTRL},
-			{{1.0, 0.5, 0.0, 1.0}, NO_CTRL},
-			{{1.0, 1.0, 0.0, 1.0}, NO_CTRL}}};
+	{{
+		{{0.0, 0.0, 0.0, 0.5}, NO_CTRL},
+		{{0.0, 0.0, 1.0, 1.0}, NO_CTRL},
+		{{1.0, 0.0, 1.0, 1.0}, NO_CTRL},
+		{{1.0, 0.5, 0.0, 1.0}, NO_CTRL},
+		{{1.0, 1.0, 0.0, 1.0}, NO_CTRL}
+	}};
 	std::array<ButtonStyle, NR_CTRL_BUTTONS> ctrlButtonStyles =
-		{{{{0.0, 0.0, 0.0, 0.5}, NO_CTRL},
-			{{0.0, 0.03, 0.06, 1.0}, CTRL_PLAY_FWD},
-			{{0.0, 0.03, 0.06, 1.0}, CTRL_PLAY_REW},
-		  {{0.0, 0.03, 0.06, 1.0}, CTRL_ALL_MARK},
-			{{0.0, 0.03, 0.06, 1.0}, CTRL_MARK},
-			{{0.0, 0.03, 0.06, 1.0}, CTRL_JUMP_FWD},
-			{{0.0, 0.03, 0.06, 1.0}, CTRL_JUMP_BACK},
-		  {{0.0, 0.03, 0.06, 1.0}, CTRL_SKIP},
-			{{0.0, 0.03, 0.06, 1.0}, CTRL_STOP}}};
+	{{
+		{{0.0, 0.0, 0.0, 0.5}, NO_CTRL},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_PLAY_FWD},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_PLAY_REW},
+	  	{{0.0, 0.03, 0.06, 1.0}, CTRL_ALL_MARK},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_MARK},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_JUMP_FWD},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_JUMP_BACK},
+	  	{{0.0, 0.03, 0.06, 1.0}, CTRL_SKIP},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_STOP}
+	}};
 	BStyles::Border border = {{ink, 1.0}, 0.0, 2.0, 0.0};
 	BStyles::Border txtboxborder = {BStyles::noLine, 4.0, 0.0, 0.0};
 	BStyles::Fill widgetBg = BStyles::noFill;
 	BStyles::Fill screenBg = BStyles::Fill (BColors::Color (0.0, 0.0, 0.0, 0.8));
 	BStyles::Fill boxBg = BStyles::Fill (BColors::Color (0.0, 0.0, 0.0, 0.9));
 	BStyles::Font ctLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 12.0,
-											   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
+						   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
 	BStyles::Font tgLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 12.0,
-											   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
+						   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
 	BStyles::Font iLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD, 24.0,
-											   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
+						  BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
 	BStyles::Font lfLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 12.0,
 											   BStyles::TEXT_ALIGN_LEFT, BStyles::TEXT_VALIGN_MIDDLE);
 	BStyles::StyleSet defaultStyles = {"default", {{"background", STYLEPTR (&BStyles::noFill)},
-												   {"border", STYLEPTR (&BStyles::noBorder)}}};
+					  {"border", STYLEPTR (&BStyles::noBorder)}}};
 	BStyles::StyleSet labelStyles = {"labels", 	  {{"background", STYLEPTR (&BStyles::noFill)},
-												   {"border", STYLEPTR (&BStyles::noBorder)},
-												   {"textcolors", STYLEPTR (&txColors)},
-												   {"font", STYLEPTR (&ctLabelFont)}}};
+					{"border", STYLEPTR (&BStyles::noBorder)},
+					{"textcolors", STYLEPTR (&txColors)},
+					{"font", STYLEPTR (&ctLabelFont)}}};
 
 	BStyles::Theme theme = BStyles::Theme ({
 		defaultStyles,
 		{"B.SEQuencer", 	{{"background", STYLEPTR (&BStyles::blackFill)},
-							 {"border", STYLEPTR (&BStyles::noBorder)}}},
-		{"main", 			{{"background", STYLEPTR (&widgetBg)},
-							 {"border", STYLEPTR (&BStyles::noBorder)}}},
-		{"widget", 			{{"uses", STYLEPTR (&defaultStyles)}}},
-		{"screen", 			{{"background", STYLEPTR (&screenBg)}}},
-		{"box", 			{{"background", STYLEPTR (&boxBg)},
-							 {"border", STYLEPTR (&border)}}},
-		{"button", 			{{"background", STYLEPTR (&BStyles::blackFill)},
-							 {"border", STYLEPTR (&border)}}},
+						{"border", STYLEPTR (&BStyles::noBorder)}}},
+		{"main", 		{{"background", STYLEPTR (&widgetBg)},
+						{"border", STYLEPTR (&BStyles::noBorder)}}},
+		{"widget", 		{{"uses", STYLEPTR (&defaultStyles)}}},
+		{"screen", 		{{"background", STYLEPTR (&screenBg)}}},
+		{"box", 		{{"background", STYLEPTR (&boxBg)},
+					{"border", STYLEPTR (&border)}}},
+		{"button", 		{{"background", STYLEPTR (&BStyles::blackFill)},
+						{"border", STYLEPTR (&border)}}},
 		{"tgbutton", 		{{"border", STYLEPTR (&BStyles::noBorder)},
-							 {"textcolors", STYLEPTR (&tgColors)},
-							 {"bgcolors", STYLEPTR (&BColors::darks)},
-							 {"font", STYLEPTR (&tgLabelFont)}}},
-		{"dial", 			{{"uses", STYLEPTR (&defaultStyles)},
-							 {"fgcolors", STYLEPTR (&fgColors)},
-							 {"bgcolors", STYLEPTR (&bgColors)},
-							 {"textcolors", STYLEPTR (&fgColors)},
-							 {"font", STYLEPTR (&ctLabelFont)}}},
-		{"ch1", 			{{"uses", STYLEPTR (&defaultStyles)},
-							 {"fgcolors", STYLEPTR (&fgColors_ch1)},
-							 {"bgcolors", STYLEPTR (&bgColors)},
-							 {"textcolors", STYLEPTR (&fgColors)},
-							 {"font", STYLEPTR (&ctLabelFont)}}},
-		{"ch2", 			{{"uses", STYLEPTR (&defaultStyles)},
-							 {"fgcolors", STYLEPTR (&fgColors_ch2)},
-							 {"bgcolors", STYLEPTR (&bgColors)},
-							 {"textcolors", STYLEPTR (&fgColors)},
-							 {"font", STYLEPTR (&ctLabelFont)}}},
-		{"ch3", 			{{"uses", STYLEPTR (&defaultStyles)},
-							 {"fgcolors", STYLEPTR (&fgColors_ch3)},
-							 {"bgcolors", STYLEPTR (&bgColors)},
-							 {"textcolors", STYLEPTR (&fgColors)},
-							 {"font", STYLEPTR (&ctLabelFont)}}},
-		{"ch4", 			{{"uses", STYLEPTR (&defaultStyles)},
-							 {"fgcolors", STYLEPTR (&fgColors_ch4)},
-							 {"bgcolors", STYLEPTR (&bgColors)},
-							 {"textcolors", STYLEPTR (&fgColors)},
-							 {"font", STYLEPTR (&ctLabelFont)}}},
-		{"slider",			{{"uses", STYLEPTR (&defaultStyles)},
-							 {"fgcolors", STYLEPTR (&fgColors)},
-							 {"bgcolors", STYLEPTR (&bgColors)},
-							 {"textcolors", STYLEPTR (&fgColors)},
-							 {"font", STYLEPTR (&ctLabelFont)}}},
-		{"ctlabel",	 		{{"uses", STYLEPTR (&labelStyles)}}},
-		{"lflabel",	 		{{"uses", STYLEPTR (&labelStyles)},
-							 {"font", STYLEPTR (&lfLabelFont)}}},
-		{"txtbox",	 		{{"background", STYLEPTR (&BStyles::noFill)},
-							 {"border", STYLEPTR (&txtboxborder)},
-							 //{"textcolors", STYLEPTR (&txColors)},
-							 {"font", STYLEPTR (&lfLabelFont)}}},
-		{"ilabel",	 		{{"uses", STYLEPTR (&labelStyles)},
-							 {"font", STYLEPTR (&iLabelFont)},
-							 {"textcolors", STYLEPTR (&BColors::whites)}}},
+						{"textcolors", STYLEPTR (&tgColors)},
+						{"bgcolors", STYLEPTR (&BColors::darks)},
+						{"font", STYLEPTR (&tgLabelFont)}}},
+		{"dial", 		{{"uses", STYLEPTR (&defaultStyles)},
+						 {"fgcolors", STYLEPTR (&fgColors)},
+						 {"bgcolors", STYLEPTR (&bgColors)},
+						 {"textcolors", STYLEPTR (&fgColors)},
+						 {"font", STYLEPTR (&ctLabelFont)}}},
+		{"ch1", 		{{"uses", STYLEPTR (&defaultStyles)},
+						 {"fgcolors", STYLEPTR (&fgColors_ch1)},
+						 {"bgcolors", STYLEPTR (&bgColors)},
+						 {"textcolors", STYLEPTR (&fgColors)},
+						 {"font", STYLEPTR (&ctLabelFont)}}},
+		{"ch2", 		{{"uses", STYLEPTR (&defaultStyles)},
+						 {"fgcolors", STYLEPTR (&fgColors_ch2)},
+						 {"bgcolors", STYLEPTR (&bgColors)},
+						 {"textcolors", STYLEPTR (&fgColors)},
+						 {"font", STYLEPTR (&ctLabelFont)}}},
+		{"ch3", 		{{"uses", STYLEPTR (&defaultStyles)},
+						 {"fgcolors", STYLEPTR (&fgColors_ch3)},
+						 {"bgcolors", STYLEPTR (&bgColors)},
+						 {"textcolors", STYLEPTR (&fgColors)},
+						 {"font", STYLEPTR (&ctLabelFont)}}},
+		{"ch4", 		{{"uses", STYLEPTR (&defaultStyles)},
+						 {"fgcolors", STYLEPTR (&fgColors_ch4)},
+						 {"bgcolors", STYLEPTR (&bgColors)},
+						 {"textcolors", STYLEPTR (&fgColors)},
+						 {"font", STYLEPTR (&ctLabelFont)}}},
+		{"slider",		{{"uses", STYLEPTR (&defaultStyles)},
+						 {"fgcolors", STYLEPTR (&fgColors)},
+						 {"bgcolors", STYLEPTR (&bgColors)},
+						 {"textcolors", STYLEPTR (&fgColors)},
+						 {"font", STYLEPTR (&ctLabelFont)}}},
+		{"ctlabel",	 	{{"uses", STYLEPTR (&labelStyles)}}},
+		{"lflabel",	 	{{"uses", STYLEPTR (&labelStyles)},
+						 {"font", STYLEPTR (&lfLabelFont)}}},
+		{"txtbox",	 	{{"background", STYLEPTR (&BStyles::noFill)},
+						 {"border", STYLEPTR (&txtboxborder)},
+						 //{"textcolors", STYLEPTR (&txColors)},
+						 {"font", STYLEPTR (&lfLabelFont)}}},
+		{"ilabel",	 	{{"uses", STYLEPTR (&labelStyles)},
+						 {"font", STYLEPTR (&iLabelFont)},
+						 {"textcolors", STYLEPTR (&BColors::whites)}}},
 		{"editlabel",	 	{{"uses", STYLEPTR (&labelStyles)},
-				 	 	 	 {"font", STYLEPTR (&iLabelFont)},
-							 {"textcolors", STYLEPTR (&BColors::whites)}}},
-		{"menu",	 		{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
-							 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
+			 	 	 	 {"font", STYLEPTR (&iLabelFont)},
+						 {"textcolors", STYLEPTR (&BColors::whites)}}},
+		{"menu",	 	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
+						 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
 		{"menu/item",	 	{{"uses", STYLEPTR (&defaultStyles)},
-							 {"textcolors", STYLEPTR (&BColors::whites)},
-							 {"font", STYLEPTR (&lfLabelFont)}}},
+						 {"textcolors", STYLEPTR (&BColors::whites)},
+						 {"font", STYLEPTR (&lfLabelFont)}}},
 		{"menu/button",	 	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
-							 {"background", STYLEPTR (&BStyles::grey20Fill)},
-							 {"bgcolors", STYLEPTR (&BColors::darks)}}},
+						 {"background", STYLEPTR (&BStyles::grey20Fill)},
+						 {"bgcolors", STYLEPTR (&BColors::darks)}}},
 		{"menu/listbox",	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
-							 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
+						 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
 		{"menu/listbox/item",	{{"uses", STYLEPTR (&defaultStyles)},
-							 {"textcolors", STYLEPTR (&BColors::whites)},
-							 {"font", STYLEPTR (&lfLabelFont)}}},
-		{"menu/listbox//button",	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
-							 {"background", STYLEPTR (&BStyles::grey20Fill)},
-							 {"bgcolors", STYLEPTR (&BColors::darks)}}}
+						 {"textcolors", STYLEPTR (&BColors::whites)},
+						 {"font", STYLEPTR (&lfLabelFont)}}},
+		{"menu/listbox//button",{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
+						 {"background", STYLEPTR (&BStyles::grey20Fill)},
+						 {"bgcolors", STYLEPTR (&BColors::darks)}}}
 	});
 
 };

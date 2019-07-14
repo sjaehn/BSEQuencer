@@ -25,6 +25,8 @@ UpButton::UpButton () :
 UpButton::UpButton (const double x, const double y, const double width, const double height, const std::string& name, double defaultValue) :
 		Button (x, y, width, height, name, defaultValue) {}
 
+Widget* UpButton::clone () const {return new UpButton (*this);}
+
 void UpButton::draw (const double x, const double y, const double width, const double height)
 {
 	if ((!widgetSurface) || (cairo_surface_status (widgetSurface) != CAIRO_STATUS_SUCCESS)) return;

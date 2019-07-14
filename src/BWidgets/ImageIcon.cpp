@@ -1,5 +1,5 @@
 /* ImageIcon.cpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,94 +21,76 @@ namespace BWidgets
 {
 ImageIcon::ImageIcon () : ImageIcon (0.0, 0.0, BWIDGETS_DEFAULT_WIDTH, BWIDGETS_DEFAULT_HEIGHT, "icon") {}
 
-ImageIcon::ImageIcon (const double x, const double y, const double width, const double height, const std::string& name) :
-		Widget (x, y, width, height, name)
+ImageIcon::ImageIcon (const double x, const double y, const double width, const double height,
+		      const std::string& name) :
+		Icon (x, y, width, height, name) {}
+
+ImageIcon::ImageIcon (const double x, const double y, const double width, const double height,
+		      const std::string& name, cairo_surface_t* surface) :
+		Icon (x, y, width, height, name)
 {
-	originalSurface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, getEffectiveWidth (), getEffectiveHeight ());
-}
-
-ImageIcon::ImageIcon (const double x, const double y, const double width, const double height, const std::string& name,
-					  cairo_surface_t* surface) :
-		Widget (x, y, width, height, name), originalSurface (nullptr)
-{
-	loadImage (surface);
-}
-
-ImageIcon::ImageIcon (const double x, const double y, const double width, const double height, const std::string& name,
-					  const std::string& filename) :
-		Widget (x, y, width, height, name), originalSurface (nullptr)
-{
-	loadImage (filename);
-}
-
-ImageIcon::ImageIcon (const ImageIcon& that) :
-		Widget (that)
-{
-	originalSurface = cairo_image_surface_clone_from_image_surface (that.originalSurface);
-}
-
-ImageIcon::~ImageIcon ()
-{
-	cairo_surface_destroy (originalSurface);
-}
-
-ImageIcon& ImageIcon::operator= (const ImageIcon& that)
-{
-	Widget::operator= (that);
-	if (originalSurface) cairo_surface_destroy (originalSurface);
-	originalSurface = cairo_image_surface_clone_from_image_surface (that.originalSurface);
-
-	return *this;
-}
-
-void ImageIcon::loadImage (cairo_surface_t* surface)
-{
-	if (originalSurface && (cairo_surface_status (originalSurface) == CAIRO_STATUS_SUCCESS)) cairo_surface_destroy (originalSurface);
-	originalSurface = cairo_image_surface_clone_from_image_surface (surface);
-}
-
-void ImageIcon::loadImage (const std::string& filename)
-{
-	if (originalSurface && (cairo_surface_status (originalSurface) == CAIRO_STATUS_SUCCESS)) cairo_surface_destroy (originalSurface);
-	originalSurface = cairo_image_surface_create_from_png (filename.c_str());
-}
-
-void ImageIcon::draw (const double x, const double y, const double width, const double height)
-{
-	if ((!widgetSurface) || (cairo_surface_status (widgetSurface) != CAIRO_STATUS_SUCCESS)) return;
-
-	if ((width_ >= 1) && (height_ >= 1))
+	// Fill all standard states with the image from surface
+	for (int i = BColors::NORMAL; i < BColors::USER_DEFINED; ++i)
 	{
-		// Draw super class widget elements first
-		Widget::draw (x, y, width, height);
-
-		double w = getEffectiveWidth ();
-		double h = getEffectiveHeight ();
-
-		if (originalSurface && (cairo_surface_status (originalSurface) == CAIRO_STATUS_SUCCESS) && (w > 0) && (h > 0))
-		{
-			cairo_t* cr = cairo_create (widgetSurface);
-			if (cairo_status (cr) == CAIRO_STATUS_SUCCESS)
-			{
-				// Limit cairo-drawing area
-				cairo_rectangle (cr, x, y, width, height);
-				cairo_clip (cr);
-				//TODO also clip to inner borders
-
-				double oriw = cairo_image_surface_get_width (originalSurface);
-				double orih = cairo_image_surface_get_height (originalSurface);
-				double sz = ((w / oriw < h / orih) ? (w / oriw) : (h / orih));
-				double x0 = getXOffset () + w / 2 - oriw * sz / 2;
-				double y0 = getYOffset () + h / 2 - orih * sz / 2;
-
-				cairo_scale (cr, sz, sz);
-				cairo_set_source_surface(cr, originalSurface, x0, y0);
-				cairo_paint (cr);
-			}
-
-			cairo_destroy (cr);
-		}
+		loadImage (BColors::State (i), surface);
 	}
+}
+
+ImageIcon::ImageIcon (const double x, const double y, const double width, const double height,
+		      const std::string& name, const std::string& filename) :
+		Icon (x, y, width, height, name)
+{
+	// Fill all standard states with the image from filename
+	for (uint i = BColors::NORMAL; i < BColors::USER_DEFINED; ++i)
+	{
+		loadImage (BColors::State (i), filename);
+	}
+}
+
+ImageIcon::ImageIcon (const double x, const double y, const double width, const double height,
+		      const std::string& name, const std::vector<cairo_surface_t*>& surfaces) :
+		Icon (x, y, width, height, name)
+{
+	for (uint i = 0; i < surfaces.size (); ++i) loadImage (BColors::State (i), surfaces[i]);
+}
+
+ImageIcon::ImageIcon (const double x, const double y, const double width, const double height,
+		      const std::string& name, const std::vector<std::string>& filenames) :
+		Icon (x, y, width, height, name)
+{
+	for (uint i = 0; i < filenames.size (); ++i) loadImage (BColors::State (i), filenames[i]);
+}
+
+Widget* ImageIcon::clone () const {return new ImageIcon (*this);}
+
+void ImageIcon::loadImage (BColors::State state, cairo_surface_t* surface)
+{
+	// Fill empty states with nullptr
+	while (state >= iconSurface.size ()) iconSurface.push_back (nullptr);
+
+	// Clear old surface
+	if (iconSurface[state] && (cairo_surface_status (iconSurface[state]) == CAIRO_STATUS_SUCCESS))
+	{
+		cairo_surface_destroy (iconSurface[state]);
+		iconSurface[state] = nullptr;
+	}
+
+	iconSurface[state] = cairo_image_surface_clone_from_image_surface (surface);
+}
+
+void ImageIcon::loadImage (BColors::State state, const std::string& filename)
+{
+	// Fill empty states with nullptr
+	while (state >= iconSurface.size ()) iconSurface.push_back (nullptr);
+
+	// Clear old surface
+	if (iconSurface[state] && (cairo_surface_status (iconSurface[state]) == CAIRO_STATUS_SUCCESS))
+	{
+		cairo_surface_destroy (iconSurface[state]);
+		iconSurface[state] = nullptr;
+	}
+
+	iconSurface[state] = cairo_image_surface_create_from_png (filename.c_str());
 }
 
 }

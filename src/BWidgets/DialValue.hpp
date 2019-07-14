@@ -1,4 +1,4 @@
-/* DisplayDial.hpp
+/* DialValue.hpp
  * Copyright (C) 2018  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,27 +15,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BWIDGETS_DISPLAYDIAL_HPP_
-#define BWIDGETS_DISPLAYDIAL_HPP_
+#ifndef BWIDGETS_DIALVALUE_HPP_
+#define BWIDGETS_DIALVALUE_HPP_
 
 #include "Dial.hpp"
 #include "Label.hpp"
 
-#define BWIDGETS_DEFAULT_DISPLAYDIAL_WIDTH BWIDGETS_DEFAULT_DIAL_WIDTH
-#define BWIDGETS_DEFAULT_DISPLAYDIAL_HEIGHT (BWIDGETS_DEFAULT_DIAL_HEIGHT * 1.2)
+#define BWIDGETS_DEFAULT_DIALVALUE_WIDTH BWIDGETS_DEFAULT_DIAL_WIDTH
+#define BWIDGETS_DEFAULT_DIALVALUE_HEIGHT (BWIDGETS_DEFAULT_DIAL_HEIGHT * 1.2)
 
 namespace BWidgets
 {
 /**
- * Class BWidgets::DisplayDial
+ * Class BWidgets::DialValue
  *
  * Composite dial widget that additionally displays the value of the dial.
  */
-class DisplayDial : public Dial
+class DialValue : public Dial
 {
 public:
-	DisplayDial ();
-	DisplayDial (const double x, const double y, const double width, const double height, const std::string& name,
+	DialValue ();
+	DialValue (const double x, const double y, const double width, const double height, const std::string& name,
 						  const double value, const double min, const double max, const double step, const std::string& valueFormat);
 
 	/**
@@ -43,9 +43,9 @@ public:
 	 * source dial.
 	 * @param that Source dial
 	 */
-	DisplayDial (const DisplayDial& that);
+	DialValue (const DialValue& that);
 
-	~DisplayDial ();
+	~DialValue ();
 
 	/**
 	 * Assignment. Copies the dial properties from a source dial and keeps
@@ -53,7 +53,13 @@ public:
 	 * if the widget is visible and a value changed event.
 	 * @param that Source widget
 	 */
-	DisplayDial& operator= (const DisplayDial& that);
+	DialValue& operator= (const DialValue& that);
+
+	/**
+	 * Pattern cloning. Creates a new instance of the widget and copies all
+	 * its properties.
+	 */
+	virtual Widget* clone () const override;
 
 	/**
 	 * Changes the value of the widget and keeps it within the defined range.
@@ -117,4 +123,4 @@ protected:
 
 }
 
-#endif /* BWIDGETS_DISPLAYDIAL_HPP_ */
+#endif /* BWIDGETS_DIALVALUE_HPP_ */

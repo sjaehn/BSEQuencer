@@ -33,15 +33,15 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		modeBox (920, 88, 260, 205, "box"),
 		modeBoxLabel (10, 10, 240, 20, "ctlabel", "Play mode"),
 		modeLabel (10, 90, 60, 20, "lflabel", "Mode"),
-		modeListBox (80, 90, 170, 20, 170, 60, "menu", std::vector<std::string> {"Autoplay", "Host controlled"}, 2.0),
+		modeListBox (80, 90, 170, 20, 170, 60, "menu", BItems::ItemList ({"Autoplay", "Host controlled"}), 2.0),
 		modeAutoplayBpmLabel (10, 130, 120, 20, "lflabel", "Beats per min"),
 		modeAutoplayBpmSlider (120, 120, 130, 25, "slider", 120.0, 1.0, 300.0, 0.0, "%3.1f"),
 		modeAutoplayBpbLabel (10, 170, 120, 20, "lflabel", "Beats per bar"),
 		modeAutoplayBpbSlider (120, 160, 130, 25, "slider", 4.0, 1.0, 16.0, 1.0, "%2.0f"),
 		modeMidiInChannelLabel (10, 130, 150, 20 , "lflabel", "MIDI input channel"),
 		modeMidiInChannelListBox (180, 130, 70, 20, 70, 200, "menu",
-								  {{0, "All"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}, {9, "9"},
-								   {10, "10"}, {11, "11"}, {12, "12"}, {13, "13"}, {14, "14"}, {15, "15"}, {16, "16"}}),
+					  BItems::ItemList ({{0, "All"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}, {9, "9"},
+							     {10, "10"}, {11, "11"}, {12, "12"}, {13, "13"}, {14, "14"}, {15, "15"}, {16, "16"}})),
 		modePlayLabel (10, 50, 205, 20, "lflabel", "Status: playing ..."),
 		modePlayButton (210, 40, 40, 40, "box", 1.0),
 
@@ -61,15 +61,20 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		propertiesBox (920, 590, 260, 210, "box"),
 		propertiesBoxLabel (10, 10, 240, 20, "ctlabel", "Properties"),
 		propertiesNrStepsLabel (10, 50, 170, 20, "lflabel", "Total number of steps"),
-		propertiesNrStepsListBox (180, 50, 70, 20, 70, 100, "menu", {{8, "8"}, {16, "16"}, {24, "24"}, {32, "32"}}, 16.0),
+		propertiesNrStepsListBox (180, 50, 70, 20, 70, 100, "menu",
+					  BItems::ItemList ({{8, "8"}, {16, "16"}, {24, "24"}, {32, "32"}}), 16.0),
 		propertiesStepsPerSlider (10, 75, 80, 25, "slider", 4.0, 1.0, 8.0, 1.0, "%2.0f"),
 		propertiesStepsPerLabel (100, 85, 80, 20, "lflabel", "steps per"),
-		propertiesBaseListBox (180, 85, 70, 20, 70, 60, "menu", std::vector<std::string> {"beat", "bar"}, 1.0),
+		propertiesBaseListBox (180, 85, 70, 20, 70, 60, "menu",
+				       BItems::ItemList ({"beat", "bar"}), 1.0),
 		propertiesRootLabel (10, 115, 40, 20, "lflabel", "Root"),
-		propertiesRootListBox (100, 115, 70, 20, 0, -160, 70, 160, "menu", {{0, "C"}, {2, "D"}, {4, "E"}, {5, "F"}, {7, "G"}, {9, "A"}, {11, "B"}}, 0.0),
-		propertiesSignatureListBox (180, 115, 70, 20, 70, 80, "menu", {{-1, "b"}, {0, ""}, {1, "#"}}, 0.0),
+		propertiesRootListBox (100, 115, 70, 20, 0, -160, 70, 160, "menu",
+				       BItems::ItemList ({{0, "C"}, {2, "D"}, {4, "E"}, {5, "F"}, {7, "G"}, {9, "A"}, {11, "B"}}), 0.0),
+		propertiesSignatureListBox (180, 115, 70, 20, 70, 80, "menu",
+					    BItems::ItemList ({{-1, "b"}, {0, ""}, {1, "#"}}), 0.0),
 		propertiesOctaveLabel (10, 145, 55, 20, "lflabel", "Octave"),
-		propertiesOctaveListBox (180, 145, 70, 20, 0, -220, 70, 220, "menu", {{-1, "-1"}, {0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}}, 4.0),
+		propertiesOctaveListBox (180, 145, 70, 20, 0, -220, 70, 220, "menu",
+					 BItems::ItemList ({{-1, "-1"}, {0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}}), 4.0),
 		propertiesScaleLabel (10, 175, 50, 20, "lflabel", "Scale"),
 		propertiesScaleEditIcon (70, 175, 20, 20, "widget", "EditSymbol.png"),
 		propertiesScaleListBox (100, 175, 150, 20, 0, -380, 150, 380, "menu", scaleItems, 0.0),
@@ -108,7 +113,9 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		chBoxes[i].chLabel.rename ("ctlabel");
 		chBoxes[i].channelLabel = BWidgets::Label (10, 50, 80, 20, "lflabel", "MIDI channel");
 		chBoxes[i].channelLabel.rename ("lflabel");
-		chBoxes[i].channelListBox = BWidgets::PopupListBox (123.5, 50, 60, 20, 60, 120, "menu", {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"}, i + 1);
+		chBoxes[i].channelListBox = BWidgets::PopupListBox (123.5, 50, 60, 20, 60, 120, "menu",
+								    BItems::ItemList({"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"}),
+								    i + 1);
 		chBoxes[i].channelListBox.rename ("menu");
 		chBoxes[i].pitchLabel = BWidgets::Label (10, 80, 80, 20, "lflabel", "Input pitch");
 		chBoxes[i].pitchLabel.rename ("lflabel");
@@ -117,11 +124,11 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		chBoxes[i].pitchScreen = BWidgets::Widget (10, 80, 173.5, 20, "screen");
 		chBoxes[i].pitchScreen.rename ("screen");
 		chBoxes[i].pitchScreen.hide ();
-		chBoxes[i].velocityDial = BWidgets::DisplayDial (25, 120, 50, 60, "dial", 1.0, 0.0, 2.0, 0.0, "%1.2f");
+		chBoxes[i].velocityDial = BWidgets::DialValue (25, 120, 50, 60, "dial", 1.0, 0.0, 2.0, 0.0, "%1.2f");
 		chBoxes[i].velocityDial.rename ("ch" + std::to_string (i + 1));
 		chBoxes[i].velocityLabel = BWidgets::Label (20, 180, 60, 20, "ctlabel", "Velocity");
 		chBoxes[i].velocityLabel.rename ("ctlabel");
-		chBoxes[i].noteOffsetDial = BWidgets::DisplayDial (118.5, 120, 50, 60, "dial", 0.0, -127.0, 127.0, 1.0, "%3.0f");
+		chBoxes[i].noteOffsetDial = BWidgets::DialValue (118.5, 120, 50, 60, "dial", 0.0, -127.0, 127.0, 1.0, "%3.0f");
 		chBoxes[i].noteOffsetDial.rename ("ch" + std::to_string (i + 1));
 		chBoxes[i].noteOffsetLabel = BWidgets::Label (113.5, 180, 60, 20, "ctlabel", "Offset");
 		chBoxes[i].noteOffsetLabel.rename ("ctlabel");
@@ -405,9 +412,14 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 					if (oName && (oName->type == uris.atom_String))
 					{
 						strncpy (scaleMaps[iD].name, (char*) LV2_ATOM_BODY(oName), 64);
-						scaleItems[iD].string = (char*) LV2_ATOM_BODY(oName);
-						propertiesScaleListBox.getItemList()->at(iD).string = (char*) LV2_ATOM_BODY(oName);
-						propertiesScaleListBox.update();
+						std::string s = (char*) LV2_ATOM_BODY(oName);
+						if (propertiesScaleListBox.getItemList())
+						{
+							BItems::ItemList::iterator it = std::next (propertiesScaleListBox.getItemList()->begin (), iD);
+							BWidgets::Label* l = (BWidgets::Label*) (*it).getWidget ();
+							if (l) l->setText (s);
+							propertiesScaleListBox.update();
+						}
 					}
 
 					// Elements TODO exceptions

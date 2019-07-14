@@ -55,6 +55,7 @@
 #include "cairoplus.h"
 #include "pugl/pugl.h"
 #include <stdint.h>
+#include <array>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -68,6 +69,11 @@
 
 namespace BWidgets
 {
+
+class Window; // Forward declaration
+class Widget; // Forward declaration
+class FocusWidget; // Forward declaration
+
 /**
  * Class BWidgets::Widget
  *
@@ -77,8 +83,6 @@ namespace BWidgets
  * border and a background. A BWidgets::Widget (and all derived widgets) may
  * also be containers for other widgets (= have children).
  */
-class Window; // Forward declaration
-class FocusWidget; // Forward declaration
 
 class Widget
 {
@@ -103,6 +107,12 @@ public:
 	 * @param that Source widget
 	 */
 	Widget& operator= (const Widget& that);
+
+	/**
+	 * Pattern cloning. Creates a new instance of the widget and copies all
+	 * its properties.
+	 */
+	virtual Widget* clone () const;
 
 	/**
 	 * Makes the widget visible (if its parents are visible too) and emits an
@@ -264,6 +274,31 @@ public:
 	 * @return Widget state
 	 */
 	BColors::State getState () const;
+
+	/**
+	 * Sets the filter for display and event handling.
+	 * @param ()		All widget states
+	 * @param state		Widget state
+	 * @param states	Vector of widget states
+	 */
+	void setStateFilter ();
+	void setStateFilter (const BColors::State state);
+	void setStateFilter (const std::vector<BColors::State>& states);
+
+	/**
+	 * Clears the filter for display and event handling.
+	 * @param ()		All widget states
+	 * @param state		Widget state
+	 * @param states	Vector of widget states
+	 */
+	void clearStateFilter ();
+	void clearStateFilter (const BColors::State state);
+	void clearStateFilter (const std::vector<BColors::State>& states);
+
+	/**
+	 * Gets all set filters for display and event handling
+	 */
+	std::vector<BColors::State> getStateFilter () const;
 
 	/**
 	 * (Re-)Defines the border of the widget. Redraws widget and emits a
@@ -613,11 +648,13 @@ protected:
 	std::vector <Widget*> getChildrenAsQueue (std::vector <Widget*> queue = {}) const;
 
 	bool isPointInWidget (const double x, const double y) const;
-	Widget* getWidgetAt (const double x, const double y, const bool checkVisibility, const bool checkClickability,
-						 const bool checkDraggability, const bool checkScrollability, const bool checkFocusability);
+	Widget* getWidgetAt (const double x, const double y, const bool checkVisibility,
+			     const bool checkClickability, const bool checkDraggability,
+			     const bool checkScrollability, const bool checkFocusability);
 
 	void postRedisplay (const double x, const double y, const double width, const double height);
 	void redisplay (cairo_surface_t* surface, double x, double y, double width, double height);
+	virtual bool filter (Widget* widget);
 
 	virtual void draw (const double x, const double y, const double width, const double height);
 

@@ -63,6 +63,12 @@ public:
 	PianoWidget (const double x, const double y, const double width, const double height, const std::string& name,
 				 const int startMidiKey, const int endMidiKey);
 
+ 	/**
+ 	 * Pattern cloning. Creates a new instance of the widget and copies all
+ 	 * its properties.
+ 	 */
+ 	virtual Widget* clone () const override;
+
 	/*
 	 * Sets the press status of the respective keys.
 	 * @param keys	Vector of bool with a size that represents the number of

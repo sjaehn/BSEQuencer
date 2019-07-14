@@ -104,6 +104,8 @@ Widget& Widget::operator= (const Widget& that)
 	return *this;
 }
 
+Widget* Widget::clone () const {return new Widget (*this);}
+
 void Widget::show ()
 {
 	visible = true;
@@ -159,7 +161,7 @@ void Widget::release (Widget* child)
 {
 	if (child)
 	{
-		//std::cout << "Release " << child->name_ << ":" << child->id << "\n";
+		//std::cout << "Release " << child->name_ << ":" << &(*child) << "\n";
 		bool wasVisible = child->isVisible ();
 
 		// Delete child's connection to this widget
@@ -458,7 +460,9 @@ bool Widget::isPointInWidget (const double x, const double y) const {return ((x 
 Widget* Widget::getWidgetAt (const double x, const double y, const bool checkVisibility, const bool checkClickability,
 							 const bool checkDraggability, const bool checkScrollability, const bool checkFocusability)
 {
-	if (main_ && isPointInWidget (x, y) && ((!checkVisibility) || visible))
+	if (main_ &&
+	    isPointInWidget (x, y) &&
+	    ((!checkVisibility) || visible))
 	{
 		Widget* finalw = ((((!checkVisibility) || visible) &&
 						   ((!checkClickability) || clickable) &&
@@ -469,13 +473,23 @@ Widget* Widget::getWidgetAt (const double x, const double y, const bool checkVis
 						  nullptr);
 		for (Widget* w : children_)
 		{
-			double xNew = x - w->x_;
-			double yNew = y - w->y_;
-			Widget* nextw = w->getWidgetAt (xNew, yNew, checkVisibility, checkClickability, checkDraggability, checkScrollability,
-											checkFocusability);
-			if (nextw)
+			if (w)
 			{
-				finalw = nextw;
+				double xNew = x - w->x_;
+				double yNew = y - w->y_;
+
+				Widget* nextw = nullptr;
+				if (filter (w))
+				{
+					nextw = w->getWidgetAt (xNew, yNew, checkVisibility,
+								checkClickability, checkDraggability,
+								checkScrollability, checkFocusability);
+				}
+
+				if (nextw)
+				{
+					finalw = nextw;
+				}
 			}
 		}
 		return finalw;
@@ -556,7 +570,6 @@ void Widget::focusOutCallback (BEvents::Event* event)
 	if (event && event->getWidget())
 	{
 		Widget* w = event->getWidget();
-		BEvents::FocusEvent* focusEvent = (BEvents::FocusEvent*) event;
 		if (w->getFocusWidget() && w->getMainWindow())
 		{
 			Window* main = w->getMainWindow();
@@ -620,12 +633,20 @@ void Widget::redisplay (cairo_surface_t* surface, double x, double y, double wid
 
 		for (Widget* w : children_)
 		{
-			double xNew = x - w->x_;
-			double yNew = y - w->y_;
-			w->redisplay (surface, xNew, yNew, width, height);
+			if (w)
+			{
+				double xNew = x - w->x_;
+				double yNew = y - w->y_;
+				if (filter (w))
+				{
+					w->redisplay (surface, xNew, yNew, width, height);
+				}
+			}
 		}
 	}
 }
+
+bool Widget::filter (Widget* widget) {return true;}
 
 void Widget::draw (const double x, const double y, const double width, const double height)
 {

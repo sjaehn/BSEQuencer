@@ -25,6 +25,8 @@ HSwitch::HSwitch (const double  x, const double y, const double width, const dou
 				  const double defaultvalue) :
 		HSlider (x, y, width, height, name, defaultvalue, 0.0, 1.0, 1.0) {}
 
+Widget* HSwitch::clone () const {return new HSwitch (*this);}
+
 void HSwitch::updateCoords ()
 {
 	double w = getEffectiveWidth ();

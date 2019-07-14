@@ -25,6 +25,7 @@
 #include <array>
 #include <string>
 #include <cmath>
+#include <cstring>
 
 #define ENOTE -128
 

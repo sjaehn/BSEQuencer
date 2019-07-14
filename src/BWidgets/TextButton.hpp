@@ -56,6 +56,12 @@ public:
 	TextButton& operator= (const TextButton& that);
 
 	/**
+	 * Pattern cloning. Creates a new instance of the widget and copies all
+	 * its properties.
+	 */
+	virtual Widget* clone () const override;
+
+	/**
 	 * Resizes the widget and its predefined child, redraw and emits a
 	 * BEvents::ExposeEvent if the widget is visible.
 	 * @param width New widgets width

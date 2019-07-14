@@ -35,6 +35,12 @@ public:
 	HPianoRoll (const double x, const double y, const double width, const double height, const std::string& name,
 			const int startMidiKey, const int endMidiKey);
 
+	/**
+	 * Pattern cloning. Creates a new instance of the widget and copies all
+	 * its properties.
+	 */
+	virtual Widget* clone () const override;
+
 	/*
 	 * Defines how the keys respond upon pointer events.
 	 * @param toggle	True, if the key is toggled if button pressed. False,

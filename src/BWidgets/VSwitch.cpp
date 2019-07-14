@@ -25,6 +25,8 @@ VSwitch::VSwitch (const double  x, const double y, const double width, const dou
 				  const double defaultvalue) :
 		VSlider (x, y, width, height, name, defaultvalue, 0.0, 1.0, 1.0) {}
 
+Widget* VSwitch::clone () const {return new VSwitch (*this);}
+
 void VSwitch::updateCoords ()
 {
 	double w = getEffectiveWidth ();

@@ -47,6 +47,8 @@ Knob& Knob::operator= (const Knob& that)
 	return *this;
 }
 
+Widget* Knob::clone () const {return new Knob (*this);}
+
 void Knob::setDepth (const double depth)
 {
 	knobDepth = depth;

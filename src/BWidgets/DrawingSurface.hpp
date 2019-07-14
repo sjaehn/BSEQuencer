@@ -54,6 +54,12 @@ public:
 	DrawingSurface& operator= (const DrawingSurface& that);
 
 	/**
+	 * Pattern cloning. Creates a new instance of the widget and copies all
+	 * its properties.
+	 */
+	virtual Widget* clone () const override;
+
+	/**
 	 * Gets (a pointer to) the Cairo surface for direct drawing provided by the
 	 * widget.
 	 * @return Cairo surface

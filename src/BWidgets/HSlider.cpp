@@ -57,6 +57,8 @@ HSlider& HSlider::operator= (const HSlider& that)
 	return *this;
 }
 
+Widget* HSlider::clone () const {return new HSlider (*this);}
+
 void HSlider::update ()
 {
 	HScale::update ();

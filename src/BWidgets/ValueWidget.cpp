@@ -38,6 +38,8 @@ ValueWidget& ValueWidget::operator= (const ValueWidget& that)
 	return *this;
 }
 
+Widget* ValueWidget::clone () const {return new ValueWidget (*this);}
+
 void ValueWidget::setValue (const double val)
 {
 	if (val != value)

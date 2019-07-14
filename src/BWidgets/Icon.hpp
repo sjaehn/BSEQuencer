@@ -1,5 +1,5 @@
-/* DownButton.hpp
- * Copyright (C) 2018  Sven Jähnichen
+/* ImageIcon.hpp
+ * Copyright (C) 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,26 +15,41 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BWIDGETS_DOWNBUTTON_HPP_
-#define BWIDGETS_DOWNBUTTON_HPP_
+#ifndef ICON_HPP_
+#define ICON_HPP_
 
-#include "Button.hpp"
-#include "Label.hpp"
+#include "Widget.hpp"
 
 namespace BWidgets
 {
 /**
- * Class BWidgets::DownButton
+ * Class BWidgets::Icon
  *
- * Text button widget. Is is a BWidgets::Button and thus a
- * BWidgets::ValueWidget having two conditions: on (value != 0) or off
- * (value == 0)
+ * Widget displaying an icon.
  */
-class DownButton : public Button
+class Icon : public Widget
 {
 public:
-	DownButton ();
-	DownButton (const double x, const double y, const double width, const double height, const std::string& name, double defaultValue = 0.0);
+	Icon ();
+	Icon (const double x, const double y, const double width, const double height, const std::string& name);
+
+	/**
+	 * Creates a new (orphan) image icon widget and copies the widget
+	 * properties from a source image icon widget. This method doesn't
+	 * copy any parent or child widgets.
+	 * @param that Source drawing surface widget
+	 */
+	Icon (const Icon& that);
+
+	~Icon ();
+
+	/**
+	 * Assignment. Copies the widget properties from a source widget and keeps
+	 * its name and its position within the widget tree. Emits a
+	 * BEvents::ExposeEvent if the widget is visible.
+	 * @param that Source widget
+	 */
+	Icon& operator= (const Icon& that);
 
 	/**
 	 * Pattern cloning. Creates a new instance of the widget and copies all
@@ -44,8 +59,10 @@ public:
 
 protected:
 	virtual void draw (const double x, const double y, const double width, const double height) override;
+
+	std::vector<cairo_surface_t*> iconSurface;
 };
 
 }
 
-#endif /* BWIDGETS_TOGGLEBUTTON_HPP_ */
+#endif /* ICON_HPP_ */

@@ -39,6 +39,8 @@ Button& Button::operator= (const Button& that)
 	return *this;
 }
 
+Widget* Button::clone () const {return new Button (*this);}
+
 void Button::applyTheme (BStyles::Theme& theme) {applyTheme (theme, name_);}
 
 void Button::applyTheme (BStyles::Theme& theme, const std::string& name)

@@ -47,6 +47,12 @@ public:
 	 */
 	HSlider (const HSlider& that);
 
+	/**
+	 * Pattern cloning. Creates a new instance of the widget and copies all
+	 * its properties.
+	 */
+	virtual Widget* clone () const override;
+
 	~HSlider ();
 
 	/**

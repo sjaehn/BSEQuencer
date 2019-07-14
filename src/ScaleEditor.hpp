@@ -21,9 +21,9 @@
 #ifndef SCALEEDITOR_HPP_
 #define SCALEEDITOR_HPP_
 
+#include <utility>
 #include "definitions.h"
 #include "BScale.hpp"
-#include "BWidgets/BItems.hpp"
 #include "BWidgets/Widget.hpp"
 #include "BWidgets/ValueWidget.hpp"
 #include "BWidgets/HPianoRoll.hpp"
@@ -37,8 +37,9 @@ class ScaleEditor : public BWidgets::ValueWidget
 {
 public:
 	ScaleEditor ();
-	ScaleEditor (const double x, const double y, const double width, const double height, const std::string& name, const std::string& pluginPath,
-				 const int mapNr, const ScaleMap& scaleMap, const BScale& scale);
+	ScaleEditor (const double x, const double y, const double width, const double height,
+		     const std::string& name, const std::string& pluginPath,
+		     const int mapNr, const ScaleMap& scaleMap, const BScale& scale);
 
 	virtual void resize (double width, double height) override;
 	void setScaleMap (const ScaleMap& scaleMap);
@@ -81,8 +82,6 @@ protected:
 	ScaleMap scaleMap;
 	int mapNr;
 
-	std::vector<BItems::Item> noteSymbols;
-
 	double sz;
 
 	cairo_surface_t* bgSurface;
@@ -95,49 +94,49 @@ protected:
 	BStyles::Fill drumBg = BStyles::noFill;
 	BStyles::Fill noteBg = BStyles::noFill;
 	BStyles::Font ctLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 12.0,
-												   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
+						   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
 	BStyles::Font lfLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 12.0,
-											   BStyles::TEXT_ALIGN_LEFT, BStyles::TEXT_VALIGN_MIDDLE);
+						   BStyles::TEXT_ALIGN_LEFT, BStyles::TEXT_VALIGN_MIDDLE);
 	BStyles::StyleSet defaultStyles = {"default", {{"background", STYLEPTR (&BStyles::noFill)},
-												   {"border", STYLEPTR (&BStyles::noBorder)}}};
-	BStyles::StyleSet labelStyles = {"labels", 	  {{"background", STYLEPTR (&BStyles::noFill)},
-												   {"border", STYLEPTR (&BStyles::noBorder)},
-												   {"textcolors", STYLEPTR (&txColors)},
-												   {"font", STYLEPTR (&ctLabelFont)}}};
+					  {"border", STYLEPTR (&BStyles::noBorder)}}};
+	BStyles::StyleSet labelStyles = {"labels", {{"background", STYLEPTR (&BStyles::noFill)},
+						   {"border", STYLEPTR (&BStyles::noBorder)},
+						   {"textcolors", STYLEPTR (&txColors)},
+						   {"font", STYLEPTR (&ctLabelFont)}}};
 
 	BStyles::Theme theme = BStyles::Theme ({
 		defaultStyles,
 		{"scaleeditor", 	{{"background", STYLEPTR (&scaleEditorBg)},
-							 {"border", STYLEPTR (&border)}}},
-		{"widget", 			{{"uses", STYLEPTR (&defaultStyles)}}},
-		{"drum", 			{{"background", STYLEPTR (&drumBg)},
-							 {"border", STYLEPTR (&BStyles::noBorder)}}},
-		{"note", 			{{"background", STYLEPTR (&noteBg)},
-							 {"border", STYLEPTR (&BStyles::noBorder)}}},
-		{"ctlabel",	 		{{"uses", STYLEPTR (&labelStyles)},
-							 {"font", STYLEPTR (&ctLabelFont)}}},
-		{"lflabel",	 		{{"uses", STYLEPTR (&labelStyles)},
-							 {"font", STYLEPTR (&lfLabelFont)}}},
-		{"button", 			{{"font", STYLEPTR (&ctLabelFont)}}},
-		{"xsymbol",	 		{{"uses", STYLEPTR (&defaultStyles)},
-							 {"fgcolors", STYLEPTR (&BColors::whites)},
-							 {"font", STYLEPTR (&ctLabelFont)}}},
-		{"menu",	 		{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
-							 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
+					{"border", STYLEPTR (&border)}}},
+		{"widget", 		{{"uses", STYLEPTR (&defaultStyles)}}},
+		{"drum", 		{{"background", STYLEPTR (&drumBg)},
+						 {"border", STYLEPTR (&BStyles::noBorder)}}},
+		{"note", 		{{"background", STYLEPTR (&noteBg)},
+						 {"border", STYLEPTR (&BStyles::noBorder)}}},
+		{"ctlabel",	 	{{"uses", STYLEPTR (&labelStyles)},
+						 {"font", STYLEPTR (&ctLabelFont)}}},
+		{"lflabel",	 	{{"uses", STYLEPTR (&labelStyles)},
+						 {"font", STYLEPTR (&lfLabelFont)}}},
+		{"button", 		{{"font", STYLEPTR (&ctLabelFont)}}},
+		{"xsymbol",	 	{{"uses", STYLEPTR (&defaultStyles)},
+						 {"fgcolors", STYLEPTR (&BColors::whites)},
+						 {"font", STYLEPTR (&ctLabelFont)}}},
+		{"menu",	 	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
+						 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
 		{"menu/item",	 	{{"uses", STYLEPTR (&defaultStyles)},
-							 {"textcolors", STYLEPTR (&BColors::whites)},
-							 {"font", STYLEPTR (&lfLabelFont)}}},
+						 {"textcolors", STYLEPTR (&BColors::whites)},
+						 {"font", STYLEPTR (&lfLabelFont)}}},
 		{"menu/button",	 	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
-							 {"background", STYLEPTR (&BStyles::grey20Fill)},
-							 {"bgcolors", STYLEPTR (&BColors::darks)}}},
+						 {"background", STYLEPTR (&BStyles::grey20Fill)},
+						 {"bgcolors", STYLEPTR (&BColors::darks)}}},
 		{"menu/listbox",	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
-							 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
+						 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
 		{"menu/listbox/item",	{{"uses", STYLEPTR (&defaultStyles)},
-							 {"textcolors", STYLEPTR (&BColors::whites)},
-							 {"font", STYLEPTR (&lfLabelFont)}}},
-		{"menu/listbox//button",	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
-							 {"background", STYLEPTR (&BStyles::grey20Fill)},
-							 {"bgcolors", STYLEPTR (&BColors::darks)}}}
+						 {"textcolors", STYLEPTR (&BColors::whites)},
+						 {"font", STYLEPTR (&lfLabelFont)}}},
+		{"menu/listbox//button",{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
+						 {"background", STYLEPTR (&BStyles::grey20Fill)},
+						 {"bgcolors", STYLEPTR (&BColors::darks)}}}
 	});
 
 };
@@ -177,14 +176,12 @@ ScaleEditor::ScaleEditor(const double x, const double y, const double width, con
 
 	// Create note symbols (for nrListbox)
 	BScale sc = BScale(0, {CROMATICSCALE});
-	BItems::Item item;
+	std::list<BItems::Item> noteSymbolItems;
 	for (int i = 0; i < 120; ++i)
 	{
 		int octave = (i / 12) - 1;
 		std::string strNote = std::to_string(i) + " (" + sc.getSymbol (i) + (octave != 0 ? std::to_string(octave) : "") + ")";
-		item.value = i;
-		item.string = strNote;
-		noteSymbols.push_back (item);
+		noteSymbolItems.push_back (BItems::Item (i, strNote));
 	}
 
 	// Init nr widgets
@@ -199,8 +196,8 @@ ScaleEditor::ScaleEditor(const double x, const double y, const double width, con
 		nrSymbol[i].applyTheme (theme);
 		add (nrSymbol[i]);
 
-		if (i >= 6) nrListbox[i] = BWidgets::PopupListBox (128, 542 - i * 30, 80, 20, 80, 240, "menu", noteSymbols, 0);
-		else nrListbox[i] = BWidgets::PopupListBox (128, 542 - i * 30, 80, 20, 0, -240, 80, 240, "menu", noteSymbols, 0);
+		if (i >= 6) nrListbox[i] = BWidgets::PopupListBox (128, 542 - i * 30, 80, 20, 80, 240, "menu", noteSymbolItems, 0);
+		else nrListbox[i] = BWidgets::PopupListBox (128, 542 - i * 30, 80, 20, 0, -240, 80, 240, "menu", noteSymbolItems, 0);
 		nrListbox[i].setCallbackFunction(BEvents::VALUE_CHANGED_EVENT, listboxValueChangedCallback);
 		nrListbox[i].rename ("menu");
 		nrListbox[i].applyTheme (theme);
@@ -483,7 +480,8 @@ void ScaleEditor::symbolDragCallback (BEvents::Event* event)
 				if (scaleEditor->dragSymbol.getName() == "drum")
 				{
 					scaleEditor->scaleMap.elements[nr] = (((int)(scaleEditor->nrListbox[nr].getValue())) | 0x0100);
-					strncpy (scaleEditor->scaleMap.altSymbols[nr], scaleEditor->nrListbox[nr].getItem().string.c_str(), 15);
+					BWidgets::Label* l = (BWidgets::Label*) scaleEditor->nrListbox[nr].getItem()->getWidget ();
+					if (l) strncpy (scaleEditor->scaleMap.altSymbols[nr], l->getText ().c_str(), 15);
 					scaleEditor->nrNoteLabel[nr].hide ();
 					scaleEditor->nrListbox[nr].show ();
 					scaleEditor->nrSymbol[nr].rename ("drum");
@@ -547,7 +545,8 @@ void ScaleEditor::listboxValueChangedCallback (BEvents::Event* event)
 	if ((nr >=0) && (scaleEditor->scaleMap.elements[nr] & 0x0100))
 	{
 		scaleEditor->scaleMap.elements[nr] = (((int)(scaleEditor->nrListbox[nr].getValue())) | 0x0100);
-		strncpy (scaleEditor->scaleMap.altSymbols[nr], scaleEditor->nrListbox[nr].getItem().string.c_str(), 15);
+		BWidgets::Label* l = (BWidgets::Label*) scaleEditor->nrListbox[nr].getItem()->getWidget ();
+		if (l) strncpy (scaleEditor->scaleMap.altSymbols[nr], l->getText ().c_str(), 15);
 		scaleEditor->updateAltSymbol (nr);
 	}
 }

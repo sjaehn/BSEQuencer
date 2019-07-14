@@ -118,6 +118,8 @@ Dial& Dial::operator= (const Dial& that)
 	return *this;
 }
 
+Widget* Dial::clone () const {return new Dial (*this);}
+
 void Dial::setValue (const double val)
 {
 	RangeWidget::setValue (val);

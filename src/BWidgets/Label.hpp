@@ -58,6 +58,12 @@ public:
 	Label& operator= (const Label& that);
 
 	/**
+	 * Pattern cloning. Creates a new instance of the widget and copies all
+	 * its properties.
+	 */
+	virtual Widget* clone () const override;
+
+	/**
 	 * Sets the output text.
 	 * @param text Output text
 	 */

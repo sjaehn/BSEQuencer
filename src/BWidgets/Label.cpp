@@ -49,6 +49,8 @@ Label& Label::operator= (const Label& that)
 	return *this;
 }
 
+Widget* Label::clone () const {return new Label (*this);}
+
 void Label::setText (const std::string& text)
 {
 	if (text != labelText)

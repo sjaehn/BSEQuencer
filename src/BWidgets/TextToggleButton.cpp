@@ -54,6 +54,8 @@ TextToggleButton& TextToggleButton::operator= (const TextToggleButton& that)
 	return *this;
 }
 
+Widget* TextToggleButton::clone () const {return new TextToggleButton (*this);}
+
 void TextToggleButton::setWidth (const double width)
 {
 	Button::setWidth (width);

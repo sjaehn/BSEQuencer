@@ -49,6 +49,8 @@ DrawingSurface& DrawingSurface::operator= (const DrawingSurface& that)
 	return *this;
 }
 
+Widget* DrawingSurface::clone () const {return new DrawingSurface (*this);}
+
 cairo_surface_t* DrawingSurface::getDrawingSurface () {return drawingSurface;}
 
 void DrawingSurface::setWidth (const double width)
