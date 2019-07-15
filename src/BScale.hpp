@@ -71,9 +71,9 @@ public:
 
 protected:
 	void createSymbols ();
-	BScaleNotes scale;
 	int rootNote;
 	SignatureIndex signature;
+	BScaleNotes scale;
 	char symbols[12][6];
 };
 

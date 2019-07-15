@@ -21,10 +21,13 @@
 #include "BSEQuencer.hpp"
 
 BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
-	map (NULL), inputPort (NULL), outputPort (NULL), outCapacity (0),
-	rate (samplerate), bar (0), bpm (120.0f), speed (1.0f), position (0.0), beatsPerBar (4.0f), barBeats (4),
-	key (defaultKey), scale (60, defaultScale), scheduleNotifyPadsToGui (false), scheduleNotifyStatusToGui (false),
-	scheduleNotifyScaleMapsToGui (true)
+	map (NULL), unmap (NULL), inputPort (NULL), outputPort (NULL),
+	output_forge (), output_frame (),
+	rate (samplerate), bar (0), bpm (120.0f), speed (1.0f), beatsPerBar (4.0f), barBeats (4),
+	outCapacity (0), position (0.0),
+	ui_on (false), scheduleNotifyPadsToGui (false), scheduleNotifyStatusToGui (false),
+	scheduleNotifyScaleMapsToGui (true),
+	key (defaultKey), scale (60, defaultScale)
 
 {
 	//Scan host features for URID map
@@ -146,7 +149,7 @@ void BSEQuencer::appendMidiMsg (const int64_t frames, const uint8_t ch, const ui
  */
 bool BSEQuencer::makeMidi (const int64_t frames, const uint8_t status, const int key, const int row, uint8_t chbits)
 {
-	if ((key >=0) && (key < inKeys.size))
+	if ((key >= 0) && (key < ((int) inKeys.size)))
 	{
 		int inKeyElement = scale.getElement(inKeys[key].note);
 
@@ -198,7 +201,7 @@ void BSEQuencer::stopMidiOut (const int64_t frames, const int key, const uint8_t
 }
 void BSEQuencer::stopMidiOut (const int64_t frames, const int key, const int row, const uint8_t chbits)
 {
-	if ((key >= 0) && (key < inKeys.size) && inKeys[key].output[row].playing)
+	if ((key >= 0) && (key < ((int) inKeys.size)) && inKeys[key].output[row].playing)
 	{
 		makeMidi (frames, LV2_MIDI_MSG_NOTE_OFF, key, row, chbits);
 		inKeys[key].output[row].playing = false;
@@ -214,7 +217,7 @@ void BSEQuencer::startMidiOut (const int64_t frames, const int key, const uint8_
 }
 void BSEQuencer::startMidiOut (const int64_t frames, const int key, const int row, const uint8_t chbits)
 {
-	if ((key >= 0) && (key < inKeys.size) && (chbits & ((uint8_t) inKeys[key].output[row].pad.ch) & 0x0F))
+	if ((key >= 0) && (key < ((int) inKeys.size)) && (chbits & ((uint8_t) inKeys[key].output[row].pad.ch) & 0x0F))
 	{
 		inKeys[key].output[row].playing = (inKeys[key].output[row].playing || makeMidi (frames, LV2_MIDI_MSG_NOTE_ON, key, row, chbits));
 	}
@@ -286,7 +289,6 @@ int BSEQuencer::getStepOffset (const int key, const int row, const int relStep)
 {
 	if (relStep <= 0) return 0;
 
-	int offset = 0;
 	int startStepNr = (inKeys[key].stepNr + inKeys[key].output[row].stepOffset) % ((int)controllers[NR_OF_STEPS]);
 	int endStepNr = startStepNr + relStep;
 
@@ -422,7 +424,7 @@ void BSEQuencer::runSequencer (const double startpos, const uint32_t start, cons
 		double endpos = startpos + (((double)end) - start) / FRAMES_PER_BEAT;
 
 		// Internal keyboard
-		for (int key = 0; key < inKeys.size; ++key)
+		for (int key = 0; key < ((int) inKeys.size); ++key)
 		{
 			double nextpos = endpos;
 			double lastpos = startpos;
@@ -624,10 +626,10 @@ void BSEQuencer::run (uint32_t n_samples)
 						PadMessage* pMes = (PadMessage*) (&vec->body + 1);
 
 						// Copy PadMessages to pads
-						for (int i = 0; i < size; ++i)
+						for (uint i = 0; i < size; ++i)
 						{
-							int row = (int) pMes->row;
-							int step = (int) pMes->step;
+							int row = (int) pMes[i].row;
+							int step = (int) pMes[i].step;
 							if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < MAXSTEPS))
 							{
 								Pad pd (pMes->ch, pMes->pitchOctave, pMes->velocity, pMes->duration);

@@ -113,6 +113,9 @@ void drawButton (cairo_t* cr, double x, double y, double width, double height, B
 			cairo_rectangle (cr, x + width / 2 - symbolSize / 4, y + height / 2 - symbolSize / 4, symbolSize / 2, symbolSize / 2);
 			cairo_fill (cr);
 			break;
+
+			default:
+			break;
 		}
 	}
 }

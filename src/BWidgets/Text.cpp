@@ -136,7 +136,7 @@ double Text::getTextBlockHeight (std::vector<std::string> textBlock)
 
 	for (std::string textline : textBlock)
 	{
-		cairo_text_extents_t ext = textFont.getTextExtents(cr, textline.c_str ());
+		//cairo_text_extents_t ext = textFont.getTextExtents(cr, textline.c_str ());
 		blockheight += (textFont.getFontSize () * textFont.getLineSpacing ());
 	}
 

@@ -29,6 +29,7 @@ Dial::Dial () : Dial (0.0, 0.0, BWIDGETS_DEFAULT_DIAL_WIDTH, BWIDGETS_DEFAULT_DI
 Dial::Dial (const double x, const double y, const double width, const double height, const std::string& name,
 			const double value, const double min, const double max, const double step) :
 		RangeWidget (x, y, width, height, name, value, min, max, step),
+		dialCenterX (width / 2), dialCenterY (height / 2), dialRadius (width < height ? width / 2 : height / 2),
 		knob ((1 - BWIDGETS_DEFAULT_DIAL_KNOB_SIZE) / 2 * width, (1 - BWIDGETS_DEFAULT_DIAL_KNOB_SIZE) / 2 * height,
 			   BWIDGETS_DEFAULT_DIAL_KNOB_SIZE * width, BWIDGETS_DEFAULT_DIAL_KNOB_SIZE * height, BWIDGETS_DEFAULT_KNOB_DEPTH,
 			   name),
@@ -36,9 +37,6 @@ Dial::Dial (const double x, const double y, const double width, const double hei
 			 (width < height ? BWIDGETS_DEFAULT_DIAL_DOT_SIZE * width : BWIDGETS_DEFAULT_DIAL_DOT_SIZE * height),
 			 name),
 		fgColors (BWIDGETS_DEFAULT_FGCOLORS), bgColors (BWIDGETS_DEFAULT_BGCOLORS),
-		dialCenterX (width / 2),
-		dialCenterY (height / 2),
-		dialRadius (width < height ? width / 2 : height / 2),
 		focusLabel (0, 0, 80, 20, name + BWIDGETS_DEFAULT_FOCUS_NAME + BWIDGETS_DEFAULT_FOCUS_LABEL_NAME, "")
 {
 
@@ -66,8 +64,10 @@ Dial::Dial (const double x, const double y, const double width, const double hei
 }
 
 Dial::Dial (const Dial& that) :
-		RangeWidget (that), knob (that.knob), fgColors (that.fgColors), bgColors (that.bgColors),
+		RangeWidget (that),
 		dialCenterX (that.dialCenterX), dialCenterY (that.dialCenterY), dialRadius (that.dialRadius),
+		knob (that.knob), dot (that.dot),
+		fgColors (that.fgColors), bgColors (that.bgColors),
 		focusLabel (0, 0, 80, 20, that.name_ + BWIDGETS_DEFAULT_FOCUS_NAME + BWIDGETS_DEFAULT_FOCUS_LABEL_NAME, "")
 {
 	add (knob);
@@ -95,6 +95,7 @@ Dial& Dial::operator= (const Dial& that)
 	release (&dot);
 
 	knob = that.knob;
+	dot = that.dot;
 	fgColors = that.fgColors;
 	bgColors = that.bgColors;
 	dialCenterX = that.dialCenterX;

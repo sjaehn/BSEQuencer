@@ -35,7 +35,7 @@ Widget* PianoWidget::clone () const {return new PianoWidget (*this);}
 
 void PianoWidget::pressKeys (std::vector<bool>& keys)
 {
-	if (keys.size() == endMidiKey - startMidiKey + 1) pressedKeys = keys;
+	if (((int) keys.size()) == endMidiKey - startMidiKey + 1) pressedKeys = keys;
 	// TODO else throw exception
 	update ();
 }
@@ -44,7 +44,7 @@ std::vector<bool> PianoWidget::getPressedKeys () const {return pressedKeys;}
 
 void PianoWidget::activateKeys (std::vector<bool>& keys)
 {
-	if (keys.size() == endMidiKey - startMidiKey + 1) activeKeys = keys;
+	if (((int) keys.size()) == endMidiKey - startMidiKey + 1) activeKeys = keys;
 	// TODO else throw exception
 	update ();
 }

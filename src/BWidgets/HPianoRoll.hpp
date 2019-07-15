@@ -58,7 +58,7 @@ public:
 	bool isKeysToggleable () const;
 
 // TODO key colors
-//	virtual void applyTheme (BStyles::Theme& theme, const std::string& name);
+//	virtual void applyTheme (BStyles::Theme& theme, const std::string& name) override;
 
 	/**
 	 * Handles the BEvents::BUTTON_PRESS_EVENT to press the keys.

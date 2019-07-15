@@ -40,7 +40,7 @@ public:
 			if (w->getParent ())
 			{
 				ButtonBox* p = (ButtonBox*) w->getParent ();
-				for (int i = 0; i < p->buttons.size (); ++i)
+				for (uint i = 0; i < p->buttons.size (); ++i)
 				{
 					if (w == (Widget*) p->buttons[i].widget)
 					{
@@ -89,7 +89,7 @@ public:
 	{
 		BWidgets::Widget::update ();
 
-		for (int i = 0; i < buttons.size (); ++i)
+		for (uint i = 0; i < buttons.size (); ++i)
 		{
 			if (buttons[i].widget)
 			{

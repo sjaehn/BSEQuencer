@@ -69,7 +69,7 @@ public:
 	 * This method should be called if the widgets properties are indirectly
 	 * changed.
 	 */
-	virtual void update ();
+	virtual void update () override;
 
 	/**
 	 * Scans theme for widget properties and applies these properties.
@@ -82,8 +82,8 @@ public:
 	 * @param name Name of the BStyles::StyleSet within the theme to be
 	 * 		  	   applied.
 	 */
-	virtual void applyTheme (BStyles::Theme& theme);
-	virtual void applyTheme (BStyles::Theme& theme, const std::string& name);
+	virtual void applyTheme (BStyles::Theme& theme) override;
+	virtual void applyTheme (BStyles::Theme& theme, const std::string& name) override;
 
 protected:
 	virtual void updateCoords () override;

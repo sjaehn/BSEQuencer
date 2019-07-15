@@ -117,8 +117,8 @@ private:
 	uint32_t chBits;
 
 	// Temporary tools
-	double tempToolCh;
 	bool tempTool;
+	double tempToolCh;
 
 	std::array<BScaleNotes, NR_SYSTEM_SCALES + NR_USER_SCALES> scaleNotes	=
 	{{// System scales

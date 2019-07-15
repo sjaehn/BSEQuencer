@@ -29,9 +29,9 @@ Widget::Widget (const double x, const double y, const double width, const double
 
 Widget::Widget(const double x, const double y, const double width, const double height, const std::string& name) :
 		extensionData (nullptr), x_ (x), y_ (y), width_ (width), height_ (height), visible (true), clickable (true), draggable (false),
-		scrollable (false), focusable (false), focusWidget (nullptr),
+		scrollable (false), focusable (false),
 		main_ (nullptr), parent_ (nullptr), children_ (), border_ (BWIDGETS_DEFAULT_BORDER), background_ (BWIDGETS_DEFAULT_BACKGROUND),
-		name_ (name), widgetState (BWIDGETS_DEFAULT_STATE)
+		name_ (name), widgetSurface (), widgetState (BWIDGETS_DEFAULT_STATE), focusWidget (nullptr)
 {
 	mergeable.fill (false);
 	mergeable[BEvents::EXPOSE_EVENT] = true;
@@ -43,18 +43,16 @@ Widget::Widget(const double x, const double y, const double width, const double 
 	cbfunction[BEvents::EventType::FOCUS_IN_EVENT] = Widget::focusInCallback;
 	cbfunction[BEvents::EventType::FOCUS_OUT_EVENT] = Widget::focusOutCallback;
 	widgetSurface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width, height);
-	id = (long) this;
 }
 
 Widget::Widget (const Widget& that) :
 		extensionData (that.extensionData), x_ (that.x_), y_ (that.y_), width_ (that.width_), height_ (that.height_),
 		visible (that.visible), clickable (that.clickable), draggable (that.draggable), scrollable (that.scrollable),
-		focusable (that.focusable), focusWidget (nullptr), mergeable (that.mergeable),
+		focusable (that.focusable), mergeable (that.mergeable),
 		main_ (nullptr), parent_ (nullptr), children_ (), border_ (that.border_), background_ (that.background_), name_ (that.name_),
-		cbfunction (that.cbfunction), widgetState (that.widgetState)
+		cbfunction (that.cbfunction), widgetSurface (), widgetState (that.widgetState), focusWidget (nullptr)
 {
 	widgetSurface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, that.width_, that.height_);
-	id = (long) this;
 }
 
 Widget::~Widget()
@@ -214,8 +212,8 @@ void Widget::release (Widget* child)
 			}
 		}
 
-		std::cerr << "Msg from BWidgets::Widget::release(): Child " << child->name_ << ":" << child->id << " is not a child of "
-				  << name_ << ":" << id << std::endl;
+		std::cerr << "Msg from BWidgets::Widget::release(): Child " << child->name_ << ":" << &(*child)
+			  << " is not a child of " << name_ << ":" << &(*this) << std::endl;
 	}
 }
 

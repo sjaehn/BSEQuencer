@@ -22,9 +22,11 @@
 
 BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *const *features, PuglNativeWindow parentWindow) :
 		Window (1200, 820, "B.SEQuencer", parentWindow, true),
-		noteBits (0), chBits (0), tempTool (false), tempToolCh (0), sz (1.0), bgImageSurface (nullptr),
-		pluginPath (bundle_path ? std::string (bundle_path) : std::string ("")), controller (NULL), write_function (NULL),
-		map (NULL),
+		controller (NULL), write_function (NULL),
+		pluginPath (bundle_path ? std::string (bundle_path) : std::string ("")),
+		sz (1.0), bgImageSurface (nullptr),
+		uris (), map (NULL), forge (),
+		noteBits (0), chBits (0), tempTool (false), tempToolCh (0),
 		mContainer (0, 0, 1200, 820, "main"),
 		padSurface (98, 88, 804, 484, "box"),
 		padSurfaceFocusText (0, 0, 100, 60, "txtbox", ""),
@@ -63,8 +65,8 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		propertiesNrStepsLabel (10, 50, 170, 20, "lflabel", "Total number of steps"),
 		propertiesNrStepsListBox (180, 50, 70, 20, 70, 100, "menu",
 					  BItems::ItemList ({{8, "8"}, {16, "16"}, {24, "24"}, {32, "32"}}), 16.0),
-		propertiesStepsPerSlider (10, 75, 80, 25, "slider", 4.0, 1.0, 8.0, 1.0, "%2.0f"),
 		propertiesStepsPerLabel (100, 85, 80, 20, "lflabel", "steps per"),
+		propertiesStepsPerSlider (10, 75, 80, 25, "slider", 4.0, 1.0, 8.0, 1.0, "%2.0f"),
 		propertiesBaseListBox (180, 85, 70, 20, 70, 60, "menu",
 				       BItems::ItemList ({"beat", "bar"}), 1.0),
 		propertiesRootLabel (10, 115, 40, 20, "lflabel", "Root"),
@@ -774,7 +776,7 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 				}
 
 				// Scale changed
-				if ((widgetNr == SCALE))
+				if (widgetNr == SCALE)
 				{
 					if (value < NR_SYSTEM_SCALES) ui->propertiesScaleEditIcon.hide();
 					else ui->propertiesScaleEditIcon.show();

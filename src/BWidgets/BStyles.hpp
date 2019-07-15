@@ -149,9 +149,9 @@ public:
 
 protected:
 	Line borderLine;
-	double borderRadius;
-	double borderPadding;
 	double borderMargin;
+	double borderPadding;
+	double borderRadius;
 };
 /*
  * End of class BWidgets::Border

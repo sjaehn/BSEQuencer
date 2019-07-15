@@ -660,7 +660,6 @@ protected:
 
 	bool fitToArea (double& x, double& y, double& width, double& height);
 
-	long id;
 	double x_, y_, width_, height_;
 	bool visible;
 	bool clickable;

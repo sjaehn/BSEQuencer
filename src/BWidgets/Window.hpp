@@ -22,6 +22,7 @@
 #define BWIDGETS_DEFAULT_WINDOW_BACKGROUND BStyles::blackFill
 
 #include <chrono>
+#include <deque>
 #include "Widget.hpp"
 #include "FocusWidget.hpp"
 
@@ -213,7 +214,7 @@ protected:
 
 	std::vector<KeyGrab> keyGrabStack;
 
-	std::vector<BEvents::Event*> eventQueue;
+	std::deque<BEvents::Event*> eventQueue;
 };
 
 }

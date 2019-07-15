@@ -293,7 +293,7 @@ void Window::handleEvents ()
 	while (!eventQueue.empty ())
 	{
 		BEvents::Event* event = eventQueue.front ();
-		eventQueue.erase (eventQueue.begin ());
+		eventQueue.pop_front ();
 
 		if (event)
 		{
@@ -617,7 +617,7 @@ void Window::translateTimeEvent ()
 
 void Window::purgeEventQueue (Widget* widget)
 {
-	for (std::vector<BEvents::Event*>::iterator it = eventQueue.begin (); it != eventQueue.end (); )
+	for (std::deque<BEvents::Event*>::iterator it = eventQueue.begin (); it != eventQueue.end (); )
 	{
 		BEvents::Event* event = *it;
 		if ((event) && ((widget == nullptr) || (widget == event->getWidget ())))

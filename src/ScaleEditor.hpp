@@ -146,7 +146,6 @@ ScaleEditor::ScaleEditor() : ScaleEditor (0, 0, 0, 0, "editor", "", 0, ScaleMap 
 ScaleEditor::ScaleEditor(const double x, const double y, const double width, const double height, const std::string& name,
 						 const std::string& pluginPath, const int mapNr, const ScaleMap& scaleMap, const BScale& scale) :
 		BWidgets::ValueWidget (x, y, width, height, name, 0.0),
-		scaleMap (scaleMap), scale (scale), mapNr (mapNr),
 		nameLabel (360, 60, 80, 20, "lflabel", "Scale name:"),
 		scaleNameLabel (460, 60, 320, 20, "lflabel", std::string (scaleMap.name)),
 		rowLabel (20, 60, 80, 20, "lflabel", "Row"),
@@ -156,10 +155,11 @@ ScaleEditor::ScaleEditor(const double x, const double y, const double width, con
 		drumkitSymbol (400, 120, 48, 24, "drum"),
 		scaleSymbol (460, 120, 48, 24, "note"),
 		dragSymbol (460, 120, 48, 24, "note"),
+		piano (340, 440, 440, 120, "widget", 0, 35),
 		cancelButton (320, 600, 60, 20, "button", "Cancel"),
 		applyButton (420, 600, 60, 20, "button", "Apply"),
-		piano (340, 440, 440, 120, "widget", 0, 35), pianoRoot (0),
 		closeSymbol (770, 10, 20, 20, "xsymbol"),
+		pianoRoot (0), scale (scale), scaleMap (scaleMap), mapNr (mapNr),
 		sz (width / 800 < height / 640 ? width / 800 : height / 640)
 
 

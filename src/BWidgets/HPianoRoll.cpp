@@ -28,9 +28,9 @@ HPianoRoll::HPianoRoll (const double x, const double y, const double width, cons
 HPianoRoll::HPianoRoll (const double x, const double y, const double width, const double height, const std::string& name,
 						const int startMidiKey, const int endMidiKey) :
 		PianoWidget (x, y, width, height, name, startMidiKey, endMidiKey),
+		toggleKeys (false), actKeyNr (-1),
 		blackBgColors ({{0.05, 0.05, 0.05, 1.0}, {0.4, 0.1, 0.1, 1.0}, {0.25, 0.25, 0.25, 1.0}, {0.0, 0.0, 0.0, 1.0}}),
-		whiteBgColors ({{0.9, 0.9, 0.9, 1.0}, {1.0, 0.6, 0.6, 1.0}, {0.5, 0.5, 0.5, 1.0}, {0.0, 0.0, 0.0, 1.0}}),
-		toggleKeys (false), actKeyNr (-1)
+		whiteBgColors ({{0.9, 0.9, 0.9, 1.0}, {1.0, 0.6, 0.6, 1.0}, {0.5, 0.5, 0.5, 1.0}, {0.0, 0.0, 0.0, 1.0}})
 {
 	setDraggable (true);
 	cbfunction[BEvents::EventType::POINTER_DRAG_EVENT] = Widget::defaultCallback;
@@ -42,7 +42,7 @@ void HPianoRoll::setKeysToggleable (const bool toggle) {toggleKeys = toggle;}
 
 bool HPianoRoll::isKeysToggleable () const {return toggleKeys;}
 
-//void HPianoRoll::applyTheme (BStyles::Theme& theme, const std::string& name);
+//void HPianoRoll::applyTheme (BStyles::Theme& theme, const std::string& name) override;
 
 void HPianoRoll::onButtonPressed (BEvents::PointerEvent* event)
 {
