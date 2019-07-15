@@ -336,7 +336,8 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 					{
 						uint32_t size = (uint32_t) ((oPad->size - sizeof(LV2_Atom_Vector_Body)) / sizeof (PadMessage));
 						PadMessage* pMes = (PadMessage*)(&vec->body + 1);
-						for (int i = 0; i < size; ++i)
+						for (uint i = 0; i < size; ++i)
+
 						{
 							int step = (int) pMes[i].step;
 							int row = (int) pMes[i].row;
@@ -353,7 +354,7 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 			// Status notifications
 			else if (obj->body.otype == uris.notify_statusEvent)
 			{
-				LV2_Atom *oPad = NULL, *oCursors = NULL, *oNotes = NULL, *oChs = NULL;
+				LV2_Atom *oCursors = NULL, *oNotes = NULL, *oChs = NULL;
 				lv2_atom_object_get(obj, uris.notify_cursors, &oCursors,
 										 uris.notify_notes, &oNotes,
 										 uris.notify_channels, &oChs,
@@ -375,7 +376,7 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 				}
 
 				// Note notifications
-				if (oNotes && (oNotes->type == uris.atom_Int) && (noteBits != ((LV2_Atom_Int*)oNotes)->body))
+				if (oNotes && (oNotes->type == uris.atom_Int) && (noteBits != ((uint32_t) ((LV2_Atom_Int*)oNotes)->body)))
 				{
 					noteBits = ((LV2_Atom_Int*)oNotes)->body;
 					drawCaption ();
@@ -860,7 +861,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 		if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < ((int)ui->controllerWidgets[NR_OF_STEPS]->getValue ())))
 		{
 			Pad* pd = &ui->pads[row][step];
-			int pdch = ((int)pd->ch) & 0x0F;
+			//int pdch = ((int)pd->ch) & 0x0F;
 			int pdctrl = (((int)pd->ch) & 0xF0) / 0x10;
 
 			// Left button: apply properties to pad
@@ -1025,7 +1026,6 @@ void BSEQuencer_GUI::drawCaption ()
 
 	int scaleNr = controllers[SCALE];
 	BScale scale (((int)(controllers[ROOT] + controllers[SIGNATURE] + 12)) % 12, (SignatureIndex) controllers[SIGNATURE], scaleNotes[scaleNr]);
-	int size = scale.getSize ();
 	std::string label = "";
 
 	for (int i = 0; i < ROWS; ++i)

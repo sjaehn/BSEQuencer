@@ -27,7 +27,7 @@ BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
 	outCapacity (0), position (0.0),
 	ui_on (false), scheduleNotifyPadsToGui (false), scheduleNotifyStatusToGui (false),
 	scheduleNotifyScaleMapsToGui (true),
-	key (defaultKey), scale (60, defaultScale)
+	key (), defaultKey (), scale (60, defaultScale)
 
 {
 	//Scan host features for URID map
