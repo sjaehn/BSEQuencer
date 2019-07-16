@@ -83,6 +83,7 @@ PopupListBox::PopupListBox (const PopupListBox& that) :
 		listBoxXOffset (that.listBoxXOffset),
 		listBoxYOffset (that.listBoxYOffset), listBoxWidth (that.listBoxWidth), listBoxHeight (that.listBoxHeight)
 {
+	listBox.extensionData = this;
 	initItem ();
 	if (item.getWidget ()) add (*item.getWidget ());
 	add (downButton);
@@ -129,7 +130,7 @@ void PopupListBox::setValue (const double val)
 		item = *listBox.getItem (listBox.getValue ());
 		initItem ();
 		if (item.getWidget ()) add (*item.getWidget ());
-		update ();
+		ValueWidget::setValue (listBox.getValue ());
 	}
 }
 

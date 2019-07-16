@@ -29,6 +29,7 @@ B_FILES = $(addprefix $(BUNDLE)/, $(FILES))
 
 GUI_INCL = \
 	src/BWidgets/ImageIcon.cpp \
+	src/BWidgets/Icon.cpp \
 	src/BWidgets/HPianoRoll.cpp \
 	src/BWidgets/PianoWidget.cpp \
 	src/BWidgets/TextToggleButton.cpp \

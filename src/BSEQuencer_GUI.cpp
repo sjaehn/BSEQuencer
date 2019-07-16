@@ -726,7 +726,7 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 	{
 		BWidgets::ValueWidget* widget = (BWidgets::ValueWidget*) event->getWidget ();
 		float value = widget->getValue();
-
+		
 		if (widget->getMainWindow())
 		{
 			BSEQuencer_GUI* ui = (BSEQuencer_GUI*) widget->getMainWindow();
