@@ -1,10 +1,14 @@
 SHELL = /bin/sh
 
+PKG_CONFIG ?= pkg-config
+CXX ?= g++
+INSTALL ?= install
+INSTALL_PROGRAM ?= $(INSTALL) -m755 -s
+INSTALL_DATA ?= $(INSTALL) -m644
+
 PREFIX ?= /usr/local
 LV2DIR ?= $(PREFIX)/lib/lv2
 
-PKG_CONFIG ?= pkg-config
-CXX ?= g++
 CPPFLAGS += -DPIC
 CXXFLAGS += -std=c++11 -fvisibility=hidden -fPIC
 LDFLAGS += -shared
@@ -98,9 +102,9 @@ $(GUI_OBJ): $(GUI_SRC)
 
 install:
 	@echo -n Install $(BUNDLE) to $(DESTDIR)$(LV2DIR)...
-	@install -d $(DESTDIR)$(LV2DIR)/$(BUNDLE)
-	@install -m755 $(B_OBJECTS) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
-	@install -m644 $(B_FILES) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
+	@$(INSTALL) -d $(DESTDIR)$(LV2DIR)/$(BUNDLE)
+	@$(INSTALL_PROGRAM) $(B_OBJECTS) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
+	@$(INSTALL_DATA) $(B_FILES) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
 	@cp -R $(BUNDLE) $(DESTDIR)$(LV2DIR)
 	@echo \ done.
 
