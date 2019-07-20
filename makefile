@@ -11,7 +11,7 @@ LV2DIR ?= $(PREFIX)/lib/lv2
 
 CPPFLAGS += -DPIC
 CXXFLAGS += -std=c++11 -fvisibility=hidden -fPIC
-LDFLAGS += -shared
+LDFLAGS += -shared -Wl,-z,relro,-z,now
 
 DSPFLAGS =
 GUIFLAGS = -DPUGL_HAVE_CAIRO
