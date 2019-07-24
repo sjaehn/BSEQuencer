@@ -3,8 +3,9 @@ SHELL = /bin/sh
 PKG_CONFIG ?= pkg-config
 CXX ?= g++
 INSTALL ?= install
-INSTALL_PROGRAM ?= $(INSTALL) -m755 -s
+INSTALL_PROGRAM ?= $(INSTALL)
 INSTALL_DATA ?= $(INSTALL) -m644
+STRIP ?= strip
 
 PREFIX ?= /usr/local
 LV2DIR ?= $(PREFIX)/lib/lv2
@@ -12,6 +13,7 @@ LV2DIR ?= $(PREFIX)/lib/lv2
 CPPFLAGS += -DPIC
 CXXFLAGS += -std=c++11 -fvisibility=hidden -fPIC
 LDFLAGS += -shared -Wl,-z,relro,-z,now
+STRIPFLAGS += -s --strip-program=$(STRIP)
 
 DSPFLAGS =
 GUIFLAGS = -DPUGL_HAVE_CAIRO
@@ -103,12 +105,28 @@ $(GUI_OBJ): $(GUI_SRC)
 install:
 	@echo -n Install $(BUNDLE) to $(DESTDIR)$(LV2DIR)...
 	@$(INSTALL) -d $(DESTDIR)$(LV2DIR)/$(BUNDLE)
-	@$(INSTALL_PROGRAM) $(B_OBJECTS) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
+	@$(INSTALL_PROGRAM) -m755 $(B_OBJECTS) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
 	@$(INSTALL_DATA) $(B_FILES) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
 	@cp -R $(BUNDLE) $(DESTDIR)$(LV2DIR)
 	@echo \ done.
 
-.PHONY: all
+install-strip:
+	@echo -n "Install (stripped)" $(BUNDLE) to $(DESTDIR)$(LV2DIR)...
+	@$(INSTALL) -d $(DESTDIR)$(LV2DIR)/$(BUNDLE)
+	@$(INSTALL_PROGRAM) -m755 $(STRIPFLAGS) $(B_OBJECTS) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
+	@$(INSTALL_DATA) $(B_FILES) $(DESTDIR)$(LV2DIR)/$(BUNDLE)
+	@cp -R $(BUNDLE) $(DESTDIR)$(LV2DIR)
+	@echo \ done.
+
+uninstall:
+	@echo -n Uninstall $(BUNDLE)...
+	@rm -f $(addprefix $(DESTDIR)$(LV2DIR)/$(BUNDLE)/, $(FILES))
+	@rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/$(GUI_OBJ)
+	@rm -f $(DESTDIR)$(LV2DIR)/$(BUNDLE)/$(DSP_OBJ)
+	-@rmdir $(DESTDIR)$(LV2DIR)/$(BUNDLE)
+	@echo \ done.
 
 clean:
 	@rm -rf $(BUNDLE)
+
+.PHONY: all install install-strip uninstall clean
