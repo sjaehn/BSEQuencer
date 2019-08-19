@@ -34,9 +34,7 @@ ItemBox::ItemBox (const double x, const double y, const double width,
 	Widget* w = this->item.getWidget ();
 	if (w)
 	{
-		w->getBorder ()->setPadding (BWIDGETS_DEFAULT_ITEMBOX_ITEM_PADDING);
 		w->setClickable (false);
-
 		add (*w);
 	}
 }
@@ -51,8 +49,6 @@ ItemBox::~ItemBox () {}
 
 ItemBox& ItemBox::operator= (const ItemBox& that)
 {
-	Widget* w = item.getWidget ();
-	if (w && isChild (w)) release (w);
 	item = that.item;
 	if (item.getWidget ()) add (*item.getWidget ());
 	ValueWidget::operator= (that);
@@ -76,7 +72,6 @@ void ItemBox::setItem (const BItems::Item item)
 	w = item.getWidget ();
 	if (w)
 	{
-		w->getBorder ()->setPadding (BWIDGETS_DEFAULT_ITEMBOX_ITEM_PADDING);
 		w->setClickable (wasClickable);
 		add (*w);
 	}
@@ -113,10 +108,9 @@ void ItemBox::update ()
 		double w = getEffectiveWidth ();
 		double h = getEffectiveHeight ();
 
-		widget -> moveTo (x0 + BWIDGETS_DEFAULT_ITEMBOX_PADDING, y0);
-		widget -> setWidth (w - 2 * BWIDGETS_DEFAULT_ITEMBOX_PADDING > 0 ?
-				    w - 2 * BWIDGETS_DEFAULT_ITEMBOX_PADDING : 0);
-		widget -> setHeight (h);
+		widget->moveTo (x0, y0);
+		widget->setWidth (w);
+		widget->setHeight (h);
 	}
 }
 

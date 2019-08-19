@@ -25,6 +25,7 @@
 
 #ifndef UNSELECTED
 #define UNSELECTED -HUGE_VAL
+#define BITEMS_DEFAULT_TEXT_PADDING 4.0
 #endif
 
 namespace BItems
@@ -46,6 +47,7 @@ public:
         double getValue () const;
         void setWidget (BWidgets::Widget* widget);
         void setWidget (const std::string& text);
+        void cloneWidgetFrom (BWidgets::Widget* widget);
         BWidgets::Widget* getWidget () const;
 
 protected:

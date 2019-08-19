@@ -32,6 +32,7 @@ Item::Item (const double value, const std::string& text) :
 {
         try {internal = new BWidgets::Label (0, 0, BWIDGETS_DEFAULT_LABEL_WIDTH, BWIDGETS_DEFAULT_LABEL_HEIGHT, "label", text);}
         catch (std::bad_alloc &ba) {throw ba;}
+        internal->getBorder ()->setPadding (BITEMS_DEFAULT_TEXT_PADDING);
         widget = internal;
 }
 
@@ -98,7 +99,16 @@ void Item::setWidget (const std::string& text)
         if (internal) deleteInternal ();
         try {internal = new BWidgets::Label (0, 0, BWIDGETS_DEFAULT_LABEL_WIDTH, BWIDGETS_DEFAULT_LABEL_HEIGHT, "label", text);}
         catch (std::bad_alloc &ba) {throw ba;}
+        internal->getBorder ()->setPadding (BITEMS_DEFAULT_TEXT_PADDING);
         widget = internal;
+}
+
+void Item::cloneWidgetFrom (BWidgets::Widget* widget)
+{
+        if (internal) deleteInternal ();
+        try {internal = widget->clone ();}
+        catch (std::bad_alloc &ba) {throw ba;}
+        this->widget = internal;
 }
 
 BWidgets::Widget* Item::getWidget () const {return widget;}

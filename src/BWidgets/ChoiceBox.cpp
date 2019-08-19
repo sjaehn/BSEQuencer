@@ -140,7 +140,10 @@ void ChoiceBox::applyTheme (BStyles::Theme& theme, const std::string& name)
 	Widget::applyTheme (theme, name);
 	for (BItems::Item const& i : items)
 	{
-		if (i.getWidget ()) i.getWidget()->applyTheme (theme, name_ + BWIDGETS_DEFAULT_CHOICEBOX_ITEM_NAME);
+		if (i.getWidget ())
+		{
+			i.getWidget()->applyTheme (theme, name + BWIDGETS_DEFAULT_CHOICEBOX_ITEM_NAME);
+		}
 	}
 	upButton.applyTheme (theme, name + BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_NAME);
 	downButton.applyTheme (theme, name + BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_NAME);
@@ -247,9 +250,8 @@ void ChoiceBox::updateItems ()
 			if (n + 1 == uint (activeNr)) w->show ();
 			else w->hide ();
 
-			w->moveTo (x0 + BWIDGETS_DEFAULT_CHOICEBOX_PADDING, y0 + upButtonHeight);
-			w->setWidth (width > 2 * BWIDGETS_DEFAULT_CHOICEBOX_PADDING ?
-						   width - 2 * BWIDGETS_DEFAULT_CHOICEBOX_PADDING : 0);
+			w->moveTo (x0, y0 + upButtonHeight);
+			w->setWidth (width);
 			w->setHeight (itemHeight);
 		}
 		++n;

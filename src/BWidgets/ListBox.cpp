@@ -125,10 +125,8 @@ void ListBox::updateItems ()
 		{
 			if ((n + 1 >= uint (listTop)) && (n + 1 < listTop + lines))
 			{
-				w->moveTo (x0 + BWIDGETS_DEFAULT_CHOICEBOX_PADDING,
-					   y0 + upButtonHeight + (n + 1 - listTop) * lineHeight);
-				w->setWidth (width > 2 * BWIDGETS_DEFAULT_CHOICEBOX_PADDING ?
-					     width - 2 * BWIDGETS_DEFAULT_CHOICEBOX_PADDING : 0);
+				w->moveTo (x0, y0 + upButtonHeight + (n + 1 - listTop) * lineHeight);
+				w->setWidth (width);
 				w->setHeight (lineHeight);
 
 				if (n + 1 == uint (activeNr)) w->setState (BColors::ACTIVE);

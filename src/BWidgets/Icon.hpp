@@ -57,6 +57,8 @@ public:
 	 */
 	virtual Widget* clone () const override;
 
+	cairo_surface_t* getIconSurface (BColors::State state) const;
+
 protected:
 	virtual void draw (const double x, const double y, const double width, const double height) override;
 

@@ -73,6 +73,10 @@ Icon& Icon::operator= (const Icon& that)
 
 Widget* Icon::clone () const {return new Icon (*this);}
 
+cairo_surface_t* Icon::getIconSurface (BColors::State state) const
+{
+	return iconSurface [getState ()];
+}
 
 void Icon::draw (const double x, const double y, const double width, const double height)
 {
