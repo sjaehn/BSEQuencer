@@ -57,7 +57,6 @@ see https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer
 
 TODO
 ----
-* Copy & paste pattern
 * Internal: sort MIDI output messages
 
 

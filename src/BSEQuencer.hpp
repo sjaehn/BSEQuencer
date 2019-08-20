@@ -120,38 +120,41 @@ private:
 	// Controllers
 	float* new_controllers [KNOBS_SIZE];
 	float controllers [KNOBS_SIZE];
-	Limit controllerLimits [KNOBS_SIZE] = {{0, 16, 1},	// MIDI_IN_CHANNEL
-										   {0, 1, 1},	// PLAY
-										   {1, 2, 1},	// MODE
-										   {8, 32, 8}, 	// NR_OF_STEPS
-										   {1, 8, 1},	// STEPS_PER
-										   {1, 2, 1},	// BASE
-										   {0, 11, 1},	// ROOT
-										   {-1, 1, 1},	// SIGNATURE
-										   {-1, 8, 1},	// OCTAVE
-										   {0, 17, 1},	// SCALE
-										   {1, 300, 0},	// AUTOPLAY_BPM
-										   {1, 16, 1},	// AUTOPLAY_BPB
-										   {0, NR_SEQUENCER_CHS + NR_CTRL_BUTTONS, 1},	// SELECTION_CH
-										   {-8, 8, 1},	// SELECTION_OCTAVE
-										   {0, 2, 0},	// SELECTION_VELOCITY
-										   {0, 1, 0},	// SELECTION_DURATION
-										   {0, 1, 1},	// CH PITCH
-										   {0, 2, 0},	// CH VELOCITY
-										   {1, 16, 1},	// CH MIDI_CHANNEL
-										   {-127, 127, 1},	// CH NOTE_OFFSET
-										   {0, 1, 1},	// CH PITCH
-										   {0, 2, 0},	// CH VELOCITY
-										   {1, 16, 1},	// CH MIDI_CHANNEL
-										   {-127, 127, 1},	// CH NOTE_OFFSET
-										   {0, 1, 1},	// CH PITCH
-										   {0, 2, 0},	// CH VELOCITY
-										   {1, 16, 1},	// CH MIDI_CHANNEL
-										   {-127, 127, 1},	// CH NOTE_OFFSET
-										   {0, 1, 1},	// CH PITCH
-										   {0, 2, 0},	// CH VELOCITY
-										   {1, 16, 1},	// CH MIDI_CHANNEL
-										   {-127, 127, 1}};	// CH NOTE_OFFSET
+	Limit controllerLimits [KNOBS_SIZE] =
+	{
+		{0, 16, 1},	// MIDI_IN_CHANNEL
+		{0, 1, 1},	// PLAY
+		{1, 2, 1},	// MODE
+		{8, 32, 8}, 	// NR_OF_STEPS
+		{1, 8, 1},	// STEPS_PER
+		{1, 2, 1},	// BASE
+		{0, 11, 1},	// ROOT
+		{-1, 1, 1},	// SIGNATURE
+		{-1, 8, 1},	// OCTAVE
+		{0, 17, 1},	// SCALE
+		{1, 300, 0},	// AUTOPLAY_BPM
+		{1, 16, 1},	// AUTOPLAY_BPB
+		{0, NR_SEQUENCER_CHS + NR_CTRL_BUTTONS + NR_EDIT_BUTTONS, 1},	// SELECTION_CH
+		{-8, 8, 1},	// SELECTION_OCTAVE
+		{0, 2, 0},	// SELECTION_VELOCITY
+		{0, 1, 0},	// SELECTION_DURATION
+		{0, 1, 1},	// CH PITCH
+		{0, 2, 0},	// CH VELOCITY
+		{1, 16, 1},	// CH MIDI_CHANNEL
+		{-127, 127, 1},	// CH NOTE_OFFSET
+		{0, 1, 1},	// CH PITCH
+		{0, 2, 0},	// CH VELOCITY
+		{1, 16, 1},	// CH MIDI_CHANNEL
+		{-127, 127, 1},	// CH NOTE_OFFSET
+		{0, 1, 1},	// CH PITCH
+		{0, 2, 0},	// CH VELOCITY
+		{1, 16, 1},	// CH MIDI_CHANNEL
+		{-127, 127, 1},	// CH NOTE_OFFSET
+		{0, 1, 1},	// CH PITCH
+		{0, 2, 0},	// CH VELOCITY
+		{1, 16, 1},	// CH MIDI_CHANNEL
+		{-127, 127, 1}	// CH NOTE_OFFSET
+	};
 
 	//Pads
 	Pad pads [ROWS] [MAXSTEPS];

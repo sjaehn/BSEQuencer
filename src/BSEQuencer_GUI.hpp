@@ -110,6 +110,9 @@ private:
 
 	//Pads
 	Pad pads [ROWS] [MAXSTEPS];
+	std::vector<std::vector<Pad>> clipBoard;
+	std::pair<int, int> clipOrigin;
+	std::pair<int, int> clipExtends;
 
 	// Cursors
 	uint32_t cursorBits [MAXSTEPS];
@@ -166,6 +169,7 @@ private:
 	BWidgets::TextToggleButton toolWholeStepButton;
 	BWidgets::Label toolButtonBoxCtrlLabel;
 	BWidgets::Label toolButtonBoxChLabel;
+	BWidgets::Label toolButtonBoxEditLabel;
 	BWidgets::Label toolOctaveLabel;
 	BWidgets::DialValue toolOctaveDial;
 	BWidgets::Label toolVelocityLabel;
@@ -225,6 +229,7 @@ private:
 	BColors::Color ctrlBgColor = {0.0, 0.08, 0.04, 1.0};
 	BColors::Color evenPadBgColor = {0.0, 0.03, 0.06, 1.0};
 	BColors::Color oddPadBgColor = {0.0, 0.0, 0.0, 1.0};
+
 	std::array<ButtonStyle, NR_SEQUENCER_CHS + 1> chButtonStyles =
 	{{
 		{{0.0, 0.0, 0.0, 0.5}, NO_CTRL},
@@ -233,6 +238,7 @@ private:
 		{{1.0, 0.5, 0.0, 1.0}, NO_CTRL},
 		{{1.0, 1.0, 0.0, 1.0}, NO_CTRL}
 	}};
+
 	std::array<ButtonStyle, NR_CTRL_BUTTONS> ctrlButtonStyles =
 	{{
 		{{0.0, 0.0, 0.0, 0.5}, NO_CTRL},
@@ -245,6 +251,15 @@ private:
 	  	{{0.0, 0.03, 0.06, 1.0}, CTRL_SKIP},
 		{{0.0, 0.03, 0.06, 1.0}, CTRL_STOP}
 	}};
+
+	std::array<ButtonStyle, NR_EDIT_BUTTONS> editButtonStyles =
+	{{
+		{{0.0, 0.03, 0.06, 1.0}, EDIT_PICK},
+		{{0.0, 0.03, 0.06, 1.0}, EDIT_CUT},
+	  	{{0.0, 0.03, 0.06, 1.0}, EDIT_COPY},
+		{{0.0, 0.03, 0.06, 1.0}, EDIT_PASTE}
+	}};
+
 	BStyles::Border border = {{ink, 1.0}, 0.0, 2.0, 0.0};
 	BStyles::Border labelborder = {BStyles::noLine, 4.0, 0.0, 0.0};
 	BStyles::Fill widgetBg = BStyles::noFill;
