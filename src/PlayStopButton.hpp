@@ -13,16 +13,19 @@ private:
 
 	void drawSymbol (const double val)
 	{
-		ButtonStyle style;
+		BColors::Color color;
+		int symbol;
 		if (val == 0.0)
 		{
-			style = {BColors::green, CTRL_PLAY_FWD};
+			color = BColors::green;
+			symbol = CTRL_PLAY_FWD;
 		}
 		else
 		{
-			style = {BColors::red, CTRL_STOP};
+			color = BColors::red;
+			symbol = CTRL_STOP;
 		}
-		drawButton (drawingSurface.getDrawingSurface (), 2, 2, drawingSurface.getWidth () - 4, drawingSurface.getHeight () - 4, style);
+		drawButton (drawingSurface.getDrawingSurface (), 2, 2, drawingSurface.getWidth () - 4, drawingSurface.getHeight () - 4, color, symbol);
 		drawingSurface.update ();
 	}
 

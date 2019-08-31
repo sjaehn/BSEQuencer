@@ -101,9 +101,9 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	}
 
 	// Init toolbox buttons
-	toolButtonBox.addButton (80, 70, 20, 20, {{0.0, 0.03, 0.06, 1.0}, NO_CTRL});
+	toolButtonBox.addButton (80, 70, 20, 20, {{0.0, 0.03, 0.06, 1.0}, NO_CTRL, "No channel"});
 	for (int i = 1; i < NR_SEQUENCER_CHS + 1; ++i) toolButtonBox.addButton (80 + i * 30, 70, 20, 20, chButtonStyles[i]);
-	toolButtonBox.addButton (80 , 10, 20, 20, {{0.0, 0.03, 0.06, 1.0}, NO_CTRL});
+	toolButtonBox.addButton (80 , 10, 20, 20, {{0.0, 0.03, 0.06, 1.0}, NO_CTRL, "No control"});
 	for (int i = 1; i < NR_CTRL_BUTTONS; ++i) toolButtonBox.addButton (80 + (i % 6) * 30, 10 + ((int) (i / 6)) * 30, 20, 20, ctrlButtonStyles[i]);
 	for (int i = 0; i < NR_EDIT_BUTTONS; ++i) toolButtonBox.addButton (80 + i * 30, 100, 20, 20, editButtonStyles[i]);
 
@@ -210,9 +210,10 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	toolBoxLabel.setState (BColors::ACTIVE);
 	propertiesBoxLabel.setState (BColors::ACTIVE);
 	propertiesScaleEditIcon.hide ();
-	for (int i = 0; i < NR_SEQUENCER_CHS; ++i) {
+	for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
+	{
 		chBoxes[i].chLabel.setState (BColors::ACTIVE);
-		drawButton (chBoxes[i].chSymbol.getDrawingSurface(), 0, 0, 20, 20, chButtonStyles[i + 1]);
+		drawButton (chBoxes[i].chSymbol.getDrawingSurface(), 0, 0, 20, 20, chButtonStyles[i + 1].color, chButtonStyles[i + 1].symbol);
 		chBoxes[i].noteOffsetDial.setHardChangeable (false);
 		chBoxes[i].velocityDial.setHardChangeable (false);
 	}
@@ -576,8 +577,15 @@ void BSEQuencer_GUI::scale ()
 		RESIZE (chBoxes[i].noteOffsetDial, 118.5, 120, 50, 60, sz);
 		RESIZE (chBoxes[i].noteOffsetLabel, 113.5, 180, 60, 20, sz);
 
-		drawButton (chBoxes[i].chSymbol.getDrawingSurface(), 0, 0,
-				    chBoxes[i].chSymbol.getEffectiveWidth(), chBoxes[i].chSymbol.getEffectiveHeight(), chButtonStyles[i + 1]);
+		drawButton
+		(
+			chBoxes[i].chSymbol.getDrawingSurface(),
+			0, 0,
+			chBoxes[i].chSymbol.getEffectiveWidth(),
+			chBoxes[i].chSymbol.getEffectiveHeight(),
+			chButtonStyles[i + 1].color,
+			chButtonStyles[i + 1].symbol
+		);
 	}
 
 	applyTheme (theme);
@@ -1141,7 +1149,7 @@ void BSEQuencer_GUI::drawCaption ()
 	{
 		BColors::Color color = BColors::invisible;
 		if (noteBits & (1 << i)) {color = ink; color.applyBrightness (0.75);}
-		drawButton (surface, 0, (ROWS - i - 1) * height / ROWS + 1, width, height / ROWS - 2, {color, NO_CTRL});
+		drawButton (surface, 0, (ROWS - i - 1) * height / ROWS + 1, width, height / ROWS - 2, color, NO_CTRL);
 
 		ScaleMap* map = &(scaleMaps[scaleNr]);
 
@@ -1235,18 +1243,17 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, int row, int step)
 
 	if ((ch >= 0) && (ch <= NR_SEQUENCER_CHS) && (ctrl >= 0) && (ctrl < NR_CTRL_BUTTONS))
 	{
-		ButtonStyle padstyle;
-		padstyle.color = chButtonStyles[ch].color;
-		if (ch > 0) padstyle.color.applyBrightness(vel);
-		padstyle.symbol = ctrlButtonStyles[ctrl].symbol;
-
+		BColors::Color color = chButtonStyles[ch].color;
+		if (ch > 0) color.applyBrightness(vel);
 		if (cursorBits[step] & (1 << row))
 		{
-			padstyle.color.setAlpha (1.0);
-			padstyle.color.applyBrightness (0.75);
+			color.setAlpha (1.0);
+			color.applyBrightness (0.75);
 		}
 
-		drawButton (cr, x + 1, y + 1, w - 2, h - 2, padstyle);
+		int symbol = ctrlButtonStyles[ctrl].symbol;
+
+		drawButton (cr, x + 1, y + 1, w - 2, h - 2, color, symbol);
 	}
 }
 

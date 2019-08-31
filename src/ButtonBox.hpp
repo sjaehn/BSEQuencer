@@ -6,7 +6,9 @@
 #include "BWidgets/BColors.hpp"
 #include "BWidgets/ValueWidget.hpp"
 #include "BWidgets/DrawingSurface.hpp"
+#include "BWidgets/Label.hpp"
 #include "drawbutton.hpp"
+#include "ButtonStyle.hpp"
 
 class ButtonBox : public BWidgets::ValueWidget
 {
@@ -26,7 +28,21 @@ public:
 		while (!buttons.empty ())
 		{
 			BWidgets::DrawingSurface* b = buttons.back ().widget;
-			if (b) delete b;
+			if (b)
+			{
+				BWidgets::FocusWidget* focus = b->getFocusWidget ();
+				if (focus)
+				{
+					std::vector<BWidgets::Widget*> children = focus->getChildren ();
+					if (children.size () > 0)
+					{
+						BWidgets::Label* label = (BWidgets::Label*) (children[0]);
+						delete label;
+					}
+					delete focus;
+				}
+				delete b;
+			}
 			buttons.pop_back ();
 		}
 	}
@@ -69,20 +85,59 @@ public:
 			{
 				b.widget->moveTo (b.widget->getX () * w, b.widget->getY () * h);
 				b.widget->resize (b.widget->getWidth () * w, b.widget->getHeight () * h);
-				drawButton (b.widget->getDrawingSurface(), 0, 0, b.widget->getEffectiveWidth(), b.widget->getEffectiveHeight(), b.style);
+				drawButton (b.widget->getDrawingSurface(), 0, 0, b.widget->getEffectiveWidth(), b.widget->getEffectiveHeight(), b.style.color, b.style.symbol);
 			}
 		}
+	}
+
+
+	virtual void applyTheme (BStyles::Theme& theme, const std::string& name) override
+	{
+		ValueWidget::applyTheme (theme, name);
+
+		for (Button const& but : buttons)
+		{
+			if (but.widget)
+			{
+				BWidgets::FocusWidget* focus = but.widget->getFocusWidget ();
+				if (focus)
+				{
+					focus->applyTheme (theme, name + "/focus");
+
+					std::vector<BWidgets::Widget*> childs = focus->getChildren ();
+					for (BWidgets::Widget* c : childs)
+					{
+						if (c) c->applyTheme (theme, name + "/focus/label");
+					}
+				}
+			}
+		}
+	}
+
+	virtual void applyTheme (BStyles::Theme& theme) override
+	{
+		applyTheme (theme, name_);
 	}
 
 	void addButton (const double x, const double y, const double width, const double height, const ButtonStyle style)
 	{
 		BWidgets::DrawingSurface* newWidget = new BWidgets::DrawingSurface (x - 3, y - 3, width + 6, height + 6, "buttonbox");
+		if (!newWidget) throw std::bad_alloc ();
 		newWidget->setBorder ({{{1.0, 1.0, 1.0, 0.0}, 1.0}, 0.0, 2.0, 0.0});
 		newWidget->setCallbackFunction (BEvents::EventType::BUTTON_PRESS_EVENT, ButtonBox::handleButtonClicked);
-		drawButton (newWidget->getDrawingSurface(), 0, 0, width, height, style);
+		drawButton (newWidget->getDrawingSurface(), 0, 0, width, height, style.color, style.symbol);
 		add (*newWidget);
 		Button newButton = {newWidget, style};
 		buttons.push_back (newButton);
+
+		newWidget->setFocusable (true);
+		BWidgets::FocusWidget* focus = new BWidgets::FocusWidget (newWidget, "buttonbox/focus");
+		if (!focus) throw std::bad_alloc ();
+		newWidget->setFocusWidget (focus);
+		BWidgets::Label* label = new BWidgets::Label (0, 0, 100, 20, "buttonbox/focus/label", style.name);
+		if (!label) throw std::bad_alloc ();
+		focus->add (*label);
+		focus->resize ();
 	}
 
 	virtual void update () override

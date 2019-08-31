@@ -7,19 +7,13 @@
 #include "BWidgets/BColors.hpp"
 #include "definitions.h"
 
-typedef struct
-{
-	BColors::Color color;
-	int symbol;
-} ButtonStyle;
-
-void drawButton (cairo_t* cr, double x, double y, double width, double height, ButtonStyle style)
+void drawButton (cairo_t* cr, double x, double y, double width, double height, BColors::Color color, int symbol)
 {
 	// Draw button
-	BColors::Color illuminated2 = style.color; illuminated2.applyBrightness (0.33);
-	BColors::Color illuminated = style.color; illuminated.applyBrightness (0.05);
-	BColors::Color darkened = style.color; darkened.applyBrightness (-0.33);
-	BColors::Color darkened2 = style.color; darkened2.applyBrightness (-0.67);
+	BColors::Color illuminated2 = color; illuminated2.applyBrightness (0.33);
+	BColors::Color illuminated = color; illuminated.applyBrightness (0.05);
+	BColors::Color darkened = color; darkened.applyBrightness (-0.33);
+	BColors::Color darkened2 = color; darkened2.applyBrightness (-0.67);
 	cairo_pattern_t* pat = cairo_pattern_create_radial (x + width / 2, y + height / 2, 0.125 * width, x + width / 2, y + height / 2, 0.5 * width);
 
 	cairo_pattern_add_color_stop_rgba (pat, 0.0, CAIRO_RGBA (illuminated));
@@ -32,15 +26,15 @@ void drawButton (cairo_t* cr, double x, double y, double width, double height, B
 	cairo_pattern_destroy (pat);
 
 	// Draw symbol
-	if (style.symbol != NO_CTRL)
+	if (symbol != NO_CTRL)
 	{
-		BColors::Color color = darkened2;
-		if (style.color.getRed() + style.color.getGreen() + style.color.getBlue() <= 0.33) color = illuminated2;
-		cairo_set_source_rgba(cr, CAIRO_RGBA (color));
+		BColors::Color col = darkened2;
+		if (color.getRed() + color.getGreen() + color.getBlue() <= 0.33) col = illuminated2;
+		cairo_set_source_rgba(cr, CAIRO_RGBA (col));
 		cairo_set_line_width (cr, 0);
 		double symbolSize = (width > height ? 0.8 * height : 0.8 * width);
 
-		switch (style.symbol)
+		switch (symbol)
 		{
 			case CTRL_PLAY_FWD:
 			cairo_move_to (cr, x + width / 2 - symbolSize / 4, y + height / 2 - symbolSize / 3);
@@ -142,7 +136,7 @@ void drawButton (cairo_t* cr, double x, double y, double width, double height, B
 				cairo_rectangle (cr, x + width / 2 - 0.375 * symbolSize, y + height / 2 - 0.25 * symbolSize, 0.5 * symbolSize, 0.75 * symbolSize);
 				cairo_set_source_rgba (cr, 0, 0, 0, 1);
 				cairo_fill_preserve (cr);
-				cairo_set_source_rgba(cr, CAIRO_RGBA (color));
+				cairo_set_source_rgba(cr, CAIRO_RGBA (col));
 				const double dash[] = {2.0};
 				cairo_set_dash (cr, dash, 1, 0);
 				cairo_set_line_width (cr, 1.0);
@@ -159,7 +153,7 @@ void drawButton (cairo_t* cr, double x, double y, double width, double height, B
 			case EDIT_COPY:
 			{
 				cairo_rectangle (cr, x + width / 2 - 0.375 * symbolSize, y + height / 2 - 0.25 * symbolSize, 0.5 * symbolSize, 0.75 * symbolSize);
-				cairo_set_source_rgba(cr, CAIRO_RGBA (color));
+				cairo_set_source_rgba(cr, CAIRO_RGBA (col));
 				cairo_fill_preserve (cr);
 				const double dash[] = {2.0};
 				cairo_set_dash (cr, dash, 1, 0);
@@ -177,12 +171,12 @@ void drawButton (cairo_t* cr, double x, double y, double width, double height, B
 			case EDIT_PASTE:
 			{
 				cairo_rectangle (cr, x + width / 2 - 0.375 * symbolSize, y + height / 2 - 0.5 * symbolSize, 0.5 * symbolSize, 0.75 * symbolSize);
-				cairo_set_source_rgba(cr, CAIRO_RGBA (color));
+				cairo_set_source_rgba(cr, CAIRO_RGBA (col));
 				cairo_fill_preserve (cr);
 				cairo_set_source_rgba (cr, 0, 0, 0, 1);
 				cairo_set_line_width (cr, 1.0);
 				cairo_stroke (cr);
-				cairo_set_source_rgba(cr, CAIRO_RGBA (color));
+				cairo_set_source_rgba(cr, CAIRO_RGBA (col));
 				cairo_rectangle (cr, x + width / 2 - 0.125 * symbolSize, y + height / 2 - 0.25 * symbolSize, 0.5 * symbolSize, 0.75 * symbolSize);
 				cairo_fill_preserve (cr);
 				cairo_set_source_rgba (cr, 0, 0, 0, 1);
@@ -197,10 +191,10 @@ void drawButton (cairo_t* cr, double x, double y, double width, double height, B
 	}
 }
 
-void drawButton (cairo_surface_t* surface, double x, double y, double width, double height, ButtonStyle style)
+void drawButton (cairo_surface_t* surface, double x, double y, double width, double height, BColors::Color color, int symbol)
 {
 	cairo_t* cr = cairo_create (surface);
-	drawButton (cr, x, y, width, height, style);
+	drawButton (cr, x, y, width, height, color, symbol);
 	cairo_destroy (cr);
 }
 

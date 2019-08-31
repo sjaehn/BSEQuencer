@@ -232,32 +232,32 @@ private:
 
 	std::array<ButtonStyle, NR_SEQUENCER_CHS + 1> chButtonStyles =
 	{{
-		{{0.0, 0.0, 0.0, 0.5}, NO_CTRL},
-		{{0.0, 0.0, 1.0, 1.0}, NO_CTRL},
-		{{1.0, 0.0, 1.0, 1.0}, NO_CTRL},
-		{{1.0, 0.5, 0.0, 1.0}, NO_CTRL},
-		{{1.0, 1.0, 0.0, 1.0}, NO_CTRL}
+		{{0.0, 0.0, 0.0, 0.5}, NO_CTRL, "No channel"},
+		{{0.0, 0.0, 1.0, 1.0}, NO_CTRL, "Channel 1"},
+		{{1.0, 0.0, 1.0, 1.0}, NO_CTRL, "Channel 2"},
+		{{1.0, 0.5, 0.0, 1.0}, NO_CTRL, "Channel 3"},
+		{{1.0, 1.0, 0.0, 1.0}, NO_CTRL, "Channel 4"}
 	}};
 
 	std::array<ButtonStyle, NR_CTRL_BUTTONS> ctrlButtonStyles =
 	{{
-		{{0.0, 0.0, 0.0, 0.5}, NO_CTRL},
-		{{0.0, 0.03, 0.06, 1.0}, CTRL_PLAY_FWD},
-		{{0.0, 0.03, 0.06, 1.0}, CTRL_PLAY_REW},
-	  	{{0.0, 0.03, 0.06, 1.0}, CTRL_ALL_MARK},
-		{{0.0, 0.03, 0.06, 1.0}, CTRL_MARK},
-		{{0.0, 0.03, 0.06, 1.0}, CTRL_JUMP_FWD},
-		{{0.0, 0.03, 0.06, 1.0}, CTRL_JUMP_BACK},
-	  	{{0.0, 0.03, 0.06, 1.0}, CTRL_SKIP},
-		{{0.0, 0.03, 0.06, 1.0}, CTRL_STOP}
+		{{0.0, 0.0, 0.0, 0.5}, NO_CTRL, "No control"},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_PLAY_FWD, "Play forward"},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_PLAY_REW, "Play reverse"},
+	  	{{0.0, 0.03, 0.06, 1.0}, CTRL_ALL_MARK, "Set all mark"},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_MARK, "Set mark"},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_JUMP_FWD, "Jump forward"},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_JUMP_BACK, "Jump backward"},
+	  	{{0.0, 0.03, 0.06, 1.0}, CTRL_SKIP, "Skip"},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_STOP, "Stop"}
 	}};
 
 	std::array<ButtonStyle, NR_EDIT_BUTTONS> editButtonStyles =
 	{{
-		{{0.0, 0.03, 0.06, 1.0}, EDIT_PICK},
-		{{0.0, 0.03, 0.06, 1.0}, EDIT_CUT},
-	  	{{0.0, 0.03, 0.06, 1.0}, EDIT_COPY},
-		{{0.0, 0.03, 0.06, 1.0}, EDIT_PASTE}
+		{{0.0, 0.03, 0.06, 1.0}, EDIT_PICK, "Pick"},
+		{{0.0, 0.03, 0.06, 1.0}, EDIT_CUT, "Cut"},
+	  	{{0.0, 0.03, 0.06, 1.0}, EDIT_COPY, "Copy"},
+		{{0.0, 0.03, 0.06, 1.0}, EDIT_PASTE, "Paste"}
 	}};
 
 	BStyles::Border border = {{ink, 1.0}, 0.0, 2.0, 0.0};
@@ -339,6 +339,9 @@ private:
 		{"editlabel",	 	{{"uses", STYLEPTR (&labelStyles)},
 		 	 	 	 {"font", STYLEPTR (&iLabelFont)},
 					 {"textcolors", STYLEPTR (&BColors::whites)}}},
+		{"widget/focus", 	{{"background", STYLEPTR (&screenBg)}}},
+		{"widget/focus/label",	{{"uses", STYLEPTR (&labelStyles)},
+					 {"font", STYLEPTR (&lfLabelFont)}}},
 		{"menu",	 	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
 					 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
 		{"menu/item",	 	{{"uses", STYLEPTR (&defaultStyles)},
