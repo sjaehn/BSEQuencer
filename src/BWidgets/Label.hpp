@@ -107,6 +107,17 @@ public:
 	double getTextWidth (std::string& text);
 
 	/**
+	 * Resizes the widget, redraw and emits a BEvents::ExposeEvent if the
+	 * widget is visible. If no parameters are given, the widget will be
+	 * resized to the size of the containing child widgets or to the text
+	 * extends (what is higher).
+	 * @param width		New widgets width
+	 * @param height	New widgets height
+	 */
+	virtual void resize () override;
+	virtual void resize (const double width, const double height) override;
+
+	/**
 	 * Scans theme for widget properties and applies these properties.
 	 * @param theme Theme to be scanned.
 	 * 				Styles used are:

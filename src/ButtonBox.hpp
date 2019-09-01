@@ -107,8 +107,14 @@ public:
 					std::vector<BWidgets::Widget*> childs = focus->getChildren ();
 					for (BWidgets::Widget* c : childs)
 					{
-						if (c) c->applyTheme (theme, name + "/focus/label");
+						if (c)
+						{
+							c->applyTheme (theme, name + "/focus/label");
+							c->resize ();
+						}
 					}
+
+					focus->resize ();
 				}
 			}
 		}
@@ -136,6 +142,7 @@ public:
 		newWidget->setFocusWidget (focus);
 		BWidgets::Label* label = new BWidgets::Label (0, 0, 100, 20, "buttonbox/focus/label", style.name);
 		if (!label) throw std::bad_alloc ();
+		label->resize ();
 		focus->add (*label);
 		focus->resize ();
 	}

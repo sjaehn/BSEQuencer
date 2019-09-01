@@ -88,6 +88,27 @@ double Label::getTextWidth (std::string& text)
 	return textwidth;
 }
 
+void Label::resize ()
+{
+	// Get label text size
+	cairo_t* cr = cairo_create (widgetSurface);
+	cairo_text_extents_t ext = labelFont.getTextExtents(cr, labelText.c_str ());
+	double height = ext.height + 2 * getYOffset ();
+	double width = ext.width + 2 * getYOffset ();
+	cairo_destroy (cr);
+
+	// Or use embedded widgets size, if bigger
+	for (Widget* w : children_)
+	{
+		if (w->getX () + w->getWidth() > width) width = w->getX () + w->getWidth();
+		if (w->getY () + w->getHeight() > height) height = w->getY () + w->getHeight();
+	}
+
+	resize (width, height);
+}
+
+void Label::resize (const double width, const double height) {Widget::resize (width, height);}
+
 void Label::applyTheme (BStyles::Theme& theme) {applyTheme (theme, name_);}
 
 void Label::applyTheme (BStyles::Theme& theme, const std::string& name)
