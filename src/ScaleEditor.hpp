@@ -89,8 +89,12 @@ protected:
 	cairo_surface_t* noteSurface;
 
 	BColors::ColorSet txColors = {{{0.167, 0.37, 0.80, 1.0}, {0.33, 0.5, 0.85, 1.0}, {0.0, 0.0, 0.25, 1.0}, {0.0, 0.0, 0.0, 0.0}}};
+	BColors::ColorSet bgColors = {{{0.15, 0.15, 0.15, 1.0}, {0.3, 0.3, 0.3, 1.0}, {0.05, 0.05, 0.05, 1.0}, {0.0, 0.0, 0.0, 1.0}}};
 	BStyles::Border border = {{BColors::white, 1.0}, 0.0, 2.0, 0.0};
+	BStyles::Border menuBorder = {{BColors::darkgrey, 1.0}, 0.0, 0.0, 0.0};
+	BStyles::Border labelborder = {BStyles::noLine, 4.0, 0.0, 0.0};
 	BStyles::Fill scaleEditorBg = BStyles::blackFill;
+	BStyles::Fill menuBg = BStyles::Fill (BColors::Color (0.0, 0.0, 0.05, 1.0));
 	BStyles::Fill drumBg = BStyles::noFill;
 	BStyles::Fill noteBg = BStyles::noFill;
 	BStyles::Font ctLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 12.0,
@@ -110,33 +114,35 @@ protected:
 					{"border", STYLEPTR (&border)}}},
 		{"widget", 		{{"uses", STYLEPTR (&defaultStyles)}}},
 		{"drum", 		{{"background", STYLEPTR (&drumBg)},
-						 {"border", STYLEPTR (&BStyles::noBorder)}}},
+					 {"border", STYLEPTR (&BStyles::noBorder)}}},
 		{"note", 		{{"background", STYLEPTR (&noteBg)},
-						 {"border", STYLEPTR (&BStyles::noBorder)}}},
+					 {"border", STYLEPTR (&BStyles::noBorder)}}},
 		{"ctlabel",	 	{{"uses", STYLEPTR (&labelStyles)},
-						 {"font", STYLEPTR (&ctLabelFont)}}},
+					 {"font", STYLEPTR (&ctLabelFont)}}},
 		{"lflabel",	 	{{"uses", STYLEPTR (&labelStyles)},
-						 {"font", STYLEPTR (&lfLabelFont)}}},
+					 {"font", STYLEPTR (&lfLabelFont)}}},
 		{"button", 		{{"font", STYLEPTR (&ctLabelFont)}}},
 		{"xsymbol",	 	{{"uses", STYLEPTR (&defaultStyles)},
-						 {"fgcolors", STYLEPTR (&BColors::whites)},
-						 {"font", STYLEPTR (&ctLabelFont)}}},
-		{"menu",	 	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
-						 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
+					 {"fgcolors", STYLEPTR (&BColors::whites)},
+					 {"font", STYLEPTR (&ctLabelFont)}}},
+		{"menu",	 	{{"border", STYLEPTR (&menuBorder)},
+					 {"background", STYLEPTR (&menuBg)}}},
 		{"menu/item",	 	{{"uses", STYLEPTR (&defaultStyles)},
-						 {"textcolors", STYLEPTR (&BColors::whites)},
-						 {"font", STYLEPTR (&lfLabelFont)}}},
-		{"menu/button",	 	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
-						 {"background", STYLEPTR (&BStyles::grey20Fill)},
-						 {"bgcolors", STYLEPTR (&BColors::darks)}}},
-		{"menu/listbox",	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
-						 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
+					 {"border", STYLEPTR (&labelborder)},
+					 {"textcolors", STYLEPTR (&BColors::whites)},
+					 {"font", STYLEPTR (&lfLabelFont)}}},
+		{"menu/button",	 	{{"border", STYLEPTR (&menuBorder)},
+					 {"background", STYLEPTR (&menuBg)},
+					 {"bgcolors", STYLEPTR (&bgColors)}}},
+		{"menu/listbox",	{{"border", STYLEPTR (&menuBorder)},
+					 {"background", STYLEPTR (&menuBg)}}},
 		{"menu/listbox/item",	{{"uses", STYLEPTR (&defaultStyles)},
-						 {"textcolors", STYLEPTR (&BColors::whites)},
-						 {"font", STYLEPTR (&lfLabelFont)}}},
-		{"menu/listbox//button",{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
-						 {"background", STYLEPTR (&BStyles::grey20Fill)},
-						 {"bgcolors", STYLEPTR (&BColors::darks)}}}
+					 {"border", STYLEPTR (&labelborder)},
+					 {"textcolors", STYLEPTR (&BColors::whites)},
+					 {"font", STYLEPTR (&lfLabelFont)}}},
+		{"menu/listbox//button",{{"border", STYLEPTR (&menuBorder)},
+					 {"background", STYLEPTR (&menuBg)},
+					 {"bgcolors", STYLEPTR (&bgColors)}}}
 	});
 
 };

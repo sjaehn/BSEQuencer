@@ -116,7 +116,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		chBoxes[i].chSymbol.rename ("button");
 		chBoxes[i].chLabel = BWidgets::Label (40, 10, 133.5, 20, "ctlabel", "Channel " + std::to_string (i + 1));
 		chBoxes[i].chLabel.rename ("ctlabel");
-		chBoxes[i].channelLabel = BWidgets::Label (10, 50, 80, 20, "lflabel", "MIDI channel");
+		chBoxes[i].channelLabel = BWidgets::Label (10, 50, 100, 20, "lflabel", "MIDI channel");
 		chBoxes[i].channelLabel.rename ("lflabel");
 		chBoxes[i].channelListBox = BWidgets::PopupListBox (123.5, 50, 60, 20, 60, 120, "menu",
 								    BItems::ItemList({"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"}),
@@ -566,7 +566,7 @@ void BSEQuencer_GUI::scale ()
 		RESIZE (chBoxes[i].box, 98 + i * 203.5, 590, 193.5, 210, sz);
 		RESIZE (chBoxes[i].chSymbol, 7, 7, 26, 26, sz);
 		RESIZE (chBoxes[i].chLabel, 40, 10, 133.5, 20, sz);
-		RESIZE (chBoxes[i].channelLabel, 10, 50, 80, 20, sz);
+		RESIZE (chBoxes[i].channelLabel, 10, 50, 100, 20, sz);
 		RESIZE (chBoxes[i].channelListBox, 123.5, 50, 60, 20, sz);
 		chBoxes[i].channelListBox.resizeListBox (60 * sz, 120 * sz);
 		RESIZE (chBoxes[i].pitchLabel, 10, 80, 80, 20, sz);

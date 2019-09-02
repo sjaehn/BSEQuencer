@@ -223,10 +223,10 @@ private:
 	BColors::ColorSet txColors = {{{0.167, 0.37, 0.80, 1.0}, {0.33, 0.5, 0.85, 1.0}, {0.0, 0.0, 0.25, 1.0}, {0.0, 0.0, 0.0, 0.0}}};
 	BColors::ColorSet tgColors = {{BColors::grey, BColors::white, BColors::grey, BColors::darkgrey}};
 	BColors::ColorSet bgColors = {{{0.15, 0.15, 0.15, 1.0}, {0.3, 0.3, 0.3, 1.0}, {0.05, 0.05, 0.05, 1.0}, {0.0, 0.0, 0.0, 1.0}}};
+	BColors::ColorSet tgBgColors = {{{0.0, 0.03, 0.06, 1.0}, {0.3, 0.3, 0.3, 1.0}, {0.0, 0.0, 0.0, 1.0}, {0.0, 0.0, 0.0, 1.0}}};
 	BColors::ColorSet ltColors = {{{1.0, 1.0, 1.0, 1.0}, {1.0, 1.0, 1.0, 1.0}, {0.25, 0.25, 0.25, 1.0}, {0.0, 0.0, 0.0, 1.0}}};
 	BColors::Color ink = {0.0, 0.25, 0.5, 1.0};
 	BColors::Color light = {1.0, 1.0, 1.0, 1.0};
-	BColors::Color ctrlBgColor = {0.0, 0.08, 0.04, 1.0};
 	BColors::Color evenPadBgColor = {0.0, 0.03, 0.06, 1.0};
 	BColors::Color oddPadBgColor = {0.0, 0.0, 0.0, 1.0};
 
@@ -261,8 +261,10 @@ private:
 	}};
 
 	BStyles::Border border = {{ink, 1.0}, 0.0, 2.0, 0.0};
+	BStyles::Border menuBorder = {{BColors::darkgrey, 1.0}, 0.0, 0.0, 0.0};
 	BStyles::Border labelborder = {BStyles::noLine, 4.0, 0.0, 0.0};
 	BStyles::Fill widgetBg = BStyles::noFill;
+	BStyles::Fill menuBg = BStyles::Fill (BColors::Color (0.0, 0.0, 0.05, 1.0));
 	BStyles::Fill screenBg = BStyles::Fill (BColors::Color (0.0, 0.0, 0.0, 0.8));
 	BStyles::Fill boxBg = BStyles::Fill (BColors::Color (0.0, 0.0, 0.0, 0.9));
 	BStyles::Font ctLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 12.0,
@@ -275,7 +277,7 @@ private:
 											   BStyles::TEXT_ALIGN_LEFT, BStyles::TEXT_VALIGN_MIDDLE);
 	BStyles::StyleSet defaultStyles = {"default", {{"background", STYLEPTR (&BStyles::noFill)},
 					  {"border", STYLEPTR (&BStyles::noBorder)}}};
-	BStyles::StyleSet labelStyles = {"labels", 	  {{"background", STYLEPTR (&BStyles::noFill)},
+	BStyles::StyleSet labelStyles = {"labels", {{"background", STYLEPTR (&BStyles::noFill)},
 					{"border", STYLEPTR (&labelborder)},
 					{"textcolors", STYLEPTR (&txColors)},
 					{"font", STYLEPTR (&ctLabelFont)}}};
@@ -294,7 +296,7 @@ private:
 					 {"border", STYLEPTR (&border)}}},
 		{"tgbutton", 		{{"border", STYLEPTR (&BStyles::noBorder)},
 					 {"textcolors", STYLEPTR (&tgColors)},
-					 {"bgcolors", STYLEPTR (&BColors::darks)},
+					 {"bgcolors", STYLEPTR (&tgBgColors)},
 					 {"font", STYLEPTR (&tgLabelFont)}}},
 		{"dial", 		{{"uses", STYLEPTR (&defaultStyles)},
 					 {"fgcolors", STYLEPTR (&fgColors)},
@@ -343,24 +345,24 @@ private:
 		{"widget/focus/label",	{{"uses", STYLEPTR (&labelStyles)},
 					 {"font", STYLEPTR (&lfLabelFont)},
 				 	 {"textcolors", STYLEPTR (&ltColors)}}},
-		{"menu",	 	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
-					 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
+		{"menu",	 	{{"border", STYLEPTR (&menuBorder)},
+					 {"background", STYLEPTR (&menuBg)}}},
 		{"menu/item",	 	{{"uses", STYLEPTR (&defaultStyles)},
 					 {"border", STYLEPTR (&labelborder)},
 					 {"textcolors", STYLEPTR (&BColors::whites)},
 					 {"font", STYLEPTR (&lfLabelFont)}}},
-		{"menu/button",	 	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
-					 {"background", STYLEPTR (&BStyles::grey20Fill)},
-					 {"bgcolors", STYLEPTR (&BColors::darks)}}},
-		{"menu/listbox",	{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
-					 {"background", STYLEPTR (&BStyles::grey20Fill)}}},
+		{"menu/button",	 	{{"border", STYLEPTR (&menuBorder)},
+					 {"background", STYLEPTR (&menuBg)},
+					 {"bgcolors", STYLEPTR (&bgColors)}}},
+		{"menu/listbox",	{{"border", STYLEPTR (&menuBorder)},
+					 {"background", STYLEPTR (&menuBg)}}},
 		{"menu/listbox/item",	{{"uses", STYLEPTR (&defaultStyles)},
 					 {"border", STYLEPTR (&labelborder)},
 					 {"textcolors", STYLEPTR (&BColors::whites)},
 					 {"font", STYLEPTR (&lfLabelFont)}}},
-		{"menu/listbox//button",{{"border", STYLEPTR (&BStyles::greyBorder1pt)},
-					 {"background", STYLEPTR (&BStyles::grey20Fill)},
-					 {"bgcolors", STYLEPTR (&BColors::darks)}}}
+		{"menu/listbox//button",{{"border", STYLEPTR (&menuBorder)},
+					 {"background", STYLEPTR (&menuBg)},
+					 {"bgcolors", STYLEPTR (&bgColors)}}}
 	});
 
 };

@@ -334,8 +334,8 @@ void Widget::setHeight (const double height)
 
 void Widget::resize ()
 {
-	double height = 0.0;
-	double width = 0.0;
+	double height = 2 * getYOffset ();
+	double width = 2 * getXOffset ();
 
 	for (Widget* w : children_)
 	{
