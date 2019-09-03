@@ -9,6 +9,8 @@
 
 void drawButton (cairo_t* cr, double x, double y, double width, double height, BColors::Color color, int symbol)
 {
+	if ((width <= 0) || (height <= 0)) return;
+	
 	// Draw button
 	BColors::Color illuminated2 = color; illuminated2.applyBrightness (0.33);
 	BColors::Color illuminated = color; illuminated.applyBrightness (0.05);

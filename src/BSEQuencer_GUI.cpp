@@ -1217,6 +1217,10 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, int row, int step)
 	const double h = height / ROWS;
 	const double x = step * w;
 	const double y = (ROWS - row - 1) * h;
+	const double xr = round (x);
+	const double yr = round (y);
+	const double wr = round (x + w) - xr;
+	const double hr = round (y + h) - yr;
 
 
 	// Draw background
@@ -1233,7 +1237,8 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, int row, int step)
 	if ((row >= clipRMin) && (row <= clipRMax) && (step >= clipSMin) && (step <= clipSMax)) bg.applyBrightness (1.5);
 
 	cairo_set_source_rgba (cr, CAIRO_RGBA (bg));
-	cairo_rectangle (cr, x, y, w, h);
+	cairo_set_line_width (cr, 0.0);
+	cairo_rectangle (cr, xr, yr, wr, hr);
 	cairo_fill (cr);
 
 	// Draw pad
@@ -1253,7 +1258,7 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, int row, int step)
 
 		int symbol = ctrlButtonStyles[ctrl].symbol;
 
-		drawButton (cr, x + 1, y + 1, w - 2, h - 2, color, symbol);
+		drawButton (cr, xr + 1, yr + 1, wr - 2, hr - 2, color, symbol);
 	}
 }
 
