@@ -116,6 +116,7 @@ private:
 		std::pair<int, int> origin;
 		std::pair<int, int> extends;
 		bool ready = true;
+		std::chrono::steady_clock::time_point time;
 	};
 
 	ClipBoard clipBoard;

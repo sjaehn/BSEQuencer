@@ -963,6 +963,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 							if (ui->clipBoard.ready)
 							{
 								ui->clipBoard.origin = std::make_pair (row, step);
+								ui->clipBoard.extends = std::make_pair (0, 0);
 								ui->clipBoard.ready = false;
 								ui->drawPad (row, step);
 							}
@@ -1054,6 +1055,19 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 						}
 
 						ui->clipBoard.ready = true;
+
+						// Hack focusWidget to cut / copy message
+						if (ui->focusWidget)
+						{
+							ui->clipBoard.time = std::chrono::steady_clock::now() + ui->focusWidget->getFocusInMilliseconds ();
+							ui->focusWidget->setFocused (true);
+							if (ui->focusWidget->getParent()) ui->focusWidget->getParent()->release (ui->focusWidget);
+							ui->add (*ui->focusWidget);
+							ui->focusWidget->moveTo (widget->getOriginX () + pointerEvent->getX() + 2,
+										 widget->getOriginY () + pointerEvent->getY() - ui->focusWidget->getHeight() - 2);
+							ui->padSurfaceFocusText.setText (edit == EDIT_CUT ? "Cut..." : "Copied...");
+							ui->focusWidget->show ();
+						}
 
 						ui->drawPad ();
 					}
