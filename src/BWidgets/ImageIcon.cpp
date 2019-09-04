@@ -41,7 +41,7 @@ ImageIcon::ImageIcon (const double x, const double y, const double width, const 
 		Icon (x, y, width, height, name)
 {
 	// Fill all standard states with the image from filename
-	for (uint i = BColors::NORMAL; i < BColors::USER_DEFINED; ++i)
+	for (unsigned int i = BColors::NORMAL; i < BColors::USER_DEFINED; ++i)
 	{
 		loadImage (BColors::State (i), filename);
 	}
@@ -51,14 +51,14 @@ ImageIcon::ImageIcon (const double x, const double y, const double width, const 
 		      const std::string& name, const std::vector<cairo_surface_t*>& surfaces) :
 		Icon (x, y, width, height, name)
 {
-	for (uint i = 0; i < surfaces.size (); ++i) loadImage (BColors::State (i), surfaces[i]);
+	for (unsigned int i = 0; i < surfaces.size (); ++i) loadImage (BColors::State (i), surfaces[i]);
 }
 
 ImageIcon::ImageIcon (const double x, const double y, const double width, const double height,
 		      const std::string& name, const std::vector<std::string>& filenames) :
 		Icon (x, y, width, height, name)
 {
-	for (uint i = 0; i < filenames.size (); ++i) loadImage (BColors::State (i), filenames[i]);
+	for (unsigned int i = 0; i < filenames.size (); ++i) loadImage (BColors::State (i), filenames[i]);
 }
 
 Widget* ImageIcon::clone () const {return new ImageIcon (*this);}

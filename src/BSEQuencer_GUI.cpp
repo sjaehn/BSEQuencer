@@ -26,7 +26,6 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		pluginPath (bundle_path ? std::string (bundle_path) : std::string ("")),
 		sz (1.0), bgImageSurface (nullptr),
 		uris (), map (NULL), forge (), clipBoard (),
-		clipOrigin (-1, -1), clipExtends (0, 0),
 		noteBits (0), chBits (0), tempTool (false), tempToolCh (0),
 		mContainer (0, 0, 1200, 820, "main"),
 		padSurface (98, 88, 804, 484, "box"),
@@ -341,7 +340,7 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 					{
 						uint32_t size = (uint32_t) ((oPad->size - sizeof(LV2_Atom_Vector_Body)) / sizeof (PadMessage));
 						PadMessage* pMes = (PadMessage*)(&vec->body + 1);
-						for (uint i = 0; i < size; ++i)
+						for (unsigned int i = 0; i < size; ++i)
 
 						{
 							int step = (int) pMes[i].step;
@@ -961,18 +960,19 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 
 						else if ((edit == EDIT_CUT) || (edit == EDIT_COPY))
 						{
-							if ((ui->clipOrigin.first < 0) || (ui->clipOrigin.second < 0))
+							if (ui->clipBoard.ready)
 							{
-								ui->clipOrigin = std::make_pair (row, step);
+								ui->clipBoard.origin = std::make_pair (row, step);
+								ui->clipBoard.ready = false;
 								ui->drawPad (row, step);
 							}
 
 							else
 							{
-								std::pair<int, int> newExtends = std::make_pair (row - ui->clipOrigin.first, step - ui->clipOrigin.second);
-								if (newExtends != ui->clipExtends)
+								std::pair<int, int> newExtends = std::make_pair (row - ui->clipBoard.origin.first, step - ui->clipBoard.origin.second);
+								if (newExtends != ui->clipBoard.extends)
 								{
-									ui->clipExtends = newExtends;
+									ui->clipBoard.extends = newExtends;
 									ui->drawPad ();
 								}
 							}
@@ -980,11 +980,11 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 
 						else if (edit == EDIT_PASTE)
 						{
-							if (!ui->clipBoard.empty ())
+							if (!ui->clipBoard.data.empty ())
 							{
-								for (int r = 0; r < int (ui->clipBoard.size ()); ++r)
+								for (int r = 0; r < int (ui->clipBoard.data.size ()); ++r)
 								{
-									for (int s = 0; s < int (ui->clipBoard[r].size ()); ++s)
+									for (int s = 0; s < int (ui->clipBoard.data[r].size ()); ++s)
 									{
 										if
 										(
@@ -994,7 +994,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 											(step + s < ((int)ui->controllerWidgets[NR_OF_STEPS]->getValue ()))
 										)
 										{
-											ui->pads[row - r][step + s] = ui->clipBoard.at(r).at(s);
+											ui->pads[row - r][step + s] = ui->clipBoard.data.at(r).at(s);
 											ui->drawPad (row - r, step + s);
 											ui->send_pad (row - r, step + s);
 										}
@@ -1025,20 +1025,20 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 
 					if ((edit == EDIT_CUT) || (edit == EDIT_COPY))
 					{
-						int clipRMin = ui->clipOrigin.first;
-						int clipRMax = ui->clipOrigin.first + ui->clipExtends.first;
+						int clipRMin = ui->clipBoard.origin.first;
+						int clipRMax = ui->clipBoard.origin.first + ui->clipBoard.extends.first;
 						if (clipRMin > clipRMax) std::swap (clipRMin, clipRMax);
-						int clipSMin = ui->clipOrigin.second;
-						int clipSMax = ui->clipOrigin.second + ui->clipExtends.second;
+						int clipSMin = ui->clipBoard.origin.second;
+						int clipSMax = ui->clipBoard.origin.second + ui->clipBoard.extends.second;
 						if (clipSMin > clipSMax) std::swap (clipSMin, clipSMax);
 
-						ui->clipBoard.clear ();
+						ui->clipBoard.data.clear ();
 						for (int r = clipRMax; r >= clipRMin; --r)
 						{
 							std::vector<Pad> padRow;
 							padRow.clear ();
 							for (int s = clipSMin; s <= clipSMax; ++s) padRow.push_back (ui->pads[r][s]);
-							ui->clipBoard.push_back (padRow);
+							ui->clipBoard.data.push_back (padRow);
 						}
 
 						if (edit == EDIT_CUT)
@@ -1053,8 +1053,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 							}
 						}
 
-						ui->clipOrigin = std::make_pair (-1, -1);
-						ui->clipExtends = std::make_pair (0, 0);
+						ui->clipBoard.ready = true;
 
 						ui->drawPad ();
 					}
@@ -1228,13 +1227,13 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, int row, int step)
 	BColors::Color bg = (((int)(step / controllerWidgets[STEPS_PER]->getValue ())) % 2) ? oddPadBgColor : evenPadBgColor;
 
 	// Highlight selection
-	int clipRMin = clipOrigin.first;
-	int clipRMax = clipOrigin.first + clipExtends.first;
+	int clipRMin = clipBoard.origin.first;
+	int clipRMax = clipBoard.origin.first + clipBoard.extends.first;
 	if (clipRMin > clipRMax) std::swap (clipRMin, clipRMax);
-	int clipSMin = clipOrigin.second;
-	int clipSMax = clipOrigin.second + clipExtends.second;
+	int clipSMin = clipBoard.origin.second;
+	int clipSMax = clipBoard.origin.second + clipBoard.extends.second;
 	if (clipSMin > clipSMax) std::swap (clipSMin, clipSMax);
-	if ((row >= clipRMin) && (row <= clipRMax) && (step >= clipSMin) && (step <= clipSMax)) bg.applyBrightness (1.5);
+	if ((!clipBoard.ready) && (row >= clipRMin) && (row <= clipRMax) && (step >= clipSMin) && (step <= clipSMax)) bg.applyBrightness (1.5);
 
 	cairo_set_source_rgba (cr, CAIRO_RGBA (bg));
 	cairo_set_line_width (cr, 0.0);

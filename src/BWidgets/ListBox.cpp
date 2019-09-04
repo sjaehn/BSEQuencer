@@ -66,11 +66,11 @@ void ListBox::setTop (const int top)
 	{
 		size_t size = items.size ();
 		if (top <= 0) listTop = 1;
-		else if (uint (top) <= size) listTop = top;
+		else if (((unsigned int) top) <= size) listTop = top;
 		else listTop = size;
 
 		int lines = getLines ();
-		if ((uint (getBottom ()) > size) && (size - lines >= 1)) listTop = size - lines + 1;
+		if (((unsigned int) (getBottom ()) > size) && (size - lines >= 1)) listTop = size - lines + 1;
 	}
 
 	if (oldtop != listTop) update ();
@@ -115,21 +115,21 @@ void ListBox::updateItems ()
 			     items.front ().getWidget()->getHeight () :
 			     BWIDGETS_DEFAULT_CHOICEBOX_ITEM_HEIGHTH);
 	double lineHeight = ((items.empty () || (itemHeight == 0)) ? 20 : itemHeight);
-	uint lines = ceil (listHeight / lineHeight);
+	unsigned int lines = ceil (listHeight / lineHeight);
 
-	uint n = 0;
+	unsigned int n = 0;
 	for (BItems::Item const& i : items)
 	{
 		Widget* w = i.getWidget ();
 		if (w)
 		{
-			if ((n + 1 >= uint (listTop)) && (n + 1 < listTop + lines))
+			if ((n + 1 >= ((unsigned int) listTop)) && (n + 1 < listTop + lines))
 			{
 				w->moveTo (x0, y0 + upButtonHeight + (n + 1 - listTop) * lineHeight);
 				w->setWidth (width);
 				w->setHeight (lineHeight);
 
-				if (n + 1 == uint (activeNr)) w->setState (BColors::ACTIVE);
+				if (n + 1 == ((unsigned int) (activeNr))) w->setState (BColors::ACTIVE);
 				else w->setState (BColors::NORMAL);
 
 				w->show ();

@@ -110,9 +110,16 @@ private:
 
 	//Pads
 	Pad pads [ROWS] [MAXSTEPS];
-	std::vector<std::vector<Pad>> clipBoard;
-	std::pair<int, int> clipOrigin;
-	std::pair<int, int> clipExtends;
+	struct ClipBoard
+	{
+		std::vector<std::vector<Pad>> data;
+		std::pair<int, int> origin;
+		std::pair<int, int> extends;
+		bool ready = true;
+	};
+
+	ClipBoard clipBoard;
+
 
 	// Cursors
 	uint32_t cursorBits [MAXSTEPS];

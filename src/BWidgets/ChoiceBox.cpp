@@ -50,7 +50,7 @@ ChoiceBox::ChoiceBox (const double x, const double y, const double width, const 
 	// Set value and preselection
 	value = preselection;
 
-	uint n = 0;
+	unsigned int n = 0;
 	for (BItems::Item const& i : items)
 	{
 		if (preselection == i.getValue())
@@ -160,7 +160,7 @@ void ChoiceBox::setValue (const double val)
 
 	else
 	{
-		uint n = 0;
+		unsigned int n = 0;
 		for (BItems::Item const& i : items)
 		{
 			if (val == i.getValue ())
@@ -241,13 +241,13 @@ void ChoiceBox::updateItems ()
 	double upButtonHeight = (height >= BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT ?
 				 BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT : 0); // TODO
 
-	uint n = 0;
+	unsigned int n = 0;
 	for (BItems::Item const& i : items)
 	{
 		Widget* w = i.getWidget ();
 		if (w)
 		{
-			if (n + 1 == uint (activeNr)) w->show ();
+			if (n + 1 == ((unsigned int) activeNr)) w->show ();
 			else w->hide ();
 
 			w->moveTo (x0, y0 + upButtonHeight);
