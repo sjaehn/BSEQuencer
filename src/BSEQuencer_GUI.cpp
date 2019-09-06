@@ -499,8 +499,9 @@ void BSEQuencer_GUI::scale ()
 	//Scale widgets
 	RESIZE (mContainer, 0, 0, 1200, 820, sz);
 	RESIZE (padSurface, 98, 88, 804, 484, sz);
-	RESIZE (padSurfaceFocusText, 0, 0, 100, 60, sz);
-	padSurface.getFocusWidget()->resize();
+
+	//RESIZE (padSurfaceFocusText, 0, 0, 100, 60, sz);
+	scaleFocus ();
 	RESIZE (captionSurface, 18, 88, 64, 484, sz);
 
 	RESIZE (modeBox, 920, 88, 260, 205, sz);
@@ -592,6 +593,27 @@ void BSEQuencer_GUI::scale ()
 	drawCaption ();
 	drawPad ();
 	show ();
+}
+
+void BSEQuencer_GUI::scaleFocus ()
+{
+	cairo_surface_t* surface = padSurface.getDrawingSurface();
+	cairo_t* cr = cairo_create (surface);
+
+	padSurfaceFocusText.resize (400,100);	// Maximize size first to omit breaks
+	std::vector<std::string> textblock = padSurfaceFocusText.getTextBlock ();
+	double blockheight = padSurfaceFocusText.getTextBlockHeight (textblock);
+	double blockwidth = 0.0;
+	for (std::string textline : textblock)
+	{
+		cairo_text_extents_t ext = padSurfaceFocusText.getFont ()->getTextExtents (cr, textline);
+		if (ext.width > blockwidth) blockwidth = ext.width;
+	}
+	padSurfaceFocusText.resize (blockwidth + 2 * padSurfaceFocusText.getXOffset (), blockheight + 2 * padSurfaceFocusText.getYOffset ());
+
+	padSurface.getFocusWidget()->resize();
+
+	cairo_destroy (cr);
 }
 
 void BSEQuencer_GUI::applyTheme (BStyles::Theme& theme)
@@ -1063,9 +1085,10 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 							ui->focusWidget->setFocused (true);
 							if (ui->focusWidget->getParent()) ui->focusWidget->getParent()->release (ui->focusWidget);
 							ui->add (*ui->focusWidget);
+			       				ui->padSurfaceFocusText.setText (edit == EDIT_CUT ? "Cut..." : "Copied...");
+			       				ui->scaleFocus ();
 							ui->focusWidget->moveTo (widget->getOriginX () + pointerEvent->getX() + 2,
 										 widget->getOriginY () + pointerEvent->getY() - ui->focusWidget->getHeight() - 2);
-							ui->padSurfaceFocusText.setText (edit == EDIT_CUT ? "Cut..." : "Copied...");
 							ui->focusWidget->show ();
 						}
 
@@ -1136,6 +1159,7 @@ void BSEQuencer_GUI::padsFocusedCallback (BEvents::Event* event)
 											"Octave: " + std::to_string ((int)pd->pitchOctave) + "\n" +
 											"Velocity: " + BValues::toBString ("%1.2f", pd->velocity) + "\n" +
 											"Duration: " + BValues::toBString ("%1.2f", pd->duration));
+			ui->scaleFocus ();
 		}
 	}
 

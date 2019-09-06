@@ -91,6 +91,7 @@ private:
 	static void padsFocusedCallback (BEvents::Event* event);
 	static void editorCloseCallback (BEvents::Event* event);
 	void scale ();
+	void scaleFocus ();
 	void drawCaption ();
 	void drawPad ();
 	void drawPad (int row, int step);
