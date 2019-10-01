@@ -344,6 +344,7 @@ void ScaleEditor::szScaleEditor ()
 		nrListbox[i].moveTo (128 * sz, (542 - i * 30) * sz ); nrListbox[i].resize (80 * sz, 20 * sz);
 		nrListbox[i].resizeListBox (80 * sz, 240 * sz);
 		if (i < 6) nrListbox[i].moveListBox(0, -240 * sz);
+		nrListbox[i].resizeListBoxItems (80 * sz, 20 * sz);
 
 		nrNoteLabel[i].moveTo (128 * sz, (540 - i * 30) * sz); nrNoteLabel[i].resize (80 * sz, 24 * sz);
 		nrAltSymbolLabel[i].moveTo (228 * sz, (540 - i * 30) * sz); nrAltSymbolLabel[i].resize (80 * sz, 24 * sz);

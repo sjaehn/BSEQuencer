@@ -151,6 +151,16 @@ void PopupListBox::resizeListBox (const double width, const double height)
 	if (listBox.isVisible()) update ();
 }
 
+void PopupListBox::resizeListBoxItem (const double value, const double width, const double height)
+{
+	listBox.resizeItem (value, width, height);
+}
+
+void PopupListBox::resizeListBoxItems (const double width, const double height)
+{
+	listBox.resizeItems (width, height);
+}
+
 void PopupListBox::update ()
 {
 	// Update ItemBox first

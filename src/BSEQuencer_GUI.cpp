@@ -25,7 +25,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		controller (NULL), write_function (NULL),
 		pluginPath (bundle_path ? std::string (bundle_path) : std::string ("")),
 		sz (1.0), bgImageSurface (nullptr),
-		uris (), map (NULL), forge (), clipBoard (),
+		uris (), forge (), clipBoard (),
 		noteBits (0), chBits (0), tempTool (false), tempToolCh (0),
 		mContainer (0, 0, 1200, 820, "main"),
 		padSurface (98, 88, 804, 484, "box"),
@@ -290,22 +290,21 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	add (mContainer);
 
 	//Scan host features for URID map
-	LV2_URID_Map* m = NULL;
+	LV2_URID_Map* map = NULL;
 	for (int i = 0; features[i]; ++i)
 	{
 		if (strcmp(features[i]->URI, LV2_URID__map) == 0)
 		{
-			m = (LV2_URID_Map*) features[i]->data;
+			map = (LV2_URID_Map*) features[i]->data;
 		}
 	}
-	if (!m) throw std::invalid_argument ("Host does not support urid:map");
+	if (!map) throw std::invalid_argument ("Host does not support urid:map");
 
 	//Map URIS
-	map = m;
 	getURIs (map, &uris);
 
 	// Initialize forge
-	lv2_atom_forge_init (&forge,map);
+	lv2_atom_forge_init (&forge, map);
 }
 
 BSEQuencer_GUI::~BSEQuencer_GUI ()
@@ -483,7 +482,7 @@ void BSEQuencer_GUI::scale ()
 	//Scale fonts
 	ctLabelFont.setFontSize (12 * sz);
 	tgLabelFont.setFontSize (12 * sz);
-	iLabelFont.setFontSize (24 * sz);
+	iLabelFont.setFontSize (18 * sz);
 	lfLabelFont.setFontSize (12 * sz);
 
 	//Background
@@ -509,6 +508,7 @@ void BSEQuencer_GUI::scale ()
 	RESIZE (modeLabel, 10, 90, 60, 20, sz);
 	RESIZE (modeListBox, 80, 90, 170, 20, sz);
 	modeListBox.resizeListBox(170 * sz, 60 * sz);
+	modeListBox.resizeListBoxItems(170 * sz, 20 * sz);
 	RESIZE (modeAutoplayBpmLabel, 10, 130, 120, 20, sz);
 	RESIZE (modeAutoplayBpmSlider, 120, 120, 130, 25, sz);
 	RESIZE (modeAutoplayBpbLabel, 10, 170, 120, 20, sz);
@@ -516,6 +516,7 @@ void BSEQuencer_GUI::scale ()
 	RESIZE (modeMidiInChannelLabel, 10, 130, 150, 20, sz);
 	RESIZE (modeMidiInChannelListBox, 180, 130, 70, 20, sz);
 	modeMidiInChannelListBox.resizeListBox (70 * sz, 200 * sz);
+	modeMidiInChannelListBox.resizeListBoxItems (70 * sz, 20 * sz);
 	RESIZE (modePlayLabel, 10, 50, 205, 20, sz);
 	RESIZE (modePlayButton, 210, 40, 40, 40, sz);
 
@@ -538,25 +539,31 @@ void BSEQuencer_GUI::scale ()
 	RESIZE (propertiesNrStepsLabel, 10, 50, 170, 20, sz);
 	RESIZE (propertiesNrStepsListBox, 180, 50, 70, 20, sz);
 	propertiesNrStepsListBox.resizeListBox (70 * sz, 100 * sz);
+	propertiesNrStepsListBox.resizeListBoxItems (70 * sz, 20 * sz);
 	RESIZE (propertiesStepsPerSlider, 10, 75, 80, 25, sz);
 	RESIZE (propertiesStepsPerLabel, 100, 85, 80, 20, sz);
 	RESIZE (propertiesBaseListBox, 180, 85, 70, 20, sz);
 	propertiesBaseListBox.resizeListBox (70 * sz, 60 * sz);
+	propertiesBaseListBox.resizeListBoxItems (70 * sz, 20 * sz);
 	RESIZE (propertiesRootLabel, 10, 115, 40, 20, sz);
 	RESIZE (propertiesRootListBox, 100, 115, 70, 20, sz);
 	propertiesRootListBox.resizeListBox (70 * sz, 160 * sz);
 	propertiesRootListBox.moveListBox (0, -160 * sz);
+	propertiesRootListBox.resizeListBoxItems (70 * sz, 20 * sz);
 	RESIZE (propertiesSignatureListBox, 180, 115, 70, 20, sz);
 	propertiesSignatureListBox.resizeListBox (70 * sz, 80 * sz);
+	propertiesSignatureListBox.resizeListBoxItems (70 * sz, 20 * sz);
 	RESIZE (propertiesOctaveLabel, 10, 145, 55, 20, sz);
 	RESIZE (propertiesOctaveListBox, 180, 145, 70, 20, sz);
 	propertiesOctaveListBox.resizeListBox (70 * sz, 220 * sz);
 	propertiesOctaveListBox.moveListBox (0, -220 * sz);
+	propertiesOctaveListBox.resizeListBoxItems (70 * sz, 20 * sz);
 	RESIZE (propertiesScaleLabel, 10, 175, 50, 20, sz);
 	RESIZE (propertiesScaleEditIcon, 70, 175, 20, 20, sz);
 	RESIZE (propertiesScaleListBox, 100, 175, 150, 20, sz);
 	propertiesScaleListBox.resizeListBox (150 * sz, 380 * sz);
 	propertiesScaleListBox.moveListBox (0, -380 * sz);
+	propertiesScaleListBox.resizeListBoxItems (150 * sz, 20 * sz);
 
 	RESIZE (helpLabel, 1140, 40, 30, 30, sz);
 	RESIZE (scaleEditor, 200, 80, 800, 640, sz);
@@ -569,6 +576,7 @@ void BSEQuencer_GUI::scale ()
 		RESIZE (chBoxes[i].channelLabel, 10, 50, 100, 20, sz);
 		RESIZE (chBoxes[i].channelListBox, 123.5, 50, 60, 20, sz);
 		chBoxes[i].channelListBox.resizeListBox (60 * sz, 120 * sz);
+		chBoxes[i].channelListBox.resizeListBoxItems (60 * sz, 20 * sz);
 		RESIZE (chBoxes[i].pitchLabel, 10, 80, 80, 20, sz);
 		RESIZE (chBoxes[i].pitchSwitch, 132.5, 82, 42, 16, sz);
 		RESIZE (chBoxes[i].pitchScreen, 10, 80, 173.5, 20, sz);

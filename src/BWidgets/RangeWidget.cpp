@@ -24,13 +24,13 @@
 namespace BWidgets
 {
 RangeWidget::RangeWidget () :
-		RangeWidget (0.0, 0.0, BWIDGETS_DEFAULT_WIDTH, BWIDGETS_DEFAULT_HEIGHT, "rangewidget",
-					 BWIDGETS_DEFAULT_VALUE, BWIDGETS_DEFAULT_RANGE_MIN, BWIDGETS_DEFAULT_RANGE_MAX, BWIDGETS_DEFAULT_RANGE_STEP) {}
+	RangeWidget (0.0, 0.0, BWIDGETS_DEFAULT_WIDTH, BWIDGETS_DEFAULT_HEIGHT, "rangewidget",
+		BWIDGETS_DEFAULT_VALUE, BWIDGETS_DEFAULT_RANGE_MIN, BWIDGETS_DEFAULT_RANGE_MAX, BWIDGETS_DEFAULT_RANGE_STEP) {}
 
 RangeWidget::RangeWidget (const double  x, const double y, const double width, const double height, const std::string& name,
-						  const double value, const double min, const double max, const double step) :
-		ValueWidget (x, y, width, height, name, value), rangeMin (min <= max ? min : max),
-		rangeMax (max), rangeStep (step)
+	const double value, const double min, const double max, const double step) :
+	ValueWidget (x, y, width, height, name, value), rangeMin (min <= max ? min : max),
+	rangeMax (max), rangeStep (step)
 {
 	this->value = LIMIT (value, min, max);
 }
@@ -69,7 +69,7 @@ double RangeWidget::getRelativeValue () const
 {
 	double relVal;
 	if (getMax () != getMin ()) relVal = (getValue () - getMin ()) / (getMax () - getMin ());
-	else relVal = 0.5;							// min == max doesn't make any sense, but need to be handled
+	else relVal = 0.5;				// min == max doesn't make any sense, but need to be handled
 	if (getStep() < 0) relVal = 1 - relVal;		// Swap if reverse orientation
 	return relVal;
 }
@@ -103,6 +103,21 @@ double RangeWidget::getMax () const {return rangeMax;}
 void RangeWidget::setStep (const double step) {rangeStep = step;}
 
 double RangeWidget::getStep () const {return rangeStep;}
+
+void RangeWidget::setLimits (const double min, const double max, const double step)
+{
+	double newMin = min <= max ? min : max;
+
+	if ((newMin != rangeMin) || (max != rangeMax) || (step != rangeStep))
+	{
+		rangeMin = newMin;
+		rangeMax = max;
+		rangeStep = step;
+		if (getValue () < rangeMin) setValue (rangeMin);
+		else if (getValue () > rangeMax) setValue (rangeMax);
+		update ();
+	}
+}
 
 
 }

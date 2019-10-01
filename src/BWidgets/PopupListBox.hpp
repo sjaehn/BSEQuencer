@@ -116,6 +116,10 @@ public:
 
 	virtual void resizeListBox (const double width, const double height);
 
+	virtual void resizeListBoxItem (const double value, const double width, const double height);
+
+	virtual void resizeListBoxItems (const double width, const double height);
+
 	/**
 	 * Calls a redraw of the widget and calls postRedisplay () if the the
 	 * Widget is visible.

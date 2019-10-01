@@ -113,6 +113,21 @@ public:
 	void addItem (const BItems::ItemList& newItems);
 
 	/**
+	 * Resizes a single items widget.
+	 * @param value		Value of the item.
+	 * @param width 	New width of the item.
+	 * @param height	New height of the item.
+	 */
+	virtual void resizeItem (const double value, const double width, const double height);
+
+	/**
+	 * Resizes a all items widgets.
+	 * @param width 	New width of the items.
+	 * @param height	New height of the items.
+	 */
+	virtual void resizeItems (const double width, const double height);
+
+	/**
 	 * Scans theme for widget properties and applies these properties.
 	 * @param theme Theme to be scanned.
 	 * @param name Name of the BStyles::StyleSet within the theme to be

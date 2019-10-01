@@ -133,6 +133,29 @@ void ChoiceBox::addItem (const BItems::ItemList& newItems)
 	for (BItems::Item const& ni : newItems) addItem (ni);
 }
 
+void ChoiceBox::resizeItem (const double value, const double width, const double height)
+{
+	BItems::Item* it = getItem (value);
+	if (it)
+	{
+		BWidgets::Widget* w = it->getWidget ();
+		if (w) w->resize (width, height);
+	}
+
+	updateItems ();
+}
+
+void ChoiceBox::resizeItems (const double width, const double height)
+{
+	for (BItems::Item const& it : items)
+	{
+		BWidgets::Widget* w = it.getWidget ();
+		if (w) w->resize (width, height);
+	}
+
+	updateItems ();
+}
+
 void ChoiceBox::applyTheme (BStyles::Theme& theme) {applyTheme (theme, name_);}
 
 void ChoiceBox::applyTheme (BStyles::Theme& theme, const std::string& name)

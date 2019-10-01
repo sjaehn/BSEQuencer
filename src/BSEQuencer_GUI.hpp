@@ -48,7 +48,6 @@
 #include "BWidgets/ImageIcon.hpp"
 #include "screen.h"
 
-
 #include "BScale.hpp"
 #include "drawbutton.hpp"
 #include "PlayStopButton.hpp"
@@ -102,7 +101,6 @@ private:
 	cairo_surface_t* bgImageSurface;
 
 	BSEQuencerURIs uris;
-	LV2_URID_Map* map;
 	LV2_Atom_Forge forge;
 
 	// Controllers
@@ -280,10 +278,10 @@ private:
 						   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
 	BStyles::Font tgLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 12.0,
 						   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
-	BStyles::Font iLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD, 24.0,
+	BStyles::Font iLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD, 18.0,
 						  BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
 	BStyles::Font lfLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 12.0,
-											   BStyles::TEXT_ALIGN_LEFT, BStyles::TEXT_VALIGN_MIDDLE);
+						   BStyles::TEXT_ALIGN_LEFT, BStyles::TEXT_VALIGN_MIDDLE);
 	BStyles::StyleSet defaultStyles = {"default", {{"background", STYLEPTR (&BStyles::noFill)},
 					  {"border", STYLEPTR (&BStyles::noBorder)}}};
 	BStyles::StyleSet labelStyles = {"labels", {{"background", STYLEPTR (&BStyles::noFill)},
@@ -291,7 +289,8 @@ private:
 					{"textcolors", STYLEPTR (&txColors)},
 					{"font", STYLEPTR (&ctLabelFont)}}};
 
-	BStyles::Theme theme = BStyles::Theme ({
+	BStyles::Theme theme = BStyles::Theme
+	({
 		defaultStyles,
 		{"B.SEQuencer", 	{{"background", STYLEPTR (&BStyles::blackFill)},
 					 {"border", STYLEPTR (&BStyles::noBorder)}}},
@@ -373,7 +372,6 @@ private:
 					 {"background", STYLEPTR (&menuBg)},
 					 {"bgcolors", STYLEPTR (&bgColors)}}}
 	});
-
 };
 
 #endif /* BSEQUENCER_GUI_HPP_ */

@@ -37,7 +37,7 @@ class RangeWidget : public ValueWidget
 public:
 	RangeWidget ();
 	RangeWidget (const double  x, const double y, const double width, const double height, const std::string& name,
-				 const double value, const double min, const double max, const double step);
+		const double value, const double min, const double max, const double step);
 
 	/**
 	 * Creates a new (orphan) widget and copies the widget properties from a
@@ -120,6 +120,13 @@ public:
 	 * @return Increment steps.
 	 */
 	double getStep () const;
+
+	/**
+	 * Sets the limits. Forces the value into the new range. Emits a value
+	 * changed event (if value changed) and (if visible) an expose event.
+	 * @param min Lower limit
+	 */
+	virtual void setLimits (const double min, const double max, const double step);
 
 protected:
 	double rangeMin;
