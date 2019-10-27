@@ -908,9 +908,9 @@ void BSEQuencer::run (uint32_t n_samples)
 
 
 		// Update for this iteration
-		if (controllers[PLAY]) runSequencer (position + (((double)last_t) - refFrame) / FRAMES_PER_BEAT, last_t, ev->time.frames);
-
-		last_t = ev->time.frames;
+		uint32_t next_t = (ev->time.frames < n_samples ? ev->time.frames : n_samples);
+		if (controllers[PLAY]) runSequencer (position + (((double)last_t) - refFrame) / FRAMES_PER_BEAT, last_t, next_t);
+		last_t = next_t;
 	}
 
 	// AUTOPLAY pseudo MIDI in
