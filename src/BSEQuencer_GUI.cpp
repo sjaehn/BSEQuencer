@@ -329,8 +329,7 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 			if (obj->body.otype == uris.notify_padEvent)
 			{
 				LV2_Atom *oPad = NULL;
-				lv2_atom_object_get(obj, uris.notify_pad, &oPad,
-										 NULL);
+				lv2_atom_object_get(obj, uris.notify_pad, &oPad, NULL);
 
 				if (oPad && (oPad->type == uris.atom_Vector))
 				{
@@ -358,10 +357,13 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 			else if (obj->body.otype == uris.notify_statusEvent)
 			{
 				LV2_Atom *oCursors = NULL, *oNotes = NULL, *oChs = NULL;
-				lv2_atom_object_get(obj, uris.notify_cursors, &oCursors,
-										 uris.notify_notes, &oNotes,
-										 uris.notify_channels, &oChs,
-										 NULL);
+				lv2_atom_object_get
+				(
+					obj, uris.notify_cursors, &oCursors,
+					uris.notify_notes, &oNotes,
+					uris.notify_channels, &oChs,
+					NULL
+				);
 
 				// Cursor notifications
 				if (oCursors && (oCursors->type == uris.atom_Vector))
@@ -403,12 +405,15 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 				int iD = 0;
 
 				LV2_Atom *oId = NULL, *oName = NULL, *oElements = NULL, *oAltSymbols = NULL, *oScale = NULL;
-				lv2_atom_object_get (obj, uris.notify_scaleID,  &oId,
-										  uris.notify_scaleName, &oName,
-										  uris.notify_scaleElements, &oElements,
-										  uris.notify_scaleAltSymbols, &oAltSymbols,
-										  uris.notify_scale, &oScale,
-										  NULL);
+				lv2_atom_object_get
+				(
+					obj, uris.notify_scaleID,  &oId,
+					uris.notify_scaleName, &oName,
+					uris.notify_scaleElements, &oElements,
+					uris.notify_scaleAltSymbols, &oAltSymbols,
+					uris.notify_scale, &oScale,
+					NULL
+				);
 
 				if (oId && (oId->type == uris.atom_Int)) iD = ((LV2_Atom_Int*)oId)->body;
 
@@ -471,7 +476,6 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 	{
 		float* pval = (float*) buffer;
 		controllerWidgets[port-KNOBS]->setValue (*pval);
-		controllers[port-KNOBS] = *pval;
 	}
 
 }
@@ -777,7 +781,11 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 
 			for (int i = 0; i < KNOBS_SIZE; ++i)
 			{
-				if (widget == ui->controllerWidgets[i]) widgetNr = i;
+				if (widget == ui->controllerWidgets[i])
+				{
+					widgetNr = i;
+					break;
+				}
 			}
 
 			if (widgetNr >= 0)
@@ -805,8 +813,8 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 						ui->modeMidiInChannelLabel.hide ();
 						ui->modeMidiInChannelListBox.hide ();
 						for (int i = 0; i < NR_SEQUENCER_CHS; ++i) ui->chBoxes[i].pitchScreen.show ();
-
 					}
+
 					else
 					{
 						ui->modeAutoplayBpmLabel.hide ();
@@ -850,9 +858,15 @@ void BSEQuencer_GUI::editPressedCallback (BEvents::Event* event)
 
 		ui->scaleEditor.setValue (0.0);
 		ui->scaleEditor.setMapNr (mapNr);
-		ui->scaleEditor.setScale (BScale (((int)(ui->controllers[ROOT] + ui->controllers[SIGNATURE] + 12)) % 12,
-										  (SignatureIndex) ui->controllers[SIGNATURE],
-										  ui->scaleNotes[mapNr]));
+		ui->scaleEditor.setScale
+		(
+			BScale
+			(
+				(int (ui->controllers[ROOT] + ui->controllers[SIGNATURE] + 12)) % 12,
+				(SignatureIndex) ui->controllers[SIGNATURE],
+				ui->scaleNotes[mapNr]
+			)
+		);
 		ui->scaleEditor.setScaleMap (ui->scaleMaps[mapNr]);
 		ui->scaleEditor.moveTo (200, 80);
 		ui->add (ui->scaleEditor);
@@ -916,10 +930,13 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 					if (ui->controllerWidgets[SELECTION_CH]->getValue() <= NR_SEQUENCER_CHS)
 					{
 						//std::cerr << "BSEQuencer.lv2#GUI: Pad CH at " << row << ", " << step << "\n";
-						Pad props (ui->controllerWidgets[SELECTION_CH]->getValue() + pdctrl * 0x10,
-								   ui->controllerWidgets[SELECTION_OCTAVE]->getValue(),
-								   ui->controllerWidgets[SELECTION_VELOCITY]->getValue(),
-								   ui->controllerWidgets[SELECTION_DURATION]->getValue());
+						Pad props
+						(
+							ui->controllerWidgets[SELECTION_CH]->getValue() + pdctrl * 0x10,
+							ui->controllerWidgets[SELECTION_OCTAVE]->getValue(),
+							ui->controllerWidgets[SELECTION_VELOCITY]->getValue(),
+							ui->controllerWidgets[SELECTION_DURATION]->getValue()
+						);
 
 						// Click on a pad with same settings as in toolbox => temporarily switch to delete
 						if ((props == *pd) && (!ui->tempTool) && (event->getEventType () == BEvents::BUTTON_PRESS_EVENT))
