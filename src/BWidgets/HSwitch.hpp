@@ -38,15 +38,36 @@ class HSwitch : public HSlider
 public:
 	HSwitch ();
 	HSwitch (const double x, const double y, const double width, const double height, const std::string& name, const double defaultvalue);
-	
+
 	/**
 	 * Pattern cloning. Creates a new instance of the widget and copies all
 	 * its properties.
 	 */
 	virtual Widget* clone () const override;
 
+	/**
+	 * Handles the BEvents::BUTTON_PRESS_EVENT to move the slider.
+	 * @param event Pointer to a pointer event emitted by the same widget.
+	 */
+	virtual void onButtonPressed (BEvents::PointerEvent* event) override;
+
+	/**
+	 * Handles the BEvents::EventType::BUTTON_RELEASE_EVENT to move the slider.
+	 * @param event Pointer event
+	 */
+	virtual void onButtonReleased (BEvents::PointerEvent* event) override;
+
+	/**
+	 * Handles the BEvents::POINTER_DRAG_EVENT to move
+	 * the slider.
+	 * @param event Pointer to a pointer event emitted by the same widget.
+	 */
+	virtual void onPointerDragged (BEvents::PointerEvent* event) override;
+
 protected:
 	virtual void updateCoords () override;
+	
+	bool dragged;
 };
 
 }

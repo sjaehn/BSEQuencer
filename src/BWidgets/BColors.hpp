@@ -1,5 +1,5 @@
 /* BColors.cpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 1019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #define LIMIT(val, min, max) (val < min ? min : (val < max ? val : max))
 #endif /* LIMIT */
 
-#define CAIRO_RGBA(col) col.getRed(), col.getGreen(), col.getBlue(), col.getAlpha()
+#define CAIRO_RGBA(col) (col).getRed(), (col).getGreen(), (col).getBlue(), (col).getAlpha()
 
 namespace BColors
 {
@@ -38,8 +38,8 @@ typedef enum {
 	NORMAL		= 0,
 	ACTIVE		= 1,
 	INACTIVE	= 2,
-	OFF			= 3,
-	USER_DEFINED= 4
+	OFF		= 3,
+	USER_DEFINED	= 4
 } State;
 
 /**

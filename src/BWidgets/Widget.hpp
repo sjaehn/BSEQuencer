@@ -666,6 +666,7 @@ protected:
 	bool draggable;
 	bool scrollable;
 	bool focusable;
+	bool scheduleDraw;
 	std::array<bool, BEvents::EventType::NO_EVENT> mergeable;
 	Window* main_;
 	Widget* parent_;

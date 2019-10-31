@@ -23,9 +23,26 @@ VSwitch::VSwitch () : VSwitch (0.0, 0.0, BWIDGETS_DEFAULT_VSWITCH_WIDTH, BWIDGET
 
 VSwitch::VSwitch (const double  x, const double y, const double width, const double height, const std::string& name,
 				  const double defaultvalue) :
-		VSlider (x, y, width, height, name, defaultvalue, 0.0, 1.0, 1.0) {}
+		VSlider (x, y, width, height, name, defaultvalue, 0.0, 1.0, 1.0), dragged (false) {}
 
 Widget* VSwitch::clone () const {return new VSwitch (*this);}
+
+void VSwitch::onButtonPressed (BEvents::PointerEvent* event) {dragged = false;}
+
+void VSwitch::onButtonReleased (BEvents::PointerEvent* event)
+{
+	if (!dragged)
+	{
+		if (getValue() == getMin ()) setValue (getMax ());
+		else setValue (getMin ());
+	}
+}
+
+void VSwitch::onPointerDragged (BEvents::PointerEvent* event)
+{
+	dragged = true;
+	VScale::onButtonPressed (event);
+}
 
 void VSwitch::updateCoords ()
 {

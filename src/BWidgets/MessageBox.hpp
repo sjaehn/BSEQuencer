@@ -25,7 +25,7 @@
 #define BWIDGETS_DEFAULT_MESSAGEBOX_TITLE_NAME "/title"
 #define BWIDGETS_DEFAULT_MESSAGEBOX_TEXT_NAME "/text"
 //TODO #define BWIDGETS_DEFAULT_MESSAGEBOX_ICON_NAME "/icon"
-#define BWIDGETS_DEFAULT_MESSAGEBOX_BUTTON_NAME "/title"
+#define BWIDGETS_DEFAULT_MESSAGEBOX_BUTTON_NAME "/button"
 
 namespace BWidgets
 {
@@ -162,6 +162,14 @@ public:
 	BStyles::Font* getFont ();
 
 	/**
+	 * Calls a redraw of the widget and calls postRedisplay () if the the
+	 * Widget is visible.
+	 * This method should be called if the widgets properties are indirectly
+	 * changed.
+	 */
+	virtual void update () override;
+
+	/**
 	 * Scans theme for widget properties and applies these properties.
 	 * @param theme Theme to be scanned.
 	 * 				Styles used are:
@@ -174,7 +182,6 @@ public:
 	virtual void applyTheme (BStyles::Theme& theme, const std::string& name) override;
 
 protected:
-	void rearrangeButtons ();
 	static void redirectPostValueChanged (BEvents::Event* event);
 
 	Text titleBox;
@@ -182,7 +189,6 @@ protected:
 	// TODO Icon;
 	TextButton okButton;
 	std::vector<TextButton*> buttons;
-	double v;
 };
 
 }

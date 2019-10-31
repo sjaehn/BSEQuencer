@@ -45,8 +45,29 @@ public:
 	 */
 	virtual Widget* clone () const override;
 
+	/**
+	 * Handles the BEvents::BUTTON_PRESS_EVENT to move the slider.
+	 * @param event Pointer to a pointer event emitted by the same widget.
+	 */
+	virtual void onButtonPressed (BEvents::PointerEvent* event) override;
+
+	/**
+	 * Handles the BEvents::EventType::BUTTON_RELEASE_EVENT to move the slider.
+	 * @param event Pointer event
+	 */
+	virtual void onButtonReleased (BEvents::PointerEvent* event) override;
+
+	/**
+	 * Handles the BEvents::POINTER_DRAG_EVENT to move
+	 * the slider.
+	 * @param event Pointer to a pointer event emitted by the same widget.
+	 */
+	virtual void onPointerDragged (BEvents::PointerEvent* event) override;
+
 protected:
 	virtual void updateCoords () override;
+
+	bool dragged;
 };
 
 }

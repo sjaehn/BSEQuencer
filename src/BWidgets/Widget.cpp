@@ -29,7 +29,7 @@ Widget::Widget (const double x, const double y, const double width, const double
 
 Widget::Widget(const double x, const double y, const double width, const double height, const std::string& name) :
 		extensionData (nullptr), x_ (x), y_ (y), width_ (width), height_ (height), visible (true), clickable (true), draggable (false),
-		scrollable (false), focusable (false),
+		scrollable (true), focusable (true), scheduleDraw (false),
 		main_ (nullptr), parent_ (nullptr), children_ (), border_ (BWIDGETS_DEFAULT_BORDER), background_ (BWIDGETS_DEFAULT_BACKGROUND),
 		name_ (name), widgetSurface (), widgetState (BWIDGETS_DEFAULT_STATE), focusWidget (nullptr)
 {
@@ -449,14 +449,15 @@ bool Widget::isMergeable (const BEvents::EventType eventType) const {return merg
 
 void Widget::update ()
 {
-	draw (0, 0, width_, height_);
+	//draw (0, 0, width_, height_);
+	scheduleDraw = true;
 	if (isVisible ()) postRedisplay ();
 }
 
 bool Widget::isPointInWidget (const double x, const double y) const {return ((x >= 0.0) && (x <= width_) && (y >= 0.0) && (y <= height_));}
 
 Widget* Widget::getWidgetAt (const double x, const double y, const bool checkVisibility, const bool checkClickability,
-							 const bool checkDraggability, const bool checkScrollability, const bool checkFocusability)
+			     const bool checkDraggability, const bool checkScrollability, const bool checkFocusability)
 {
 	if (main_ &&
 	    isPointInWidget (x, y) &&
@@ -619,6 +620,9 @@ void Widget::redisplay (cairo_surface_t* surface, double x, double y, double wid
 {
 	if (main_ && visible && fitToArea (x, y, width, height))
 	{
+		// Update draw
+		if (scheduleDraw) draw (0, 0, width_, height_);
+
 		// Copy widgets surface onto main surface
 		double x0 = getOriginX ();
 		double y0 = getOriginY ();
@@ -654,6 +658,8 @@ void Widget::draw (const double x, const double y, const double width, const dou
 
 	if (cairo_status (cr) == CAIRO_STATUS_SUCCESS)
 	{
+		scheduleDraw = false;
+
 		// Limit cairo-drawing area
 		cairo_rectangle (cr, x, y, width, height);
 		cairo_clip (cr);

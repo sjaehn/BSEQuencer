@@ -23,9 +23,26 @@ HSwitch::HSwitch () : HSwitch (0.0, 0.0, BWIDGETS_DEFAULT_HSWITCH_WIDTH, BWIDGET
 
 HSwitch::HSwitch (const double  x, const double y, const double width, const double height, const std::string& name,
 				  const double defaultvalue) :
-		HSlider (x, y, width, height, name, defaultvalue, 0.0, 1.0, 1.0) {}
+		HSlider (x, y, width, height, name, defaultvalue, 0.0, 1.0, 1.0), dragged (false) {}
 
 Widget* HSwitch::clone () const {return new HSwitch (*this);}
+
+void HSwitch::onButtonPressed (BEvents::PointerEvent* event) {dragged = false;}
+
+void HSwitch::onButtonReleased (BEvents::PointerEvent* event)
+{
+	if (!dragged)
+	{
+		if (getValue() == getMin ()) setValue (getMax ());
+		else setValue (getMin ());
+	}
+}
+
+void HSwitch::onPointerDragged (BEvents::PointerEvent* event)
+{
+	dragged = true;
+	HScale::onButtonPressed (event);
+}
 
 void HSwitch::updateCoords ()
 {

@@ -36,8 +36,6 @@ ChoiceBox::ChoiceBox (const double x, const double y, const double width,
 
 	add (upButton);
 	add (downButton);
-
-	setScrollable (true);
 }
 
 ChoiceBox::ChoiceBox (const double x, const double y, const double width, const double height,
@@ -122,6 +120,7 @@ void ChoiceBox::addItem (const BItems::Item& newItem)
 	if (w)
 	{
 		w->setClickable (true);
+		w->setScrollable (false);
 		w->setCallbackFunction (BEvents::BUTTON_PRESS_EVENT, ChoiceBox::handleItemClicked);
 		add (*w);
 	}
