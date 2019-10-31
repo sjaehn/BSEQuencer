@@ -12,174 +12,174 @@
 @prefix rsz: <http://lv2plug.in/ns/ext/resize-port#> .
 
 <http://www.jahnichen.de/sjaehn#me>
-		a foaf:Person;
-		foaf:name "Sven Jaehnichen";
-#		foaf:mbox ;
-		foaf:homepage <https://github.com/sjaehn/> .
+	a foaf:Person;
+	foaf:name "Sven Jaehnichen";
+#	foaf:mbox ;
+	foaf:homepage <https://github.com/sjaehn/> .
 
 <https://www.jahnichen.de/plugins/lv2/BSEQuencer#gui>
-		a ui:X11UI;
-		lv2:extensionData ui:idleInterface ;
-		lv2:requiredFeature ui:idleInterface ;
-		ui:requiredFeature ui:makeResident .
+	a ui:X11UI;
+	lv2:extensionData ui:idleInterface ;
+	lv2:requiredFeature ui:idleInterface ;
+	ui:requiredFeature ui:makeResident .
 
 <https://www.jahnichen.de/plugins/lv2/BSEQuencer>
         a lv2:Plugin , lv2:UtilityPlugin ;
         rdfs:comment "Multi channel step sequencer" ;
-  		doap:name "B.SEQuencer" ;
-		doap:license <http://usefulinc.com/doap/licenses/gpl>;
+	doap:name "B.SEQuencer" ;
+	doap:license <http://usefulinc.com/doap/licenses/gpl>;
         doap:maintainer <http://www.jahnichen.de/sjaehn#me> ;
         lv2:optionalFeature lv2:hardRTCapable ;
         lv2:extensionData state:interface ;
-  		lv2:requiredFeature urid:map ;
-  		ui:ui <https://www.jahnichen.de/plugins/lv2/BSEQuencer#gui> ;
+	lv2:requiredFeature urid:map ;
+	ui:ui <https://www.jahnichen.de/plugins/lv2/BSEQuencer#gui> ;
         lv2:port [
                 a lv2:InputPort , atom:AtomPort ;
                 atom:bufferType atom:Sequence ;
                 atom:supports midi:MidiEvent ;
+		atom:supports time:Position ;
                 lv2:designation lv2:control ;
                 lv2:index 0 ;
                 lv2:symbol "input" ;
                 lv2:name "Input" ;
                 rdfs:comment "MIDI in and GUI to plugin communication" ;
         ] , [
-				a lv2:OutputPort , atom:AtomPort ;
-				atom:bufferType atom:Sequence ;
-				atom:supports midi:MidiEvent ;
-				lv2:designation lv2:control ;
-				lv2:index 1 ;
-				lv2:symbol "output" ;
-				lv2:name "Output" ;
-				rsz:minimumSize 16384 ;
-			  	rdfs:comment "Plugin to GUI communication" ;
-		] , [
+		a lv2:OutputPort , atom:AtomPort ;
+		atom:bufferType atom:Sequence ;
+		atom:supports midi:MidiEvent ;
+		lv2:index 1 ;
+		lv2:symbol "output" ;
+		lv2:name "Output" ;
+		rsz:minimumSize 16384 ;
+	  	rdfs:comment "Plugin to GUI communication" ;
+	] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 2 ;
                 lv2:symbol "midi_in" ;
                 lv2:name "MIDI input channel" ;
                 lv2:portProperty lv2:integer;
-                lv2:default 0.0 ;
-                lv2:minimum 0.0 ;
-                lv2:maximum 16.0 ;
+                lv2:default 0 ;
+                lv2:minimum 0 ;
+                lv2:maximum 16 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 3 ;
                 lv2:symbol "play" ;
                 lv2:name "Play" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
-					lv2:scalePoint [ rdfs:label "Off"; rdf:value 0 ] ;
-					lv2:scalePoint [ rdfs:label "On"; rdf:value 1 ] ;
-                lv2:default 1.0 ;
-                lv2:minimum 0.0 ;
-                lv2:maximum 1.0 ;
+		lv2:scalePoint [ rdfs:label "Off"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "On"; rdf:value 1 ] ;
+                lv2:default 1 ;
+                lv2:minimum 0 ;
+                lv2:maximum 1 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 4 ;
                 lv2:symbol "mode" ;
                 lv2:name "Mode" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
-					lv2:scalePoint [ rdfs:label "Autoplay"; rdf:value 1 ] ;
-					lv2:scalePoint [ rdfs:label "Host control"; rdf:value 2 ] ;
-                lv2:default 2.0 ;
-                lv2:minimum 1.0 ;
-                lv2:maximum 2.0 ;
+		lv2:scalePoint [ rdfs:label "Autoplay"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Host control"; rdf:value 2 ] ;
+                lv2:default 2 ;
+                lv2:minimum 1 ;
+                lv2:maximum 2 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 5 ;
                 lv2:symbol "nr_of_steps" ;
                 lv2:name "Nr of steps" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
-					lv2:scalePoint [ rdfs:label "8"; rdf:value 8 ] ;
-					lv2:scalePoint [ rdfs:label "16"; rdf:value 16 ] ;
-					lv2:scalePoint [ rdfs:label "24"; rdf:value 24 ] ;
-					lv2:scalePoint [ rdfs:label "32"; rdf:value 32 ] ;
-                lv2:default 16.0 ;
-                lv2:minimum 8.0 ;
-                lv2:maximum 32.0 ;
+		lv2:scalePoint [ rdfs:label "8"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "16"; rdf:value 16 ] ;
+		lv2:scalePoint [ rdfs:label "24"; rdf:value 24 ] ;
+		lv2:scalePoint [ rdfs:label "32"; rdf:value 32 ] ;
+                lv2:default 16 ;
+                lv2:minimum 8 ;
+                lv2:maximum 32 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 6 ;
                 lv2:symbol "steps_per" ;
                 lv2:name "Steps per" ;
                 lv2:portProperty lv2:integer ;
-                lv2:default 1.0 ;
-                lv2:minimum 1.0 ;
-                lv2:maximum 8.0 ;
+                lv2:default 1 ;
+                lv2:minimum 1 ;
+                lv2:maximum 8 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 7 ;
                 lv2:symbol "base" ;
                 lv2:name "Base" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
-					lv2:scalePoint [ rdfs:label "beat(s)"; rdf:value 1 ] ;
-					lv2:scalePoint [ rdfs:label "bar(s)"; rdf:value 2 ] ;
-                lv2:default 1.0 ;
-                lv2:minimum 1.0 ;
-                lv2:maximum 2.0 ;
+		lv2:scalePoint [ rdfs:label "beat(s)"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "bar(s)"; rdf:value 2 ] ;
+                lv2:default 1 ;
+                lv2:minimum 1 ;
+                lv2:maximum 2 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 8 ;
                 lv2:symbol "root" ;
                 lv2:name "Root note" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
-					lv2:scalePoint [ rdfs:label "C"; rdf:value 0 ] ;
-					lv2:scalePoint [ rdfs:label "D"; rdf:value 2 ] ;
-					lv2:scalePoint [ rdfs:label "E"; rdf:value 4 ] ;
-					lv2:scalePoint [ rdfs:label "F"; rdf:value 5 ] ;
-					lv2:scalePoint [ rdfs:label "G"; rdf:value 7 ] ;
-					lv2:scalePoint [ rdfs:label "A"; rdf:value 9 ] ;
-					lv2:scalePoint [ rdfs:label "B"; rdf:value 11 ] ;
-                lv2:default 0.0 ;
-                lv2:minimum 0.0 ;
-                lv2:maximum 11.0 ;
+		lv2:scalePoint [ rdfs:label "C"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "D"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "E"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "F"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "G"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "A"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "B"; rdf:value 11 ] ;
+                lv2:default 0 ;
+                lv2:minimum 0 ;
+                lv2:maximum 11 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 9 ;
                 lv2:symbol "signature" ;
                 lv2:name "Signature" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
-                	lv2:scalePoint [ rdfs:label "♭"; rdf:value -1 ] ;
-					lv2:scalePoint [ rdfs:label ""; rdf:value 0 ] ;
-					lv2:scalePoint [ rdfs:label "#"; rdf:value 1 ] ;
-                lv2:default 0.0 ;
-                lv2:minimum -1.0 ;
-                lv2:maximum 1.0 ;
+        	lv2:scalePoint [ rdfs:label "♭"; rdf:value -1 ] ;
+		lv2:scalePoint [ rdfs:label ""; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "#"; rdf:value 1 ] ;
+                lv2:default 0 ;
+                lv2:minimum -1 ;
+                lv2:maximum 1 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 10 ;
                 lv2:symbol "octave" ;
                 lv2:name "Octave" ;
                 lv2:portProperty lv2:integer ;
-                lv2:default 4.0 ;
-                lv2:minimum -1.0 ;
-                lv2:maximum 8.0 ;
+                lv2:default 4 ;
+                lv2:minimum -1 ;
+                lv2:maximum 8 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 11 ;
                 lv2:symbol "scale" ;
                 lv2:name "Scale" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
-					lv2:scalePoint [ rdfs:label "Chromatic"; rdf:value 0 ] ;
-					lv2:scalePoint [ rdfs:label "Major"; rdf:value 1 ] ;
-					lv2:scalePoint [ rdfs:label "Minor"; rdf:value 2 ] ;
-					lv2:scalePoint [ rdfs:label "Harmonic major"; rdf:value 3 ] ;
-					lv2:scalePoint [ rdfs:label "Harmonic minor"; rdf:value 4 ] ;
-					lv2:scalePoint [ rdfs:label "Melodic minor"; rdf:value 5 ] ;
-					lv2:scalePoint [ rdfs:label "Dorian"; rdf:value 6 ] ;
-					lv2:scalePoint [ rdfs:label "Phygian"; rdf:value 7 ] ;
-					lv2:scalePoint [ rdfs:label "Lydian"; rdf:value 8 ] ;
-					lv2:scalePoint [ rdfs:label "Mixolydian"; rdf:value 9 ] ;
-					lv2:scalePoint [ rdfs:label "Lokrian"; rdf:value 10 ] ;
-					lv2:scalePoint [ rdfs:label "Hungarian minor"; rdf:value 11 ] ;
-					lv2:scalePoint [ rdfs:label "Major pentatonic"; rdf:value 12 ] ;
-					lv2:scalePoint [ rdfs:label "Minor pentatonic"; rdf:value 13 ] ;
-					lv2:scalePoint [ rdfs:label "User scale 1"; rdf:value 14 ] ;
-					lv2:scalePoint [ rdfs:label "User scale 2"; rdf:value 15 ] ;
-					lv2:scalePoint [ rdfs:label "User scale 3"; rdf:value 16 ] ;
-					lv2:scalePoint [ rdfs:label "User scale 4"; rdf:value 17 ] ;
-                lv2:default 0.0 ;
-                lv2:minimum 0.0 ;
-                lv2:maximum 17.0 ;
+		lv2:scalePoint [ rdfs:label "Chromatic"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Major"; rdf:value 1 ] ;
+		lv2:scalePoint [ rdfs:label "Minor"; rdf:value 2 ] ;
+		lv2:scalePoint [ rdfs:label "Harmonic major"; rdf:value 3 ] ;
+		lv2:scalePoint [ rdfs:label "Harmonic minor"; rdf:value 4 ] ;
+		lv2:scalePoint [ rdfs:label "Melodic minor"; rdf:value 5 ] ;
+		lv2:scalePoint [ rdfs:label "Dorian"; rdf:value 6 ] ;
+		lv2:scalePoint [ rdfs:label "Phygian"; rdf:value 7 ] ;
+		lv2:scalePoint [ rdfs:label "Lydian"; rdf:value 8 ] ;
+		lv2:scalePoint [ rdfs:label "Mixolydian"; rdf:value 9 ] ;
+		lv2:scalePoint [ rdfs:label "Lokrian"; rdf:value 10 ] ;
+		lv2:scalePoint [ rdfs:label "Hungarian minor"; rdf:value 11 ] ;
+		lv2:scalePoint [ rdfs:label "Major pentatonic"; rdf:value 12 ] ;
+		lv2:scalePoint [ rdfs:label "Minor pentatonic"; rdf:value 13 ] ;
+		lv2:scalePoint [ rdfs:label "User scale 1"; rdf:value 14 ] ;
+		lv2:scalePoint [ rdfs:label "User scale 2"; rdf:value 15 ] ;
+		lv2:scalePoint [ rdfs:label "User scale 3"; rdf:value 16 ] ;
+		lv2:scalePoint [ rdfs:label "User scale 4"; rdf:value 17 ] ;
+                lv2:default 0 ;
+                lv2:minimum 0 ;
+                lv2:maximum 17 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 12 ;
@@ -194,27 +194,27 @@
                 lv2:symbol "autoplay_beats_per_bar" ;
                 lv2:name "Autoplay: beats per bar" ;
                 lv2:portProperty lv2:integer ;
-                lv2:default 4.0 ;
-                lv2:minimum 1.0 ;
-                lv2:maximum 16.0 ;
+                lv2:default 4 ;
+                lv2:minimum 1 ;
+                lv2:maximum 16 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 14 ;
                 lv2:symbol "selection_channel" ;
                 lv2:name "Selection: Channel" ;
                 lv2:portProperty lv2:integer ;
-                lv2:default 1.0 ;
-                lv2:minimum 0.0 ;
-                lv2:maximum 14.0 ;
+                lv2:default 1 ;
+                lv2:minimum 0 ;
+                lv2:maximum 14 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 15 ;
                 lv2:symbol "selection_pitch_octave" ;
                 lv2:name "Selection: pitch octave" ;
                 lv2:portProperty lv2:integer ;
-                lv2:default 0.0 ;
-                lv2:minimum -8.0 ;
-                lv2:maximum 8.0 ;
+                lv2:default 0 ;
+                lv2:minimum -8 ;
+                lv2:maximum 8 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 16 ;
@@ -237,11 +237,11 @@
                 lv2:symbol "ch1_pitch" ;
                 lv2:name "CH1: Pitch" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
-				lv2:scalePoint [ rdfs:label "Off"; rdf:value 0 ] ;
-				lv2:scalePoint [ rdfs:label "On"; rdf:value 1 ] ;
-				lv2:default 0.0 ;
-                lv2:minimum 0.0 ;
-                lv2:maximum 1.0 ;
+		lv2:scalePoint [ rdfs:label "Off"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "On"; rdf:value 1 ] ;
+		lv2:default 0 ;
+                lv2:minimum 0 ;
+                lv2:maximum 1 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 19 ;
@@ -256,29 +256,29 @@
                 lv2:symbol "ch1_midi_channel" ;
                 lv2:name "CH1: MIDI Channel" ;
                 lv2:portProperty lv2:integer ;
-                lv2:default 1.0 ;
-                lv2:minimum 1.0 ;
-                lv2:maximum 16.0 ;
+                lv2:default 1 ;
+                lv2:minimum 1 ;
+                lv2:maximum 16 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 21 ;
                 lv2:symbol "ch1_note_offset" ;
                 lv2:name "CH1: Note offset" ;
                 lv2:portProperty lv2:integer ;
-                lv2:default 0.0 ;
-                lv2:minimum -127.0 ;
-                lv2:maximum 127.0 ;
+                lv2:default 0 ;
+                lv2:minimum -127 ;
+                lv2:maximum 127 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 22 ;
                 lv2:symbol "ch2_pitch" ;
                 lv2:name "CH2: Pitch" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
-				lv2:scalePoint [ rdfs:label "Off"; rdf:value 0 ] ;
-				lv2:scalePoint [ rdfs:label "On"; rdf:value 1 ] ;
-				lv2:default 0.0 ;
-                lv2:minimum 0.0 ;
-                lv2:maximum 1.0 ;
+		lv2:scalePoint [ rdfs:label "Off"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "On"; rdf:value 1 ] ;
+		lv2:default 0 ;
+                lv2:minimum 0 ;
+                lv2:maximum 1 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 23 ;
@@ -293,29 +293,29 @@
                 lv2:symbol "ch2_midi_channel" ;
                 lv2:name "CH2: MIDI Channel" ;
                 lv2:portProperty lv2:integer ;
-                lv2:default 2.0 ;
-                lv2:minimum 1.0 ;
-                lv2:maximum 16.0 ;
+                lv2:default 2 ;
+                lv2:minimum 1 ;
+                lv2:maximum 16 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 25 ;
                 lv2:symbol "ch2_note_offset" ;
                 lv2:name "CH2: Note offset" ;
                 lv2:portProperty lv2:integer ;
-                lv2:default 0.0 ;
-                lv2:minimum -127.0 ;
-                lv2:maximum 127.0 ;
+                lv2:default 0 ;
+                lv2:minimum -127 ;
+                lv2:maximum 127 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 26 ;
                 lv2:symbol "ch3_pitch" ;
                 lv2:name "CH3: Pitch" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
-				lv2:scalePoint [ rdfs:label "Off"; rdf:value 0 ] ;
-				lv2:scalePoint [ rdfs:label "On"; rdf:value 1 ] ;
-				lv2:default 0.0 ;
-                lv2:minimum 0.0 ;
-                lv2:maximum 1.0 ;
+		lv2:scalePoint [ rdfs:label "Off"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "On"; rdf:value 1 ] ;
+		lv2:default 0 ;
+                lv2:minimum 0 ;
+                lv2:maximum 1 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 27 ;
@@ -330,29 +330,29 @@
                 lv2:symbol "ch3_midi_channel" ;
                 lv2:name "CH3: MIDI Channel" ;
                 lv2:portProperty lv2:integer ;
-                lv2:default 3.0 ;
-                lv2:minimum 1.0 ;
-                lv2:maximum 16.0 ;
+                lv2:default 3 ;
+                lv2:minimum 1 ;
+                lv2:maximum 16 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 29 ;
                 lv2:symbol "ch3_note_offset" ;
                 lv2:name "CH3: Note offset" ;
                 lv2:portProperty lv2:integer ;
-                lv2:default 0.0 ;
-                lv2:minimum -127.0 ;
-                lv2:maximum 127.0 ;
+                lv2:default 0 ;
+                lv2:minimum -127 ;
+                lv2:maximum 127 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 30 ;
                 lv2:symbol "ch4_pitch" ;
                 lv2:name "CH4: Pitch" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
-				lv2:scalePoint [ rdfs:label "Off"; rdf:value 0 ] ;
-				lv2:scalePoint [ rdfs:label "On"; rdf:value 1 ] ;
-				lv2:default 0.0 ;
-                lv2:minimum 0.0 ;
-                lv2:maximum 1.0 ;
+		lv2:scalePoint [ rdfs:label "Off"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "On"; rdf:value 1 ] ;
+		lv2:default 0 ;
+                lv2:minimum 0 ;
+                lv2:maximum 1 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 31 ;
@@ -367,16 +367,16 @@
                 lv2:symbol "ch4_midi_channel" ;
                 lv2:name "CH4: MIDI Channel" ;
                 lv2:portProperty lv2:integer ;
-                lv2:default 4.0 ;
-                lv2:minimum 1.0 ;
-                lv2:maximum 16.0 ;
+                lv2:default 4 ;
+                lv2:minimum 1 ;
+                lv2:maximum 16 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 33 ;
                 lv2:symbol "ch4_note_offset" ;
                 lv2:name "CH4: Note offset" ;
                 lv2:portProperty lv2:integer ;
-                lv2:default 0.0 ;
-                lv2:minimum -127.0 ;
-                lv2:maximum 127.0 ;
+                lv2:default 0 ;
+                lv2:minimum -127 ;
+                lv2:maximum 127 ;
         ] .

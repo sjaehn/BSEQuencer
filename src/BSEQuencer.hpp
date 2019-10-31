@@ -22,7 +22,7 @@
 #define BSEQUENCER_HPP_
 
 #define CONTROLLER_CHANGED(con) ((new_controllers[con]) ? (controllers[con] != *(new_controllers[con])) : false)
-#define VALUE_SPEED (controllers[MODE] == AUTOPLAY ? 1 : speed)
+// #define VALUE_SPEED (controllers[MODE] == AUTOPLAY ? 1 : speed)
 #define VALUE_BPM (controllers[MODE] == AUTOPLAY ? controllers[AUTOPLAY_BPM] : bpm)
 #define VALUE_BPB (controllers[MODE] == AUTOPLAY ? controllers[AUTOPLAY_BPB] : beatsPerBar)
 #define VALUE_BU (controllers[MODE] == AUTOPLAY ? controllers[AUTOPLAY_BU] : beatUnit)
@@ -161,11 +161,8 @@ private:
 
 	// Host communicated data
 	double rate;
-	long bar;
 	float bpm;
-	float speed;
 	float beatsPerBar;
-	float barBeats;
 	uint32_t outCapacity;
 
 	// Data derived from controllers or host
@@ -177,18 +174,18 @@ private:
 	bool scheduleNotifyStatusToGui;
 	bool scheduleNotifyScaleMapsToGui;
 	StaticArrayList<Key, 16> inKeys;
-	Key key;
 	Key defaultKey;
 	BScale scale;
 
 	std::array<BScaleNotes, NR_SYSTEM_SCALES + NR_USER_SCALES> scaleNotes	=
-				{{// System scales
-				  {CROMATICSCALE}, {MAJORSCALE}, {MINORSCALE}, {HARMONICMAJORSCALE}, {HARMONICMINORSCALE}, {MELODICMINORSCALE},
-				  {DORIANSCALE}, {PHRYGIANSCALE}, {LYDIANSCALE}, {MIXOLYDIANSCALE}, {LOKRIANSCALE}, {HUNGARIANMINORSCALE},
-				  {MAJORPENTATONICSCALE}, {MINORPENTATONICSCALE},
-				  // User scales
-				  {CROMATICSCALE}, {CROMATICSCALE}, {CROMATICSCALE}, {CROMATICSCALE}
-				}};
+	{{
+		// System scales
+		{CROMATICSCALE}, {MAJORSCALE}, {MINORSCALE}, {HARMONICMAJORSCALE}, {HARMONICMINORSCALE}, {MELODICMINORSCALE},
+		{DORIANSCALE}, {PHRYGIANSCALE}, {LYDIANSCALE}, {MIXOLYDIANSCALE}, {LOKRIANSCALE}, {HUNGARIANMINORSCALE},
+		{MAJORPENTATONICSCALE}, {MINORPENTATONICSCALE},
+		// User scales
+		{CROMATICSCALE}, {CROMATICSCALE}, {CROMATICSCALE}, {CROMATICSCALE}
+	}};
 
 	ScaleMap scaleMaps[NR_SYSTEM_SCALES + NR_USER_SCALES];
 

@@ -23,11 +23,11 @@
 BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
 	map (NULL), unmap (NULL), inputPort (NULL), outputPort (NULL),
 	output_forge (), output_frame (),
-	rate (samplerate), bar (0), bpm (120.0f), speed (1.0f), beatsPerBar (4.0f), barBeats (4),
+	rate (samplerate), bpm (120.0f), beatsPerBar (4.0f),
 	outCapacity (0), position (0.0),
 	ui_on (false), scheduleNotifyPadsToGui (false), scheduleNotifyStatusToGui (false),
 	scheduleNotifyScaleMapsToGui (true),
-	key (), defaultKey (), scale (60, defaultScale)
+	defaultKey (), scale (60, defaultScale)
 
 {
 	//Scan host features for URID map
@@ -149,7 +149,7 @@ void BSEQuencer::appendMidiMsg (const int64_t frames, const uint8_t ch, const ui
  */
 bool BSEQuencer::makeMidi (const int64_t frames, const uint8_t status, const int key, const int row, uint8_t chbits)
 {
-	if ((key >= 0) && (key < ((int) inKeys.size)))
+	if ((key >= 0) && (key < int (inKeys.size)))
 	{
 		int inKeyElement = scale.getElement(inKeys[key].note);
 
@@ -271,7 +271,7 @@ double BSEQuencer::getStep (const int key, const double relpos)
 
 	// Return "raw" negative step position for before-start events
 	if (rawstep <= 0.0) return rawstep;
-	else return fmod (rawstep, ((int)controllers[NR_OF_STEPS]));
+	else return fmod (rawstep, int (controllers[NR_OF_STEPS]));
 }
 
 /*
@@ -417,14 +417,16 @@ int BSEQuencer::getStepOffset (const int key, const int row, const int relStep)
  */
 void BSEQuencer::runSequencer (const double startpos, const uint32_t start, const uint32_t end)
 {
+	if (end < start) return;
+
 	// Playing or halted?
-	if ((VALUE_SPEED > 0) && (VALUE_BPM > 0))
+	if (VALUE_BPM > 0)
 	{
 		cleanupInKeys ();
-		double endpos = startpos + (((double)end) - start) / FRAMES_PER_BEAT;
+		double endpos = startpos + double (end - start) / FRAMES_PER_BEAT;
 
 		// Internal keyboard
-		for (int key = 0; key < ((int) inKeys.size); ++key)
+		for (int key = 0; key < int (inKeys.size); ++key)
 		{
 			double nextpos = endpos;
 			double lastpos = startpos;
@@ -433,7 +435,7 @@ void BSEQuencer::runSequencer (const double startpos, const uint32_t start, cons
 			{
 				int64_t actframes = LIMIT (start + (actpos - startpos) * FRAMES_PER_BEAT, start, end);
 				double actstep = getStep (key, actpos - inKeys[key].startPos);
-				int actStepNr = LIMIT ((int) floor (actstep), 0, ((int)controllers[NR_OF_STEPS]) - 1);
+				int actStepNr = LIMIT (int (floor (actstep)), 0, int (controllers[NR_OF_STEPS]) - 1);
 				double actStepFrac = actstep - actStepNr;
 
 				// Only present events
@@ -442,6 +444,9 @@ void BSEQuencer::runSequencer (const double startpos, const uint32_t start, cons
 					// Just stepped?
 					if (inKeys[key].stepNr != actStepNr)
 					{
+
+						// fprintf (stderr, "BSEQuencer.lv2: Just stepped (key = %i, actpos = %f, actStepFrac = %f)\n", key, actpos, actStepFrac);
+
 						// Stop all output for the last step
 						stopMidiOut (actframes, key, ALL_CH);
 
@@ -511,7 +516,6 @@ void BSEQuencer::runSequencer (const double startpos, const uint32_t start, cons
 void BSEQuencer::run (uint32_t n_samples)
 {
 	int64_t last_t = 0;
-	int64_t refFrame = 0;
 
 	if ((!inputPort) || (!outputPort)) return;
 
@@ -588,6 +592,8 @@ void BSEQuencer::run (uint32_t n_samples)
 	// Read CONTROL port (notifications from GUI and host)
 	LV2_ATOM_SEQUENCE_FOREACH(inputPort, ev)
 	{
+		int64_t act_t = (ev->time.frames <= n_samples ? ev->time.frames : n_samples);
+
 		if ((ev->body.type == uris.atom_Object) || (ev->body.type == uris.atom_Blank))
 		{
 			const LV2_Atom_Object* obj = (const LV2_Atom_Object*)&ev->body;
@@ -613,8 +619,7 @@ void BSEQuencer::run (uint32_t n_samples)
 			else if (obj->body.otype == uris.notify_padEvent)
 			{
 				LV2_Atom *oPd = NULL;
-				lv2_atom_object_get (obj, uris.notify_pad,  &oPd,
-										  NULL);
+				lv2_atom_object_get (obj, uris.notify_pad,  &oPd, NULL);
 
 				// Pad notification
 				if (oPd && (oPd->type == uris.atom_Vector))
@@ -721,13 +726,14 @@ void BSEQuencer::run (uint32_t n_samples)
 				if (controllers[MODE] == HOST_CONTROLLED)
 				{
 					bool scheduleStopMidi = false;
-					LV2_Atom *oBpm = NULL, *oSpeed = NULL, *oBpb = NULL, *oBbeat = NULL, *oBar = NULL;
-					lv2_atom_object_get (obj, uris.time_beatsPerMinute,  &oBpm,
-											  uris.time_beatsPerBar,  &oBpb,
-											  uris.time_bar,  &oBar,
-											  uris.time_speed, &oSpeed,
-											  uris.time_barBeat, &oBbeat,
-											  NULL);
+					LV2_Atom *oBpm = NULL, *oBpb = NULL;
+					lv2_atom_object_get
+					(
+						obj,
+						uris.time_beatsPerMinute,  &oBpm,
+						uris.time_beatsPerBar,  &oBpb,
+						NULL
+					);
 
 					// BPM changed?
 					if (oBpm && (oBpm->type == uris.atom_Float) && (bpm != ((LV2_Atom_Float*)oBpm)->body))
@@ -745,35 +751,6 @@ void BSEQuencer::run (uint32_t n_samples)
 						if (controllers[MODE] == HOST_CONTROLLED) scheduleStopMidi = true;
 					}
 
-					// Bar changed?
-					if (oBar && (oBar->type == uris.atom_Long) && (bar != ((LV2_Atom_Long*)oBar)->body))
-					{
-						bar = ((LV2_Atom_Long*)oBar)->body;
-						//fprintf (stderr, "BSEQuencer.lv2: bar set to %li.\n", bar);
-						if (controllers[MODE] == HOST_CONTROLLED) scheduleStopMidi = true;
-					}
-
-					// Speed changed? (not implemented yet)
-					if (oSpeed && (oSpeed->type == uris.atom_Float) && (speed != ((LV2_Atom_Float*)oSpeed)->body))
-					{
-						speed = ((LV2_Atom_Float*)oSpeed)->body;
-						//fprintf (stderr, "BSEQuencer.lv2: speed set to %f.\n", speed);
-						if (controllers[MODE] == HOST_CONTROLLED) scheduleStopMidi = true;
-					}
-
-					// Beat position changed (during playing) ?
-					if (oBbeat && (oBbeat->type == uris.atom_Float) && (barBeats != ((LV2_Atom_Float*) oBbeat)->body))
-					{
-						// No host sync in AUTOPLAY mode
-						if (controllers[MODE] == HOST_CONTROLLED)
-						{
-							barBeats = ((LV2_Atom_Float*) oBbeat)->body;
-							position = beatsPerBar * ((double) bar) + barBeats;
-							//fprintf (stderr, "BSEQuencer.lv2: barBeats set to %f (position = %f, bar = %li).\n", barBeats, position, bar);
-							refFrame = ev->time.frames;
-						}
-					}
-
 					// Stop MIDI output for all BSEQuencer channels
 					if (scheduleStopMidi && (controllers[MODE] != AUTOPLAY))
 					{
@@ -781,8 +758,8 @@ void BSEQuencer::run (uint32_t n_samples)
 						{
 							if (!midiStopped[i])
 							{
-								//fprintf (stderr, "Call stopMidiOut from 'Stop MIDI output for all BSEQuencer channels' at %f\n", position);
-								stopMidiOut (ev->time.frames, 1 << i);
+								// fprintf (stderr, "Call stopMidiOut from 'Stop MIDI output for all BSEQuencer channels' at %f\n", position);
+								stopMidiOut (act_t, 1 << i);
 								midiStopped[i] = true;
 							}
 						}
@@ -828,11 +805,12 @@ void BSEQuencer::run (uint32_t n_samples)
 							// Build new key from MIDI data
 							if (newNote)
 							{
-								key = defaultKey; // stepNr = -1; direction = 1; output.pads, output.playing and jumpOff ()-initialized
+								Key key = defaultKey; // stepNr = -1; direction = 1; output.pads, output.playing and jumpOff ()-initialized
 								key.note = note;
 								key.velocity = msg[2];
-								key.startPos = position + ((((double)ev->time.frames) - refFrame) / FRAMES_PER_BEAT) - (1 /STEPS_PER_BEAT);
+								key.startPos = position + double (act_t) / FRAMES_PER_BEAT - (1 / STEPS_PER_BEAT);
 								inKeys.push_back (key);
+								// fprintf (stderr, "BSEQuencer.lv2: Key on (frames: %i, note: %i, velocity: %i) at %f\n", key.startFrame, key.note, key.velocity, key.startPos);
 							}
 						}
 						break;
@@ -844,7 +822,10 @@ void BSEQuencer::run (uint32_t n_samples)
 							{
 								if (inKeys[i].note == note)
 								{
-									stopMidiOut (ev->time.frames, i, ALL_CH);
+									//key.endFrame = ev->time.frames;
+									// fprintf (stderr, "BSEQuencer.lv2: Key off (frames: %li, note: %i, velocity: %i) at %f + frames\n", act_t, note, msg[2], position);
+
+									stopMidiOut (act_t, i, ALL_CH);
 									inKeys.erase (&inKeys.iterator[i]);
 									break;
 								}
@@ -862,14 +843,14 @@ void BSEQuencer::run (uint32_t n_samples)
 							case LV2_MIDI_CTL_SUSTAIN:
 								for (int ch = 1; ch <= NR_SEQUENCER_CHS; ++ch)
 								{
-									appendMidiMsg (ev->time.frames, ch, LV2_MIDI_MSG_CONTROLLER, LV2_MIDI_CTL_SUSTAIN, msg[2]);
+									appendMidiMsg (act_t, ch, LV2_MIDI_MSG_CONTROLLER, LV2_MIDI_CTL_SUSTAIN, msg[2]);
 								}
 								break;
 
 
 							// LV2_MIDI_CTL_ALL_SOUNDS_OFF: Stop all outputs
 							case LV2_MIDI_CTL_ALL_SOUNDS_OFF:
-								for (size_t i = 0; i < inKeys.size; ++i) stopMidiOut (ev->time.frames, i, ALL_CH);
+								for (size_t i = 0; i < inKeys.size; ++i) stopMidiOut (act_t, i, ALL_CH);
 								break;
 
 							// LV2_MIDI_CTL_ALL_NOTES_OFF: Stop all outputs and delete all keys
@@ -878,7 +859,7 @@ void BSEQuencer::run (uint32_t n_samples)
 							case LV2_MIDI_CTL_ALL_NOTES_OFF:
 								while (!inKeys.empty())
 								{
-									stopMidiOut (ev->time.frames, inKeys.size - 1, ALL_CH);
+									stopMidiOut (act_t, inKeys.size - 1, ALL_CH);
 									inKeys.pop_back();
 								}
 								break;
@@ -908,9 +889,8 @@ void BSEQuencer::run (uint32_t n_samples)
 
 
 		// Update for this iteration
-		uint32_t next_t = (ev->time.frames < n_samples ? ev->time.frames : n_samples);
-		if (controllers[PLAY]) runSequencer (position + (((double)last_t) - refFrame) / FRAMES_PER_BEAT, last_t, next_t);
-		last_t = next_t;
+		if (controllers[PLAY]) runSequencer (position + double (last_t) / FRAMES_PER_BEAT, last_t, act_t);
+		last_t = act_t;
 	}
 
 	// AUTOPLAY pseudo MIDI in
@@ -920,7 +900,7 @@ void BSEQuencer::run (uint32_t n_samples)
 		// No inKeys => create an empty preliminary key
 		if (inKeys.empty())
 		{
-			key = defaultKey;
+			Key key = defaultKey;
 			key.note = -99;
 			inKeys.push_back (key);
 		}
@@ -939,15 +919,15 @@ void BSEQuencer::run (uint32_t n_samples)
 			inKeys[0] = defaultKey; // stepNr = -1; direction = 1; output.pads, output.playing and jumpOff ()-initialized
 			inKeys[0].note = controllers[ROOT] + controllers[SIGNATURE] + (controllers[OCTAVE] + 1) * 12;
 			inKeys[0].velocity = 64;
-			inKeys[0].startPos = position + ((((double)last_t) - refFrame) / FRAMES_PER_BEAT) - (1 /STEPS_PER_BEAT);
+			inKeys[0].startPos = position + double (last_t) / FRAMES_PER_BEAT - (1 / STEPS_PER_BEAT);
 		}
 	}
 
 	// Update for the remainder of the cycle
-	if ((controllers[PLAY]) && (last_t < n_samples)) runSequencer (position + (((double)last_t) - refFrame) / FRAMES_PER_BEAT, last_t, n_samples);
+	if ((controllers[PLAY]) && (last_t < n_samples)) runSequencer (position + double (last_t) / FRAMES_PER_BEAT, last_t, n_samples);
 
 	//Update position until next time signal from host
-	position += (((double)n_samples) - refFrame) / FRAMES_PER_BEAT;
+	position += double (n_samples) / FRAMES_PER_BEAT;
 
 	scheduleNotifyStatusToGui = true;
 
