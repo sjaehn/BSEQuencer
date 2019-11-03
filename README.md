@@ -8,11 +8,20 @@ Description: Multi channel MIDI step sequencer LV2 plugin with a variable matrix
 
 Installation
 ------------
-Build your own binaries in the following three steps.
+a) Install the bsequencer (bsequencer-lv2) package for your system
+* [Free BSD](https://www.freshports.org/audio/bsequencer-lv2) by yurivict
+* [NixOS](https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/audio/bsequencer/default.nix) by Bart Brouns
+* Check https://repology.org/project/bsequencer/versions for other systems
+
+b) Build your own binaries in the following three steps.
 
 Step 1: Clone or download this repository.
 
-Step 2: Install the development packages for x11, cairo, and lv2 if not done yet.
+Step 2: Install pkg-config and the development packages for x11, cairo, and lv2 if not done yet. On
+Debian-based systems you may run:
+```
+sudo apt-get install pkg-config libx11-dev libcairo2-dev lv2-dev
+```
 
 Step 3: Building and installing into the default lv2 directory (/usr/lib/lv2/) is easy. Simply call:
 ```
