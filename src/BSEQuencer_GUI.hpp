@@ -32,6 +32,7 @@
 #include <lv2/lv2plug.in/ns/ext/time/time.h>
 #include <lv2/lv2plug.in/ns/ext/midi/midi.h>
 #include <iostream>
+#include <algorithm>
 
 #include "BWidgets/BItems.hpp"
 #include "BWidgets/Widget.hpp"
@@ -53,16 +54,20 @@
 #include "PlayStopButton.hpp"
 #include "ButtonBox.hpp"
 #include "CircledSymbol.hpp"
+#include "UndoButton.hpp"
+#include "RedoButton.hpp"
 #include "definitions.h"
 #include "ports.h"
 #include "urids.h"
 #include "Pad.hpp"
 #include "PadMessage.hpp"
 #include "ScaleEditor.hpp"
+#include "Journal.hpp"
 
 #define BG_FILE "surface.png"
 #define HELP_URL "https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer"
 #define OPEN_CMD "xdg-open"
+#define MAXUNDO 20
 
 #define RESIZE(widget, x, y, w, h, sz) widget.moveTo ((x) * (sz), (y) * (sz)); widget.resize ((w) * (sz), (h) * (sz));
 class BSEQuencer_GUI : public BWidgets::Window
@@ -85,6 +90,7 @@ private:
 	static void valueChangedCallback(BEvents::Event* event);
 	static void helpPressedCallback (BEvents::Event* event);
 	static void editPressedCallback (BEvents::Event* event);
+	static void undoClickedCallback (BEvents::Event* event);
 	static void padsPressedCallback (BEvents::Event* event);
 	static void padsScrolledCallback (BEvents::Event* event);
 	static void padsFocusedCallback (BEvents::Event* event);
@@ -108,7 +114,27 @@ private:
 	std::array<float, KNOBS_SIZE> controllers;
 
 	//Pads
-	Pad pads [ROWS] [MAXSTEPS];
+	class Pattern
+	{
+	public:
+		void clear ();
+		Pad getPad (const size_t row, const size_t step) const;
+		void setPad (const size_t row, const size_t step, const Pad& pad);
+		std::vector<PadMessage> undo ();
+		std::vector<PadMessage> redo ();
+		void store ();
+	private:
+		Journal<std::vector<PadMessage>, MAXUNDO> journal;
+		Pad pads [ROWS] [MAXSTEPS];
+		struct
+		{
+			std::vector<PadMessage> oldMessage;
+			std::vector<PadMessage> newMessage;
+		} changes;
+	};
+
+	Pattern pattern;
+
 	struct ClipBoard
 	{
 		std::vector<std::vector<Pad>> data;
@@ -129,6 +155,7 @@ private:
 	// Temporary tools
 	bool tempTool;
 	double tempToolCh;
+	bool wheelScrolled;
 
 	std::array<BScaleNotes, NR_SYSTEM_SCALES + NR_USER_SCALES> scaleNotes	=
 	{{// System scales
@@ -174,6 +201,8 @@ private:
 	BWidgets::Label toolBoxLabel;
 	ButtonBox toolButtonBox;
 	BWidgets::TextToggleButton toolWholeStepButton;
+	UndoButton toolUndoButton;
+	RedoButton toolRedoButton;
 	BWidgets::Label toolButtonBoxCtrlLabel;
 	BWidgets::Label toolButtonBoxChLabel;
 	BWidgets::Label toolButtonBoxEditLabel;
