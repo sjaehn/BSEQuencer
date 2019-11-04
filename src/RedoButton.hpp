@@ -22,13 +22,53 @@
 
 #include <cmath>
 #include "BWidgets/Button.hpp"
+#include "BWidgets/Label.hpp"
 
 class RedoButton : public BWidgets::Button
 {
+protected:
+        BWidgets::Label focusLabel;
+
 public:
         RedoButton () : RedoButton (0.0, 0.0, BWIDGETS_DEFAULT_BUTTON_WIDTH, BWIDGETS_DEFAULT_BUTTON_HEIGHT, "button", 0.0) {}
 	RedoButton (const double x, const double y, const double width, const double height, const std::string& name, double defaultValue = 0.0) :
-                Button (x, y, width, height, name, defaultValue) {}
+                Button (x, y, width, height, name, defaultValue),
+                focusLabel (0, 0, 40, 20, name + "/focus/label", "Redo")
+        {
+                focusWidget = new BWidgets::FocusWidget (this, name + "/focus");
+        	if (focusWidget)
+        	{
+        		focusWidget->add (focusLabel);
+        		focusWidget->resize ();
+        	}
+        }
+
+        virtual void applyTheme (BStyles::Theme& theme, const std::string& name) override
+	{
+		Button::applyTheme (theme, name);
+
+		if (focusWidget)
+		{
+			focusWidget->applyTheme (theme, name + "/focus");
+
+			std::vector<BWidgets::Widget*> childs = focusWidget->getChildren ();
+			for (BWidgets::Widget* c : childs)
+			{
+				if (c)
+				{
+					c->applyTheme (theme, name + "/focus/label");
+					c->resize ();
+				}
+			}
+
+			focusWidget->resize ();
+		}
+	}
+
+	virtual void applyTheme (BStyles::Theme& theme) override
+	{
+		applyTheme (theme, name_);
+	}
 
 protected:
         virtual void draw (const double x, const double y, const double width, const double height) override
