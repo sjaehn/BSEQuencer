@@ -32,36 +32,37 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		padSurfaceFocusText (0, 0, 100, 60, "txtbox", ""),
 		captionSurface (18, 88, 64, 484, "box"),
 
-		modeBox (920, 88, 260, 205, "box"),
+		modeBox (920, 88, 260, 170, "box"),
 		modeBoxLabel (10, 10, 240, 20, "ctlabel", "Play mode"),
-		modeLabel (10, 90, 60, 20, "lflabel", "Mode"),
-		modeListBox (80, 90, 170, 20, 170, 60, "menu", BItems::ItemList ({"Autoplay", "Host controlled"}), 2.0),
-		modeAutoplayBpmLabel (10, 130, 120, 20, "lflabel", "Beats per min"),
-		modeAutoplayBpmSlider (120, 120, 130, 25, "slider", 120.0, 1.0, 300.0, 0.0, "%3.1f"),
-		modeAutoplayBpbLabel (10, 170, 120, 20, "lflabel", "Beats per bar"),
-		modeAutoplayBpbSlider (120, 160, 130, 25, "slider", 4.0, 1.0, 16.0, 1.0, "%2.0f"),
-		modeMidiInChannelLabel (10, 130, 150, 20 , "lflabel", "MIDI input channel"),
-		modeMidiInChannelListBox (180, 130, 70, 20, 70, 200, "menu",
+		modeLabel (10, 80, 60, 20, "lflabel", "Mode"),
+		modeListBox (80, 80, 170, 20, 170, 60, "menu", BItems::ItemList ({"Autoplay", "Host controlled"}), 2.0),
+		modeAutoplayBpmLabel (10, 115, 120, 20, "lflabel", "Beats per min"),
+		modeAutoplayBpmSlider (120, 105, 130, 25, "slider", 120.0, 1.0, 300.0, 0.0, "%3.1f"),
+		modeAutoplayBpbLabel (10, 145, 120, 20, "lflabel", "Beats per bar"),
+		modeAutoplayBpbSlider (120, 135, 130, 25, "slider", 4.0, 1.0, 16.0, 1.0, "%2.0f"),
+		modeMidiInChannelLabel (10, 110, 150, 20 , "lflabel", "MIDI input channel"),
+		modeMidiInChannelListBox (180, 110, 70, 20, 70, 200, "menu",
 					  BItems::ItemList ({{0, "All"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}, {9, "9"},
 							     {10, "10"}, {11, "11"}, {12, "12"}, {13, "13"}, {14, "14"}, {15, "15"}, {16, "16"}})),
 		modePlayLabel (10, 50, 205, 20, "lflabel", "Status: playing ..."),
-		modePlayButton (210, 40, 40, 40, "box", 1.0),
+		modePlayButton (220, 40, 30, 30, "box", 1.0),
 
-		toolBox (920, 315, 260, 257, "box"),
+		toolBox (920, 280, 260, 292, "box"),
 		toolBoxLabel (10, 10, 240, 20, "ctlabel", "Toolbox"),
-		toolButtonBox (0, 30, 260, 125, "widget"),
+		toolButtonBox (0, 30, 260, 160, "widget"),
 		toolWholeStepButton (170, 40, 80, 20, "tgbutton", "Whole step", 0.0),
-		toolUndoButton (200, 100, 20, 20, "tgbutton"),
-		toolRedoButton (230, 100, 20, 20, "tgbutton"),
+		toolResetButton (80, 130, 20, 20, "tgbutton"),
+		toolUndoButton (110, 130, 20, 20, "tgbutton"),
+		toolRedoButton (140, 130, 20, 20, "tgbutton"),
 		toolButtonBoxCtrlLabel (10, 10, 60, 20, "lflabel", "Controls"),
 		toolButtonBoxChLabel (10, 70, 60, 20, "lflabel", "Channels"),
 		toolButtonBoxEditLabel (10, 100, 60, 20, "lflabel", "Edit"),
-		toolOctaveLabel (30, 225, 60, 20, "ctlabel", "Octave"),
-		toolOctaveDial (35, 165, 50, 60, "dial", 0.0, -8.0, 8.0, 1.0, "%1.0f"),
-		toolVelocityLabel (100, 225, 60, 20, "ctlabel", "Velocity"),
-		toolVelocityDial  (105, 165, 50, 60, "dial", 1.0, 0.0, 2.0, 0.0, "%1.2f"),
-		toolDurationLabel (170, 225, 60, 20, "ctlabel", "Duration"),
-		toolDurationDial (175, 165, 50, 60, "dial", 1.0, 0.0, 1.0, 0.0, "%1.2f"),
+		toolOctaveLabel (30, 260, 60, 20, "ctlabel", "Octave"),
+		toolOctaveDial (35, 200, 50, 60, "dial", 0.0, -8.0, 8.0, 1.0, "%1.0f"),
+		toolVelocityLabel (100, 260, 60, 20, "ctlabel", "Velocity"),
+		toolVelocityDial  (105, 200, 50, 60, "dial", 1.0, 0.0, 2.0, 0.0, "%1.2f"),
+		toolDurationLabel (170, 260, 60, 20, "ctlabel", "Duration"),
+		toolDurationDial (175, 200, 50, 60, "dial", 1.0, 0.0, 1.0, 0.0, "%1.2f"),
 
 		propertiesBox (920, 590, 260, 210, "box"),
 		propertiesBoxLabel (10, 10, 240, 20, "ctlabel", "Properties"),
@@ -189,6 +190,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	padSurface.setCallbackFunction (BEvents::FOCUS_OUT_EVENT, padsFocusedCallback);
 	padSurface.setMergeable (BEvents::POINTER_DRAG_EVENT, false);
 
+	toolResetButton.setCallbackFunction(BEvents::VALUE_CHANGED_EVENT, resetClickedCallback);
 	toolUndoButton.setCallbackFunction(BEvents::VALUE_CHANGED_EVENT, undoClickedCallback);
 	toolRedoButton.setCallbackFunction(BEvents::VALUE_CHANGED_EVENT, undoClickedCallback);
 
@@ -244,6 +246,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	toolButtonBox.add (toolButtonBoxChLabel);
 	toolButtonBox.add (toolButtonBoxEditLabel);
 	toolButtonBox.add (toolWholeStepButton);
+	toolButtonBox.add (toolResetButton);
 	toolButtonBox.add (toolUndoButton);
 	toolButtonBox.add (toolRedoButton);
 
@@ -595,38 +598,39 @@ void BSEQuencer_GUI::scale ()
 	scaleFocus ();
 	RESIZE (captionSurface, 18, 88, 64, 484, sz);
 
-	RESIZE (modeBox, 920, 88, 260, 205, sz);
+	RESIZE (modeBox, 920, 88, 260, 180, sz);
 	RESIZE (modeBoxLabel, 10, 10, 240, 20, sz);
-	RESIZE (modeLabel, 10, 90, 60, 20, sz);
-	RESIZE (modeListBox, 80, 90, 170, 20, sz);
+	RESIZE (modeLabel, 10, 80, 60, 20, sz);
+	RESIZE (modeListBox, 80, 80, 170, 20, sz);
 	modeListBox.resizeListBox(170 * sz, 60 * sz);
 	modeListBox.resizeListBoxItems(170 * sz, 20 * sz);
-	RESIZE (modeAutoplayBpmLabel, 10, 130, 120, 20, sz);
-	RESIZE (modeAutoplayBpmSlider, 120, 120, 130, 25, sz);
-	RESIZE (modeAutoplayBpbLabel, 10, 170, 120, 20, sz);
-	RESIZE (modeAutoplayBpbSlider, 120, 160, 130, 25, sz);
-	RESIZE (modeMidiInChannelLabel, 10, 130, 150, 20, sz);
-	RESIZE (modeMidiInChannelListBox, 180, 130, 70, 20, sz);
+	RESIZE (modeAutoplayBpmLabel, 10, 115, 120, 20, sz);
+	RESIZE (modeAutoplayBpmSlider, 120, 105, 130, 25, sz);
+	RESIZE (modeAutoplayBpbLabel, 10, 145, 120, 20, sz);
+	RESIZE (modeAutoplayBpbSlider, 120, 135, 130, 25, sz);
+	RESIZE (modeMidiInChannelLabel, 10, 110, 150, 20, sz);
+	RESIZE (modeMidiInChannelListBox, 180, 110, 70, 20, sz);
 	modeMidiInChannelListBox.resizeListBox (70 * sz, 200 * sz);
 	modeMidiInChannelListBox.resizeListBoxItems (70 * sz, 20 * sz);
 	RESIZE (modePlayLabel, 10, 50, 205, 20, sz);
-	RESIZE (modePlayButton, 210, 40, 40, 40, sz);
+	RESIZE (modePlayButton, 220, 40, 30, 30, sz);
 
-	RESIZE (toolBox, 920, 315, 260, 257, sz);
+	RESIZE (toolBox, 920, 280, 260, 292, sz);
 	RESIZE (toolBoxLabel, 10, 10, 240, 20, sz);
-	RESIZE (toolButtonBox, 0, 30, 260, 125, sz);
+	RESIZE (toolButtonBox, 0, 30, 260, 160, sz);
 	RESIZE (toolWholeStepButton, 170, 40, 80, 20, sz);
-	RESIZE (toolUndoButton, 200, 100, 20, 20, sz);
-	RESIZE (toolRedoButton, 230, 100, 20, 20, sz);
+	RESIZE (toolResetButton, 80, 130, 20, 20, sz);
+	RESIZE (toolUndoButton,110, 130, 20, 20, sz);
+	RESIZE (toolRedoButton, 140, 130, 20, 20, sz);
 	RESIZE (toolButtonBoxCtrlLabel, 10, 10, 60, 20, sz);
 	RESIZE (toolButtonBoxChLabel, 10, 70, 60, 20, sz);
 	RESIZE (toolButtonBoxEditLabel, 10, 100, 60, 20, sz);
-	RESIZE (toolOctaveLabel, 30, 225, 60, 20, sz);
-	RESIZE (toolOctaveDial, 35, 165, 50, 60, sz);
-	RESIZE (toolVelocityLabel, 100, 225, 60, 20, sz);
-	RESIZE (toolVelocityDial, 105, 165, 50, 60, sz);
-	RESIZE (toolDurationLabel, 170, 225, 60, 20, sz);
-	RESIZE (toolDurationDial, 175, 165, 50, 60, sz);
+	RESIZE (toolOctaveLabel, 30, 260, 60, 20, sz);
+	RESIZE (toolOctaveDial, 35, 200, 50, 60, sz);
+	RESIZE (toolVelocityLabel, 100, 260, 60, 20, sz);
+	RESIZE (toolVelocityDial, 105, 200, 50, 60, sz);
+	RESIZE (toolDurationLabel, 170, 260, 60, 20, sz);
+	RESIZE (toolDurationDial, 175, 200, 50, 60, sz);
 
 	RESIZE (propertiesBox, 920, 590, 260, 210, sz);
 	RESIZE (propertiesBoxLabel, 10, 10, 240, 20, sz);
@@ -743,6 +747,7 @@ void BSEQuencer_GUI::applyTheme (BStyles::Theme& theme)
 	toolBoxLabel.applyTheme (theme);
 	toolButtonBox.applyTheme (theme);
 	toolWholeStepButton.applyTheme (theme);
+	toolResetButton.applyTheme (theme);
 	toolUndoButton.applyTheme (theme);
 	toolRedoButton.applyTheme (theme);
 	toolButtonBoxCtrlLabel.applyTheme (theme);
@@ -961,6 +966,38 @@ void BSEQuencer_GUI::editPressedCallback (BEvents::Event* event)
 		ui->scaleEditor.setScaleMap (ui->scaleMaps[mapNr]);
 		ui->scaleEditor.moveTo (200, 80);
 		ui->add (ui->scaleEditor);
+	}
+}
+
+void BSEQuencer_GUI::resetClickedCallback (BEvents::Event* event)
+{
+	if ((event) && (event->getWidget ()) && (event->getWidget()->getMainWindow()))
+	{
+		BWidgets::Button* widget = (BWidgets::Button*)event->getWidget();
+		BSEQuencer_GUI* ui = (BSEQuencer_GUI*)(widget->getMainWindow());
+		double value = ((BEvents::ValueChangedEvent*) event)->getValue ();
+
+		if ((value == 1) && (widget == (BWidgets::Button*)&ui->toolResetButton))
+		{
+			if (ui->wheelScrolled)
+			{
+				ui->pattern.store ();
+				ui->wheelScrolled = false;
+			}
+
+			Pad p0 = Pad ();
+			for (int r = 0; r < ROWS; ++r)
+			{
+				for (int s = 0; s < MAXSTEPS; ++s)
+				{
+					ui->pattern.setPad (r, s, p0);
+					ui->send_pad (r, s);
+				}
+			}
+
+			ui->drawPad ();
+			ui->pattern.store ();
+		}
 	}
 }
 

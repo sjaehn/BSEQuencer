@@ -54,6 +54,7 @@
 #include "PlayStopButton.hpp"
 #include "ButtonBox.hpp"
 #include "CircledSymbol.hpp"
+#include "ResetButton.hpp"
 #include "UndoButton.hpp"
 #include "RedoButton.hpp"
 #include "definitions.h"
@@ -90,6 +91,7 @@ private:
 	static void valueChangedCallback(BEvents::Event* event);
 	static void helpPressedCallback (BEvents::Event* event);
 	static void editPressedCallback (BEvents::Event* event);
+	static void resetClickedCallback (BEvents::Event* event);
 	static void undoClickedCallback (BEvents::Event* event);
 	static void padsPressedCallback (BEvents::Event* event);
 	static void padsScrolledCallback (BEvents::Event* event);
@@ -201,6 +203,7 @@ private:
 	BWidgets::Label toolBoxLabel;
 	ButtonBox toolButtonBox;
 	BWidgets::TextToggleButton toolWholeStepButton;
+	ResetButton toolResetButton;
 	UndoButton toolUndoButton;
 	RedoButton toolRedoButton;
 	BWidgets::Label toolButtonBoxCtrlLabel;
