@@ -109,37 +109,6 @@ void BSEQuencer::connect_port (uint32_t port, void *data)
 	}
 }
 
-/* Sends MIDI signal through midiOut port
- * @param ch: BSEQuencer channel
- * @param status: MIDI status byte
- * @param note: MIDI note
- * @param velocity: MIDI velocity
- *
- * TODO outCapacity
- */
-void BSEQuencer::appendMidiMsg (const int64_t frames, const uint8_t ch, const uint8_t status, const int note, const uint8_t velocity)
-{
-	// ch -> MIDI channel
-	int channel = controllers[CH + (ch - 1) * CH_SIZE + MIDI_CHANNEL] - 1;
-
-	// compose MIDI message block
-	LV2_Atom midiatom;
-	midiatom.type = uris.midi_Event;
-	midiatom.size = 3;
-
-	uint8_t msg[3];
-	msg[0] = status + channel;
-	msg[1] = note;
-	msg[2] = velocity;
-
-	// send MIDI message
-	if (!lv2_atom_forge_frame_time (&output_forge, frames)) return;
-	if (!lv2_atom_forge_raw (&output_forge, &midiatom, sizeof (LV2_Atom))) return;
-	if (!lv2_atom_forge_raw (&output_forge, &msg, 3)) return;
-	lv2_atom_forge_pad (&output_forge, sizeof (LV2_Atom) + 3);
-	// fprintf (stderr, "BSEQuencer.lv2: appendMidiMsg (frames: %li, status: %i, note: %i, velocity: %i) at %f\n", frames, channel + status, note, velocity, position);
-}
-
 /* Prepares MIDI output of the respective key for sending
  * @param frames: time.frames
  * @param status: MIDI status byte
@@ -179,7 +148,7 @@ bool BSEQuencer::makeMidi (const int64_t frames, const uint8_t status, const int
 				float outVelocity = ((float)inKeys[key].velocity) * pd->velocity * controllers[CH + (outCh - 1) * CH_SIZE + VELOCITY];
 				if ((outNote >=0) && (outNote <= 127))
 				{
-					appendMidiMsg (frames, outCh, status, outNote, LIMIT (outVelocity, 0, 127));
+					midiStack.append (frames, outCh, status, outNote, LIMIT (outVelocity, 0, 127));
 					return (status == LV2_MIDI_MSG_NOTE_ON);
 				}
 			}
@@ -519,6 +488,7 @@ void BSEQuencer::run (uint32_t n_samples)
 
 	if ((!inputPort) || (!outputPort)) return;
 
+	midiStack.clear ();
 
 	// Init notify port
 	uint32_t space = outputPort->atom.size;
@@ -843,7 +813,7 @@ void BSEQuencer::run (uint32_t n_samples)
 							case LV2_MIDI_CTL_SUSTAIN:
 								for (int ch = 1; ch <= NR_SEQUENCER_CHS; ++ch)
 								{
-									appendMidiMsg (act_t, ch, LV2_MIDI_MSG_CONTROLLER, LV2_MIDI_CTL_SUSTAIN, msg[2]);
+									midiStack.append (act_t, ch, LV2_MIDI_MSG_CONTROLLER, LV2_MIDI_CTL_SUSTAIN, msg[2]);
 								}
 								break;
 
@@ -932,11 +902,11 @@ void BSEQuencer::run (uint32_t n_samples)
 	scheduleNotifyStatusToGui = true;
 
 	// Send notifications to GUI
-	if (ui_on && scheduleNotifyStatusToGui) space = space - notifyStatusToGui (space);
-	if (ui_on && scheduleNotifyPadsToGui) space = space - notifyPadsToGui (space);
-	if (ui_on && scheduleNotifyScaleMapsToGui) space = space - notifyScaleMapsToGui (space);
+	if (ui_on && scheduleNotifyStatusToGui) notifyStatusToGui ();
+	if (ui_on && scheduleNotifyPadsToGui) notifyPadsToGui ();
+	if (ui_on && scheduleNotifyScaleMapsToGui) notifyScaleMapsToGui ();
+	notifyMidi ();
 	lv2_atom_forge_pop(&output_forge, &output_frame);
-
 }
 
 LV2_State_Status BSEQuencer::state_save (LV2_State_Store_Function store, LV2_State_Handle handle, uint32_t flags,
@@ -1300,7 +1270,7 @@ void BSEQuencer::padMessageBufferAllPads ()
 	}
 }
 
-uint32_t BSEQuencer::notifyPadsToGui(const uint32_t space)
+void BSEQuencer::notifyPadsToGui ()
 {
 	PadMessage endmsg (ENDPADMESSAGE);
 	if (!(endmsg == padMessageBuffer[0]))
@@ -1310,26 +1280,22 @@ uint32_t BSEQuencer::notifyPadsToGui(const uint32_t space)
 		for (int i = 0; (i < ROWS * MAXSTEPS) && (!(padMessageBuffer[i] == endmsg)); ++i) end = i;
 
 		// Prepare forge buffer and initialize atom sequence
-		if (space > 1024 + sizeof(PadMessage) * end)							// TODO calculate the right size
-		{
-			LV2_Atom_Forge_Frame frame;
-			lv2_atom_forge_frame_time(&output_forge, 0);
-			lv2_atom_forge_object(&output_forge, &frame, 0, uris.notify_padEvent);
-			lv2_atom_forge_key(&output_forge, uris.notify_pad);
-			lv2_atom_forge_vector(&output_forge, sizeof(float), uris.atom_Float, sizeof(PadMessage) / sizeof(float) * (end + 1), (void*) padMessageBuffer);
-			lv2_atom_forge_pop(&output_forge, &frame);
 
-			// Empty padMessageBuffer
-			padMessageBuffer[0] = endmsg;
+		LV2_Atom_Forge_Frame frame;
+		lv2_atom_forge_frame_time(&output_forge, 0);
+		lv2_atom_forge_object(&output_forge, &frame, 0, uris.notify_padEvent);
+		lv2_atom_forge_key(&output_forge, uris.notify_pad);
+		lv2_atom_forge_vector(&output_forge, sizeof(float), uris.atom_Float, sizeof(PadMessage) / sizeof(float) * (end + 1), (void*) padMessageBuffer);
+		lv2_atom_forge_pop(&output_forge, &frame);
 
-			scheduleNotifyPadsToGui = false;
-			return sizeof(PadMessage) * end;									// TODO calculate the right size
-		}
+		// Empty padMessageBuffer
+		padMessageBuffer[0] = endmsg;
+
+		scheduleNotifyPadsToGui = false;
 	}
-	return 0;
 }
 
-uint32_t BSEQuencer::notifyStatusToGui (const uint32_t space)
+void BSEQuencer::notifyStatusToGui ()
 {
 	// Get all act. steps for all active midiInKeys -> cursorbits
 	// Get all act. played notes for all active midiInKeys -> notebits
@@ -1365,53 +1331,69 @@ uint32_t BSEQuencer::notifyStatusToGui (const uint32_t space)
 	}
 
 	// Prepare forge buffer and initialize atom sequence
-	if (space > 1024 + 3 * sizeof(uint32_t))									// TODO calculate the right size
+
+	LV2_Atom_Forge_Frame frame;
+	lv2_atom_forge_frame_time(&output_forge, 0);
+	lv2_atom_forge_object(&output_forge, &frame, 0, uris.notify_statusEvent);
+	lv2_atom_forge_key(&output_forge, uris.notify_cursors);
+	lv2_atom_forge_vector(&output_forge, sizeof (int), uris.atom_Int, MAXSTEPS, (void*) cursorbits);
+	lv2_atom_forge_key(&output_forge, uris.notify_notes);
+	lv2_atom_forge_int(&output_forge, notebits);
+	lv2_atom_forge_key(&output_forge, uris.notify_channels);
+	lv2_atom_forge_int(&output_forge, chbits);
+	lv2_atom_forge_pop(&output_forge, &frame);
+
+	scheduleNotifyStatusToGui = false;
+}
+
+void BSEQuencer::notifyScaleMapsToGui ()
+{
+	for (int i = NR_SYSTEM_SCALES; i < NR_SYSTEM_SCALES + NR_USER_SCALES; ++i)
 	{
 		LV2_Atom_Forge_Frame frame;
 		lv2_atom_forge_frame_time(&output_forge, 0);
-		lv2_atom_forge_object(&output_forge, &frame, 0, uris.notify_statusEvent);
-		lv2_atom_forge_key(&output_forge, uris.notify_cursors);
-		lv2_atom_forge_vector(&output_forge, sizeof (int), uris.atom_Int, MAXSTEPS, (void*) cursorbits);
-		lv2_atom_forge_key(&output_forge, uris.notify_notes);
-		lv2_atom_forge_int(&output_forge, notebits);
-		lv2_atom_forge_key(&output_forge, uris.notify_channels);
-		lv2_atom_forge_int(&output_forge, chbits);
+		lv2_atom_forge_object(&output_forge, &frame, 0, uris.notify_scaleMapsEvent);
+		lv2_atom_forge_key(&output_forge, uris.notify_scaleID);
+		lv2_atom_forge_int(&output_forge, i);
+		lv2_atom_forge_key(&output_forge, uris.notify_scaleName);
+		lv2_atom_forge_string (&output_forge, scaleMaps[i].name, 64);
+		lv2_atom_forge_key(&output_forge, uris.notify_scaleElements);
+		lv2_atom_forge_vector(&output_forge, sizeof (int), uris.atom_Int, 16, (void*) scaleMaps[i].elements);
+		lv2_atom_forge_key(&output_forge, uris.notify_scaleAltSymbols);
+		lv2_atom_forge_vector(&output_forge, 16, uris.atom_String, 16, (void*) scaleMaps[i].altSymbols);
+		lv2_atom_forge_key(&output_forge, uris.notify_scale);
+		BScaleNotes* notes = &scaleNotes[i];
+		lv2_atom_forge_vector(&output_forge, sizeof (int), uris.atom_Int, 12, (void*) notes);
 		lv2_atom_forge_pop(&output_forge, &frame);
 
-		scheduleNotifyStatusToGui = false;
-		return 3 * sizeof(uint32_t);											// TODO calculate the right size
+		scheduleNotifyScaleMapsToGui = false;
 	}
-	return 0;
 }
 
-uint32_t BSEQuencer::notifyScaleMapsToGui (const uint32_t space)
+void BSEQuencer::notifyMidi ()
 {
-	if (space > 1024 + 4 * 512)					// TODO calculate the right size
+	for (size_t i = 0; i < midiStack.size (); ++i)
 	{
-		for (int i = NR_SYSTEM_SCALES; i < NR_SYSTEM_SCALES + NR_USER_SCALES; ++i)
-		{
-			LV2_Atom_Forge_Frame frame;
-			lv2_atom_forge_frame_time(&output_forge, 0);
-			lv2_atom_forge_object(&output_forge, &frame, 0, uris.notify_scaleMapsEvent);
-			lv2_atom_forge_key(&output_forge, uris.notify_scaleID);
-			lv2_atom_forge_int(&output_forge, i);
-			lv2_atom_forge_key(&output_forge, uris.notify_scaleName);
-			lv2_atom_forge_string (&output_forge, scaleMaps[i].name, 64);
-			lv2_atom_forge_key(&output_forge, uris.notify_scaleElements);
-			lv2_atom_forge_vector(&output_forge, sizeof (int), uris.atom_Int, 16, (void*) scaleMaps[i].elements);
-			lv2_atom_forge_key(&output_forge, uris.notify_scaleAltSymbols);
-			lv2_atom_forge_vector(&output_forge, 16, uris.atom_String, 16, (void*) scaleMaps[i].altSymbols);
-			lv2_atom_forge_key(&output_forge, uris.notify_scale);
-			BScaleNotes* notes = &scaleNotes[i];
-			lv2_atom_forge_vector(&output_forge, sizeof (int), uris.atom_Int, 12, (void*) notes);
-			lv2_atom_forge_pop(&output_forge, &frame);
+		MidiData& midiData = midiStack[i];
+		// ch -> MIDI channel
+		int channel = controllers[CH + (midiData.ch - 1) * CH_SIZE + MIDI_CHANNEL] - 1;
 
-			scheduleNotifyScaleMapsToGui = false;
-		}
+		// compose MIDI message block
+		LV2_Atom midiatom;
+		midiatom.type = uris.midi_Event;
+		midiatom.size = 3;
 
-		return 4 * 512;							// TODO calculate the right size
+		uint8_t msg[3];
+		msg[0] = midiData.status + channel;
+		msg[1] = midiData.note;
+		msg[2] = midiData.velocity;
+
+		// send MIDI message
+		if (!lv2_atom_forge_frame_time (&output_forge, midiData.frames)) return;
+		if (!lv2_atom_forge_raw (&output_forge, &midiatom, sizeof (LV2_Atom))) return;
+		if (!lv2_atom_forge_raw (&output_forge, &msg, 3)) return;
+		lv2_atom_forge_pad (&output_forge, sizeof (LV2_Atom) + 3);
 	}
-	return 0;
 }
 
 /*

@@ -1,7 +1,7 @@
 /* B.SEQuencer
  * MIDI Step Sequencer LV2 Plugin
  *
- * Copyright (C) 2018 by Sven Jähnichen
+ * Copyright (C) 2018, 2019 by Sven Jähnichen
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,6 +50,7 @@
 #include "Pad.hpp"
 #include "PadMessage.hpp"
 #include "StaticArrayList.hpp"
+#include "MidiStack.hpp"
 
 typedef struct {
 	float min;
@@ -83,8 +84,6 @@ public:
 	LV2_State_Status state_restore(LV2_State_Retrieve_Function retrieve, LV2_State_Handle handle, uint32_t flags, const LV2_Feature* const* features);
 
 private:
-	void appendMidiMsg (const int64_t frames, const uint8_t ch, const uint8_t status, const int note, const uint8_t velocity);
-	uint32_t initMidiOut (LV2_Atom_Sequence* midi);
 	bool makeMidi (const int64_t frames, const uint8_t status, const int key, const int row, uint8_t chbits = ALL_CH);
 	void stopMidiOut (const int64_t frames, const uint8_t chbits);
 	void stopMidiOut (const int64_t frames, const int key, const uint8_t chbits);
@@ -99,14 +98,17 @@ private:
 	Pad validatePad (Pad pad);
 	bool padMessageBufferAppendPad (int row, int step, Pad pad);
 	void padMessageBufferAllPads ();
-	uint32_t notifyPadsToGui (const uint32_t space);
-	uint32_t notifyStatusToGui (const uint32_t space);
-	uint32_t notifyScaleMapsToGui (const uint32_t space);
+	void notifyPadsToGui ();
+	void notifyStatusToGui ();
+	void notifyScaleMapsToGui ();
+	void notifyMidi ();
 
 	// URIs
 	BSEQuencerURIs uris;
 	LV2_URID_Map* map;
 	LV2_URID_Unmap* unmap;
+
+	MidiStack midiStack;
 
 	// DSP <-> GUI communication
 	const LV2_Atom_Sequence* inputPort;

@@ -64,11 +64,6 @@ Usage
 see https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer
 
 
-TODO
-----
-* Internal: sort MIDI output messages
-
-
 See also
 --------
 * Feature tour: https://www.youtube.com/watch?v=J6bU4GdUVYc
