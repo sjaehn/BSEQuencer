@@ -25,7 +25,7 @@
 #include <cstring>
 #include <array>
 
-#define MIDIBUFFERSIZE 128
+#define MIDIBUFFERSIZE 256
 
  class MidiStack : private std::array<MidiData, MIDIBUFFERSIZE>
  {
