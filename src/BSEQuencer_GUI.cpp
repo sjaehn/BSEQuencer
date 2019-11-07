@@ -21,72 +21,72 @@
 #include "BSEQuencer_GUI.hpp"
 
 BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *const *features, PuglNativeWindow parentWindow) :
-		Window (1200, 820, "B.SEQuencer", parentWindow, true),
-		controller (NULL), write_function (NULL),
-		pluginPath (bundle_path ? std::string (bundle_path) : std::string ("")),
-		sz (1.0), bgImageSurface (nullptr),
-		uris (), forge (), clipBoard (),
-		noteBits (0), chBits (0), tempTool (false), tempToolCh (0), wheelScrolled (false),
-		mContainer (0, 0, 1200, 820, "main"),
-		padSurface (98, 88, 804, 484, "box"),
-		padSurfaceFocusText (0, 0, 100, 60, "txtbox", ""),
-		captionSurface (18, 88, 64, 484, "box"),
+	Window (1200, 820, "B.SEQuencer", parentWindow, true),
+	controller (NULL), write_function (NULL),
+	pluginPath (bundle_path ? std::string (bundle_path) : std::string ("")),
+	sz (1.0), bgImageSurface (nullptr),
+	uris (), forge (), clipBoard (),
+	noteBits (0), chBits (0), tempTool (false), tempToolCh (0), wheelScrolled (false),
+	mContainer (0, 0, 1200, 820, "main"),
+	padSurface (98, 88, 804, 484, "box"),
+	padSurfaceFocusText (0, 0, 100, 60, "txtbox", ""),
+	captionSurface (18, 88, 64, 484, "box"),
 
-		modeBox (920, 88, 260, 170, "box"),
-		modeBoxLabel (10, 10, 240, 20, "ctlabel", "Play mode"),
-		modeLabel (10, 80, 60, 20, "lflabel", "Mode"),
-		modeListBox (80, 80, 170, 20, 170, 60, "menu", BItems::ItemList ({"Autoplay", "Host controlled"}), 2.0),
-		modeAutoplayBpmLabel (10, 115, 120, 20, "lflabel", "Beats per min"),
-		modeAutoplayBpmSlider (120, 105, 130, 25, "slider", 120.0, 1.0, 300.0, 0.0, "%3.1f"),
-		modeAutoplayBpbLabel (10, 145, 120, 20, "lflabel", "Beats per bar"),
-		modeAutoplayBpbSlider (120, 135, 130, 25, "slider", 4.0, 1.0, 16.0, 1.0, "%2.0f"),
-		modeMidiInChannelLabel (10, 110, 150, 20 , "lflabel", "MIDI input channel"),
-		modeMidiInChannelListBox (180, 110, 70, 20, 70, 200, "menu",
-					  BItems::ItemList ({{0, "All"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}, {9, "9"},
-							     {10, "10"}, {11, "11"}, {12, "12"}, {13, "13"}, {14, "14"}, {15, "15"}, {16, "16"}})),
-		modePlayLabel (10, 50, 205, 20, "lflabel", "Status: playing ..."),
-		modePlayButton (220, 40, 30, 30, "box", 1.0),
+	modeBox (920, 88, 260, 170, "box"),
+	modeBoxLabel (10, 10, 240, 20, "ctlabel", "Play mode"),
+	modeLabel (10, 80, 60, 20, "lflabel", "Mode"),
+	modeListBox (80, 80, 170, 20, 170, 60, "menu", BItems::ItemList ({"Autoplay", "Host controlled"}), 2.0),
+	modeAutoplayBpmLabel (10, 115, 120, 20, "lflabel", "Beats per min"),
+	modeAutoplayBpmSlider (120, 105, 130, 25, "slider", 120.0, 1.0, 300.0, 0.0, "%3.1f"),
+	modeAutoplayBpbLabel (10, 145, 120, 20, "lflabel", "Beats per bar"),
+	modeAutoplayBpbSlider (120, 135, 130, 25, "slider", 4.0, 1.0, 16.0, 1.0, "%2.0f"),
+	modeMidiInChannelLabel (10, 110, 150, 20 , "lflabel", "MIDI input channel"),
+	modeMidiInChannelListBox (180, 110, 70, 20, 70, 200, "menu",
+				  BItems::ItemList ({{0, "All"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}, {9, "9"},
+						     {10, "10"}, {11, "11"}, {12, "12"}, {13, "13"}, {14, "14"}, {15, "15"}, {16, "16"}})),
+	modePlayLabel (10, 50, 205, 20, "lflabel", "Status: playing ..."),
+	modePlayButton (220, 40, 30, 30, "box", 1.0),
 
-		toolBox (920, 280, 260, 292, "box"),
-		toolBoxLabel (10, 10, 240, 20, "ctlabel", "Toolbox"),
-		toolButtonBox (0, 30, 260, 160, "widget"),
-		toolWholeStepButton (170, 40, 80, 20, "tgbutton", "Whole step", 0.0),
-		toolResetButton (80, 130, 20, 20, "tgbutton"),
-		toolUndoButton (110, 130, 20, 20, "tgbutton"),
-		toolRedoButton (140, 130, 20, 20, "tgbutton"),
-		toolButtonBoxCtrlLabel (10, 10, 60, 20, "lflabel", "Controls"),
-		toolButtonBoxChLabel (10, 70, 60, 20, "lflabel", "Channels"),
-		toolButtonBoxEditLabel (10, 100, 60, 20, "lflabel", "Edit"),
-		toolOctaveLabel (30, 260, 60, 20, "ctlabel", "Octave"),
-		toolOctaveDial (35, 200, 50, 60, "dial", 0.0, -8.0, 8.0, 1.0, "%1.0f"),
-		toolVelocityLabel (100, 260, 60, 20, "ctlabel", "Velocity"),
-		toolVelocityDial  (105, 200, 50, 60, "dial", 1.0, 0.0, 2.0, 0.0, "%1.2f"),
-		toolDurationLabel (170, 260, 60, 20, "ctlabel", "Duration"),
-		toolDurationDial (175, 200, 50, 60, "dial", 1.0, 0.0, 1.0, 0.0, "%1.2f"),
+	toolBox (920, 280, 260, 292, "box"),
+	toolBoxLabel (10, 10, 240, 20, "ctlabel", "Toolbox"),
+	toolButtonBox (0, 30, 260, 160, "widget"),
+	toolWholeStepButton (170, 40, 80, 20, "tgbutton", "Whole step", 0.0),
+	toolResetButton (80, 130, 20, 20, "tgbutton"),
+	toolUndoButton (110, 130, 20, 20, "tgbutton"),
+	toolRedoButton (140, 130, 20, 20, "tgbutton"),
+	toolButtonBoxCtrlLabel (10, 10, 60, 20, "lflabel", "Controls"),
+	toolButtonBoxChLabel (10, 70, 60, 20, "lflabel", "Channels"),
+	toolButtonBoxEditLabel (10, 100, 60, 20, "lflabel", "Edit"),
+	toolOctaveLabel (30, 260, 60, 20, "ctlabel", "Octave"),
+	toolOctaveDial (35, 200, 50, 60, "dial", 0.0, -8.0, 8.0, 1.0, "%1.0f"),
+	toolVelocityLabel (100, 260, 60, 20, "ctlabel", "Velocity"),
+	toolVelocityDial  (105, 200, 50, 60, "dial", 1.0, 0.0, 2.0, 0.0, "%1.2f"),
+	toolDurationLabel (170, 260, 60, 20, "ctlabel", "Duration"),
+	toolDurationDial (175, 200, 50, 60, "dial", 1.0, 0.0, 1.0, 0.0, "%1.2f"),
 
-		propertiesBox (920, 590, 260, 210, "box"),
-		propertiesBoxLabel (10, 10, 240, 20, "ctlabel", "Properties"),
-		propertiesNrStepsLabel (10, 50, 170, 20, "lflabel", "Total number of steps"),
-		propertiesNrStepsListBox (180, 50, 70, 20, 70, 100, "menu",
-					  BItems::ItemList ({{8, "8"}, {16, "16"}, {24, "24"}, {32, "32"}}), 16.0),
-		propertiesStepsPerLabel (100, 85, 80, 20, "lflabel", "steps per"),
-		propertiesStepsPerSlider (10, 75, 80, 25, "slider", 4.0, 1.0, 8.0, 1.0, "%2.0f"),
-		propertiesBaseListBox (180, 85, 70, 20, 70, 60, "menu",
-				       BItems::ItemList ({"beat", "bar"}), 1.0),
-		propertiesRootLabel (10, 115, 40, 20, "lflabel", "Root"),
-		propertiesRootListBox (100, 115, 70, 20, 0, -160, 70, 160, "menu",
-				       BItems::ItemList ({{0, "C"}, {2, "D"}, {4, "E"}, {5, "F"}, {7, "G"}, {9, "A"}, {11, "B"}}), 0.0),
-		propertiesSignatureListBox (180, 115, 70, 20, 70, 80, "menu",
-					    BItems::ItemList ({{-1, "b"}, {0, ""}, {1, "#"}}), 0.0),
-		propertiesOctaveLabel (10, 145, 55, 20, "lflabel", "Octave"),
-		propertiesOctaveListBox (180, 145, 70, 20, 0, -220, 70, 220, "menu",
-					 BItems::ItemList ({{-1, "-1"}, {0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}}), 4.0),
-		propertiesScaleLabel (10, 175, 50, 20, "lflabel", "Scale"),
-		propertiesScaleEditIcon (70, 175, 20, 20, "widget", "EditSymbol.png"),
-		propertiesScaleListBox (100, 175, 150, 20, 0, -380, 150, 380, "menu", scaleItems, 0.0),
+	propertiesBox (920, 590, 260, 210, "box"),
+	propertiesBoxLabel (10, 10, 240, 20, "ctlabel", "Properties"),
+	propertiesNrStepsLabel (10, 50, 170, 20, "lflabel", "Total number of steps"),
+	propertiesNrStepsListBox (180, 50, 70, 20, 70, 100, "menu",
+				  BItems::ItemList ({{8, "8"}, {16, "16"}, {24, "24"}, {32, "32"}}), 16.0),
+	propertiesStepsPerLabel (100, 85, 80, 20, "lflabel", "steps per"),
+	propertiesStepsPerSlider (10, 75, 80, 25, "slider", 4.0, 1.0, 8.0, 1.0, "%2.0f"),
+	propertiesBaseListBox (180, 85, 70, 20, 70, 60, "menu",
+			       BItems::ItemList ({"beat", "bar"}), 1.0),
+	propertiesRootLabel (10, 115, 40, 20, "lflabel", "Root"),
+	propertiesRootListBox (100, 115, 70, 20, 0, -160, 70, 160, "menu",
+			       BItems::ItemList ({{0, "C"}, {2, "D"}, {4, "E"}, {5, "F"}, {7, "G"}, {9, "A"}, {11, "B"}}), 0.0),
+	propertiesSignatureListBox (180, 115, 70, 20, 70, 80, "menu",
+				    BItems::ItemList ({{-1, "b"}, {0, ""}, {1, "#"}}), 0.0),
+	propertiesOctaveLabel (10, 145, 55, 20, "lflabel", "Octave"),
+	propertiesOctaveListBox (180, 145, 70, 20, 0, -220, 70, 220, "menu",
+				 BItems::ItemList ({{-1, "-1"}, {0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}}), 4.0),
+	propertiesScaleLabel (10, 175, 50, 20, "lflabel", "Scale"),
+	propertiesScaleEditIcon (70, 175, 20, 20, "widget", "EditSymbol.png"),
+	propertiesScaleListBox (100, 175, 150, 20, 0, -380, 150, 380, "menu", scaleItems, 0.0),
 
-		helpLabel (1140, 40, 30, 30, "ilabel", "?"),
-		scaleEditor (200, 80, 800, 640, "scaleeditor", (bundle_path ? std::string (bundle_path) : std::string ("")), 0, ScaleMap (), BScale (0,defaultScale))
+	helpLabel (1140, 40, 30, 30, "ilabel", "?"),
+	scaleEditor (200, 80, 800, 640, "scaleeditor", (bundle_path ? std::string (bundle_path) : std::string ("")), 0, ScaleMap (), BScale (0,defaultScale))
 
 {
 	// Init scale maps
@@ -1166,7 +1166,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 							ui->controllerWidgets[SELECTION_DURATION]->setValue(pd.duration);
 						}
 
-						else if ((edit == EDIT_CUT) || (edit == EDIT_COPY))
+						else if ((edit == EDIT_CUT) || (edit == EDIT_COPY) || (edit == EDIT_FLIPX) || (edit = EDIT_FLIPY))
 						{
 							if (ui->clipBoard.ready)
 							{
@@ -1234,7 +1234,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 			{
 				int edit = ((int)ui->controllerWidgets[SELECTION_CH]->getValue() - NR_SEQUENCER_CHS - NR_CTRL_BUTTONS) * 0x100;
 
-				if ((edit == EDIT_CUT) || (edit == EDIT_COPY))
+				if ((edit == EDIT_CUT) || (edit == EDIT_COPY) || (edit == EDIT_FLIPX) || (edit == EDIT_FLIPY))
 				{
 					int clipRMin = ui->clipBoard.origin.first;
 					int clipRMax = ui->clipBoard.origin.first + ui->clipBoard.extends.first;
@@ -1242,6 +1242,38 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 					int clipSMin = ui->clipBoard.origin.second;
 					int clipSMax = ui->clipBoard.origin.second + ui->clipBoard.extends.second;
 					if (clipSMin > clipSMax) std::swap (clipSMin, clipSMax);
+
+					if (edit == EDIT_FLIPX)
+					{
+						for (int ds = 0; ds < int ((clipSMax + 1 - clipSMin) / 2); ++ds)
+						{
+							for (int r = clipRMin; r <= clipRMax; ++r)
+							{
+								Pad pd = ui->pattern.getPad (r, clipSMin + ds);
+								ui->pattern.setPad (r, clipSMin + ds, ui->pattern.getPad (r, clipSMax - ds));
+								ui->send_pad (r, clipSMin + ds);
+								ui->pattern.setPad (r, clipSMax - ds, pd);
+								ui->send_pad (r, clipSMax - ds);
+							}
+						}
+						ui->pattern.store ();
+					}
+
+					if (edit == EDIT_FLIPY)
+					{
+						for (int dr = 0; dr < int ((clipRMax + 1 - clipRMin) / 2); ++dr)
+						{
+							for (int s = clipSMin; s <= clipSMax; ++s)
+							{
+								Pad pd = ui->pattern.getPad (clipRMin + dr, s);
+								ui->pattern.setPad (clipRMin + dr, s, ui->pattern.getPad (clipRMax -dr, s));
+								ui->send_pad (clipRMin + dr, s);
+								ui->pattern.setPad (clipRMax - dr, s, pd);
+								ui->send_pad (clipRMax - dr, s);
+							}
+						}
+						ui->pattern.store ();
+					}
 
 					ui->clipBoard.data.clear ();
 					for (int r = clipRMax; r >= clipRMin; --r)
@@ -1262,24 +1294,26 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 								ui->send_pad (r, s);
 							}
 						}
-
 						ui->pattern.store ();
 					}
 
 					ui->clipBoard.ready = true;
 
 					// Hack focusWidget to cut / copy message
-					if (ui->focusWidget)
+					if ((edit == EDIT_CUT) || (edit == EDIT_COPY))
 					{
-						ui->clipBoard.time = std::chrono::steady_clock::now() + ui->focusWidget->getFocusInMilliseconds ();
-						ui->focusWidget->setFocused (true);
-						if (ui->focusWidget->getParent()) ui->focusWidget->getParent()->release (ui->focusWidget);
-						ui->add (*ui->focusWidget);
-		       				ui->padSurfaceFocusText.setText (edit == EDIT_CUT ? "Cut..." : "Copied...");
-		       				ui->scaleFocus ();
-						ui->focusWidget->moveTo (widget->getOriginX () + pointerEvent->getX() + 2,
-									 widget->getOriginY () + pointerEvent->getY() - ui->focusWidget->getHeight() - 2);
-						ui->focusWidget->show ();
+						if (ui->focusWidget)
+						{
+							ui->clipBoard.time = std::chrono::steady_clock::now() + ui->focusWidget->getFocusInMilliseconds ();
+							ui->focusWidget->setFocused (true);
+							if (ui->focusWidget->getParent()) ui->focusWidget->getParent()->release (ui->focusWidget);
+							ui->add (*ui->focusWidget);
+			       				ui->padSurfaceFocusText.setText (edit == EDIT_CUT ? "Cut..." : "Copied...");
+			       				ui->scaleFocus ();
+							ui->focusWidget->moveTo (widget->getOriginX () + pointerEvent->getX() + 2,
+										 widget->getOriginY () + pointerEvent->getY() - ui->focusWidget->getHeight() - 2);
+							ui->focusWidget->show ();
+						}
 					}
 
 					ui->drawPad ();

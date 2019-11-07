@@ -294,8 +294,10 @@ private:
 	std::array<ButtonStyle, NR_EDIT_BUTTONS> editButtonStyles =
 	{{
 		{{0.0, 0.03, 0.06, 1.0}, EDIT_PICK, "Pick"},
-		{{0.0, 0.03, 0.06, 1.0}, EDIT_CUT, "Cut"},
-	  	{{0.0, 0.03, 0.06, 1.0}, EDIT_COPY, "Copy"},
+		{{0.0, 0.03, 0.06, 1.0}, EDIT_CUT, "Select & cut"},
+	  	{{0.0, 0.03, 0.06, 1.0}, EDIT_COPY, "Select & copy"},
+		{{0.0, 0.03, 0.06, 1.0}, EDIT_FLIPX, "Select & X flip"},
+		{{0.0, 0.03, 0.06, 1.0}, EDIT_FLIPY, "Select & Y flip"},
 		{{0.0, 0.03, 0.06, 1.0}, EDIT_PASTE, "Paste"}
 	}};
 

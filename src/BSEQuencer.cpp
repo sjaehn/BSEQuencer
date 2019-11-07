@@ -780,7 +780,7 @@ void BSEQuencer::run (uint32_t n_samples)
 								key.velocity = msg[2];
 								key.startPos = position + double (act_t) / FRAMES_PER_BEAT - (1 / STEPS_PER_BEAT);
 								inKeys.push_back (key);
-								// fprintf (stderr, "BSEQuencer.lv2: Key on (frames: %i, note: %i, velocity: %i) at %f\n", key.startFrame, key.note, key.velocity, key.startPos);
+								// fprintf (stderr, "BSEQuencer.lv2: Key on (frames: %li, note: %i, velocity: %i) at %f\n", act_t, key.note, key.velocity, key.startPos);
 							}
 						}
 						break;
@@ -792,7 +792,6 @@ void BSEQuencer::run (uint32_t n_samples)
 							{
 								if (inKeys[i].note == note)
 								{
-									//key.endFrame = ev->time.frames;
 									// fprintf (stderr, "BSEQuencer.lv2: Key off (frames: %li, note: %i, velocity: %i) at %f + frames\n", act_t, note, msg[2], position);
 
 									stopMidiOut (act_t, i, ALL_CH);

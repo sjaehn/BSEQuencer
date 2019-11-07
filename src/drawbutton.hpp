@@ -10,7 +10,7 @@
 void drawButton (cairo_t* cr, double x, double y, double width, double height, BColors::Color color, int symbol)
 {
 	if ((width <= 0) || (height <= 0)) return;
-	
+
 	// Draw button
 	BColors::Color illuminated2 = color; illuminated2.applyBrightness (0.33);
 	BColors::Color illuminated = color; illuminated.applyBrightness (0.05);
@@ -165,6 +165,60 @@ void drawButton (cairo_t* cr, double x, double y, double width, double height, B
 				cairo_fill_preserve (cr);
 				cairo_set_source_rgba (cr, 0, 0, 0, 1);
 				cairo_set_dash (cr, dash, 0, 0);
+				cairo_set_line_width (cr, 1.0);
+				cairo_stroke (cr);
+			}
+			break;
+
+			case EDIT_FLIPX:
+			{
+				cairo_rectangle (cr, x + width / 2 - 0.375 * symbolSize, y + height / 2 - 0.5 * symbolSize, 0.75 * symbolSize, symbolSize);
+				cairo_set_source_rgba (cr, CAIRO_RGBA (col));
+				cairo_fill (cr);
+
+				cairo_set_line_width (cr, 1.0);
+				cairo_set_source_rgba (cr, 0, 0, 0, 1);
+				cairo_move_to (cr, x + width / 2 - 0.3 * symbolSize, y + height / 2);
+				cairo_line_to (cr, x + width / 2 - 0.15 * symbolSize, y + height / 2 + 0.1 * symbolSize);
+				cairo_line_to (cr, x + width / 2 - 0.15 * symbolSize, y + height / 2 - 0.1 * symbolSize);
+				cairo_line_to (cr, x + width / 2 - 0.3 * symbolSize, y + height / 2);
+				cairo_line_to (cr, x + width / 2 + 0.3 * symbolSize, y + height / 2);
+				cairo_line_to (cr, x + width / 2 + 0.15 * symbolSize, y + height / 2 + 0.1 * symbolSize);
+				cairo_line_to (cr, x + width / 2 + 0.15 * symbolSize, y + height / 2 - 0.1 * symbolSize);
+				cairo_line_to (cr, x + width / 2 + 0.3 * symbolSize, y + height / 2);
+				cairo_stroke (cr);
+
+				cairo_rectangle (cr, x + width / 2 - 0.375 * symbolSize, y + height / 2 - 0.5 * symbolSize, 0.75 * symbolSize, symbolSize);
+				cairo_set_source_rgba(cr, CAIRO_RGBA (col));
+				const double dash[] = {2.0};
+				cairo_set_dash (cr, dash, 1, 0);
+				cairo_set_line_width (cr, 1.0);
+				cairo_stroke (cr);
+			}
+			break;
+
+			case EDIT_FLIPY:
+			{
+				cairo_rectangle (cr, x + width / 2 - 0.375 * symbolSize, y + height / 2 - 0.5 * symbolSize, 0.75 * symbolSize, symbolSize);
+				cairo_set_source_rgba (cr, CAIRO_RGBA (col));
+				cairo_fill (cr);
+
+				cairo_set_line_width (cr, 1.0);
+				cairo_set_source_rgba (cr, 0, 0, 0, 1);
+				cairo_move_to (cr, x + width / 2, y + height / 2 - 0.4 * symbolSize);
+				cairo_line_to (cr, x + width / 2 - 0.1 * symbolSize, y + height / 2 - 0.25 * symbolSize);
+				cairo_line_to (cr, x + width / 2 + 0.1 * symbolSize, y + height / 2 - 0.25 * symbolSize);
+				cairo_line_to (cr, x + width / 2, y + height / 2 - 0.4 * symbolSize);
+				cairo_line_to (cr, x + width / 2, y + height / 2 + 0.4 * symbolSize);
+				cairo_line_to (cr, x + width / 2 - 0.1 * symbolSize, y + height / 2 + 0.25 * symbolSize);
+				cairo_line_to (cr, x + width / 2 + 0.1 * symbolSize, y + height / 2 + 0.25 * symbolSize);
+				cairo_line_to (cr, x + width / 2, y + height / 2 + 0.4 * symbolSize);
+				cairo_stroke (cr);
+
+				cairo_rectangle (cr, x + width / 2 - 0.375 * symbolSize, y + height / 2 - 0.5 * symbolSize, 0.75 * symbolSize, symbolSize);
+				cairo_set_source_rgba(cr, CAIRO_RGBA (col));
+				const double dash[] = {2.0};
+				cairo_set_dash (cr, dash, 1, 0);
 				cairo_set_line_width (cr, 1.0);
 				cairo_stroke (cr);
 			}
