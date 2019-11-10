@@ -30,8 +30,7 @@
 #include "BWidgets/Label.hpp"
 #include "BWidgets/PopupListBox.hpp"
 #include "BWidgets/TextButton.hpp"
-#include "CircledSymbol.hpp"
-#include "CloseSymbol.hpp"
+#include "BWidgets/ImageIcon.hpp"
 
 class ScaleEditor : public BWidgets::ValueWidget
 {
@@ -53,9 +52,9 @@ protected:
 	void szScaleEditor ();
 	void updateAltSymbol (int nr);
 	static void symbolDragCallback (BEvents::Event* event);
-	static void listboxValueChangedCallback (BEvents::Event* event);
+	static void symbolListboxValueChangedCallback (BEvents::Event* event);
+	static void noteListboxValueChangedCallback (BEvents::Event* event);
 	static void buttonClickCallback (BEvents::Event* event);
-	static void closeClickCallback (BEvents::Event* event);
 	static void pianoClickCallback (BEvents::Event* event);
 
 	BWidgets::Label nameLabel;
@@ -64,18 +63,16 @@ protected:
 	BWidgets::Label symbolLabel;
 	BWidgets::Label noteLabel;
 	BWidgets::Label altSymbolLabel;
+	std::array<BWidgets::ImageIcon, ROWS> drumSymbol;
+	std::array<BWidgets::ImageIcon, ROWS>noteSymbol;
 	std::array<BWidgets::Label, ROWS> nrLabel;
-	std::array<BWidgets::Widget, ROWS> nrSymbol;
-	std::array<BWidgets::PopupListBox, ROWS> nrListbox;
+	std::array<BWidgets::PopupListBox, ROWS> nrSymbolListbox;
+	std::array<BWidgets::PopupListBox, ROWS> nrNoteListbox;
 	std::array<BWidgets::Label, ROWS> nrNoteLabel;
 	std::array<BWidgets::Label, ROWS> nrAltSymbolLabel;
-	BWidgets::Widget drumkitSymbol;
-	BWidgets::Widget scaleSymbol;
-	BWidgets::Widget dragSymbol;
 	BWidgets::HPianoRoll piano;
 	BWidgets::TextButton cancelButton;
 	BWidgets::TextButton applyButton;
-	CloseSymbol closeSymbol;
 
 	int pianoRoot;
 	BScale scale;
@@ -85,8 +82,6 @@ protected:
 	double sz;
 
 	cairo_surface_t* bgSurface;
-	cairo_surface_t* drumSurface;
-	cairo_surface_t* noteSurface;
 
 	BColors::ColorSet txColors = {{{0.167, 0.37, 0.80, 1.0}, {0.33, 0.5, 0.85, 1.0}, {0.0, 0.0, 0.25, 1.0}, {0.0, 0.0, 0.0, 0.0}}};
 	BColors::ColorSet bgColors = {{{0.15, 0.15, 0.15, 1.0}, {0.3, 0.3, 0.3, 1.0}, {0.05, 0.05, 0.05, 1.0}, {0.0, 0.0, 0.0, 1.0}}};
@@ -95,8 +90,6 @@ protected:
 	BStyles::Border labelborder = {BStyles::noLine, 4.0, 0.0, 0.0};
 	BStyles::Fill scaleEditorBg = BStyles::blackFill;
 	BStyles::Fill menuBg = BStyles::Fill (BColors::Color (0.0, 0.0, 0.05, 1.0));
-	BStyles::Fill drumBg = BStyles::noFill;
-	BStyles::Fill noteBg = BStyles::noFill;
 	BStyles::Font ctLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 12.0,
 						   BStyles::TEXT_ALIGN_CENTER, BStyles::TEXT_VALIGN_MIDDLE);
 	BStyles::Font lfLabelFont = BStyles::Font ("Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL, 12.0,
@@ -113,10 +106,6 @@ protected:
 		{"scaleeditor", 	{{"background", STYLEPTR (&scaleEditorBg)},
 					{"border", STYLEPTR (&border)}}},
 		{"widget", 		{{"uses", STYLEPTR (&defaultStyles)}}},
-		{"drum", 		{{"background", STYLEPTR (&drumBg)},
-					 {"border", STYLEPTR (&BStyles::noBorder)}}},
-		{"note", 		{{"background", STYLEPTR (&noteBg)},
-					 {"border", STYLEPTR (&BStyles::noBorder)}}},
 		{"ctlabel",	 	{{"uses", STYLEPTR (&labelStyles)},
 					 {"font", STYLEPTR (&ctLabelFont)}}},
 		{"lflabel",	 	{{"uses", STYLEPTR (&labelStyles)},
@@ -152,21 +141,17 @@ ScaleEditor::ScaleEditor() : ScaleEditor (0, 0, 0, 0, "editor", "", 0, ScaleMap 
 ScaleEditor::ScaleEditor(const double x, const double y, const double width, const double height, const std::string& name,
 						 const std::string& pluginPath, const int mapNr, const ScaleMap& scaleMap, const BScale& scale) :
 		BWidgets::ValueWidget (x, y, width, height, name, 0.0),
-		nameLabel (360, 60, 80, 20, "lflabel", "Scale name:"),
-		scaleNameLabel (460, 60, 320, 20, "lflabel", std::string (scaleMap.name)),
-		rowLabel (20, 60, 80, 20, "lflabel", "Row"),
-		symbolLabel (60, 60, 48, 20, "ctlabel", "Mode"),
-		noteLabel (128, 60, 80, 20, "ctlabel", "Note"),
-		altSymbolLabel (228, 60, 80, 20, "ctlabel", "Symbol"),
-		drumkitSymbol (400, 120, 48, 24, "drum"),
-		scaleSymbol (460, 120, 48, 24, "note"),
-		dragSymbol (460, 120, 48, 24, "note"),
-		piano (340, 440, 440, 120, "widget", 0, 35),
-		cancelButton (320, 600, 60, 20, "button", "Cancel"),
-		applyButton (420, 600, 60, 20, "button", "Apply"),
-		closeSymbol (770, 10, 20, 20, "xsymbol"),
+		nameLabel (20, 60, 80, 20, "lflabel", "Scale name:"),
+		scaleNameLabel (120, 60, 320, 20, "lflabel", std::string (scaleMap.name)),
+		rowLabel (20, 100, 80, 20, "lflabel", "Row"),
+		symbolLabel (70, 100, 48, 20, "ctlabel", "Mode"),
+		noteLabel (148, 100, 80, 20, "ctlabel", "Note"),
+		altSymbolLabel (248, 100, 80, 20, "ctlabel", "Symbol"),
+		piano (50, 620, 260, 60, "widget", 0, 35),
+		cancelButton (60, 720, 60, 20, "button", "Cancel"),
+		applyButton (240, 720, 60, 20, "button", "Apply"),
 		pianoRoot (0), scale (scale), scaleMap (scaleMap), mapNr (mapNr),
-		sz (width / 800 < height / 640 ? width / 800 : height / 640)
+		sz (width / 360 < height / 760 ? width / 360 : height / 760)
 
 
 {
@@ -174,67 +159,66 @@ ScaleEditor::ScaleEditor(const double x, const double y, const double width, con
 	setFocusable (true);	// Only to block underlying pads callback
 
 	bgSurface = cairo_image_surface_create_from_png ((pluginPath + "ScaleEditor.png").c_str());
-	drumSurface = cairo_image_surface_create_from_png ((pluginPath + "DrumSymbol.png").c_str());
-	noteSurface = cairo_image_surface_create_from_png ((pluginPath + "NoteSymbol.png").c_str());
 	scaleEditorBg.loadFillFromCairoSurface(bgSurface);
-	drumBg.loadFillFromCairoSurface(drumSurface);
-	noteBg.loadFillFromCairoSurface(noteSurface);
 
 	// Create note symbols (for nrListbox)
 	BScale sc = BScale(0, {CROMATICSCALE});
-	std::list<BItems::Item> noteSymbolItems;
+	std::list<BItems::Item> noteNameItems;
 	for (int i = 0; i < 120; ++i)
 	{
 		int octave = (i / 12) - 1;
 		std::string strNote = std::to_string(i) + " (" + sc.getSymbol (i) + (octave != 0 ? std::to_string(octave) : "") + ")";
-		noteSymbolItems.push_back (BItems::Item (i, strNote));
+		noteNameItems.push_back (BItems::Item (i, strNote));
 	}
 
 	// Init nr widgets
 	for (int i = 0; i < ROWS; ++i)
 	{
-		nrLabel[i] = BWidgets::Label (20, 540 - i * 30, 30, 24, "lflabel", std::to_string (i + 1));
+
+		drumSymbol[i] = BWidgets::ImageIcon (0, 0, 48, 24, "widget", pluginPath + "DrumSymbol.png");
+		drumSymbol[i].rename ("widget");
+		drumSymbol[i].applyTheme (theme);
+		noteSymbol[i] = BWidgets::ImageIcon (0, 0, 48, 24, "widget", pluginPath + "NoteSymbol.png");
+		noteSymbol[i].rename ("widget");
+		noteSymbol[i].applyTheme (theme);
+
+		BItems::ItemList il;
+		il.push_back (BItems::Item (0, &noteSymbol[i]));
+		il.push_back (BItems::Item (1, &drumSymbol[i]));
+
+		nrSymbolListbox[i] =  BWidgets::PopupListBox (60, 580 - i * 30, 68, 24, 68, 68, "menu", il, 0);
+		nrSymbolListbox[i].setCallbackFunction(BEvents::VALUE_CHANGED_EVENT, symbolListboxValueChangedCallback);
+		nrSymbolListbox[i].rename ("menu");
+		nrSymbolListbox[i].applyTheme (theme);
+		add (nrSymbolListbox[i]);
+
+		nrLabel[i] = BWidgets::Label (20, 580 - i * 30, 30, 24, "lflabel", std::to_string (i + 1));
 		nrLabel[i].rename ("lflabel");
 		nrLabel[i].applyTheme (theme);
 		add (nrLabel[i]);
 
-		nrSymbol[i] = BWidgets::Widget (60, 540 - i * 30, 48, 24, "widget");
-		nrSymbol[i].applyTheme (theme);
-		add (nrSymbol[i]);
+		if (i >= 6) nrNoteListbox[i] = BWidgets::PopupListBox (148, 580 - i * 30, 80, 24, 80, 240, "menu", noteNameItems, 0);
+		else nrNoteListbox[i] = BWidgets::PopupListBox (148, 580 - i * 30, 80, 24, 0, -240, 80, 240, "menu", noteNameItems, 0);
+		nrNoteListbox[i].setCallbackFunction(BEvents::VALUE_CHANGED_EVENT, noteListboxValueChangedCallback);
+		nrNoteListbox[i].rename ("menu");
+		nrNoteListbox[i].applyTheme (theme);
+		add (nrNoteListbox[i]);
 
-		if (i >= 6) nrListbox[i] = BWidgets::PopupListBox (128, 542 - i * 30, 80, 20, 80, 240, "menu", noteSymbolItems, 0);
-		else nrListbox[i] = BWidgets::PopupListBox (128, 542 - i * 30, 80, 20, 0, -240, 80, 240, "menu", noteSymbolItems, 0);
-		nrListbox[i].setCallbackFunction(BEvents::VALUE_CHANGED_EVENT, listboxValueChangedCallback);
-		nrListbox[i].rename ("menu");
-		nrListbox[i].applyTheme (theme);
-		add (nrListbox[i]);
-
-		nrNoteLabel[i] = BWidgets::Label (128, 540 - i * 30, 80, 24, "ctlabel", "(uses scale)");
+		nrNoteLabel[i] = BWidgets::Label (148, 580 - i * 30, 80, 24, "ctlabel", "(uses scale)");
 		nrNoteLabel[i].rename ("ctlabel");
 		nrNoteLabel[i].applyTheme (theme);
 		add (nrNoteLabel[i]);
 		nrNoteLabel[i].hide ();
 
-		nrAltSymbolLabel[i] = BWidgets::Label (228, 540 - i * 30, 80, 24, "ctlabel", "");
+		nrAltSymbolLabel[i] = BWidgets::Label (248, 580 - i * 30, 80, 24, "ctlabel", "");
 		nrAltSymbolLabel[i].rename ("ctlabel");
 		updateAltSymbol (i);
 		nrAltSymbolLabel[i].applyTheme (theme);
 		add (nrAltSymbolLabel[i]);
 	}
 
-	drumkitSymbol.setDraggable (true);
-	drumkitSymbol.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, symbolDragCallback);
-	drumkitSymbol.setCallbackFunction(BEvents::BUTTON_RELEASE_EVENT, symbolDragCallback);
-	drumkitSymbol.setCallbackFunction(BEvents::POINTER_DRAG_EVENT, symbolDragCallback);
-
-	scaleSymbol.setDraggable (true);
-	scaleSymbol.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, symbolDragCallback);
-	scaleSymbol.setCallbackFunction(BEvents::BUTTON_RELEASE_EVENT, symbolDragCallback);
-	scaleSymbol.setCallbackFunction(BEvents::POINTER_DRAG_EVENT, symbolDragCallback);
-
 	cancelButton.setCallbackFunction(BEvents::BUTTON_CLICK_EVENT, buttonClickCallback);
 	applyButton.setCallbackFunction(BEvents::BUTTON_CLICK_EVENT, buttonClickCallback);
-	closeSymbol.setCallbackFunction(BEvents::BUTTON_CLICK_EVENT, closeClickCallback);
 
 	piano.setKeysToggleable (true);
 	piano.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, pianoClickCallback);
@@ -250,12 +234,9 @@ ScaleEditor::ScaleEditor(const double x, const double y, const double width, con
 	symbolLabel.applyTheme (theme);
 	noteLabel.applyTheme (theme);
 	altSymbolLabel.applyTheme (theme);
-	drumkitSymbol.applyTheme (theme);
-	scaleSymbol.applyTheme (theme);
 	cancelButton.applyTheme (theme);
 	applyButton.applyTheme (theme);
 	piano.applyTheme (theme);
-	closeSymbol.applyTheme (theme);
 	applyTheme (theme);
 
 	add (nameLabel);
@@ -264,20 +245,17 @@ ScaleEditor::ScaleEditor(const double x, const double y, const double width, con
 	add (symbolLabel);
 	add (noteLabel);
 	add (altSymbolLabel);
-	add (drumkitSymbol);
-	add (scaleSymbol);
 	add (cancelButton);
 	add (applyButton);
 	add (piano);
-	add (closeSymbol);
 
 	if (sz != 1.0) szScaleEditor();
 }
 
 void ScaleEditor::resize (double width, double height)
 {
-	double wf = width / 800;
-	double hf = height / 640;
+	double wf = width / 360;
+	double hf = height / 760;
 	double newsz = (wf < hf ? wf : hf);
 	if (sz != newsz)
 	{
@@ -293,7 +271,7 @@ void ScaleEditor::szScaleEditor ()
 	lfLabelFont.setFontSize (12 * sz);
 
 	// Scale background
-	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 800 * sz, 640 * sz);
+	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 360 * sz, 760 * sz);
 	cairo_t* cr = cairo_create (surface);
 	cairo_scale (cr, sz, sz);
 	cairo_set_source_surface(cr, bgSurface, 0, 0);
@@ -302,52 +280,29 @@ void ScaleEditor::szScaleEditor ()
 	cairo_destroy (cr);
 	cairo_surface_destroy (surface);
 
-	// Scale drum image
-	surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 48 * sz, 24 * sz);
-	cr = cairo_create (surface);
-	cairo_scale (cr, sz, sz);
-	cairo_set_source_surface(cr, drumSurface, 0, 0);
-	cairo_paint(cr);
-	drumBg.loadFillFromCairoSurface(surface);
-	cairo_destroy (cr);
-	cairo_surface_destroy (surface);
-
-	// Scale note image
-	surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 48 * sz, 24 * sz);
-	cr = cairo_create (surface);
-	cairo_scale (cr, sz, sz);
-	cairo_set_source_surface(cr, noteSurface, 0, 0);
-	cairo_paint(cr);
-	noteBg.loadFillFromCairoSurface(surface);
-	cairo_destroy (cr);
-	cairo_surface_destroy (surface);
-
-	nameLabel.moveTo (360 * sz, 60 * sz); nameLabel.resize (80 * sz, 20 * sz);
-	scaleNameLabel.moveTo (460 * sz, 60 * sz); scaleNameLabel.resize(320 * sz, 20 * sz);
-	rowLabel.moveTo (20 * sz, 60 * sz); rowLabel.resize (80 * sz, 20 * sz);
-	symbolLabel.moveTo (60 * sz, 60 * sz); symbolLabel.resize (48 * sz, 20 * sz);
-	noteLabel.moveTo (128 * sz, 60 * sz); noteLabel.resize (80 * sz, 20 * sz);
-	altSymbolLabel.moveTo (228 * sz, 60 * sz); altSymbolLabel.resize (80 * sz, 20 * sz);
-	drumkitSymbol.moveTo (400 * sz, 120 * sz); drumkitSymbol.resize (48 * sz, 24 * sz);
-	scaleSymbol.moveTo (460 * sz, 120 * sz); scaleSymbol.resize (48 * sz, 24 * sz);
-	dragSymbol.moveTo (460 * sz, 120 * sz); dragSymbol.resize (48 * sz, 24 * sz);
-	cancelButton.moveTo (320 * sz, 600 * sz); cancelButton.resize (60 * sz, 20 * sz);
-	applyButton.moveTo (420 * sz, 600 * sz); applyButton.resize (60 * sz, 20 * sz);
-	piano.moveTo (340 * sz, 440 * sz); piano.resize (440 * sz, 120 * sz);
-	closeSymbol.moveTo (770 * sz, 10 * sz); closeSymbol.resize (20 * sz, 20 * sz);
+	nameLabel.moveTo (20 * sz, 60 * sz); nameLabel.resize (80 * sz, 20 * sz);
+	scaleNameLabel.moveTo (120 * sz, 60 * sz); scaleNameLabel.resize(320 * sz, 20 * sz);
+	rowLabel.moveTo (20 * sz, 100 * sz); rowLabel.resize (80 * sz, 20 * sz);
+	symbolLabel.moveTo (70 * sz, 100 * sz); symbolLabel.resize (48 * sz, 20 * sz);
+	noteLabel.moveTo (148 * sz, 100 * sz); noteLabel.resize (80 * sz, 20 * sz);
+	altSymbolLabel.moveTo (248 * sz, 100 * sz); altSymbolLabel.resize (80 * sz, 20 * sz);
+	cancelButton.moveTo (60 * sz, 720 * sz); cancelButton.resize (60 * sz, 20 * sz);
+	applyButton.moveTo (240 * sz, 720 * sz); applyButton.resize (60 * sz, 20 * sz);
+	piano.moveTo (50 * sz, 620 * sz); piano.resize (260 * sz, 60 * sz);
 
 	for (int i = 0; i < ROWS; ++i)
 	{
-		nrLabel[i].moveTo (20 * sz, (540 - i * 30) * sz); nrLabel[i].resize (30 * sz, 24 * sz);
-		nrSymbol[i].moveTo (60 * sz, (540 - i * 30) * sz); nrSymbol[i].resize (48 * sz, 24 * sz);
+		nrLabel[i].moveTo (20 * sz, (580 - i * 30) * sz); nrLabel[i].resize (30 * sz, 24 * sz);
+		nrSymbolListbox[i].moveTo (60 * sz, (580 - i * 30) * sz); nrSymbolListbox[i].resize (68 * sz, 24 * sz);
+		nrSymbolListbox[i].resizeListBox (68 * sz, 68 * sz);
 
-		nrListbox[i].moveTo (128 * sz, (542 - i * 30) * sz ); nrListbox[i].resize (80 * sz, 20 * sz);
-		nrListbox[i].resizeListBox (80 * sz, 240 * sz);
-		if (i < 6) nrListbox[i].moveListBox(0, -240 * sz);
-		nrListbox[i].resizeListBoxItems (80 * sz, 20 * sz);
+		nrNoteListbox[i].moveTo (148 * sz, (580 - i * 30) * sz ); nrNoteListbox[i].resize (80 * sz, 24 * sz);
+		nrNoteListbox[i].resizeListBox (80 * sz, 240 * sz);
+		if (i < 6) nrNoteListbox[i].moveListBox(0, -240 * sz);
+		nrNoteListbox[i].resizeListBoxItems (80 * sz, 24 * sz);
 
-		nrNoteLabel[i].moveTo (128 * sz, (540 - i * 30) * sz); nrNoteLabel[i].resize (80 * sz, 24 * sz);
-		nrAltSymbolLabel[i].moveTo (228 * sz, (540 - i * 30) * sz); nrAltSymbolLabel[i].resize (80 * sz, 24 * sz);
+		nrNoteLabel[i].moveTo (148 * sz, (580 - i * 30) * sz); nrNoteLabel[i].resize (80 * sz, 24 * sz);
+		nrAltSymbolLabel[i].moveTo (248 * sz, (580 - i * 30) * sz); nrAltSymbolLabel[i].resize (80 * sz, 24 * sz);
 	}
 
 	nameLabel.applyTheme (theme);
@@ -356,25 +311,21 @@ void ScaleEditor::szScaleEditor ()
 	symbolLabel.applyTheme (theme);
 	noteLabel.applyTheme (theme);
 	altSymbolLabel.applyTheme (theme);
-	drumkitSymbol.applyTheme (theme);
-	scaleSymbol.applyTheme (theme);
-	dragSymbol.applyTheme (theme);
 	cancelButton.applyTheme (theme);
 	applyButton.applyTheme (theme);
 	piano.applyTheme (theme);
-	closeSymbol.applyTheme (theme);
 
 	for (int i = 0; i < ROWS; ++i)
 	{
 		nrLabel[i].applyTheme (theme);
-		nrSymbol[i].applyTheme (theme);
-		nrListbox[i].applyTheme (theme);
+		nrSymbolListbox[i].applyTheme (theme);
+		nrNoteListbox[i].applyTheme (theme);
 		nrNoteLabel[i].applyTheme (theme);
 		nrAltSymbolLabel[i].applyTheme (theme);
 	}
 
 	applyTheme (theme);
-	Widget::resize (800 * sz, 640 * sz);
+	Widget::resize (360 * sz, 760 * sz);
 }
 
 void ScaleEditor::setScaleMap (const ScaleMap& scaleMap)
@@ -386,20 +337,18 @@ void ScaleEditor::setScaleMap (const ScaleMap& scaleMap)
 	// Set nr widgets
 	for (int i = 0; i < ROWS; ++i)
 	{
-		if (scaleMap.elements[i] & 0x0100) nrSymbol[i].rename ("drum");
-		else nrSymbol[i].rename ("note");
-		nrSymbol[i].applyTheme (theme);
-
 		if (scaleMap.elements[i] & 0x0100)
 		{
+			nrSymbolListbox[i].setValue (1);
 			nrNoteLabel[i].hide ();
-			nrListbox[i].setValue (scaleMap.elements[i] & 0x0FF);
-			nrListbox[i].show ();
+			nrNoteListbox[i].setValue (scaleMap.elements[i] & 0x0FF);
+			nrNoteListbox[i].show ();
 		}
 
 		else
 		{
-			nrListbox[i].hide ();
+			nrSymbolListbox[i].setValue (0);
+			nrNoteListbox[i].hide ();
 			nrNoteLabel[i].show ();
 		}
 
@@ -447,92 +396,58 @@ void ScaleEditor::updateAltSymbol (int nr)
 	nrAltSymbolLabel[nr].setText (symbol);
 }
 
-void ScaleEditor::symbolDragCallback (BEvents::Event* event)
+void ScaleEditor::symbolListboxValueChangedCallback (BEvents::Event* event)
 {
-	if ((!event) || (!event->getWidget())) return;
+	if ((!event) || (!event->getWidget()) || (!event->getWidget()->getParent())) return;
 
-	BEvents::PointerEvent* pointerEvent = (BEvents::PointerEvent*) event;
-	Widget* symbolWidget = pointerEvent->getWidget();
-	if (symbolWidget->getParent())
+	BWidgets::PopupListBox* listbox = (BWidgets::PopupListBox*)(event->getWidget());
+	ScaleEditor* scaleEditor = (ScaleEditor*)(listbox->getParent());
+	int nr = -1;
+	int value = ((BEvents::ValueChangedEvent*)event)->getValue ();
+
+	for (int i = 0; i < ROWS; ++i)
 	{
-		ScaleEditor* scaleEditor = (ScaleEditor*)(symbolWidget->getParent());
-		BEvents::EventType eventType = pointerEvent->getEventType();
-		double sz = scaleEditor->sz;
-
-		// Button pressed
-		if (eventType == BEvents::BUTTON_PRESS_EVENT)
+		if (listbox == &(scaleEditor->nrSymbolListbox[i]))
 		{
-			scaleEditor->dragSymbol = *symbolWidget;
-			scaleEditor->dragSymbol.rename (symbolWidget->getName());
-			scaleEditor->dragSymbol.applyTheme (scaleEditor->theme);
-			if (scaleEditor->dragSymbol.getParent()) scaleEditor->dragSymbol.getParent()->release (&(scaleEditor->dragSymbol));
-			scaleEditor->add (scaleEditor->dragSymbol);
-			scaleEditor->dragSymbol.show();
+			nr = i;
+			break;
+		}
+	}
+
+	if (nr >= 0)
+	{
+		if (value)
+		{
+			scaleEditor->scaleMap.elements[nr] = ((int(scaleEditor->nrNoteListbox[nr].getValue())) | 0x0100);
+			scaleEditor->nrNoteListbox[nr].show ();
+			scaleEditor->nrNoteLabel[nr].hide ();
+			BWidgets::Label* l = (BWidgets::Label*) scaleEditor->nrNoteListbox[nr].getItem()->getWidget ();
+			if (l) strncpy (scaleEditor->scaleMap.altSymbols[nr], l->getText ().c_str(), 15);
+			scaleEditor->updateAltSymbol (nr);
 		}
 
-		// Button released
-		else if (eventType == BEvents::BUTTON_RELEASE_EVENT)
+		else
 		{
-			// Get center position
-			double x = scaleEditor->dragSymbol.getX() + 24 * sz;
-			double y = scaleEditor->dragSymbol.getY() + 12 * sz;
+			scaleEditor->scaleMap.elements[nr] = 0;	// Will be substituted by auto numbering later
+			scaleEditor->nrNoteListbox[nr].hide ();
+			scaleEditor->nrNoteLabel[nr].show ();
+		}
 
-
-			if ((x >= 60 * sz) && (x < 308 * sz) && (y >= 90 * sz) && (y < 560 * sz))
+		// Update auto numbering of scale map elements
+		for (int i = 0, count = 0; i < ROWS; ++i)
+		{
+			if (!(scaleEditor->scaleMap.elements[i] & 0x0100))
 			{
-				int nr = (565 * sz - y) / (30 * sz);
-				nr = LIMIT (nr, 0, 15);
-
-				// Drum kit
-				if (scaleEditor->dragSymbol.getName() == "drum")
-				{
-					scaleEditor->scaleMap.elements[nr] = (((int)(scaleEditor->nrListbox[nr].getValue())) | 0x0100);
-					BWidgets::Label* l = (BWidgets::Label*) scaleEditor->nrListbox[nr].getItem()->getWidget ();
-					if (l) strncpy (scaleEditor->scaleMap.altSymbols[nr], l->getText ().c_str(), 15);
-					scaleEditor->nrNoteLabel[nr].hide ();
-					scaleEditor->nrListbox[nr].show ();
-					scaleEditor->nrSymbol[nr].rename ("drum");
-					scaleEditor->nrSymbol[nr].applyTheme (scaleEditor->theme);
-				}
-
-				// Scale
-				else
-				{
-					scaleEditor->scaleMap.elements[nr] = 0;	// Will be substituted by auto numbering later
-					scaleEditor->nrListbox[nr].hide ();
-					scaleEditor->nrNoteLabel[nr].show ();
-					scaleEditor->nrSymbol[nr].rename ("note");
-					scaleEditor->nrSymbol[nr].applyTheme (scaleEditor->theme);
-				}
-
-				// Update auto numbering of scale map elements
-				for (int i = 0, count = 0; i < ROWS; ++i)
-				{
-					if (!(scaleEditor->scaleMap.elements[i] & 0x0100))
-					{
-						scaleEditor->scaleMap.elements[i] = count;
-						scaleEditor->scaleMap.altSymbols[i][0] = '\0';
-						++count;
-					}
-				}
-
+				scaleEditor->scaleMap.elements[i] = count;
+				scaleEditor->scaleMap.altSymbols[i][0] = '\0';
+				++count;
 			}
-
-			if (scaleEditor->dragSymbol.getParent()) scaleEditor->dragSymbol.getParent()->release (&(scaleEditor->dragSymbol));
-			for (int i = 0; i < ROWS; ++i) scaleEditor->updateAltSymbol (i);
-		}
-
-		// Pointer dragged
-		else if (eventType == BEvents::POINTER_DRAG_EVENT)
-		{
-			double x = scaleEditor->dragSymbol.getX() + pointerEvent->getDeltaX();
-			double y = scaleEditor->dragSymbol.getY() + pointerEvent->getDeltaY();
-			scaleEditor->dragSymbol.moveTo (x, y);
+			scaleEditor->updateAltSymbol (i);
 		}
 	}
 }
 
-void ScaleEditor::listboxValueChangedCallback (BEvents::Event* event)
+void ScaleEditor::noteListboxValueChangedCallback (BEvents::Event* event)
 {
 	if ((!event) || (!event->getWidget()) || (!event->getWidget()->getParent())) return;
 
@@ -542,17 +457,17 @@ void ScaleEditor::listboxValueChangedCallback (BEvents::Event* event)
 
 	for (int i = 0; i < ROWS; ++i)
 	{
-		if (listbox == &(scaleEditor->nrListbox[i]))
+		if (listbox == &(scaleEditor->nrNoteListbox[i]))
 		{
 			nr = i;
 			break;
 		}
 	}
 
-	if ((nr >=0) && (scaleEditor->scaleMap.elements[nr] & 0x0100))
+	if ((nr >=0 ) && (scaleEditor->scaleMap.elements[nr] & 0x0100))
 	{
-		scaleEditor->scaleMap.elements[nr] = (((int)(scaleEditor->nrListbox[nr].getValue())) | 0x0100);
-		BWidgets::Label* l = (BWidgets::Label*) scaleEditor->nrListbox[nr].getItem()->getWidget ();
+		scaleEditor->scaleMap.elements[nr] = (((int)(scaleEditor->nrNoteListbox[nr].getValue())) | 0x0100);
+		BWidgets::Label* l = (BWidgets::Label*) scaleEditor->nrNoteListbox[nr].getItem()->getWidget ();
 		if (l) strncpy (scaleEditor->scaleMap.altSymbols[nr], l->getText ().c_str(), 15);
 		scaleEditor->updateAltSymbol (nr);
 	}
@@ -569,19 +484,6 @@ void ScaleEditor::buttonClickCallback (BEvents::Event* event)
 
 			if (button == &(scaleEditor->cancelButton)) scaleEditor->setValue (-1.0);
 			else if (button == &(scaleEditor->applyButton)) scaleEditor->setValue (1.0);
-		}
-	}
-}
-
-void ScaleEditor::closeClickCallback (BEvents::Event* event)
-{
-	if ((event) && (event->getEventType() == BEvents::BUTTON_CLICK_EVENT) && (event->getWidget()))
-	{
-		CircledSymbol* button = (CircledSymbol*) event->getWidget();
-		if (button->getParent())
-		{
-			ScaleEditor* scaleEditor = (ScaleEditor*)(button->getParent());
-			scaleEditor->setValue (-1.0);
 		}
 	}
 }

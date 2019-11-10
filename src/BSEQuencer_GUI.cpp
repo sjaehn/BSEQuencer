@@ -82,11 +82,11 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	propertiesOctaveListBox (180, 145, 70, 20, 0, -220, 70, 220, "menu",
 				 BItems::ItemList ({{-1, "-1"}, {0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}}), 4.0),
 	propertiesScaleLabel (10, 175, 50, 20, "lflabel", "Scale"),
-	propertiesScaleEditIcon (70, 175, 20, 20, "widget", "EditSymbol.png"),
+	propertiesScaleEditIcon (70, 175, 20, 20, "widget", (bundle_path ? std::string (bundle_path) + EDIT_SYMBOL : std::string (""))),
 	propertiesScaleListBox (100, 175, 150, 20, 0, -380, 150, 380, "menu", scaleItems, 0.0),
 
 	helpLabel (1140, 40, 30, 30, "ilabel", "?"),
-	scaleEditor (200, 80, 800, 640, "scaleeditor", (bundle_path ? std::string (bundle_path) : std::string ("")), 0, ScaleMap (), BScale (0,defaultScale))
+	scaleEditor (420, 20, 360, 760, "scaleeditor", (bundle_path ? std::string (bundle_path) : std::string ("")), 0, ScaleMap (), BScale (0,defaultScale))
 
 {
 	// Init scale maps
@@ -664,7 +664,7 @@ void BSEQuencer_GUI::scale ()
 	propertiesScaleListBox.resizeListBoxItems (150 * sz, 20 * sz);
 
 	RESIZE (helpLabel, 1140, 40, 30, 30, sz);
-	RESIZE (scaleEditor, 200, 80, 800, 640, sz);
+	RESIZE (scaleEditor, 420, 20, 360, 760, sz);
 
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
 	{
@@ -964,7 +964,7 @@ void BSEQuencer_GUI::editPressedCallback (BEvents::Event* event)
 			)
 		);
 		ui->scaleEditor.setScaleMap (ui->scaleMaps[mapNr]);
-		ui->scaleEditor.moveTo (200, 80);
+		ui->scaleEditor.moveTo (420, 20);
 		ui->add (ui->scaleEditor);
 	}
 }

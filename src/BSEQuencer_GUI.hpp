@@ -66,6 +66,7 @@
 #include "Journal.hpp"
 
 #define BG_FILE "surface.png"
+#define EDIT_SYMBOL "EditSymbol.png"
 #define HELP_URL "https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer"
 #define OPEN_CMD "xdg-open"
 #define MAXUNDO 20
