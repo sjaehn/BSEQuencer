@@ -159,30 +159,16 @@ void Widget::release (Widget* child)
 {
 	if (child)
 	{
-		//std::cout << "Release " << child->name_ << ":" << &(*child) << "\n";
+		//std::cerr << "Release " << child->name_ << ":" << &(*child) << "\n";
 		bool wasVisible = child->isVisible ();
 
 		// Delete child's connection to this widget
 		child->parent_ = nullptr;
 
-		// Release child from main window and from main windows input connections
-		if (child->main_)
-		{
-			for (int i = (int) BEvents::NO_BUTTON; i < (int) BEvents::NR_OF_BUTTONS; ++i)
-			{
-				if (child->main_->getInputWidget ((BEvents::InputDevice) i) == child)
-				{
-					child->main_->setInput ((BEvents::InputDevice) i, nullptr, 0.0, 0.0);
-				}
-			}
-
-			child->main_->purgeEventQueue (child);
-			child->main_->removeKeyGrab (child);
-			child->main_ = nullptr;
-		}
-
-		// And the same for all children of child
+		// Release child and all children of child
+		// from main window and from main windows input connections
 		std::vector<Widget*> queue = child->getChildrenAsQueue ();
+		queue.push_back (child);
 		for (Widget* w : queue)
 		{
 			if (w->main_)
@@ -194,7 +180,6 @@ void Widget::release (Widget* child)
 						w->main_->setInput ((BEvents::InputDevice) i, nullptr, 0.0, 0.0);
 					}
 				}
-
 				w->main_->purgeEventQueue (w);
 				w->main_->removeKeyGrab (w);
 				w->main_ = nullptr;
@@ -529,6 +514,7 @@ void Widget::onWheelScrolled (BEvents::WheelEvent* event){cbfunction[BEvents::Ev
 void Widget::onValueChanged (BEvents::ValueChangedEvent* event) {cbfunction[BEvents::EventType::VALUE_CHANGED_EVENT] (event);}
 void Widget::onFocusIn (BEvents::FocusEvent* event) {cbfunction[BEvents::EventType::FOCUS_IN_EVENT] (event);}
 void Widget::onFocusOut (BEvents::FocusEvent* event) {cbfunction[BEvents::EventType::FOCUS_OUT_EVENT] (event);}
+void Widget::onMessage (BEvents::MessageEvent* event) {cbfunction[BEvents::EventType::MESSAGE_EVENT] (event);}
 
 void Widget::defaultCallback (BEvents::Event* event) {}
 
@@ -603,6 +589,15 @@ std::vector <Widget*> Widget::getChildrenAsQueue (std::vector <Widget*> queue) c
 		if (!w->children_.empty()) queue = w->getChildrenAsQueue (queue);
 	}
 	return queue;
+}
+
+void Widget::postMessage (const std::string& name, const BUtilities::Any content)
+{
+	if (main_)
+	{
+		BEvents::MessageEvent* event = new BEvents::MessageEvent (this, name, content);
+		main_->addEventToQueue (event);
+	}
 }
 
 void Widget::postRedisplay () {postRedisplay (getOriginX (), getOriginY (), width_, height_);}

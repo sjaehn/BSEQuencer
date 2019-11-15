@@ -57,6 +57,12 @@ Window::Window (const double width, const double height, const std::string& titl
 Window::~Window ()
 {
 	purgeEventQueue ();
+	keyGrabStack.clear ();
+	while (!children_.empty ())
+	{
+		Widget* w = children_.front ();
+		if (w) release (w);
+	}
 	puglDestroy(view_);
 	main_ = nullptr;	// Important switch for the super destructor. It took
 						// days of debugging ...
@@ -255,7 +261,7 @@ void Window::setKeyGrab (Widget* widget, std::vector<uint32_t>& keys)
 {
 	if ((widget == this) || isChild (widget))
 	{
-		KeyGrab newKeyGrab = {keys, widget};
+		KeyGrab newKeyGrab = {widget, keys};
 		removeKeyGrab (widget);
 		keyGrabStack.push_back (newKeyGrab);
 	}
@@ -263,19 +269,29 @@ void Window::setKeyGrab (Widget* widget, std::vector<uint32_t>& keys)
 
 void Window::removeKeyGrab (Widget* widget)
 {
-	for (std::vector<KeyGrab>::iterator it = keyGrabStack.begin(); it != keyGrabStack.end(); )
+	bool done = true;
+	do
 	{
-		KeyGrab* gr = (KeyGrab*) &it;
-		if (gr->widget == widget) it = keyGrabStack.erase (it);
-		else ++it;
-	}
+		done = true;
+
+		for (std::list<KeyGrab>::iterator it = keyGrabStack.begin(); it != keyGrabStack.end(); ++it)
+		{
+			KeyGrab* gr = &*it;
+			if (gr->widget == widget)
+			{
+				done = false;
+				keyGrabStack.erase (it); //TODO erase first element
+				break;
+			}
+		}
+	} while (!done);
 }
 
 Widget* Window::getKeyGrabWidget (uint32_t key)
 {
-	for (int i = keyGrabStack.size () - 1; i >= 0; --i)
+	for (std::list<KeyGrab>::reverse_iterator rit = keyGrabStack.rbegin (); rit != keyGrabStack.rend (); ++rit)
 	{
-		KeyGrab gr = keyGrabStack.at (i);
+		KeyGrab& gr = *rit;
 		for (uint32_t k : gr.keys)
 		{
 			if ((k == 0) || (k == key)) return gr.widget;
@@ -376,6 +392,10 @@ void Window::handleEvents ()
 
 				case BEvents::FOCUS_OUT_EVENT:
 					widget->onFocusOut((BEvents::FocusEvent*) event);
+					break;
+
+				case BEvents::MESSAGE_EVENT:
+					widget->onMessage ((BEvents::MessageEvent*) event);
 					break;
 
 				default:

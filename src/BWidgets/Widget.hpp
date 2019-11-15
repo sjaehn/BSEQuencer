@@ -618,6 +618,13 @@ public:
 	virtual void onFocusOut (BEvents::FocusEvent* event);
 
 	/**
+	 * Predefined empty method to handle a
+	 * BEvents::EventType::MESSAGE_EVENT.
+	 * @param event Event
+	 */
+	virtual void onMessage (BEvents::MessageEvent* event);
+
+	/**
 	 * Scans theme for widget properties and applies these properties.
 	 * @param theme Theme to be scanned
 	 */
@@ -652,8 +659,10 @@ protected:
 			     const bool checkClickability, const bool checkDraggability,
 			     const bool checkScrollability, const bool checkFocusability);
 
+	void postMessage (const std::string& name, const BUtilities::Any content);
 	void postRedisplay (const double x, const double y, const double width, const double height);
 	void redisplay (cairo_surface_t* surface, double x, double y, double width, double height);
+
 	virtual bool filter (Widget* widget);
 
 	virtual void draw (const double x, const double y, const double width, const double height);

@@ -65,7 +65,6 @@ GUI_INCL = \
 	src/BWidgets/Widget.cpp \
 	src/BWidgets/BStyles.cpp \
 	src/BWidgets/BColors.cpp \
-	src/BWidgets/BEvents.cpp \
 	src/BWidgets/BItems.cpp \
 	src/BWidgets/BValues.cpp \
 	src/screen.c \

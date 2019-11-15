@@ -18,6 +18,7 @@
 #ifndef BWIDGETS_HPP_
 #define BWIDGETS_HPP_
 
+#include "BUtilities.hpp"
 #include "BColors.hpp"
 #include "BStyles.hpp"
 #include "BEvents.hpp"

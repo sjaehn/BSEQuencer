@@ -23,6 +23,7 @@
 
 #include <chrono>
 #include <deque>
+#include <list>
 #include "Widget.hpp"
 #include "FocusWidget.hpp"
 
@@ -154,6 +155,13 @@ public:
 	 */
 	void removeKeyGrab (Widget* widget);
 
+	/* Gets the widget that is resposible for emitting BEvents::KeyEvent's if
+	 * the respective key has been pressed or released.
+	 * @param key	Unicode of the key (or BEvent::KeyCode).
+	 * @return	Responsible widget or nullptr.
+	 */
+	Widget* getKeyGrabWidget (uint32_t key);
+
 	/*
 	 * Removes events (emited by a given widget) from the event queue
 	 * @param widget	Emitting widget (nullptr for all widgets)
@@ -170,13 +178,6 @@ protected:
 	void translateTimeEvent ();
 
 	void mergeEvents ();
-
-	/* Gets the widget that is resposible for emitting BEvents::KeyEvent's if
-	 * the respective key has been pressed or released.
-	 * @param key		Unicode of the key (or BEvent::KeyCode).
-	 * @return			Responsible widget or nullptr.
-	 */
-	Widget* getKeyGrabWidget (uint32_t key);
 
 	std::string title_;
 	PuglView* view_;
@@ -208,11 +209,11 @@ protected:
 
 	typedef struct
 	{
-		std::vector<uint32_t> keys;
 		Widget* widget;
+		std::vector<uint32_t> keys;
 	} KeyGrab;
 
-	std::vector<KeyGrab> keyGrabStack;
+	std::list<KeyGrab> keyGrabStack;
 
 	std::deque<BEvents::Event*> eventQueue;
 };

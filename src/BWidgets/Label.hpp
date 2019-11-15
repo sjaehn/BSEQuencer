@@ -23,6 +23,9 @@
 #define BWIDGETS_DEFAULT_LABEL_ALIGN BStyles::TEXT_ALIGN_CENTER
 #define BWIDGETS_DEFAULT_LABEL_VALIGN BStyles::TEXT_VALIGN_MIDDLE
 
+#define BWIDGETS_LABEL_TEXT_CHANGED_MESSAGE "TEXT_CHANGED"
+#define BWIDGETS_LABEL_EDIT_ENTERED_MESSAGE "EDIT_ENTERED"
+
 #include "Widget.hpp"
 
 namespace BWidgets
@@ -39,15 +42,6 @@ public:
 	Label ();
 	Label (const double x, const double y, const double width, const double height, const std::string& text);
 	Label (const double x, const double y, const double width, const double height, const std::string& name, const std::string& text);
-
-	/**
-	 * Creates a new (orphan) label and copies the label properties from a
-	 * source label. This method doesn't copy any parent or child widgets.
-	 * @param that Source label
-	 */
-	Label (const Label& that);
-
-	~Label ();
 
 	/**
 	 * Assignment. Copies the label properties from a source label and keeps
@@ -129,12 +123,34 @@ public:
 	virtual void applyTheme (BStyles::Theme& theme) override;
 	virtual void applyTheme (BStyles::Theme& theme, const std::string& name) override;
 
+	void setEditable (const bool status);
+	bool isEditable () const;
+
+	void setEditMode (const bool mode);
+	bool getEditMode () const;
+
+	void setCursor (const size_t pos);
+	void setCursor (const size_t from, const size_t to);
+
+	virtual void onButtonPressed (BEvents::PointerEvent* event) override;
+	virtual void onButtonClicked (BEvents::PointerEvent* event) override;
+	virtual void onPointerDragged (BEvents::PointerEvent* event) override;
+	virtual void onKeyPressed (BEvents::KeyEvent* event) override;
+	virtual void onKeyReleased (BEvents::KeyEvent* event) override;
+
 protected:
+	size_t getCursorFromCoords (const double x, const double y);
 	virtual void draw (const double x, const double y, const double width, const double height) override;
 
 	BColors::ColorSet labelColors;
 	BStyles::Font labelFont;
 	std::string labelText;
+	std::string oldText;
+	std::u32string u32labelText;
+	bool editable;
+	bool editMode;
+	size_t cursorFrom;
+	size_t cursorTo;
 };
 
 }
