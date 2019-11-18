@@ -667,7 +667,7 @@ void BSEQuencer_GUI::scale ()
 	propertiesScaleListBox.resizeListBoxItems (150 * sz, 20 * sz);
 
 	RESIZE (helpLabel, 1140, 40, 30, 30, sz);
-	if (scaleEditor) RESIZE ((*scaleEditor), 420, 20, 360, 760, sz);
+	if (scaleEditor) {RESIZE ((*scaleEditor), 420, 20, 360, 760, sz);}
 
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
 	{
