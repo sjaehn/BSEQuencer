@@ -199,6 +199,24 @@ void Label::setCursor (const size_t from, const size_t to)
 	}
 }
 
+void Label::applyEdit ()
+{
+	if (main_) main_->removeKeyGrab (this);
+	setEditMode (false);
+	if (labelText != oldText)
+	{
+		postMessage (BWIDGETS_LABEL_TEXT_CHANGED_MESSAGE, BUtilities::makeAny<std::string> (labelText));
+		oldText = labelText;
+	}
+}
+
+void Label::discardEdit ()
+{
+	if (main_) main_->removeKeyGrab (this);
+	setEditMode (false);
+	if (labelText != oldText) setText (oldText);
+}
+
 void Label::onKeyPressed (BEvents::KeyEvent* event)
 {
 	if (editable && (event) && (event->getWidget () == this) && (main_) && (main_->getKeyGrabWidget (0) == this))
@@ -227,23 +245,11 @@ void Label::onKeyPressed (BEvents::KeyEvent* event)
 			break;
 
 			case 13:	// Enter
-			{
-				main_->removeKeyGrab (this);
-				setEditMode (false);
-				if (labelText != oldText)
-				{
-					postMessage (BWIDGETS_LABEL_TEXT_CHANGED_MESSAGE, BUtilities::makeAny<std::string> (labelText));
-					oldText = labelText;
-				}
-			}
+			applyEdit ();
 			break;
 
 			case 27:	// Escape
-			{
-				main_->removeKeyGrab (this);
-				setEditMode (false);
-				if (labelText != oldText) setText (oldText);
-			}
+			discardEdit ();
 			break;
 
 			case 127:	// Delete
@@ -297,24 +303,15 @@ void Label::onKeyReleased (BEvents::KeyEvent* event) {cbfunction[BEvents::EventT
 
 void Label::onButtonPressed (BEvents::PointerEvent* event)
 {
-	if (editable && (event) && (event->getWidget () == this) && (main_) && (main_->getKeyGrabWidget (0) == this))
+	if (editable && (event) && (event->getWidget () == this) && (main_))
 	{
+		main_->setKeyGrab (this);
+		setEditMode (true);
 		size_t cursor = getCursorFromCoords (event->getX (), event->getY ());
 		setCursor (cursor, cursor);
 	}
 
 	cbfunction[BEvents::EventType::BUTTON_PRESS_EVENT] (event);
-}
-
-void Label::onButtonClicked (BEvents::PointerEvent* event)
-{
-	if (editable && (event) && (event->getWidget () == this) && (main_) && (main_->getKeyGrabWidget (0) != this))
-	{
-		main_->setKeyGrab (this);
-		setEditMode (true);
-	}
-
-	cbfunction[BEvents::EventType::BUTTON_CLICK_EVENT] (event);
 }
 
 void Label::onPointerDragged (BEvents::PointerEvent* event)

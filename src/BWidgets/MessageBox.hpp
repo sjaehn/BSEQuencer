@@ -135,6 +135,8 @@ public:
 	 */
 	double getButtonValue  (const std::string& label) const;
 
+	std::string getButtonText (const double value) const;
+
 	//TODO virtual void setBorder (const BStyles::Border& border) override;
 
 	/**

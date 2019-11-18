@@ -193,6 +193,14 @@ double MessageBox::getButtonValue  (const std::string& label) const
 	return 0;
 }
 
+std::string MessageBox::getButtonText (const double value) const
+{
+	size_t v = value;
+	if ((v < 1) || (v > buttons.size ())) return "";
+	if (!buttons[v - 1]) return "";
+	return buttons[v - 1]->getLabel ()-> getText ();
+}
+
 void MessageBox::setTextColors (const BColors::ColorSet& colorset) {textBox.setTextColors (colorset);}
 
 BColors::ColorSet* MessageBox::getTextColors () {return textBox.getTextColors ();}
@@ -315,7 +323,7 @@ void MessageBox::redirectPostValueChanged (BEvents::Event* event)
 		{
 			std::string label = w->getLabel ()->getText ();
 			MessageBox* p = (MessageBox*) w->getParent ();
-			if (p->getParent ())
+			if (p->getMainWindow ())
 			{
 				// Button pressed ?
 				if (w->getValue ())
@@ -326,7 +334,7 @@ void MessageBox::redirectPostValueChanged (BEvents::Event* event)
 					if (v)
 					{
 						p->setValue (v);
-						p->hide ();
+						p->postCloseRequest ();
 					}
 				}
 			}

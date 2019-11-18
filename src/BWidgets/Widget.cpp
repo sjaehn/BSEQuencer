@@ -34,7 +34,7 @@ Widget::Widget(const double x, const double y, const double width, const double 
 		name_ (name), widgetSurface (), widgetState (BWIDGETS_DEFAULT_STATE), focusWidget (nullptr)
 {
 	mergeable.fill (false);
-	mergeable[BEvents::EXPOSE_EVENT] = true;
+	mergeable[BEvents::EXPOSE_REQUEST_EVENT] = true;
 	mergeable[BEvents::POINTER_MOTION_EVENT] = true;
 	mergeable[BEvents::POINTER_DRAG_EVENT] = true;
 	mergeable[BEvents::WHEEL_SCROLL_EVENT] = true;
@@ -57,9 +57,8 @@ Widget::Widget (const Widget& that) :
 
 Widget::~Widget()
 {
-	// Hide widget first (prevents filling the event stack with superfluous expose
-	// events from released child widgets)
-	hide ();
+	// Release from parent (and main) if still linked
+	if (parent_) parent_->release (this);
 
 	// Release children
 	while (!children_.empty ())
@@ -70,9 +69,6 @@ Widget::~Widget()
 		// Hard kick out if release failed
 		if (w == children_.back ()) children_.pop_back ();
 	}
-
-	// Release from parent (and main) if still linked
-	if (parent_) parent_->release (this);
 
 	cairo_surface_destroy (widgetSurface);
 }
@@ -500,9 +496,20 @@ void Widget::applyTheme (BStyles::Theme& theme, const std::string& name)
 	}
 }
 
-void Widget::onConfigure (BEvents::ExposeEvent* event) {} // Empty, only Windows handle configure events
-void Widget::onExpose (BEvents::ExposeEvent* event) {} // Empty, only Windows handle expose events
-void Widget::onClose () {} // Empty, only Windows handle close events
+void Widget::onConfigureRequest (BEvents::ExposeEvent* event) {cbfunction[BEvents::EventType::CONFIGURE_REQUEST_EVENT] (event);}
+void Widget::onExposeRequest (BEvents::ExposeEvent* event) {cbfunction[BEvents::EventType::EXPOSE_REQUEST_EVENT] (event);}
+
+void Widget::onCloseRequest (BEvents::WidgetEvent* event)
+{
+	cbfunction[BEvents::EventType::CLOSE_REQUEST_EVENT] (event);
+
+	if ((event) && (event->getWidget () == this))
+	{
+		Widget* c = event->getRequestWidget ();
+		if (isChild (c)) release (c);
+	}
+}
+
 void Widget::onKeyPressed (BEvents::KeyEvent* event) {cbfunction[BEvents::EventType::KEY_PRESS_EVENT] (event);}
 void Widget::onKeyReleased (BEvents::KeyEvent* event) {cbfunction[BEvents::EventType::KEY_RELEASE_EVENT] (event);}
 void Widget::onButtonPressed (BEvents::PointerEvent* event) {cbfunction[BEvents::EventType::BUTTON_PRESS_EVENT] (event);}
@@ -606,7 +613,16 @@ void Widget::postRedisplay (const double xabs, const double yabs, const double w
 {
 	if (main_)
 	{
-		BEvents::ExposeEvent* event = new BEvents::ExposeEvent (this, BEvents::EXPOSE_EVENT, xabs, yabs, width, height);
+		BEvents::ExposeEvent* event = new BEvents::ExposeEvent (main_, this, BEvents::EXPOSE_REQUEST_EVENT, xabs, yabs, width, height);
+		main_->addEventToQueue (event);
+	}
+}
+
+void Widget::postCloseRequest ()
+{
+	if (main_)
+	{
+		BEvents::WidgetEvent* event = new BEvents::WidgetEvent (main_, this, BEvents::CLOSE_REQUEST_EVENT);
 		main_->addEventToQueue (event);
 	}
 }

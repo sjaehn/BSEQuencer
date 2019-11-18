@@ -82,7 +82,7 @@ public:
 	void send_ui_off ();
 	void send_pad (int row, int step);
 	void send_scaleMaps (int scaleNr);
-	virtual void onConfigure (BEvents::ExposeEvent* event) override;
+	virtual void onConfigureRequest (BEvents::ExposeEvent* event) override;
 	void applyTheme (BStyles::Theme& theme) override;
 
 	LV2UI_Controller controller;

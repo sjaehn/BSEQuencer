@@ -796,9 +796,9 @@ void BSEQuencer_GUI::applyTheme (BStyles::Theme& theme)
 	//scaleEditor.applyTheme (theme);
 }
 
-void BSEQuencer_GUI::onConfigure (BEvents::ExposeEvent* event)
+void BSEQuencer_GUI::onConfigureRequest (BEvents::ExposeEvent* event)
 {
-	Window::onConfigure (event);
+	Window::onConfigureRequest (event);
 
 	sz = (width_ / 1200 > height_ / 820 ? height_ / 820 : width_ / 1200);
 	scale ();

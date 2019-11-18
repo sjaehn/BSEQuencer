@@ -49,9 +49,9 @@ enum InputDevice
  */
 enum EventType
 {
-	CONFIGURE_EVENT,
-	EXPOSE_EVENT,
-	CLOSE_EVENT,
+	CONFIGURE_REQUEST_EVENT,
+	EXPOSE_REQUEST_EVENT,
+	CLOSE_REQUEST_EVENT,
 	KEY_PRESS_EVENT,
 	KEY_RELEASE_EVENT,
 	BUTTON_PRESS_EVENT,
@@ -134,16 +134,47 @@ public:
  *****************************************************************************/
 
 
+ /**
+  * Class BEvents::WidgetEvent
+  *
+  * Widget events are emitted by an (event) widget if the widget is requested
+  * by an other (request) widget. This event class is typically used if opening
+  * or closing of a window or an request widget is requested.
+  */
+ class WidgetEvent : public Event
+ {
+ protected:
+ 	BWidgets::Widget* requestWidget;
+
+ public:
+ 	WidgetEvent () :
+ 		WidgetEvent (nullptr, nullptr, NO_EVENT) {}
+ 	WidgetEvent (BWidgets::Widget* eventWidget, BWidgets::Widget* requestWidget, const EventType type) :
+ 		Event (eventWidget, type),  requestWidget (requestWidget) {}
+
+ 	/**
+ 	 * Gets a pointer to the widget which request the event.
+ 	 * @return Pointer to the widget
+ 	 */
+ 	BWidgets::Widget* getRequestWidget ()
+ 	{return requestWidget;}
+
+ };
+ /*
+  * End of class BEvents::WidgetEvent
+  *****************************************************************************/
+
+
 /**
  * Class BEvents::ExposeEvent
  *
- * Expose events are emitted (e.g., by a widget) if the visual output should be
+ * Expose events are emitted by a parent event widget (or window) if the visual
+ * output of a child (request) widget is requested to be
  * updated. An expose event additionally contains the coordinates (x, y, width
  * and height) of the output region (relative to the widgets origin) that should
- * be updated. Expose events will be handled only by the respective main window
- * (a BWidgets::Window).
+ * be updated.
  */
-class ExposeEvent : public Event
+class ExposeEvent : public WidgetEvent
 {
 protected:
 	double exposeX0;
@@ -153,9 +184,10 @@ protected:
 
 public:
 	ExposeEvent () :
-		ExposeEvent (nullptr, NO_EVENT, 0, 0, 0, 0) {};
-	ExposeEvent (BWidgets::Widget* widget, const EventType type, const double x, const double y, const double width, const double height) :
-		Event (widget, type), exposeX0 (x), exposeY0 (y), exposeWidth (width), exposeHeight (height) {}
+		ExposeEvent (nullptr, nullptr, NO_EVENT, 0, 0, 0, 0) {};
+	ExposeEvent (BWidgets::Widget* eventWidget, BWidgets::Widget* requestWidget, const EventType type,
+		     const double x, const double y, const double width, const double height) :
+		WidgetEvent (eventWidget, requestWidget, type), exposeX0 (x), exposeY0 (y), exposeWidth (width), exposeHeight (height) {}
 
 	/**
 	 * Redefines the x coordinate of the output region for the expose event

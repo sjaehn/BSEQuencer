@@ -88,21 +88,22 @@ public:
 	/**
 	 * Executes an reexposure of the area given by the expose event.
 	 * @param event Expose event containing the widget that emitted the event
-	 * 				and the area that should be reexposed.
+	 * 		and the area that should be reexposed.
 	 */
-	virtual void onExpose (BEvents::ExposeEvent* event) override;
+	virtual void onExposeRequest (BEvents::ExposeEvent* event) override;
 
 	/**
 	 * Predefined empty method to handle a BEvents::EventType::CONFIGURE_EVENT.
-	 * BEvents::EventType::CONFIGURE_EVENTs will only be handled by
-	 * BWidget::Window.
+	 * @param event Expose event containing the widget that emitted the event
+	 * 		and the area that should be reexposed.
 	 */
-	virtual void onConfigure (BEvents::ExposeEvent* event) override;
+	virtual void onConfigureRequest (BEvents::ExposeEvent* event) override;
 
 	/**
 	 * Sets the close flag and thus ends the run method.
+	 * @param event Widget event containing the widget that emitted the event
 	 */
-	virtual void onClose () override;
+	virtual void onCloseRequest (BEvents::WidgetEvent* event) override;
 
 	/*
 	 * Links or unlinks a mouse button to a widget.
