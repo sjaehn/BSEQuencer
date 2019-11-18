@@ -83,6 +83,7 @@ public:
 	void send_pad (int row, int step);
 	void send_scaleMaps (int scaleNr);
 	virtual void onConfigureRequest (BEvents::ExposeEvent* event) override;
+	virtual void onCloseRequest (BEvents::WidgetEvent* event) override;
 	void applyTheme (BStyles::Theme& theme) override;
 
 	LV2UI_Controller controller;
@@ -97,7 +98,6 @@ private:
 	static void padsPressedCallback (BEvents::Event* event);
 	static void padsScrolledCallback (BEvents::Event* event);
 	static void padsFocusedCallback (BEvents::Event* event);
-	static void editorCloseCallback (BEvents::Event* event);
 	void scale ();
 	void scaleFocus ();
 	void drawCaption ();
@@ -252,7 +252,7 @@ private:
 	std::array<ChBox, NR_SEQUENCER_CHS> chBoxes;
 
 	CircledSymbol helpLabel;
-	ScaleEditor scaleEditor;
+	ScaleEditor* scaleEditor;
 
 	// Definition of styles
 	BColors::ColorSet fgColors = {{{0.0, 0.25, 0.75, 1.0}, {0.25, 0.75, 0.75, 1.0}, {0.0, 0.0, 0.1, 1.0}, {0.0, 0.0, 0.0, 0.0}}};

@@ -86,7 +86,8 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	propertiesScaleListBox (100, 175, 150, 20, 0, -380, 150, 380, "menu", scaleItems, 0.0),
 
 	helpLabel (1140, 40, 30, 30, "ilabel", "?"),
-	scaleEditor (420, 20, 360, 760, "scaleeditor", (bundle_path ? std::string (bundle_path) : std::string ("")), 0, ScaleMap (), BScale (0,defaultScale))
+	scaleEditor (nullptr)
+	//(420, 20, 360, 760, "scaleeditor", (bundle_path ? std::string (bundle_path) : std::string ("")), 0, ScaleMap (), BScale (0,defaultScale))
 
 {
 	// Init scale maps
@@ -196,7 +197,6 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 
 	helpLabel.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, helpPressedCallback);
 	propertiesScaleEditIcon.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, editPressedCallback);
-	scaleEditor.setCallbackFunction(BEvents::VALUE_CHANGED_EVENT, editorCloseCallback);
 
 	// Apply theme
 	bgImageSurface = cairo_image_surface_create_from_png ((pluginPath + BG_FILE).c_str());
@@ -321,8 +321,11 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 
 BSEQuencer_GUI::~BSEQuencer_GUI ()
 {
+	if (scaleEditor) delete scaleEditor;
+
 	BWidgets::FocusWidget* focus = padSurface.getFocusWidget();
 	if (focus) delete focus;
+
 	send_ui_off ();
 }
 
@@ -664,7 +667,7 @@ void BSEQuencer_GUI::scale ()
 	propertiesScaleListBox.resizeListBoxItems (150 * sz, 20 * sz);
 
 	RESIZE (helpLabel, 1140, 40, 30, 30, sz);
-	RESIZE (scaleEditor, 420, 20, 360, 760, sz);
+	if (scaleEditor) RESIZE ((*scaleEditor), 420, 20, 360, 760, sz);
 
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
 	{
@@ -802,6 +805,33 @@ void BSEQuencer_GUI::onConfigureRequest (BEvents::ExposeEvent* event)
 
 	sz = (width_ / 1200 > height_ / 820 ? height_ / 820 : width_ / 1200);
 	scale ();
+}
+
+void BSEQuencer_GUI::onCloseRequest (BEvents::WidgetEvent* event)
+{
+	if (event && (scaleEditor) && (event->getRequestWidget () == scaleEditor))
+	{
+		int mapNr = scaleEditor->getMapNr();
+		scaleNotes[mapNr] = scaleEditor->getScale().getScale();
+		scaleMaps[mapNr] = scaleEditor->getScaleMap();
+
+		// Update captions
+		if (controllers[SCALE] == mapNr) drawCaption();
+
+		// Update scale listbox
+		BItems::ItemList::iterator it = std::next (propertiesScaleListBox.getItemList()->begin (), mapNr);
+		BWidgets::Label* l = (BWidgets::Label*) (*it).getWidget ();
+		if (l) l->setText (scaleMaps[mapNr].name);
+		propertiesScaleListBox.update();
+
+		// Notify plugin
+		send_scaleMaps (mapNr);
+
+		// And close / delete
+		delete scaleEditor;
+		scaleEditor = nullptr;
+	}
+	else Window::onCloseRequest (event);
 }
 
 void BSEQuencer_GUI::send_ui_on ()
@@ -950,22 +980,23 @@ void BSEQuencer_GUI::editPressedCallback (BEvents::Event* event)
 		BSEQuencer_GUI* ui = (BSEQuencer_GUI*)(((BWidgets::Widget*)(event->getWidget()))->getMainWindow());
 		int mapNr = ui->propertiesScaleListBox.getValue();
 
-		if (ui->scaleEditor.getParent()) ui->scaleEditor.getParent()->release (&(ui->scaleEditor));
-
-		ui->scaleEditor.setValue (0.0);
-		ui->scaleEditor.setMapNr (mapNr);
-		ui->scaleEditor.setScale
-		(
-			BScale
+		if (!ui->scaleEditor)
+		{
+			ui->scaleEditor = new ScaleEditor
 			(
-				(int (ui->controllers[ROOT] + ui->controllers[SIGNATURE] + 12)) % 12,
-				(SignatureIndex) ui->controllers[SIGNATURE],
-				ui->scaleNotes[mapNr]
-			)
-		);
-		ui->scaleEditor.setScaleMap (ui->scaleMaps[mapNr]);
-		ui->scaleEditor.moveTo (420, 20);
-		ui->add (ui->scaleEditor);
+				420, 20, 360, 760, "scaleeditor",
+				ui->pluginPath,
+				mapNr,
+				ui->scaleMaps[mapNr],
+				BScale
+				(
+					(int (ui->controllers[ROOT] + ui->controllers[SIGNATURE] + 12)) % 12,
+					(SignatureIndex) ui->controllers[SIGNATURE],
+					ui->scaleNotes[mapNr]
+				)
+			);
+			ui->add (*ui->scaleEditor);
+		}
 	}
 }
 
@@ -1023,30 +1054,6 @@ void BSEQuencer_GUI::undoClickedCallback (BEvents::Event* event)
 				ui->drawPad ();
 			}
 		}
-	}
-}
-
-void BSEQuencer_GUI::editorCloseCallback (BEvents::Event* event)
-{
-	if ((event) && (event->getWidget ()) && (event->getWidget()->getMainWindow()))
-	{
-		ScaleEditor* scaleEditor = (ScaleEditor*)(event->getWidget());
-		BSEQuencer_GUI* ui = (BSEQuencer_GUI*)(scaleEditor->getMainWindow());
-		double val = scaleEditor->getValue();
-		if (val == 1.0)
-		{
-			int mapNr = scaleEditor->getMapNr();
-			ui->scaleNotes[mapNr] = scaleEditor->getScale().getScale();
-			ui->scaleMaps[mapNr] = scaleEditor->getScaleMap();
-
-			// Update captions
-			if (ui->controllers[SCALE] == mapNr) ui->drawCaption();
-
-			// Notify plugin
-			ui->send_scaleMaps (mapNr);
-		}
-
-		if ((val == 1.0) || (val == -1.0)) ui->release (scaleEditor);
 	}
 }
 

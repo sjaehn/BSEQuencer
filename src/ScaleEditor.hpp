@@ -55,6 +55,8 @@ protected:
 	static void symbolListboxValueChangedCallback (BEvents::Event* event);
 	static void noteListboxValueChangedCallback (BEvents::Event* event);
 	static void buttonClickCallback (BEvents::Event* event);
+	static void labelClickCallback (BEvents::Event* event);
+	static void labelMessageCallback (BEvents::Event* event);
 	static void pianoClickCallback (BEvents::Event* event);
 
 	BWidgets::Label nameLabel;
@@ -161,6 +163,10 @@ ScaleEditor::ScaleEditor(const double x, const double y, const double width, con
 	bgSurface = cairo_image_surface_create_from_png ((pluginPath + "ScaleEditor.png").c_str());
 	scaleEditorBg.loadFillFromCairoSurface(bgSurface);
 
+	scaleNameLabel.setEditable (true);
+	scaleNameLabel.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, labelClickCallback);
+	scaleNameLabel.setCallbackFunction(BEvents::MESSAGE_EVENT, labelMessageCallback);
+
 	// Create note symbols (for nrListbox)
 	BScale sc = BScale(0, {CROMATICSCALE});
 	std::list<BItems::Item> noteNameItems;
@@ -212,6 +218,9 @@ ScaleEditor::ScaleEditor(const double x, const double y, const double width, con
 
 		nrAltSymbolLabel[i] = BWidgets::Label (248, 580 - i * 30, 80, 24, "ctlabel", "");
 		nrAltSymbolLabel[i].rename ("ctlabel");
+		nrAltSymbolLabel[i].setEditable (true);
+		nrAltSymbolLabel[i].setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, labelClickCallback);
+		nrAltSymbolLabel[i].setCallbackFunction(BEvents::MESSAGE_EVENT, labelMessageCallback);
 		updateAltSymbol (i);
 		nrAltSymbolLabel[i].applyTheme (theme);
 		add (nrAltSymbolLabel[i]);
@@ -484,6 +493,67 @@ void ScaleEditor::buttonClickCallback (BEvents::Event* event)
 
 			if (button == &(scaleEditor->cancelButton)) scaleEditor->setValue (-1.0);
 			else if (button == &(scaleEditor->applyButton)) scaleEditor->setValue (1.0);
+			scaleEditor->postCloseRequest ();
+		}
+	}
+}
+
+void ScaleEditor::labelClickCallback (BEvents::Event* event)
+{
+	if ((event) && (event->getEventType() == BEvents::BUTTON_PRESS_EVENT) && (event->getWidget()))
+	{
+		BWidgets::Label* label = (BWidgets::Label*) event->getWidget();
+		if (label->getParent ())
+		{
+			ScaleEditor* scaleEditor = (ScaleEditor*)(label->getParent());
+
+			// Switch off edit mode for all other editable labels
+			if (label == &scaleEditor->scaleNameLabel)
+			{
+				for (BWidgets::Label& l : scaleEditor->nrAltSymbolLabel)
+				{
+					if (l.getEditMode ()) l.applyEdit ();
+				}
+			}
+
+			else
+			{
+				if (scaleEditor->scaleNameLabel.getMainWindow ()) scaleEditor->scaleNameLabel.getMainWindow ()->removeKeyGrab (&scaleEditor->scaleNameLabel);
+				scaleEditor->scaleNameLabel.setEditMode (false);
+				for (BWidgets::Label& l : scaleEditor->nrAltSymbolLabel)
+				{
+					if ((label != &l) && l.getEditMode ()) l.applyEdit ();
+				}
+			}
+		}
+	}
+}
+
+void ScaleEditor::labelMessageCallback (BEvents::Event* event)
+{
+	if ((event) && (event->getEventType() == BEvents::MESSAGE_EVENT) && (event->getWidget()))
+	{
+		BEvents::MessageEvent* me = (BEvents::MessageEvent*) event;
+
+		if (me->getName () == BWIDGETS_LABEL_TEXT_CHANGED_MESSAGE)
+		{
+			BWidgets::Label* label = (BWidgets::Label*) event->getWidget();
+			if (label->getParent ())
+			{
+				ScaleEditor* scaleEditor = (ScaleEditor*)(label->getParent());
+
+				if (label == &scaleEditor->scaleNameLabel) strncpy (scaleEditor->scaleMap.name, scaleEditor->scaleNameLabel.getText ().c_str (), 63);
+
+				else for (size_t i = 0; i < ROWS; ++i)
+				{
+					BWidgets::Label* l = &scaleEditor->nrAltSymbolLabel[i];
+					if (label == l)
+					{
+						strncpy (scaleEditor->scaleMap.altSymbols[i], l->getText ().c_str (), 15);
+						break;
+					}
+				}
+			}
 		}
 	}
 }

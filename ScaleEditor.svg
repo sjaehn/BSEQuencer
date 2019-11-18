@@ -1231,7 +1231,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.98994949"
-     inkscape:cx="267.98172"
+     inkscape:cx="-12.840688"
      inkscape:cy="368.44716"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -1254,7 +1254,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -1274,14 +1274,14 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:6.61458302px;font-family:'Good Times';-inkscape-font-specification:'Good Times';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="21.260599"
-       y="105.36042"
+       x="2.8190017"
+       y="104.82588"
        id="text1218"><tspan
          sodipodi:role="line"
          id="tspan1216"
-         x="21.260599"
-         y="105.36042"
-         style="fill:#ffffff;stroke-width:0.26458332">Scale Editor</tspan></text>
+         x="2.8190017"
+         y="104.82588"
+         style="fill:#ffffff;stroke-width:0.26458332">Scale &amp; Drumkit Editor</tspan></text>
     <path
        style="fill:#002595;fill-opacity:0.24705882;stroke:#ffffff;stroke-width:0;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0;filter:url(#filter1003)"
        d="m 210,730 a 59.999994,59.999994 0 0 0 -51.89844,30 h 40 l 20,30 -20,30 H 158.125 A 59.999994,59.999994 0 0 0 210,850 59.999994,59.999994 0 0 0 261.875,820 H 440 a 30,30 0 0 0 30,-30 30,30 0 0 0 -30,-30 H 261.89844 A 59.999994,59.999994 0 0 0 210,730 Z m 230,50 a 9.9999997,9.9999997 0 0 1 10,10 9.9999997,9.9999997 0 0 1 -10,10 9.9999997,9.9999997 0 0 1 -10,-10 9.9999997,9.9999997 0 0 1 10,-10 z"
