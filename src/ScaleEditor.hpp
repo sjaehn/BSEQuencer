@@ -587,7 +587,18 @@ void ScaleEditor::pianoClickCallback (BEvents::Event* event)
 			if (newScaleNotes != scale->getScale())
 			{
 				scale->setScale (newScaleNotes);
-				for (int i = 0; i < ROWS; ++i) scaleEditor->updateAltSymbol (i);
+
+				// Update auto numbering of scale map elements
+				for (int i = 0, count = 0; i < ROWS; ++i)
+				{
+					if (!(scaleEditor->scaleMap.elements[i] & 0x0100))
+					{
+						scaleEditor->scaleMap.elements[i] = count;
+						scaleEditor->scaleMap.altSymbols[i][0] = '\0';
+						++count;
+					}
+					scaleEditor->updateAltSymbol (i);
+				}
 			}
 		}
 	}
