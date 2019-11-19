@@ -984,7 +984,7 @@ void BSEQuencer_GUI::editPressedCallback (BEvents::Event* event)
 		{
 			ui->scaleEditor = new ScaleEditor
 			(
-				420, 20, 360, 760, "scaleeditor",
+				420 * ui->sz, 20 * ui->sz, 360 * ui->sz, 760 * ui->sz, "scaleeditor",
 				ui->pluginPath,
 				mapNr,
 				ui->scaleMaps[mapNr],
