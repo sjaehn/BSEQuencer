@@ -47,6 +47,7 @@
 #include "ports.h"
 #include "urids.h"
 #include "BScale.hpp"
+#include "ScaleMap.hpp"
 #include "Pad.hpp"
 #include "PadMessage.hpp"
 #include "StaticArrayList.hpp"
@@ -179,17 +180,7 @@ private:
 	Key defaultKey;
 	BScale scale;
 
-	std::array<BScaleNotes, NR_SYSTEM_SCALES + NR_USER_SCALES> scaleNotes	=
-	{{
-		// System scales
-		{CROMATICSCALE}, {MAJORSCALE}, {MINORSCALE}, {HARMONICMAJORSCALE}, {HARMONICMINORSCALE}, {MELODICMINORSCALE},
-		{DORIANSCALE}, {PHRYGIANSCALE}, {LYDIANSCALE}, {MIXOLYDIANSCALE}, {LOKRIANSCALE}, {HUNGARIANMINORSCALE},
-		{MAJORPENTATONICSCALE}, {MINORPENTATONICSCALE},
-		// User scales
-		{CROMATICSCALE}, {CROMATICSCALE}, {CROMATICSCALE}, {CROMATICSCALE}
-	}};
-
-	ScaleMap scaleMaps[NR_SYSTEM_SCALES + NR_USER_SCALES];
+	RTScaleMap rtScaleMaps[NR_SYSTEM_SCALES + NR_USER_SCALES];
 
 
 };

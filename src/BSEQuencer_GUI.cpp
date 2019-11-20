@@ -83,25 +83,27 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 				 BItems::ItemList ({{-1, "-1"}, {0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}}), 4.0),
 	propertiesScaleLabel (10, 175, 50, 20, "lflabel", "Scale"),
 	propertiesScaleEditIcon (70, 175, 20, 20, "widget", (bundle_path ? std::string (bundle_path) + EDIT_SYMBOL : std::string (""))),
-	propertiesScaleListBox (100, 175, 150, 20, 0, -380, 150, 380, "menu", scaleItems, 0.0),
+	propertiesScaleListBox (),
 
 	helpLabel (1140, 40, 30, 30, "ilabel", "?"),
 	scaleEditor (nullptr)
-	//(420, 20, 360, 760, "scaleeditor", (bundle_path ? std::string (bundle_path) : std::string ("")), 0, ScaleMap (), BScale (0,defaultScale))
+	//(420, 20, 360, 760, "scaleeditor", (bundle_path ? std::string (bundle_path) : std::string ("")), 0, RTScaleMap (), BScale (0,defaultScale))
 
 {
 	// Init scale maps
 	for (int scaleNr = 0; scaleNr < NR_SYSTEM_SCALES + NR_USER_SCALES; ++scaleNr)
 	{
-		if (scaleNr >= NR_SYSTEM_SCALES) strncpy (scaleMaps[scaleNr].name, ("User scale " + std::to_string (scaleNr + 1 - NR_SYSTEM_SCALES)).c_str(), 64);
-		else scaleMaps[scaleNr].name[0] = '\0';
-
-		for (int row = 0; row < ROWS; ++row)
-		{
-			scaleMaps[scaleNr].elements[row] = row;
-			scaleMaps[scaleNr].altSymbols[row][0] = '\0';
-		}
+		scaleMaps[scaleNr] = defaultScaleMaps[scaleNr];
 	}
+
+	// Init propertiesScaleListBox
+	BItems::ItemList scaleItems;
+	for (int scaleNr = 0; scaleNr < NR_SYSTEM_SCALES + NR_USER_SCALES; ++scaleNr)
+	{
+		scaleItems.push_back (BItems::Item (scaleNr, scaleMaps[scaleNr].name));
+	}
+	propertiesScaleListBox = BWidgets::PopupListBox (100, 175, 150, 20, 0, -380, 150, 380, "menu", scaleItems, 0.0);
+	propertiesScaleListBox.rename ("menu");
 
 	// Init toolbox buttons
 	toolButtonBox.addButton (80, 70, 20, 20, {{0.0, 0.03, 0.06, 1.0}, NO_CTRL, "No channel"});
@@ -497,6 +499,7 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 			else if (obj->body.otype == uris.notify_scaleMapsEvent)
 			{
 				int iD = 0;
+				int scaleNr = 0;
 
 				LV2_Atom *oId = NULL, *oName = NULL, *oElements = NULL, *oAltSymbols = NULL, *oScale = NULL;
 				lv2_atom_object_get
@@ -509,18 +512,29 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 					NULL
 				);
 
-				if (oId && (oId->type == uris.atom_Int)) iD = ((LV2_Atom_Int*)oId)->body;
+				if (oId && (oId->type == uris.atom_Int))
+				{
+					iD = ((LV2_Atom_Int*)oId)->body;
+					for (int i = 0; i < NR_SYSTEM_SCALES + NR_USER_SCALES; ++i)
+					{
+						if (iD == scaleMaps[i].iD)
+						{
+							scaleNr = i;
+							break;
+						}
+					}
+				}
 
-				if ((iD >= NR_SYSTEM_SCALES) && (iD < NR_SYSTEM_SCALES + NR_USER_SCALES))
+				if ((scaleNr >= NR_SYSTEM_SCALES) && (scaleNr < NR_SYSTEM_SCALES + NR_USER_SCALES))
 				{
 					// Name
 					if (oName && (oName->type == uris.atom_String))
 					{
-						strncpy (scaleMaps[iD].name, (char*) LV2_ATOM_BODY(oName), 64);
+						scaleMaps[scaleNr].name = std::string ((char*) LV2_ATOM_BODY(oName));
 						std::string s = (char*) LV2_ATOM_BODY(oName);
 						if (propertiesScaleListBox.getItemList())
 						{
-							BItems::ItemList::iterator it = std::next (propertiesScaleListBox.getItemList()->begin (), iD);
+							BItems::ItemList::iterator it = std::next (propertiesScaleListBox.getItemList()->begin (), scaleNr);
 							BWidgets::Label* l = (BWidgets::Label*) (*it).getWidget ();
 							if (l) l->setText (s);
 							propertiesScaleListBox.update();
@@ -533,7 +547,7 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 						const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oElements;
 						if (vec->body.child_type == uris.atom_Int)
 						{
-							memcpy (scaleMaps[iD].elements, &vec->body + 1, 16 * sizeof (int));
+							memcpy (scaleMaps[scaleNr].elements.data(), &vec->body + 1, 16 * sizeof (int));
 						}
 					}
 
@@ -543,7 +557,13 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 						const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oAltSymbols;
 						if (vec->body.child_type == uris.atom_String)
 						{
-							memcpy (scaleMaps[iD].altSymbols, &vec->body + 1, 16 * 16);
+							char rtAltSymbols[16][16];
+							memcpy (rtAltSymbols, (&vec->body + 1), 16 * 16);
+
+							for (size_t r = 0; r < ROWS; ++r)
+							{
+								scaleMaps[scaleNr].altSymbols[r] = std::string (rtAltSymbols[r]);
+							}
 						}
 					}
 
@@ -554,11 +574,11 @@ void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
 						if (vec->body.child_type == uris.atom_Int)
 						{
 							BScaleNotes* notes = (BScaleNotes*) (&vec->body + 1);
-							scaleNotes[iD] = *notes;
+							scaleMaps[scaleNr].scaleNotes = *notes;
 						}
 					}
 
-					if (iD == controllers[SCALE]) drawCaption ();
+					if (scaleNr == controllers[SCALE]) drawCaption ();
 
 				}
 			}
@@ -812,7 +832,6 @@ void BSEQuencer_GUI::onCloseRequest (BEvents::WidgetEvent* event)
 	if (event && (scaleEditor) && (event->getRequestWidget () == scaleEditor))
 	{
 		int mapNr = scaleEditor->getMapNr();
-		scaleNotes[mapNr] = scaleEditor->getScale().getScale();
 		scaleMaps[mapNr] = scaleEditor->getScaleMap();
 
 		// Update captions
@@ -873,21 +892,22 @@ void BSEQuencer_GUI::send_pad (int row, int step)
 
 void BSEQuencer_GUI::send_scaleMaps (int scaleNr)
 {
+	RTScaleMap rtScaleMap; rtScaleMap = scaleMaps[scaleNr];
 	uint8_t obj_buf[2048];
 	lv2_atom_forge_set_buffer(&forge, obj_buf, sizeof(obj_buf));
 
 	LV2_Atom_Forge_Frame frame;
 	LV2_Atom* msg = (LV2_Atom*)lv2_atom_forge_object(&forge, &frame, 0, uris.notify_scaleMapsEvent);
 	lv2_atom_forge_key(&forge, uris.notify_scaleID);
-	lv2_atom_forge_int(&forge, scaleNr);
+	lv2_atom_forge_int(&forge, rtScaleMap.iD);
 	lv2_atom_forge_key(&forge, uris.notify_scaleName);
-	lv2_atom_forge_string (&forge, scaleMaps[scaleNr].name, 64);
+	lv2_atom_forge_string (&forge, rtScaleMap.name, 64);
 	lv2_atom_forge_key(&forge, uris.notify_scaleElements);
-	lv2_atom_forge_vector(&forge, sizeof (int), uris.atom_Int, 16, (void*) scaleMaps[scaleNr].elements);
+	lv2_atom_forge_vector(&forge, sizeof (int), uris.atom_Int, 16, (void*) rtScaleMap.elements);
 	lv2_atom_forge_key(&forge, uris.notify_scaleAltSymbols);
-	lv2_atom_forge_vector(&forge, 16, uris.atom_String, 16, (void*) scaleMaps[scaleNr].altSymbols);
+	lv2_atom_forge_vector(&forge, 16, uris.atom_String, 16, (void*) rtScaleMap.altSymbols);
 	lv2_atom_forge_key(&forge, uris.notify_scale);
-	BScaleNotes* notes = &scaleNotes[scaleNr];
+	BScaleNotes* notes = &rtScaleMap.scaleNotes;
 	lv2_atom_forge_vector(&forge, sizeof (int), uris.atom_Int, 12, (void*) notes);
 	lv2_atom_forge_pop(&forge, &frame);
 	write_function(controller, INPUT, lv2_atom_total_size(msg), uris.atom_eventTransfer, msg);
@@ -992,7 +1012,7 @@ void BSEQuencer_GUI::editPressedCallback (BEvents::Event* event)
 				(
 					(int (ui->controllers[ROOT] + ui->controllers[SIGNATURE] + 12)) % 12,
 					(SignatureIndex) ui->controllers[SIGNATURE],
-					ui->scaleNotes[mapNr]
+					ui->scaleMaps[mapNr].scaleNotes
 				)
 			);
 			ui->add (*ui->scaleEditor);
@@ -1415,7 +1435,12 @@ void BSEQuencer_GUI::drawCaption ()
 	cairo_select_font_face (cr, ctLabelFont.getFontFamily ().c_str (), ctLabelFont.getFontSlant (), ctLabelFont.getFontWeight ());
 
 	int scaleNr = controllers[SCALE];
-	BScale scale (((int)(controllers[ROOT] + controllers[SIGNATURE] + 12)) % 12, (SignatureIndex) controllers[SIGNATURE], scaleNotes[scaleNr]);
+	BScale scale
+	(
+		((int)(controllers[ROOT] + controllers[SIGNATURE] + 12)) % 12,
+		(SignatureIndex) controllers[SIGNATURE],
+		scaleMaps[scaleNr].scaleNotes
+	);
 	std::string label = "";
 
 	for (int i = 0; i < ROWS; ++i)
@@ -1426,7 +1451,7 @@ void BSEQuencer_GUI::drawCaption ()
 
 		ScaleMap* map = &(scaleMaps[scaleNr]);
 
-		if (map->altSymbols[i][0]) label = std::string (map->altSymbols[i]);
+		if (map->altSymbols[i] != "") label = map->altSymbols[i];
 		else
 		{
 			int element = map->elements[i];

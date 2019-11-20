@@ -77,11 +77,4 @@ typedef enum {
 } EditButtons;
 
 
-typedef struct {
-	char name[64];
-	int elements[ROWS];
-	char altSymbols[ROWS][16];
-} ScaleMap;
-
-
 #endif /* DEFINITIONS_H_ */

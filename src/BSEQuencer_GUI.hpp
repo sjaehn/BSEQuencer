@@ -50,6 +50,7 @@
 #include "screen.h"
 
 #include "BScale.hpp"
+#include "ScaleMap.hpp"
 #include "drawbutton.hpp"
 #include "PlayStopButton.hpp"
 #include "ButtonBox.hpp"
@@ -160,26 +161,7 @@ private:
 	double tempToolCh;
 	bool wheelScrolled;
 
-	std::array<BScaleNotes, NR_SYSTEM_SCALES + NR_USER_SCALES> scaleNotes	=
-	{{// System scales
-		{CROMATICSCALE}, {MAJORSCALE}, {MINORSCALE}, {HARMONICMAJORSCALE}, {HARMONICMINORSCALE}, {MELODICMINORSCALE},
-		{DORIANSCALE}, {PHRYGIANSCALE}, {LYDIANSCALE}, {MIXOLYDIANSCALE}, {LOKRIANSCALE}, {HUNGARIANMINORSCALE},
-		{MAJORPENTATONICSCALE}, {MINORPENTATONICSCALE},
-		// User scales
-		{CROMATICSCALE}, {CROMATICSCALE}, {CROMATICSCALE}, {CROMATICSCALE}
-	}};
-
-
-	BItems::ItemList scaleItems =
-	{{
-		{0, "Chromatic"}, {1, "Major"}, {2, "Minor"}, {3, "Harmonic major"}, {4, "Harmonic minor"}, {5, "Melodic minor"},
-		{6, "Dorian"}, {7, "Phygian"}, {8, "Lydian"}, {9, "Mixolydian"}, {10, "Lokrian"}, {11, "Hungarian minor"},
-		{12, "Major pentatonic"}, {13, "Minor pentatonic"}, {14, "User scale 1"}, {15, "User scale 2"}, {16, "User scale 3"},
-		{17, "User scale 4"}
-	}};
-
 	ScaleMap scaleMaps[NR_SYSTEM_SCALES + NR_USER_SCALES];
-
 
 	//Widgets
 	BWidgets::Widget mContainer;

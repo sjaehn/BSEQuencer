@@ -24,6 +24,7 @@
 #include <utility>
 #include "definitions.h"
 #include "BScale.hpp"
+#include "ScaleMap.hpp"
 #include "BWidgets/Widget.hpp"
 #include "BWidgets/ValueWidget.hpp"
 #include "BWidgets/HPianoRoll.hpp"
@@ -144,7 +145,7 @@ ScaleEditor::ScaleEditor(const double x, const double y, const double width, con
 						 const std::string& pluginPath, const int mapNr, const ScaleMap& scaleMap, const BScale& scale) :
 		BWidgets::ValueWidget (x, y, width, height, name, 0.0),
 		nameLabel (20, 60, 80, 20, "lflabel", "Scale name:"),
-		scaleNameLabel (120, 60, 320, 20, "lflabel", std::string (scaleMap.name)),
+		scaleNameLabel (120, 60, 320, 20, "lflabel", scaleMap.name),
 		rowLabel (20, 100, 80, 20, "lflabel", "Row"),
 		symbolLabel (70, 100, 48, 20, "ctlabel", "Mode"),
 		noteLabel (148, 100, 80, 20, "ctlabel", "Note"),
@@ -341,7 +342,7 @@ void ScaleEditor::setScaleMap (const ScaleMap& scaleMap)
 {
 	this->scaleMap = scaleMap;
 
-	scaleNameLabel.setText(std::string(scaleMap.name));
+	scaleNameLabel.setText(scaleMap.name);
 
 	// Set nr widgets
 	for (int i = 0; i < ROWS; ++i)
@@ -400,7 +401,7 @@ int ScaleEditor::getMapNr () const {return mapNr;}
 void ScaleEditor::updateAltSymbol (int nr)
 {
 	std::string symbol;
-	if (scaleMap.altSymbols[nr][0] != '\0') symbol = std::string (scaleMap.altSymbols[nr]);
+	if (scaleMap.altSymbols[nr] != "") symbol = scaleMap.altSymbols[nr];
 	else if (!(scaleMap.elements[nr] & 0x0100)) symbol = scale.getSymbol (scaleMap.elements[nr]);
 	nrAltSymbolLabel[nr].setText (symbol);
 }
@@ -431,13 +432,13 @@ void ScaleEditor::symbolListboxValueChangedCallback (BEvents::Event* event)
 			scaleEditor->nrNoteListbox[nr].show ();
 			scaleEditor->nrNoteLabel[nr].hide ();
 			BWidgets::Label* l = (BWidgets::Label*) scaleEditor->nrNoteListbox[nr].getItem()->getWidget ();
-			if (l) strncpy (scaleEditor->scaleMap.altSymbols[nr], l->getText ().c_str(), 15);
+			if (l) scaleEditor->scaleMap.altSymbols[nr] = l->getText ();
 			scaleEditor->updateAltSymbol (nr);
 		}
 
 		else
 		{
-			scaleEditor->scaleMap.elements[nr] = 0;	// Will be substituted by auto numbering later
+			scaleEditor->scaleMap.elements[nr] = 0;		// Will be substituted by auto numbering later
 			scaleEditor->nrNoteListbox[nr].hide ();
 			scaleEditor->nrNoteLabel[nr].show ();
 		}
@@ -448,7 +449,7 @@ void ScaleEditor::symbolListboxValueChangedCallback (BEvents::Event* event)
 			if (!(scaleEditor->scaleMap.elements[i] & 0x0100))
 			{
 				scaleEditor->scaleMap.elements[i] = count;
-				scaleEditor->scaleMap.altSymbols[i][0] = '\0';
+				scaleEditor->scaleMap.altSymbols[i] = "";
 				++count;
 			}
 			scaleEditor->updateAltSymbol (i);
@@ -477,7 +478,7 @@ void ScaleEditor::noteListboxValueChangedCallback (BEvents::Event* event)
 	{
 		scaleEditor->scaleMap.elements[nr] = (((int)(scaleEditor->nrNoteListbox[nr].getValue())) | 0x0100);
 		BWidgets::Label* l = (BWidgets::Label*) scaleEditor->nrNoteListbox[nr].getItem()->getWidget ();
-		if (l) strncpy (scaleEditor->scaleMap.altSymbols[nr], l->getText ().c_str(), 15);
+		if (l) scaleEditor->scaleMap.altSymbols[nr] = l->getText ();
 		scaleEditor->updateAltSymbol (nr);
 	}
 }
@@ -542,14 +543,14 @@ void ScaleEditor::labelMessageCallback (BEvents::Event* event)
 			{
 				ScaleEditor* scaleEditor = (ScaleEditor*)(label->getParent());
 
-				if (label == &scaleEditor->scaleNameLabel) strncpy (scaleEditor->scaleMap.name, scaleEditor->scaleNameLabel.getText ().c_str (), 63);
+				if (label == &scaleEditor->scaleNameLabel) scaleEditor->scaleMap.name = scaleEditor->scaleNameLabel.getText ();
 
 				else for (size_t i = 0; i < ROWS; ++i)
 				{
 					BWidgets::Label* l = &scaleEditor->nrAltSymbolLabel[i];
 					if (label == l)
 					{
-						strncpy (scaleEditor->scaleMap.altSymbols[i], l->getText ().c_str (), 15);
+						scaleEditor->scaleMap.altSymbols[i] = l->getText ();
 						break;
 					}
 				}
@@ -594,7 +595,7 @@ void ScaleEditor::pianoClickCallback (BEvents::Event* event)
 					if (!(scaleEditor->scaleMap.elements[i] & 0x0100))
 					{
 						scaleEditor->scaleMap.elements[i] = count;
-						scaleEditor->scaleMap.altSymbols[i][0] = '\0';
+						scaleEditor->scaleMap.altSymbols[i] = "";
 						++count;
 					}
 					scaleEditor->updateAltSymbol (i);

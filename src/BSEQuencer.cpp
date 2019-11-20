@@ -63,14 +63,7 @@ BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
 	// Init scale maps
 	for (int scaleNr = 0; scaleNr < NR_SYSTEM_SCALES + NR_USER_SCALES; ++scaleNr)
 	{
-		if (scaleNr >= NR_SYSTEM_SCALES) strncpy (scaleMaps[scaleNr].name, ("User scale " + std::to_string (scaleNr + 1 - NR_SYSTEM_SCALES)).c_str(), 64);
-		else scaleMaps[scaleNr].name[0] = '\0';
-
-		for (int row = 0; row < ROWS; ++row)
-		{
-			scaleMaps[scaleNr].elements[row] = row;
-			scaleMaps[scaleNr].altSymbols[row][0] = '\0';
-		}
+		rtScaleMaps[scaleNr] = defaultScaleMaps[scaleNr];
 	}
 
 	// Initialize padMessageBuffer
@@ -133,13 +126,13 @@ bool BSEQuencer::makeMidi (const int64_t frames, const uint8_t status, const int
 				int outNote;
 
 				// Drumkit: absolute MIDI notes, not input pitched
-				if (scaleMaps[scaleNr].elements[row] &0x100) outNote = scaleMaps[scaleNr].elements[row] & 0x0FF;
+				if (rtScaleMaps[scaleNr].elements[row] &0x100) outNote = rtScaleMaps[scaleNr].elements[row] & 0x0FF;
 
 				// Scale: relative Notes obtained from actual scale, input pitched
 				else
 				{
 					int pitch = ((controllers[CH + (outCh - 1) * CH_SIZE + PITCH]) ? inKeyElement : 0);
-					outNote = scale.getMIDInote((scaleMaps[scaleNr].elements[row] & 0x0FF) + pitch);
+					outNote = scale.getMIDInote((rtScaleMaps[scaleNr].elements[row] & 0x0FF) + pitch);
 				}
 
 				// Apply octave shift, note offset
@@ -538,8 +531,8 @@ void BSEQuencer::run (uint32_t n_samples)
 		 CONTROLLER_CHANGED(SIGNATURE) ||
 		 CONTROLLER_CHANGED(OCTAVE)))
 	{
-		int newScaleNr = LIMIT (*new_controllers[SCALE], 0, scaleNotes.size () - 1);
-		scale.setScale(scaleNotes[newScaleNr]);
+		int newScaleNr = LIMIT (*new_controllers[SCALE], 0, NR_SYSTEM_SCALES + NR_USER_SCALES - 1);
+		scale.setScale(rtScaleMaps[newScaleNr].scaleNotes);
 		scale.setRoot (*new_controllers[ROOT] + *new_controllers[SIGNATURE] + (*new_controllers[OCTAVE] + 1) * 12);
 	}
 
@@ -626,23 +619,39 @@ void BSEQuencer::run (uint32_t n_samples)
 			else if (obj->body.otype == uris.notify_scaleMapsEvent)
 			{
 				int iD = 0;
+				int scaleNr = 0;
 
 				LV2_Atom *oId = NULL, *oName = NULL, *oElements = NULL, *oAltSymbols = NULL, *oScale = NULL;
-				lv2_atom_object_get (obj, uris.notify_scaleID,  &oId,
-										  uris.notify_scaleName, &oName,
-										  uris.notify_scaleElements, &oElements,
-										  uris.notify_scaleAltSymbols, &oAltSymbols,
-										  uris.notify_scale, &oScale,
-										  NULL);
+				lv2_atom_object_get
+				(
+					obj,
+					uris.notify_scaleID,  &oId,
+					uris.notify_scaleName, &oName,
+					uris.notify_scaleElements, &oElements,
+					uris.notify_scaleAltSymbols, &oAltSymbols,
+					uris.notify_scale, &oScale,
+					NULL
+				);
 
-				if (oId && (oId->type == uris.atom_Int)) iD = ((LV2_Atom_Int*)oId)->body;
+				if (oId && (oId->type == uris.atom_Int))
+				{
+					iD = ((LV2_Atom_Int*)oId)->body;
+					for (int i = 0; i < NR_SYSTEM_SCALES + NR_USER_SCALES; ++i)
+					{
+						if (iD == rtScaleMaps[i].iD)
+						{
+							scaleNr = i;
+							break;
+						}
+					}
+				}
 
-				if ((iD >= NR_SYSTEM_SCALES) && (iD < NR_SYSTEM_SCALES + NR_USER_SCALES))
+				if ((scaleNr >= NR_SYSTEM_SCALES) && (scaleNr < NR_SYSTEM_SCALES + NR_USER_SCALES))
 				{
 					// Name
 					if (oName && (oName->type == uris.atom_String))
 					{
-						strncpy (scaleMaps[iD].name, (char*) LV2_ATOM_BODY(oName), 64);
+						strncpy (rtScaleMaps[scaleNr].name, (char*) LV2_ATOM_BODY(oName), 64);
 					}
 
 					// Elements TODO safety
@@ -651,7 +660,7 @@ void BSEQuencer::run (uint32_t n_samples)
 						const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oElements;
 						if (vec->body.child_type == uris.atom_Int)
 						{
-							memcpy (scaleMaps[iD].elements, &vec->body + 1, 16 * sizeof (int));
+							memcpy (rtScaleMaps[scaleNr].elements, &vec->body + 1, 16 * sizeof (int));
 						}
 					}
 
@@ -661,7 +670,7 @@ void BSEQuencer::run (uint32_t n_samples)
 						const LV2_Atom_Vector* vec = (const LV2_Atom_Vector*) oAltSymbols;
 						if (vec->body.child_type == uris.atom_String)
 						{
-							memcpy (scaleMaps[iD].altSymbols, &vec->body + 1, 16 * 16);
+							memcpy (rtScaleMaps[scaleNr].altSymbols, &vec->body + 1, 16 * 16);
 						}
 					}
 
@@ -672,14 +681,14 @@ void BSEQuencer::run (uint32_t n_samples)
 						if (vec->body.child_type == uris.atom_Int)
 						{
 							BScaleNotes* notes = (BScaleNotes*) (&vec->body + 1);
-							scaleNotes[iD] = *notes;
+							rtScaleMaps[scaleNr].scaleNotes = *notes;
 						}
 					}
 
 					// Playing scale changed => update and stop output
-					if (iD == controllers[SCALE])
+					if (scaleNr == controllers[SCALE])
 					{
-						scale.setScale(scaleNotes[iD]);
+						scale.setScale(rtScaleMaps[scaleNr].scaleNotes);
 						for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
 						{
 							if (!midiStopped[i]) stopMidiOut(0, 1 << i);
@@ -934,27 +943,27 @@ LV2_State_Status BSEQuencer::state_save (LV2_State_Store_Function store, LV2_Sta
 
 	for (int nr = NR_SYSTEM_SCALES; nr < NR_SYSTEM_SCALES + NR_USER_SCALES; ++nr)
 	{
-		mapDataString += "id:" + std::to_string (nr) + ";\n";
+		mapDataString += "id:" + std::to_string (rtScaleMaps[nr].iD) + ";\n";
 
-		std::string namestr = std::string (scaleMaps[nr].name);
+		std::string namestr = std::string (rtScaleMaps[nr].name);
 		while (namestr.find ("\"") != std::string::npos) namestr.replace (namestr.find ("\""), 1, "&quot;");
 		mapDataString += "nm:\"" + namestr + "\";\n";
 
 		mapDataString += "el:";
-		for (int row = 0; row < ROWS; ++row) mapDataString += std::to_string (scaleMaps[nr].elements[row]) + ";";
+		for (int row = 0; row < ROWS; ++row) mapDataString += std::to_string (rtScaleMaps[nr].elements[row]) + ";";
 		mapDataString += "\n";
 
 		mapDataString += "as:";
 		for (int row = 0; row < ROWS; ++row)
 		{
-			std::string altstr = std::string (scaleMaps[nr].altSymbols[row]);
+			std::string altstr = std::string (rtScaleMaps[nr].altSymbols[row]);
 			while (altstr.find ("\"") != std::string::npos) altstr.replace (namestr.find ("\""), 1, "&quot;");
 			mapDataString += "\"" + altstr + "\";";
 		}
 		mapDataString += "\n";
 
 		mapDataString += "sc:";
-		for (int el = 0; el < 12; ++el) mapDataString += std::to_string (scaleNotes[nr][el]) + ";";
+		for (int el = 0; el < 12; ++el) mapDataString += std::to_string (rtScaleMaps[nr].scaleNotes[el]) + ";";
 		mapDataString += "\n";
 	}
 	store (handle, uris.state_scales, mapDataString.c_str(), mapDataString.size() + 1, uris.atom_String, LV2_STATE_IS_POD);
@@ -1084,7 +1093,9 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 			if (strPos + 3 > scaleDataString.length()) break;	// Nothing more after id => end
 			scaleDataString.erase (0, strPos + 3);
 
-			int id;
+			int id = -1;
+			int scaleNr = -1;
+
 			try {id = std::stof (scaleDataString, &nextPos);}
 			catch  (const std::exception& e)
 			{
@@ -1094,6 +1105,21 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 
 			if (nextPos > 0) scaleDataString.erase (0, nextPos);
 			if ((id < 0) || (id >= NR_SYSTEM_SCALES + NR_USER_SCALES))
+			{
+				fprintf (stderr, "BSEQuencer.lv2: Restore scale map state incomplete. Invalid scale data block loaded with ID %i. Try to use the data before this id.\n", id);
+				break;
+			}
+
+			// iD to index
+			for (int i = 0; i < NR_SYSTEM_SCALES + NR_USER_SCALES; ++i)
+			{
+				if (id == rtScaleMaps[i].iD)
+				{
+					scaleNr = i;
+					break;
+				}
+			}
+			if (scaleNr < 0)
 			{
 				fprintf (stderr, "BSEQuencer.lv2: Restore scale map state incomplete. Invalid scale data block loaded with ID %i. Try to use the data before this id.\n", id);
 				break;
@@ -1117,7 +1143,7 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 							nextPos = scaleDataString.find ("\"");
 							std::string namestr = scaleDataString.substr (0, nextPos);
 							while (namestr.find ("&quot") != std::string::npos) namestr.replace (namestr.find ("&quot;"), 1, "\"");
-							strncpy (scaleMaps[id].name, namestr.c_str(), 63);
+							strncpy (rtScaleMaps[scaleNr].name, namestr.c_str(), 63);
 							scaleDataString.erase (0, nextPos + 1);
 						}
 						break;
@@ -1136,7 +1162,7 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 									break;
 								}
 
-								scaleMaps[id].elements[i] = el;
+								rtScaleMaps[scaleNr].elements[i] = el;
 								scaleDataString.erase (0, nextPos);
 								nextPos = scaleDataString.find (";");
 								scaleDataString.erase (0, nextPos + 1);
@@ -1169,7 +1195,7 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 								nextPos = scaleDataString.find ("\"");
 								std::string altstr = scaleDataString.substr (0, nextPos);
 								while (altstr.find ("&quot") != std::string::npos) altstr.replace (altstr.find ("&quot;"), 1, "\"");
-								strncpy (scaleMaps[id].altSymbols[i], altstr.c_str(), 15);
+								strncpy (rtScaleMaps[scaleNr].altSymbols[i], altstr.c_str(), 15);
 								scaleDataString.erase (0, nextPos + 1);
 							}
 						}
@@ -1189,7 +1215,7 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 									break;
 								}
 
-								scaleNotes[id][i] = sc;
+								rtScaleMaps[scaleNr].scaleNotes[i] = sc;
 								scaleDataString.erase (0, nextPos);
 								nextPos = scaleDataString.find (";");
 								scaleDataString.erase (0, nextPos + 1);
@@ -1355,13 +1381,13 @@ void BSEQuencer::notifyScaleMapsToGui ()
 		lv2_atom_forge_key(&output_forge, uris.notify_scaleID);
 		lv2_atom_forge_int(&output_forge, i);
 		lv2_atom_forge_key(&output_forge, uris.notify_scaleName);
-		lv2_atom_forge_string (&output_forge, scaleMaps[i].name, 64);
+		lv2_atom_forge_string (&output_forge, rtScaleMaps[i].name, 64);
 		lv2_atom_forge_key(&output_forge, uris.notify_scaleElements);
-		lv2_atom_forge_vector(&output_forge, sizeof (int), uris.atom_Int, 16, (void*) scaleMaps[i].elements);
+		lv2_atom_forge_vector(&output_forge, sizeof (int), uris.atom_Int, 16, (void*) rtScaleMaps[i].elements);
 		lv2_atom_forge_key(&output_forge, uris.notify_scaleAltSymbols);
-		lv2_atom_forge_vector(&output_forge, 16, uris.atom_String, 16, (void*) scaleMaps[i].altSymbols);
+		lv2_atom_forge_vector(&output_forge, 16, uris.atom_String, 16, (void*) rtScaleMaps[i].altSymbols);
 		lv2_atom_forge_key(&output_forge, uris.notify_scale);
-		BScaleNotes* notes = &scaleNotes[i];
+		BScaleNotes* notes = &rtScaleMaps[i].scaleNotes;
 		lv2_atom_forge_vector(&output_forge, sizeof (int), uris.atom_Int, 12, (void*) notes);
 		lv2_atom_forge_pop(&output_forge, &frame);
 
