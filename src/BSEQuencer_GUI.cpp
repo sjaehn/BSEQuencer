@@ -144,7 +144,6 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		chBoxes[i].noteOffsetLabel.rename ("ctlabel");
 	}
 
-
 	// Link controllerWidgets
 	controllerWidgets[MIDI_IN_CHANNEL] = (BWidgets::ValueWidget*) &modeMidiInChannelListBox;
 	controllerWidgets[PLAY] = (BWidgets::ValueWidget*) &modePlayButton;
@@ -170,6 +169,9 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		controllerWidgets[CH + i * CH_SIZE + MIDI_CHANNEL] = (BWidgets::ValueWidget*) &chBoxes[i].channelListBox;
 		controllerWidgets[CH + i * CH_SIZE + NOTE_OFFSET] = (BWidgets::ValueWidget*) &chBoxes[i].noteOffsetDial;
 	}
+
+	// Init controller values
+	for (int i = 0; i < KNOBS_SIZE; ++i) controllers[i] = controllerWidgets[i]->getValue ();
 
 	// Set callback functions
 	for (int i = 0; i < KNOBS_SIZE; ++i) controllerWidgets[i]->setCallbackFunction (BEvents::VALUE_CHANGED_EVENT, valueChangedCallback);

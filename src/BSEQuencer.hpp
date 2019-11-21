@@ -134,7 +134,7 @@ private:
 		{0, 11, 1},	// ROOT
 		{-1, 1, 1},	// SIGNATURE
 		{-1, 8, 1},	// OCTAVE
-		{0, 17, 1},	// SCALE
+		{0, NR_SYSTEM_SCALES + NR_USER_SCALES - 1, 1},	// SCALE
 		{1, 300, 0},	// AUTOPLAY_BPM
 		{1, 16, 1},	// AUTOPLAY_BPB
 		{0, NR_SEQUENCER_CHS + NR_CTRL_BUTTONS + NR_EDIT_BUTTONS, 1},	// SELECTION_CH
