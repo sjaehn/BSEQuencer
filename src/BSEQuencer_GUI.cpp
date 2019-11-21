@@ -102,7 +102,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	{
 		scaleItems.push_back (BItems::Item (scaleNr, scaleMaps[scaleNr].name));
 	}
-	propertiesScaleListBox = BWidgets::PopupListBox (100, 175, 150, 20, 0, -380, 150, 380, "menu", scaleItems, 0.0);
+	propertiesScaleListBox = BWidgets::PopupListBox (100, 175, 150, 20, 0, -400, 150, 400, "menu", scaleItems, 0.0);
 	propertiesScaleListBox.rename ("menu");
 
 	// Init toolbox buttons
@@ -682,8 +682,8 @@ void BSEQuencer_GUI::scale ()
 	RESIZE (propertiesScaleLabel, 10, 175, 50, 20, sz);
 	RESIZE (propertiesScaleEditIcon, 70, 175, 20, 20, sz);
 	RESIZE (propertiesScaleListBox, 100, 175, 150, 20, sz);
-	propertiesScaleListBox.resizeListBox (150 * sz, 380 * sz);
-	propertiesScaleListBox.moveListBox (0, -380 * sz);
+	propertiesScaleListBox.resizeListBox (150 * sz, 400 * sz);
+	propertiesScaleListBox.moveListBox (0, -400 * sz);
 	propertiesScaleListBox.resizeListBoxItems (150 * sz, 20 * sz);
 
 	RESIZE (helpLabel, 1140, 40, 30, 30, sz);

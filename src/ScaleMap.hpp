@@ -97,6 +97,12 @@ const std::array<ScaleMap, NR_SYSTEM_SCALES + NR_USER_SCALES> defaultScaleMaps =
 	{11, "Hungarian minor", {ALLROWS}, {NOALTSYMBOLS}, {HUNGARIANMINORSCALE}},
 	{12, "Major pentatonic", {ALLROWS}, {NOALTSYMBOLS}, {MAJORPENTATONICSCALE}},
 	{13, "Minor pentatonic", {ALLROWS}, {NOALTSYMBOLS}, {MINORPENTATONICSCALE}},
+	{
+		18, "GM drumkit 1 (36-51)",
+		{292, 294, 296, 297, 299, 301, 303, 304, 306, 293, 295, 298, 300, 302, 305, 307},
+		{"Kick", "Snare 1", "Snare2", "Low F Tom", "Hi F Tom", "Low Tom", "Low M Tom", "Hi M Tom", "Hi Tom", "Side stick", "Clap", "Closed HH", "Pedal HH", "Open HH", "Crash", "Ride"},
+		{CROMATICSCALE}
+	},
 	/*********************** User scales **************************/
 	{14, "User scale 1", {ALLROWS}, {NOALTSYMBOLS}, {CROMATICSCALE}},
 	{15, "User scale 2", {ALLROWS}, {NOALTSYMBOLS}, {CROMATICSCALE}},

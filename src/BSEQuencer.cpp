@@ -1379,7 +1379,7 @@ void BSEQuencer::notifyScaleMapsToGui ()
 		lv2_atom_forge_frame_time(&output_forge, 0);
 		lv2_atom_forge_object(&output_forge, &frame, 0, uris.notify_scaleMapsEvent);
 		lv2_atom_forge_key(&output_forge, uris.notify_scaleID);
-		lv2_atom_forge_int(&output_forge, i);
+		lv2_atom_forge_int(&output_forge, rtScaleMaps[i].iD);
 		lv2_atom_forge_key(&output_forge, uris.notify_scaleName);
 		lv2_atom_forge_string (&output_forge, rtScaleMaps[i].name, 64);
 		lv2_atom_forge_key(&output_forge, uris.notify_scaleElements);

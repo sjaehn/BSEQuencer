@@ -21,7 +21,7 @@
 #ifndef DEFINITIONS_H_
 #define DEFINITIONS_H_
 
-#define NR_SYSTEM_SCALES 14
+#define NR_SYSTEM_SCALES 15
 #define NR_USER_SCALES 4
 #define MAXSTEPS 32
 #define ROWS 16
