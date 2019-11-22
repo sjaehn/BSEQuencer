@@ -103,6 +103,12 @@ const std::array<ScaleMap, NR_SYSTEM_SCALES + NR_USER_SCALES> defaultScaleMaps =
 		{"Kick", "Snare 1", "Snare2", "Low F Tom", "Hi F Tom", "Low Tom", "Low M Tom", "Hi M Tom", "Hi Tom", "Side stick", "Clap", "Closed HH", "Pedal HH", "Open HH", "Crash", "Ride"},
 		{CROMATICSCALE}
 	},
+	{
+		19, "GM drumkit 2 (60-75)",
+		{316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331},
+		{"Hi Bongo", "Low Bongo", "Mute Hi Conga", "Open Hi Conga", "Low Conga", "Hi Timbale", "Low Timbale", "Hi Agogo", "Low Agogo", "Cabasa", "Maracas", "Short Whistle", "Long Whistle", "Short Guiro", "Long Guiro", "Claves"},
+		{CROMATICSCALE}
+	},
 	/*********************** User scales **************************/
 	{14, "User scale 1", {ALLROWS}, {NOALTSYMBOLS}, {CROMATICSCALE}},
 	{15, "User scale 2", {ALLROWS}, {NOALTSYMBOLS}, {CROMATICSCALE}},
