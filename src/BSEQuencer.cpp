@@ -1234,6 +1234,11 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 	return LV2_STATE_SUCCESS;
 }
 
+void BSEQuencer::activate ()
+{
+	inKeys.clear ();
+}
+
 /*
  * Checks if a value is within a limit, and if not, puts the value within
  * this limit.
@@ -1472,6 +1477,12 @@ static LV2_State_Status state_restore(LV2_Handle instance, LV2_State_Retrieve_Fu
 	return LV2_STATE_SUCCESS;
 }
 
+static void activate (LV2_Handle instance)
+{
+	BSEQuencer* inst = (BSEQuencer*)instance;
+	inst->activate ();
+}
+
 static void cleanup (LV2_Handle instance)
 {
 	BSEQuencer* inst = (BSEQuencer*) instance;
@@ -1494,9 +1505,9 @@ static const LV2_Descriptor descriptor =
 		BSEQUENCER_URI,
 		instantiate,
 		connect_port,
-		NULL,			// activate,
+		activate,
 		run,
-		NULL,			// deactivate,
+		NULL,	// deactivate
 		cleanup,
 		extension_data
 };

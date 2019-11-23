@@ -100,6 +100,11 @@ template<typename T, std::size_t sz> struct StaticArrayList
 		}
 	}
 
+	void clear ()
+	{
+		while (!empty ()) pop_back ();
+	}
+
 	T** erase (T** iterator_ptr)
 	{
 		T** end_iit = end ();

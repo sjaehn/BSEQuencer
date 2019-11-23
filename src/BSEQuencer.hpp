@@ -83,6 +83,7 @@ public:
 	void run(uint32_t n_samples);
 	LV2_State_Status state_save(LV2_State_Store_Function store, LV2_State_Handle handle, uint32_t flags, const LV2_Feature* const* features);
 	LV2_State_Status state_restore(LV2_State_Retrieve_Function retrieve, LV2_State_Handle handle, uint32_t flags, const LV2_Feature* const* features);
+	void activate ();
 
 private:
 	bool makeMidi (const int64_t frames, const uint8_t status, const int key, const int row, uint8_t chbits = ALL_CH);
