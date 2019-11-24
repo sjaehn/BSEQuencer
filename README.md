@@ -9,6 +9,7 @@ Description: Multi channel MIDI step sequencer LV2 plugin with a variable matrix
 Installation
 ------------
 a) Install the bsequencer (bsequencer-lv2) package for your system
+* [Arch linux](https://www.archlinux.org/packages/community/x86_64/bsequencer/) by David Runge
 * [Free BSD](https://www.freshports.org/audio/bsequencer-lv2) by yurivict
 * [NixOS](https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/audio/bsequencer/default.nix) by Bart Brouns
 * Check https://repology.org/project/bsequencer/versions for other systems
