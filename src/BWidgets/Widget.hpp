@@ -491,8 +491,11 @@ public:
 
 	/**
 	 * Requests close of this widget by emitting a BEvents::WidgetEvent
+	 * @param handle	Widget that will handle the close request event
+	 			(default = main_)
 	 */
 	void postCloseRequest ();
+	void postCloseRequest (Widget* handle);
 
 	/**
 	 * (Re-)Defines the callback function for an event. It is on the onXXX

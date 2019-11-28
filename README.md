@@ -54,7 +54,7 @@ Key features
 * Autoplay or host / MIDI controlled playing
 * Handles multiple MIDI inputs signals (keys) in one sequencer instance
 * Use musical scales and / or drumkits
-* Scale editor
+* Scale & drumkit editor
 * Controls for playing direction, jump, skip, and stop options placeable to any position within the matrix
 * Notes can be associated with four different, configurable output channels
 * Output channels connectable with individual MIDI channels

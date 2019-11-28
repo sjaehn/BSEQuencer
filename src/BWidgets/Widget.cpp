@@ -505,8 +505,9 @@ void Widget::onCloseRequest (BEvents::WidgetEvent* event)
 
 	if ((event) && (event->getWidget () == this))
 	{
-		Widget* c = event->getRequestWidget ();
-		if (isChild (c)) release (c);
+		Widget* requestWidget = event->getRequestWidget ();
+		Widget* parent = (requestWidget ? requestWidget->getParent () : nullptr);
+		if (parent && parent->isChild (requestWidget)) release (requestWidget);
 	}
 }
 
@@ -618,12 +619,14 @@ void Widget::postRedisplay (const double xabs, const double yabs, const double w
 	}
 }
 
-void Widget::postCloseRequest ()
+void Widget::postCloseRequest () {postCloseRequest (main_);}
+
+void Widget::postCloseRequest (Widget* handle)
 {
-	if (main_)
+	if (handle)
 	{
-		BEvents::WidgetEvent* event = new BEvents::WidgetEvent (main_, this, BEvents::CLOSE_REQUEST_EVENT);
-		main_->addEventToQueue (event);
+		BEvents::WidgetEvent* event = new BEvents::WidgetEvent (handle, this, BEvents::CLOSE_REQUEST_EVENT);
+		if (event) main_->addEventToQueue (event);
 	}
 }
 
