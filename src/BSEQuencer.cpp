@@ -23,6 +23,7 @@
 BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
 	map (NULL), unmap (NULL), inputPort (NULL), outputPort (NULL),
 	output_forge (), output_frame (),
+	new_controllers {nullptr}, controllers {0},
 	rate (samplerate), bpm (120.0f), beatsPerBar (4.0f),
 	outCapacity (0), position (0.0),
 	ui_on (false), scheduleNotifyPadsToGui (false), scheduleNotifyStatusToGui (false),
