@@ -1,4 +1,4 @@
-/* BUtilities.hpp
+/* Any.hpp
  * Copyright (C) 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,8 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BUTILITIES_HPP_
-#define BUTILITIES_HPP_
+#ifndef BUTILITIES_ANY_HPP_
+#define BUTILITIES_ANY_HPP_
 
 #include <typeinfo>
 #include <iostream>
@@ -89,4 +89,4 @@ template <class T> Any makeAny (const T& t)
 
 }
 
-#endif /* BUTILITIES_HPP_ */
+#endif /* BUTILITIES_ANY_HPP_ */

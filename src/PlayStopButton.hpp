@@ -47,7 +47,7 @@ public:
 
 	virtual void resize (const double width, const double height) override
 	{
-		if ((width != width_) || (height != height_))
+		if ((width != getWidth()) || (height != getHeight()))
 		{
 			Widget::resize (width, height);
 			drawingSurface.resize (width, height);
@@ -59,7 +59,7 @@ public:
 	{
 		if (value == 0.0) setValue (1.0);
 		else setValue (0.0);
-		cbfunction[BEvents::EventType::BUTTON_PRESS_EVENT] (event);
+		cbfunction_[BEvents::EventType::BUTTON_PRESS_EVENT] (event);
 	}
 };
 

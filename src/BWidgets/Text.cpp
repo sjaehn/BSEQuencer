@@ -1,5 +1,5 @@
 /* Text.cpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@ Text& Text::operator= (const Text& that)
 	textString = that.textString;
 	yResizable = that.yResizable;
 	Widget::operator= (that);
+	if (yResizable) resize (getExtends());
 	return *this;
 }
 
@@ -57,6 +58,7 @@ void Text::setText (const std::string& text)
 	if (text != textString)
 	{
 		textString = text;
+		if (yResizable) resize (getExtends());
 		update ();
 	}
 }
@@ -72,6 +74,7 @@ BColors::ColorSet* Text::getTextColors () {return &textColors;}
 void Text::setFont (const BStyles::Font& font)
 {
 	textFont = font;
+	if (yResizable) resize (getExtends());
 	update ();
 }
 BStyles::Font* Text::getFont () {return &textFont;}
@@ -79,6 +82,26 @@ BStyles::Font* Text::getFont () {return &textFont;}
 void Text::setYResizable (const bool resizable) {yResizable = resizable;}
 
 bool Text::isYResizable () const {return yResizable;}
+
+void Text::setWidth (const double width)
+{
+	Widget::setWidth (width);
+	if (yResizable) resize (getExtends());
+}
+
+void Text::resize () {resize (getExtends());}
+
+void Text::resize (const double width, const double height) {resize (BUtilities::Point (width, height));}
+
+void Text::resize (const BUtilities::Point extends)
+{
+	if (yResizable)
+	{
+		double ySize = getTextBlockHeight (getTextBlock()) + 2 * getYOffset();
+		Widget::resize (BUtilities::Point (extends.x, ySize));
+	}
+	else Widget::resize (extends);
+}
 
 void Text::applyTheme (BStyles::Theme& theme) {applyTheme (theme, name_);}
 
@@ -92,9 +115,9 @@ void Text::applyTheme (BStyles::Theme& theme, const std::string& name)
 
 	// Font
 	void* fontPtr = theme.getStyle(name, BWIDGETS_KEYWORD_FONT);
-	if (fontPtr) textFont = *((BStyles::Font*) fontPtr);
+	if (fontPtr) setFont (*((BStyles::Font*) fontPtr));
 
-	if (colorsPtr || fontPtr) update ();
+	else if (colorsPtr) update ();
 }
 
 std::vector<std::string> Text::getTextBlock ()
@@ -102,11 +125,12 @@ std::vector<std::string> Text::getTextBlock ()
 	std::vector<std::string> textblock;
 	double w = getEffectiveWidth ();
 	double h = getEffectiveHeight ();
-	cairo_t* cr = cairo_create (widgetSurface);
-	cairo_text_decorations decorations = {textFont.getFontFamily ().c_str (),
-										  textFont.getFontSize (),
-										  textFont.getFontSlant (),
-										  textFont.getFontWeight ()};
+	cairo_t* cr = cairo_create (widgetSurface_);
+	cairo_text_decorations decorations;
+	strncpy (decorations.family, textFont.getFontFamily ().c_str (), 63);
+	decorations.size = textFont.getFontSize ();
+	decorations.slant = textFont.getFontSlant ();
+	decorations.weight = textFont.getFontWeight ();
 
 	char* textCString = (char*) malloc (strlen (textString.c_str ()) + 1);
 	if (textCString)
@@ -116,6 +140,7 @@ std::vector<std::string> Text::getTextBlock ()
 		for (double y = 0; (yResizable || (y <= h)) && (strlen (textCString) > 0); )
 		{
 			char* outputtext = cairo_create_text_fitted (cr, w, decorations, textCString);
+			if (outputtext[0] == '\0') break;
 			cairo_text_extents_t ext = textFont.getTextExtents(cr, outputtext);
 			textblock.push_back (std::string (outputtext));
 			y += (ext.height * textFont.getLineSpacing ());
@@ -132,7 +157,7 @@ std::vector<std::string> Text::getTextBlock ()
 double Text::getTextBlockHeight (std::vector<std::string> textBlock)
 {
 	double blockheight = 0.0;
-	cairo_t* cr = cairo_create (widgetSurface);
+	cairo_t* cr = cairo_create (widgetSurface_);
 
 	for (std::string textline : textBlock)
 	{
@@ -144,19 +169,19 @@ double Text::getTextBlockHeight (std::vector<std::string> textBlock)
 	return blockheight;
 }
 
-void Text::draw (const double x, const double y, const double width, const double height)
+void Text::draw (const BUtilities::RectArea& area)
 {
-	if ((!widgetSurface) || (cairo_surface_status (widgetSurface) != CAIRO_STATUS_SUCCESS)) return;
+	if ((!widgetSurface_) || (cairo_surface_status (widgetSurface_) != CAIRO_STATUS_SUCCESS)) return;
 
 	// Draw super class widget elements first
-	Widget::draw (x, y, width, height);
+	Widget::draw (area);
 
-	cairo_t* cr = cairo_create (widgetSurface);
+	cairo_t* cr = cairo_create (widgetSurface_);
 
 	if (cairo_status (cr) == CAIRO_STATUS_SUCCESS)
 	{
 		// Limit cairo-drawing area
-		cairo_rectangle (cr, x, y, width, height);
+		cairo_rectangle (cr, area.getX (), area.getY (), area.getWidth (), area.getHeight ());
 		cairo_clip (cr);
 
 		double xoff = getXOffset ();
@@ -173,12 +198,12 @@ void Text::draw (const double x, const double y, const double width, const doubl
 		switch (textFont.getTextVAlign ())
 		{
 		case BStyles::TEXT_VALIGN_TOP:		y0 = 0;
-											break;
+							break;
 		case BStyles::TEXT_VALIGN_MIDDLE:	y0 = h / 2 - blockheight / 2;
-											break;
+							break;
 		case BStyles::TEXT_VALIGN_BOTTOM:	y0 = h - blockheight;
-											break;
-		default:							y0 = 0;
+							break;
+		default:				y0 = 0;
 		}
 
 
@@ -197,12 +222,12 @@ void Text::draw (const double x, const double y, const double width, const doubl
 			switch (textFont.getTextAlign ())
 			{
 			case BStyles::TEXT_ALIGN_LEFT:		x0 = - ext.x_bearing;
-												break;
+								break;
 			case BStyles::TEXT_ALIGN_CENTER:	x0 = w / 2 - ext.width / 2 - ext.x_bearing;
-												break;
+								break;
 			case BStyles::TEXT_ALIGN_RIGHT:		x0 = w - ext.width - ext.x_bearing;
-												break;
-			default:							x0 = 0;
+								break;
+			default:				x0 = 0;
 			}
 
 			cairo_move_to (cr, xoff + x0, yoff + y0 + ycount - ext.y_bearing);

@@ -20,7 +20,9 @@
 
 #include <cstdint>
 #include <string>
-#include "BUtilities.hpp"
+#include "BDevices.hpp"
+#include "../BUtilities/Any.hpp"
+#include "../BUtilities/RectArea.hpp"
 
 namespace BWidgets
 {
@@ -31,18 +33,6 @@ namespace BEvents
 {
 
 //TODO switch toward three pointer event handling states: pass, handle, block
-
-/**
- * Enumeration of mouse buttons as input device for event handling
- */
-enum InputDevice
-{
-	NO_BUTTON	= 0,
-	LEFT_BUTTON	= 1,
-	MIDDLE_BUTTON	= 2,
-	RIGHT_BUTTON	= 3,
-	NR_OF_BUTTONS	= 4
-};
 
 /**
  * Enumeration of event types
@@ -67,34 +57,6 @@ enum EventType
 	NO_EVENT
 };
 
-enum KeyCode {
-	KEY_F1 = 0xE000,
-	KEY_F2,
-	KEY_F3,
-	KEY_F4,
-	KEY_F5,
-	KEY_F6,
-	KEY_F7,
-	KEY_F8,
-	KEY_F9,
-	KEY_F10,
-	KEY_F11,
-	KEY_F12,
-	KEY_LEFT,
-	KEY_UP,
-	KEY_RIGHT,
-	KEY_DOWN,
-	KEY_PAGE_UP,
-	KEY_PAGE_DOWN,
-	KEY_HOME,
-	KEY_END,
-	KEY_INSERT,
-	KEY_SHIFT,
-	KEY_CTRL,
-	KEY_ALT,
-	KEY_SUPER
-};
-
 /**
  * Class BEvents::Event
  *
@@ -113,6 +75,8 @@ public:
 		Event (nullptr, NO_EVENT) {}
 	Event (BWidgets::Widget* widget, const EventType type) :
 		eventWidget (widget), eventType (type) {}
+
+	virtual ~Event () {}
 
 	/**
 	 * Gets a pointer to the widget which caused the event.
@@ -177,73 +141,33 @@ public:
 class ExposeEvent : public WidgetEvent
 {
 protected:
-	double exposeX0;
-	double exposeY0;
-	double exposeWidth;
-	double exposeHeight;
+	BUtilities::RectArea exposeArea;
 
 public:
 	ExposeEvent () :
 		ExposeEvent (nullptr, nullptr, NO_EVENT, 0, 0, 0, 0) {};
 	ExposeEvent (BWidgets::Widget* eventWidget, BWidgets::Widget* requestWidget, const EventType type,
 		     const double x, const double y, const double width, const double height) :
-		WidgetEvent (eventWidget, requestWidget, type), exposeX0 (x), exposeY0 (y), exposeWidth (width), exposeHeight (height) {}
+		ExposeEvent (eventWidget, requestWidget, type, BUtilities::RectArea (x, y, width, height)) {}
+	ExposeEvent (BWidgets::Widget* eventWidget, BWidgets::Widget* requestWidget, const EventType type,
+		     const BUtilities::RectArea& area) :
+		WidgetEvent (eventWidget, requestWidget, type),
+		exposeArea (area) {}
 
 	/**
-	 * Redefines the x coordinate of the output region for the expose event
-	 * @param x X coordinate relative to the widgets origin
+	 * Redefines the area coordinates of the output region for the expose
+	 * event
+	 * @param area Area coordinates relative to the widgets origin
 	 */
-	void setX (const double x)
-	{exposeX0 = x;}
+	void setArea (const BUtilities::RectArea& area)
+	{exposeArea = area;}
 
 	/**
-	 * Gets the x coordinate of the output region for the expose event
-	 * @return X coordinate relative to the widgets origin
+	 * Gets the area coordinates of the output region for the expose event
+	 * @return Area coordinates relative to the widgets origin
 	 */
-	double getX () const
-	{return exposeX0;}
-
-	/**
-	 * Redefines the y coordinate of the output region for the expose event
-	 * @param y Y coordinate relative to the widgets origin
-	 */
-	void setY (const double y)
-	{exposeY0 = y;}
-
-	/**
-	 * Gets the y coordinate of the output region for the expose event
-	 * @return Y coordinate relative to the widgets origin
-	 */
-	double getY () const
-	{return exposeY0;}
-
-	/**
-	 * Redefines the width of the output region for the expose event
-	 * @param width Width of the output region
-	 */
-	void setWidth (const double width)
-	{exposeWidth = width;}
-
-	/**
-	 * Gets the width of the output region for the expose event
-	 * @return Width of the output region
-	 */
-	double getWidth () const
-	{return exposeWidth;}
-
-	/**
-	 * Redefines the height of the output region for the expose event
-	 * @param height Height of the output region
-	 */
-	void setHeight (const double height)
-	{exposeHeight = height;}
-
-	/**
-	 * Gets the height of the output region for the expose event
-	 * @return Height of the output region
-	 */
-	double getHeight () const
-	{return exposeHeight;}
+	BUtilities::RectArea getArea () const
+	{return exposeArea;}
 };
 /*
  * End of class BEvents::ExposeEvent
@@ -257,43 +181,32 @@ public:
  class KeyEvent : public Event
  {
  protected:
-	double xpos;
-	double ypos;
+	BUtilities::Point point;
 	uint32_t key;
 
  public:
-	 KeyEvent () :
+	KeyEvent () :
 	 	KeyEvent (nullptr, NO_EVENT, 0, 0, 0) {}
-	 KeyEvent (BWidgets::Widget* widget, const EventType type, const double x, const double y, const uint32_t unicode) :
-			Event (widget, type), xpos (x), ypos (y), key (unicode) {}
+	KeyEvent (BWidgets::Widget* widget, const EventType type, const double x, const double y, const uint32_t unicode) :
+		KeyEvent (widget, type, BUtilities::Point (x, y), unicode) {}
+	KeyEvent (BWidgets::Widget* widget, const EventType type, const BUtilities::Point& position, const uint32_t unicode) :
+		Event (widget, type),
+		point (position),
+		key (unicode) {}
 
 	 /**
-	  * Redefines the x coordinate of the key event
-	  * @param x X coordinate relative to the widgets origin
+	  * Redefines the point coordinates of the key event
+	  * @param coords Point coordinates relative to the widgets origin
 	  */
-	 void setX (const double x)
-	 {xpos = x;}
+	 void setPosition (const BUtilities::Point& coords)
+	 {point = coords;}
 
 	 /**
-	  * Gets the x coordinate of the key event
-	  * @return X coordinate relative to the widgets origin
+	  * Gets the point coordinates of the key event
+	  * @return coords Point coordinates relative to the widgets origin
 	  */
-	 double getX () const
-	 {return xpos;}
-
-	 /**
-	  * Redefines the y coordinate of the key event
-	  * @param y y coordinate relative to the widgets origin
-	  */
-	 void setY (const double y)
-	 {ypos = y;}
-
-	 /**
-	  * Gets the y coordinate of the key event
-	  * @return Y coordinate relative to the widgets origin
-	  */
-	 double getY () const
-	 {return ypos;}
+	 BUtilities::Point getPosition () const
+	 {return point;}
 
 	 /**
 	  * Gets the key that caused of the key event
@@ -351,126 +264,79 @@ public:
 class PointerEvent : public Event
 {
 protected:
-	double xpos;
-	double ypos;
-	double xOrigin;
-	double yOrigin;
-	double deltaX;
-	double deltaY;
-	InputDevice buttonNr;
+	BUtilities::Point point, origin, delta;
+	BDevices::ButtonCode buttonNr;
+
 
 public:
 	PointerEvent () :
-		PointerEvent (nullptr, NO_EVENT, 0, 0, 0, 0, 0, 0, NO_BUTTON) {}
+		PointerEvent (nullptr, NO_EVENT, 0, 0, 0, 0, 0, 0, BDevices::NO_BUTTON) {}
 	PointerEvent (BWidgets::Widget* widget, const EventType type,
 			const double x, const double y, const double xOrigin, const double yOrigin,
-			const double deltaX, const double deltaY, const InputDevice button) :
-		Event (widget, type), xpos (x), ypos (y), xOrigin (xOrigin), yOrigin (yOrigin),
-		deltaX (deltaX), deltaY (deltaY), buttonNr (button)
-	{}
+			const double deltaX, const double deltaY, const BDevices::ButtonCode button) :
+		PointerEvent (widget, type, BUtilities::Point (x, y), BUtilities::Point (xOrigin, yOrigin), BUtilities::Point (deltaX, deltaY), button) {}
+	PointerEvent (BWidgets::Widget* widget, const EventType type, const BUtilities::Point& point,
+			const BUtilities::Point& origin, const BUtilities::Point& delta,
+			const BDevices::ButtonCode button) :
+		Event (widget, type), point (point), origin (origin), delta (delta), buttonNr (button) {}
 
 	/**
-	 * Redefines the x coordinate of the pointer event
-	 * @param x X coordinate relative to the widgets origin
+	 * Redefines the point coordinate of the pointer event
+	 * @param pont Point coordinate relative to the widgets origin
 	 */
-	void setX (const double x)
-	{xpos = x;}
+	void setPosition (const BUtilities::Point& coords)
+ 	{point = coords;}
 
 	/**
-	 * Gets the x coordinate of the pointer event
-	 * @return X coordinate relative to the widgets origin
+	 * Gets the point coordinate of the pointer event
+	 * @return Point coordinate relative to the widgets origin
 	 */
-	double getX () const
-	{return xpos;}
+	BUtilities::Point getPosition () const
+	{return point;}
 
 	/**
-	 * Redefines the y coordinate of the pointer event
-	 * @param y y coordinate relative to the widgets origin
-	 */
-	void setY (const double y)
-	{ypos = y;}
-
-	/**
-	 * Gets the y coordinate of the pointer event
-	 * @return Y coordinate relative to the widgets origin
-	 */
-	double getY () const
-	{return ypos;}
-
-	/**
-	 * Redefines the x coordinate of the position where the button was
+	 * Redefines the point coordinate of the position where the button was
 	 * initially pressed
-	 * @param xOrigin X coordinate relative to the widgets origin
+	 * @param origin Point coordinate relative to the widgets origin
 	 */
-	void setXOrigin (const double xOrigin)
-	{this->xOrigin = xOrigin;}
+	void setOrigin (const BUtilities::Point& coords)
+	{origin = coords;}
 
 	/**
-	 * Gets the x coordinate of the pointer position where the respective
-	 * button was initially pressed. The returned value is the same as getX ()
-	 * for BUTTON_PRESS_EVENTs, 0.0 for POINTER_MOTION_EVENTs.
-	 * @return X coordinate relative to the widgets origin
+	 * Gets the point coordinate of the pointer position where the respective
+	 * button was initially pressed. The returned value is the same as
+	 * for getPoint() for BUTTON_PRESS_EVENTs, 0.0 for POINTER_MOTION_EVENTs.
+	 * @return Point coordinate relative to the widgets origin
 	 */
-	double getXOrigin () const
-	{return xOrigin;}
+	BUtilities::Point getOrigin () const
+	{return origin;}
 
 	/**
-	 * Redefines the y coordinate of the position where the button was
-	 * initially pressed
-	 * @param yOrigin Y coordinate relative to the widgets origin
+	 * Redefines the pointers movement
+	 * @param delta Movement of the pointer
 	 */
-	void setYOrigin (const double xOrigin)
-	{this->yOrigin = yOrigin;}
+	void setDelta (const BUtilities::Point& coords)
+	{delta = coords;}
 
 	/**
-	 * Gets the y coordinate of the pointer position where the respective
-	 * button was initially pressed. The returned value is the same as getY ()
-	 * for BUTTON_PRESS_EVENTs, 0.0 for POINTER_MOTION_EVENTs.
-	 * @return Y coordinate relative to the widgets origin
+	 * Gets the movement (relative to the last PointerEvent)
+	 * @return Change in coordinates
 	 */
-	double getYOrigin () const
-	{return yOrigin;}
-
-	/**
-	 * Redefines the pointers x movement
-	 * @param deltaX Movement of the pointer on x axis
-	 */
-	void setDeltaX (const double deltaX)
-	{this->deltaX = deltaX;}
-
-	/**
-	 * Gets the x movement (relative to the last PointerEvent)
-	 * @return Change in x coordinate
-	 */
-	double getDeltaX () const
-	{return deltaX;}
-
-	/**
-	 * Redefines the pointers y movement
-	 * @param deltaY Movement of the pointer on y axis
-	 */
-	void setDeltaY (const double deltaY)
-	{this->deltaY = deltaY;}
-
-	/**
-	 * Gets the y movement (relative to the last PointerEvent)
-	 * @return Change in y coordinate
-	 */
-	double getDeltaY () const
-	{return deltaY;}
+	BUtilities::Point getDelta () const
+	{return delta;}
 
 	/**
 	 * Redefines the button pressed of the pointer event
 	 * @param button Button pressed
 	 */
-	void setButton (const InputDevice button)
+	void setButton (const BDevices::ButtonCode button)
 	{buttonNr = button;}
 
 	/**
 	 * Gets the button pressed of the pointer event
 	 * @return Button pressed
 	 */
-	InputDevice getButton () const
+	BDevices::ButtonCode getButton () const
 	{return buttonNr;}
 };
 /*
@@ -490,72 +356,45 @@ public:
 class WheelEvent : public Event
 {
 protected:
-	double xpos;
-	double ypos;
-	double deltaX;
-	double deltaY;
+	BUtilities::Point point;
+	BUtilities::Point delta;
 
 public:
 	WheelEvent () :
 		WheelEvent (nullptr, NO_EVENT, 0, 0, 0, 0) {}
 	WheelEvent (BWidgets::Widget* widget, const EventType type, const double x, const double y, const double deltaX, const double deltaY) :
-		Event (widget, type), xpos (x), ypos (y),deltaX (deltaX), deltaY (deltaY) {}
+		WheelEvent (widget, type, BUtilities::Point (x, y), BUtilities::Point (deltaX, deltaY)) {}
+
+	WheelEvent (BWidgets::Widget* widget, const EventType type, const BUtilities::Point& point, const BUtilities::Point delta) :
+		Event (widget, type), point (point), delta (delta) {}
 
 	/**
-	 * Redefines the pointers x coordinate
-	 * @param x X coordinate relative to the widgets origin
+	 * Redefines the pointers coordinate
+	 * @param x Point coordinate relative to the widgets origin
 	 */
-	void setX (const double x)
-	{xpos = x;}
+	void setPosition (const BUtilities::Point& coords)
+  	{point = coords;}
 
 	/**
-	 * Gets the pointers x coordinate of the wheel event
-	 * @return X coordinate relative to the widgets origin
+	 * Gets the pointers coordinate of the wheel event
+	 * @return Point coordinate relative to the widgets origin
 	 */
-	double getX () const
-	{return xpos;}
+	BUtilities::Point getPosition () const
+ 	{return point;}
 
 	/**
-	 * Redefines the pointers y coordinate
-	 * @param y y coordinate relative to the widgets origin
+	 * Redefines the wheels  movement
+	 * @param delta Movement of the wheel
 	 */
-	void setY (const double y)
-	{ypos = y;}
+	void setDelta (const BUtilities::Point& coords)
+ 	{delta = coords;}
 
 	/**
-	 * Gets the pointers y coordinate
-	 * @return Y coordinate relative to the widgets origin
+	 * Gets the xmovement of the wheel
+	 * @return Change in coordinate
 	 */
-	double getY () const
-	{return ypos;}
-
-	/**
-	 * Redefines the wheels x movement
-	 * @param deltaX Movement of the wheel on x axis
-	 */
-	void setDeltaX (const double deltaX)
-	{this->deltaX = deltaX;}
-
-	/**
-	 * Gets the x movement of the wheel
-	 * @return Change in x coordinate
-	 */
-	double getDeltaX () const
-	{return deltaX;}
-
-	/**
-	 * Redefines the wheels y movement
-	 * @param deltaY Movement of the wheel on y axis
-	 */
-	void setDeltaY (const double deltaY)
-	{this->deltaY = deltaY;}
-
-	/**
-	 * Gets the y movement of the wheel
-	 * @return Change in y coordinate
-	 */
-	double getDeltaY () const
-	{return deltaY;}
+	BUtilities::Point getDelta () const
+ 	{return delta;}
 };
 /*
  * End of class BEvents::WheelEvent
@@ -611,42 +450,29 @@ public:
 class FocusEvent : public Event
 {
 protected:
-	double xpos;
-	double ypos;
+	BUtilities::Point point;
 
 public:
 	FocusEvent () :
 		FocusEvent (nullptr, NO_EVENT, 0, 0) {}
 	FocusEvent (BWidgets::Widget* widget, const EventType type, const double x, const double y) :
-		Event (widget, type), xpos (x), ypos (y) {}
+		FocusEvent (widget, type, BUtilities::Point (x, y)) {}
+	FocusEvent (BWidgets::Widget* widget, const EventType type, const BUtilities::Point& point) :
+		Event (widget, type), point (point) {}
 
 	/**
-	 * Redefines the pointers x coordinate
-	 * @param x X coordinate relative to the widgets origin
+	 * Redefines the pointers coordinate
+	 * @param x Point coordinate relative to the widgets origin
 	 */
-	void setX (const double x)
-	{xpos = x;}
+	void setPosition (const BUtilities::Point& coords)
+  	{point = coords;}
 
 	/**
-	 * Gets the pointers x coordinate of the wheel event
-	 * @return X coordinate relative to the widgets origin
+	 * Gets the pointers coordinate of the wheel event
+	 * @return Point coordinate relative to the widgets origin
 	 */
-	double getX () const
-	{return xpos;}
-
-	/**
-	 * Redefines the pointers y coordinate
-	 * @param y y coordinate relative to the widgets origin
-	 */
-	void setY (const double y)
-	{ypos = y;}
-
-	/**
-	 * Gets the pointers y coordinate
-	 * @return Y coordinate relative to the widgets origin
-	 */
-	double getY () const
-	{return ypos;}
+	BUtilities::Point getPosition () const
+ 	{return point;}
 };
 /*
  * End of class BEvents::ValueChangedEvent

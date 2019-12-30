@@ -21,10 +21,6 @@
 #ifndef BSEQUENCER_GUI_HPP_
 #define BSEQUENCER_GUI_HPP_
 
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 #include <lv2/lv2plug.in/ns/lv2core/lv2.h>
 #include <lv2/lv2plug.in/ns/extensions/ui/ui.h>
 #include <lv2/lv2plug.in/ns/ext/atom/atom.h>
@@ -37,7 +33,6 @@
 #include "BWidgets/BItems.hpp"
 #include "BWidgets/Widget.hpp"
 #include "BWidgets/Window.hpp"
-#include "BWidgets/FocusWidget.hpp"
 #include "BWidgets/Label.hpp"
 #include "BWidgets/DrawingSurface.hpp"
 #include "BWidgets/HSliderValue.hpp"
@@ -58,6 +53,7 @@
 #include "ResetButton.hpp"
 #include "UndoButton.hpp"
 #include "RedoButton.hpp"
+#include "PadSurface.hpp"
 #include "definitions.h"
 #include "ports.h"
 #include "urids.h"
@@ -165,8 +161,7 @@ private:
 
 	//Widgets
 	BWidgets::Widget mContainer;
-	BWidgets::DrawingSurface padSurface;
-	BWidgets::Text padSurfaceFocusText;
+	PadSurface padSurface;
 	BWidgets::DrawingSurface captionSurface;
 
 	BWidgets::Widget modeBox;
@@ -287,6 +282,7 @@ private:
 	BStyles::Border border = {{ink, 1.0}, 0.0, 2.0, 0.0};
 	BStyles::Border menuBorder = {{BColors::darkgrey, 1.0}, 0.0, 0.0, 0.0};
 	BStyles::Border labelborder = {BStyles::noLine, 4.0, 0.0, 0.0};
+	BStyles::Border focusborder = BStyles::Border (BStyles::Line (BColors::Color (0.0, 0.0, 0.0, 0.5), 2.0));
 	BStyles::Fill widgetBg = BStyles::noFill;
 	BStyles::Fill menuBg = BStyles::Fill (BColors::Color (0.0, 0.0, 0.05, 1.0));
 	BStyles::Fill screenBg = BStyles::Fill (BColors::Color (0.0, 0.0, 0.0, 0.8));
@@ -305,6 +301,10 @@ private:
 					{"border", STYLEPTR (&labelborder)},
 					{"textcolors", STYLEPTR (&txColors)},
 					{"font", STYLEPTR (&ctLabelFont)}}};
+	BStyles::StyleSet focusStyles = {"labels", {{"background", STYLEPTR (&screenBg)},
+					{"border", STYLEPTR (&focusborder)},
+					{"textcolors", STYLEPTR (&ltColors)},
+					{"font", STYLEPTR (&lfLabelFont)}}};
 
 	BStyles::Theme theme = BStyles::Theme
 	({
@@ -317,46 +317,50 @@ private:
 		{"screen", 		{{"background", STYLEPTR (&screenBg)}}},
 		{"box", 		{{"background", STYLEPTR (&boxBg)},
 					{"border", STYLEPTR (&border)}}},
+		{"box/focus",		{{"uses", STYLEPTR (&focusStyles)}}},
 		{"button", 		{{"background", STYLEPTR (&BStyles::blackFill)},
 					 {"border", STYLEPTR (&border)}}},
 		{"tgbutton", 		{{"border", STYLEPTR (&BStyles::noBorder)},
 					 {"textcolors", STYLEPTR (&tgColors)},
 					 {"bgcolors", STYLEPTR (&tgBgColors)},
 					 {"font", STYLEPTR (&tgLabelFont)}}},
-		{"tgbutton/focus", 	{{"background", STYLEPTR (&screenBg)}}},
-		{"tgbutton/focus/label",{{"uses", STYLEPTR (&labelStyles)},
- 					 {"font", STYLEPTR (&lfLabelFont)},
- 				 	 {"textcolors", STYLEPTR (&ltColors)}}},
+		{"tgbutton/focus",	{{"uses", STYLEPTR (&focusStyles)}}},
 		{"dial", 		{{"uses", STYLEPTR (&defaultStyles)},
 					 {"fgcolors", STYLEPTR (&fgColors)},
 					 {"bgcolors", STYLEPTR (&bgColors)},
 					 {"textcolors", STYLEPTR (&fgColors)},
 					 {"font", STYLEPTR (&ctLabelFont)}}},
+		{"dial/focus",		{{"uses", STYLEPTR (&focusStyles)}}},
 		{"ch1", 		{{"uses", STYLEPTR (&defaultStyles)},
 					 {"fgcolors", STYLEPTR (&fgColors_ch1)},
 					 {"bgcolors", STYLEPTR (&bgColors)},
 					 {"textcolors", STYLEPTR (&fgColors)},
 					 {"font", STYLEPTR (&ctLabelFont)}}},
+		{"ch1/focus",		{{"uses", STYLEPTR (&focusStyles)}}},
 		{"ch2", 		{{"uses", STYLEPTR (&defaultStyles)},
 					 {"fgcolors", STYLEPTR (&fgColors_ch2)},
 					 {"bgcolors", STYLEPTR (&bgColors)},
 					 {"textcolors", STYLEPTR (&fgColors)},
 					 {"font", STYLEPTR (&ctLabelFont)}}},
+		{"ch2/focus",		{{"uses", STYLEPTR (&focusStyles)}}},
 		{"ch3", 		{{"uses", STYLEPTR (&defaultStyles)},
 					 {"fgcolors", STYLEPTR (&fgColors_ch3)},
 					 {"bgcolors", STYLEPTR (&bgColors)},
 					 {"textcolors", STYLEPTR (&fgColors)},
 					 {"font", STYLEPTR (&ctLabelFont)}}},
+		{"ch3/focus",		{{"uses", STYLEPTR (&focusStyles)}}},
 		{"ch4", 		{{"uses", STYLEPTR (&defaultStyles)},
 					 {"fgcolors", STYLEPTR (&fgColors_ch4)},
 					 {"bgcolors", STYLEPTR (&bgColors)},
 					 {"textcolors", STYLEPTR (&fgColors)},
 					 {"font", STYLEPTR (&ctLabelFont)}}},
+		{"ch4/focus",		{{"uses", STYLEPTR (&focusStyles)}}},
 		{"slider",		{{"uses", STYLEPTR (&defaultStyles)},
 					 {"fgcolors", STYLEPTR (&fgColors)},
 					 {"bgcolors", STYLEPTR (&bgColors)},
 					 {"textcolors", STYLEPTR (&fgColors)},
 					 {"font", STYLEPTR (&ctLabelFont)}}},
+		{"slider/focus",	{{"uses", STYLEPTR (&focusStyles)}}},
 		{"ctlabel",	 	{{"uses", STYLEPTR (&labelStyles)}}},
 		{"lflabel",	 	{{"uses", STYLEPTR (&labelStyles)},
 					 {"font", STYLEPTR (&lfLabelFont)}}},
@@ -370,10 +374,7 @@ private:
 		{"editlabel",	 	{{"uses", STYLEPTR (&labelStyles)},
 		 	 	 	 {"font", STYLEPTR (&iLabelFont)},
 					 {"textcolors", STYLEPTR (&BColors::whites)}}},
-		{"widget/focus", 	{{"background", STYLEPTR (&screenBg)}}},
-		{"widget/focus/label",	{{"uses", STYLEPTR (&labelStyles)},
-					 {"font", STYLEPTR (&lfLabelFont)},
-				 	 {"textcolors", STYLEPTR (&ltColors)}}},
+		{"widget/focus",	{{"uses", STYLEPTR (&focusStyles)}}},
 		{"menu",	 	{{"border", STYLEPTR (&menuBorder)},
 					 {"background", STYLEPTR (&menuBg)}}},
 		{"menu/item",	 	{{"uses", STYLEPTR (&defaultStyles)},

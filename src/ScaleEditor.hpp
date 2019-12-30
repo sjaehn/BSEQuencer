@@ -304,12 +304,12 @@ void ScaleEditor::szScaleEditor ()
 	{
 		nrLabel[i].moveTo (20 * sz, (580 - i * 30) * sz); nrLabel[i].resize (30 * sz, 24 * sz);
 		nrSymbolListbox[i].moveTo (60 * sz, (580 - i * 30) * sz); nrSymbolListbox[i].resize (68 * sz, 24 * sz);
-		nrSymbolListbox[i].resizeListBox (68 * sz, 68 * sz);
+		nrSymbolListbox[i].resizeListBox (BUtilities::Point (68 * sz, 68 * sz));
 
 		nrNoteListbox[i].moveTo (148 * sz, (580 - i * 30) * sz ); nrNoteListbox[i].resize (80 * sz, 24 * sz);
-		nrNoteListbox[i].resizeListBox (80 * sz, 240 * sz);
-		if (i < 6) nrNoteListbox[i].moveListBox(0, -240 * sz);
-		nrNoteListbox[i].resizeListBoxItems (80 * sz, 24 * sz);
+		nrNoteListbox[i].resizeListBox (BUtilities::Point (80 * sz, 240 * sz));
+		if (i < 6) nrNoteListbox[i].moveListBox(BUtilities::Point (0, -240 * sz));
+		nrNoteListbox[i].resizeListBoxItems (BUtilities::Point (80 * sz, 24 * sz));
 
 		nrNoteLabel[i].moveTo (148 * sz, (580 - i * 30) * sz); nrNoteLabel[i].resize (80 * sz, 24 * sz);
 		nrAltSymbolLabel[i].moveTo (248 * sz, (580 - i * 30) * sz); nrAltSymbolLabel[i].resize (80 * sz, 24 * sz);
@@ -519,7 +519,10 @@ void ScaleEditor::labelClickCallback (BEvents::Event* event)
 
 			else
 			{
-				if (scaleEditor->scaleNameLabel.getMainWindow ()) scaleEditor->scaleNameLabel.getMainWindow ()->removeKeyGrab (&scaleEditor->scaleNameLabel);
+				if (scaleEditor->scaleNameLabel.getMainWindow ())
+				{
+					scaleEditor->scaleNameLabel.getMainWindow ()->getKeyGrabStack()->remove (&scaleEditor->scaleNameLabel);
+				}
 				scaleEditor->scaleNameLabel.setEditMode (false);
 				for (BWidgets::Label& l : scaleEditor->nrAltSymbolLabel)
 				{

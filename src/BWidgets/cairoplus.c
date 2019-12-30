@@ -160,6 +160,7 @@ char* cairo_create_text_fitted (cairo_t* cr, double width, cairo_text_decoration
 				else text[0] = '\0';
 				return output;
 			}
+			else free (output);
 		}
 	}
 

@@ -19,6 +19,7 @@
  */
 
 #include "BSEQuencer_GUI.hpp"
+#include "BUtilities/to_string.hpp"
 
 BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *const *features, PuglNativeWindow parentWindow) :
 	Window (1200, 820, "B.SEQuencer", parentWindow, true),
@@ -26,10 +27,10 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	pluginPath (bundle_path ? std::string (bundle_path) : std::string ("")),
 	sz (1.0), bgImageSurface (nullptr),
 	uris (), forge (), clipBoard (),
-	noteBits (0), chBits (0), tempTool (false), tempToolCh (0), wheelScrolled (false),
+	cursorBits {0}, noteBits (0), chBits (0),
+	tempTool (false), tempToolCh (0), wheelScrolled (false),
 	mContainer (0, 0, 1200, 820, "main"),
 	padSurface (98, 88, 804, 484, "box"),
-	padSurfaceFocusText (0, 0, 100, 60, "txtbox", ""),
 	captionSurface (18, 88, 64, 484, "box"),
 
 	modeBox (920, 88, 260, 170, "box"),
@@ -116,32 +117,20 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
 	{
 		chBoxes[i].box = BWidgets::Widget (98 + i * 203.5, 590, 193.5, 210, "box");
-		chBoxes[i].box.rename ("box");
 		chBoxes[i].chSymbol = BWidgets::DrawingSurface (7, 7, 26, 26, "button");
-		chBoxes[i].chSymbol.rename ("button");
 		chBoxes[i].chLabel = BWidgets::Label (40, 10, 133.5, 20, "ctlabel", "Channel " + std::to_string (i + 1));
-		chBoxes[i].chLabel.rename ("ctlabel");
 		chBoxes[i].channelLabel = BWidgets::Label (10, 50, 100, 20, "lflabel", "MIDI channel");
-		chBoxes[i].channelLabel.rename ("lflabel");
 		chBoxes[i].channelListBox = BWidgets::PopupListBox (123.5, 50, 60, 20, 60, 120, "menu",
 								    BItems::ItemList({"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"}),
 								    i + 1);
-		chBoxes[i].channelListBox.rename ("menu");
 		chBoxes[i].pitchLabel = BWidgets::Label (10, 80, 80, 20, "lflabel", "Input pitch");
-		chBoxes[i].pitchLabel.rename ("lflabel");
-		chBoxes[i].pitchSwitch = BWidgets::HSwitch (132.5, 82, 42, 16, "slider", 0.0);
-		chBoxes[i].pitchSwitch.rename ("ch" + std::to_string (i + 1));
+		chBoxes[i].pitchSwitch = BWidgets::HSwitch (132.5, 82, 42, 16, "ch" + std::to_string (i + 1), 0.0);
 		chBoxes[i].pitchScreen = BWidgets::Widget (10, 80, 173.5, 20, "screen");
-		chBoxes[i].pitchScreen.rename ("screen");
 		chBoxes[i].pitchScreen.hide ();
-		chBoxes[i].velocityDial = BWidgets::DialValue (25, 120, 50, 60, "dial", 1.0, 0.0, 2.0, 0.0, "%1.2f");
-		chBoxes[i].velocityDial.rename ("ch" + std::to_string (i + 1));
+		chBoxes[i].velocityDial = BWidgets::DialValue (25, 120, 50, 60, "ch" + std::to_string (i + 1), 1.0, 0.0, 2.0, 0.0, "%1.2f");
 		chBoxes[i].velocityLabel = BWidgets::Label (20, 180, 60, 20, "ctlabel", "Velocity");
-		chBoxes[i].velocityLabel.rename ("ctlabel");
-		chBoxes[i].noteOffsetDial = BWidgets::DialValue (118.5, 120, 50, 60, "dial", 0.0, -127.0, 127.0, 1.0, "%3.0f");
-		chBoxes[i].noteOffsetDial.rename ("ch" + std::to_string (i + 1));
+		chBoxes[i].noteOffsetDial = BWidgets::DialValue (118.5, 120, 50, 60, "ch" + std::to_string (i + 1), 0.0, -127.0, 127.0, 1.0, "%3.0f");
 		chBoxes[i].noteOffsetLabel = BWidgets::Label (113.5, 180, 60, 20, "ctlabel", "Offset");
-		chBoxes[i].noteOffsetLabel.rename ("ctlabel");
 	}
 
 	// Link controllerWidgets
@@ -185,12 +174,6 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	padSurface.setCallbackFunction (BEvents::WHEEL_SCROLL_EVENT, padsScrolledCallback);
 
 	padSurface.setFocusable (true);
-	BWidgets::FocusWidget* focus = new BWidgets::FocusWidget (this, "screen");
-	if (!focus) throw std::bad_alloc ();
-	padSurface.setFocusWidget (focus);
-	focus->add (padSurfaceFocusText);
-	focus->resize ();
-	focus->applyTheme (theme);
 	padSurface.setCallbackFunction (BEvents::FOCUS_IN_EVENT, padsFocusedCallback);
 	padSurface.setCallbackFunction (BEvents::FOCUS_OUT_EVENT, padsFocusedCallback);
 	padSurface.setMergeable (BEvents::POINTER_DRAG_EVENT, false);
@@ -291,12 +274,12 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		chBoxes[i].box.add (chBoxes[i].noteOffsetLabel);
 	}
 
-	mContainer.add (padSurface);
 	mContainer.add (captionSurface);
-	mContainer.add (modeBox);
 	mContainer.add (toolBox);
+	mContainer.add (modeBox);
 	mContainer.add (propertiesBox);
 	mContainer.add (helpLabel);
+	mContainer.add (padSurface);
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i) mContainer.add (chBoxes[i].box);
 
 	drawCaption ();
@@ -326,9 +309,6 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 BSEQuencer_GUI::~BSEQuencer_GUI ()
 {
 	if (scaleEditor) delete scaleEditor;
-
-	BWidgets::FocusWidget* focus = padSurface.getFocusWidget();
-	if (focus) delete focus;
 
 	send_ui_off ();
 }
@@ -627,16 +607,16 @@ void BSEQuencer_GUI::scale ()
 	RESIZE (modeBoxLabel, 10, 10, 240, 20, sz);
 	RESIZE (modeLabel, 10, 80, 60, 20, sz);
 	RESIZE (modeListBox, 80, 80, 170, 20, sz);
-	modeListBox.resizeListBox(170 * sz, 60 * sz);
-	modeListBox.resizeListBoxItems(170 * sz, 20 * sz);
+	modeListBox.resizeListBox(BUtilities::Point (170 * sz, 60 * sz));
+	modeListBox.resizeListBoxItems(BUtilities::Point (170 * sz, 20 * sz));
 	RESIZE (modeAutoplayBpmLabel, 10, 115, 120, 20, sz);
 	RESIZE (modeAutoplayBpmSlider, 120, 105, 130, 25, sz);
 	RESIZE (modeAutoplayBpbLabel, 10, 145, 120, 20, sz);
 	RESIZE (modeAutoplayBpbSlider, 120, 135, 130, 25, sz);
 	RESIZE (modeMidiInChannelLabel, 10, 110, 150, 20, sz);
 	RESIZE (modeMidiInChannelListBox, 180, 110, 70, 20, sz);
-	modeMidiInChannelListBox.resizeListBox (70 * sz, 200 * sz);
-	modeMidiInChannelListBox.resizeListBoxItems (70 * sz, 20 * sz);
+	modeMidiInChannelListBox.resizeListBox (BUtilities::Point (70 * sz, 200 * sz));
+	modeMidiInChannelListBox.resizeListBoxItems (BUtilities::Point (70 * sz, 20 * sz));
 	RESIZE (modePlayLabel, 10, 50, 205, 20, sz);
 	RESIZE (modePlayButton, 220, 40, 30, 30, sz);
 
@@ -661,32 +641,32 @@ void BSEQuencer_GUI::scale ()
 	RESIZE (propertiesBoxLabel, 10, 10, 240, 20, sz);
 	RESIZE (propertiesNrStepsLabel, 10, 50, 170, 20, sz);
 	RESIZE (propertiesNrStepsListBox, 180, 50, 70, 20, sz);
-	propertiesNrStepsListBox.resizeListBox (70 * sz, 100 * sz);
-	propertiesNrStepsListBox.resizeListBoxItems (70 * sz, 20 * sz);
+	propertiesNrStepsListBox.resizeListBox (BUtilities::Point (70 * sz, 100 * sz));
+	propertiesNrStepsListBox.resizeListBoxItems (BUtilities::Point (70 * sz, 20 * sz));
 	RESIZE (propertiesStepsPerSlider, 10, 75, 80, 25, sz);
 	RESIZE (propertiesStepsPerLabel, 100, 85, 80, 20, sz);
 	RESIZE (propertiesBaseListBox, 180, 85, 70, 20, sz);
-	propertiesBaseListBox.resizeListBox (70 * sz, 60 * sz);
-	propertiesBaseListBox.resizeListBoxItems (70 * sz, 20 * sz);
+	propertiesBaseListBox.resizeListBox (BUtilities::Point (70 * sz, 60 * sz));
+	propertiesBaseListBox.resizeListBoxItems (BUtilities::Point (70 * sz, 20 * sz));
 	RESIZE (propertiesRootLabel, 10, 115, 40, 20, sz);
 	RESIZE (propertiesRootListBox, 100, 115, 70, 20, sz);
-	propertiesRootListBox.resizeListBox (70 * sz, 160 * sz);
-	propertiesRootListBox.moveListBox (0, -160 * sz);
-	propertiesRootListBox.resizeListBoxItems (70 * sz, 20 * sz);
+	propertiesRootListBox.resizeListBox (BUtilities::Point (70 * sz, 160 * sz));
+	propertiesRootListBox.moveListBox (BUtilities::Point (0, -160 * sz));
+	propertiesRootListBox.resizeListBoxItems (BUtilities::Point (70 * sz, 20 * sz));
 	RESIZE (propertiesSignatureListBox, 180, 115, 70, 20, sz);
-	propertiesSignatureListBox.resizeListBox (70 * sz, 80 * sz);
-	propertiesSignatureListBox.resizeListBoxItems (70 * sz, 20 * sz);
+	propertiesSignatureListBox.resizeListBox (BUtilities::Point (70 * sz, 80 * sz));
+	propertiesSignatureListBox.resizeListBoxItems (BUtilities::Point (70 * sz, 20 * sz));
 	RESIZE (propertiesOctaveLabel, 10, 145, 55, 20, sz);
 	RESIZE (propertiesOctaveListBox, 180, 145, 70, 20, sz);
-	propertiesOctaveListBox.resizeListBox (70 * sz, 220 * sz);
-	propertiesOctaveListBox.moveListBox (0, -220 * sz);
-	propertiesOctaveListBox.resizeListBoxItems (70 * sz, 20 * sz);
+	propertiesOctaveListBox.resizeListBox (BUtilities::Point (70 * sz, 220 * sz));
+	propertiesOctaveListBox.moveListBox (BUtilities::Point (0, -220 * sz));
+	propertiesOctaveListBox.resizeListBoxItems (BUtilities::Point (70 * sz, 20 * sz));
 	RESIZE (propertiesScaleLabel, 10, 175, 50, 20, sz);
 	RESIZE (propertiesScaleEditIcon, 70, 175, 20, 20, sz);
 	RESIZE (propertiesScaleListBox, 100, 175, 150, 20, sz);
-	propertiesScaleListBox.resizeListBox (150 * sz, 420 * sz);
-	propertiesScaleListBox.moveListBox (0, -420 * sz);
-	propertiesScaleListBox.resizeListBoxItems (150 * sz, 20 * sz);
+	propertiesScaleListBox.resizeListBox (BUtilities::Point (150 * sz, 420 * sz));
+	propertiesScaleListBox.moveListBox (BUtilities::Point (0, -420 * sz));
+	propertiesScaleListBox.resizeListBoxItems (BUtilities::Point (150 * sz, 20 * sz));
 
 	RESIZE (helpLabel, 1140, 40, 30, 30, sz);
 	if (scaleEditor) {RESIZE ((*scaleEditor), 420, 20, 360, 760, sz);}
@@ -698,8 +678,8 @@ void BSEQuencer_GUI::scale ()
 		RESIZE (chBoxes[i].chLabel, 40, 10, 133.5, 20, sz);
 		RESIZE (chBoxes[i].channelLabel, 10, 50, 100, 20, sz);
 		RESIZE (chBoxes[i].channelListBox, 123.5, 50, 60, 20, sz);
-		chBoxes[i].channelListBox.resizeListBox (60 * sz, 120 * sz);
-		chBoxes[i].channelListBox.resizeListBoxItems (60 * sz, 20 * sz);
+		chBoxes[i].channelListBox.resizeListBox (BUtilities::Point (60 * sz, 120 * sz));
+		chBoxes[i].channelListBox.resizeListBoxItems (BUtilities::Point (60 * sz, 20 * sz));
 		RESIZE (chBoxes[i].pitchLabel, 10, 80, 80, 20, sz);
 		RESIZE (chBoxes[i].pitchSwitch, 132.5, 82, 42, 16, sz);
 		RESIZE (chBoxes[i].pitchScreen, 10, 80, 173.5, 20, sz);
@@ -718,9 +698,7 @@ void BSEQuencer_GUI::scale ()
 			chButtonStyles[i + 1].symbol
 		);
 	}
-
 	applyTheme (theme);
-
 	drawCaption ();
 	drawPad ();
 	show ();
@@ -731,18 +709,18 @@ void BSEQuencer_GUI::scaleFocus ()
 	cairo_surface_t* surface = padSurface.getDrawingSurface();
 	cairo_t* cr = cairo_create (surface);
 
-	padSurfaceFocusText.resize (400,100);	// Maximize size first to omit breaks
-	std::vector<std::string> textblock = padSurfaceFocusText.getTextBlock ();
-	double blockheight = padSurfaceFocusText.getTextBlockHeight (textblock);
+	padSurface.focusText.resize (400,100);	// Maximize size first to omit breaks
+	std::vector<std::string> textblock = padSurface.focusText.getTextBlock ();
+	double blockheight = padSurface.focusText.getTextBlockHeight (textblock);
 	double blockwidth = 0.0;
 	for (std::string textline : textblock)
 	{
-		cairo_text_extents_t ext = padSurfaceFocusText.getFont ()->getTextExtents (cr, textline);
+		cairo_text_extents_t ext = padSurface.focusText.getFont ()->getTextExtents (cr, textline);
 		if (ext.width > blockwidth) blockwidth = ext.width;
 	}
-	padSurfaceFocusText.resize (blockwidth + 2 * padSurfaceFocusText.getXOffset (), blockheight + 2 * padSurfaceFocusText.getYOffset ());
+	padSurface.focusText.resize (blockwidth + 2 * padSurface.focusText.getXOffset (), blockheight + 2 * padSurface.focusText.getYOffset ());
 
-	padSurface.getFocusWidget()->resize();
+	padSurface.focusText.resize();
 
 	cairo_destroy (cr);
 }
@@ -752,7 +730,6 @@ void BSEQuencer_GUI::applyTheme (BStyles::Theme& theme)
 	mContainer.applyTheme (theme);
 
 	padSurface.applyTheme (theme);
-	padSurfaceFocusText.applyTheme (theme);
 	captionSurface.applyTheme (theme);
 
 	modeBox.applyTheme (theme);
@@ -825,7 +802,7 @@ void BSEQuencer_GUI::onConfigureRequest (BEvents::ExposeEvent* event)
 {
 	Window::onConfigureRequest (event);
 
-	sz = (width_ / 1200 > height_ / 820 ? height_ / 820 : width_ / 1200);
+	sz = (getWidth() / 1200 > getHeight() / 820 ? getHeight() / 820 : getWidth() / 1200);
 	scale ();
 }
 
@@ -1100,8 +1077,8 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 		const double width = ui->padSurface.getEffectiveWidth ();
 		const double height = ui->padSurface.getEffectiveHeight ();
 
-		int row = (ROWS - 1) - ((int) ((pointerEvent->getY () - widget->getYOffset()) / (height / ROWS)));
-		int step = (pointerEvent->getX () - widget->getXOffset()) / (width / ui->controllerWidgets[NR_OF_STEPS]->getValue ());
+		int row = (ROWS - 1) - ((int) ((pointerEvent->getPosition ().y - widget->getYOffset()) / (height / ROWS)));
+		int step = (pointerEvent->getPosition ().x - widget->getXOffset()) / (width / ui->controllerWidgets[NR_OF_STEPS]->getValue ());
 
 		if ((event->getEventType () == BEvents::BUTTON_PRESS_EVENT) || (event->getEventType () == BEvents::POINTER_DRAG_EVENT))
 		{
@@ -1113,7 +1090,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 				int pdctrl = (int (pd.ch) & 0xF0) / 0x10;
 
 				// Left button: apply properties to pad
-				if (pointerEvent->getButton() == BEvents::LEFT_BUTTON)
+				if (pointerEvent->getButton() == BDevices::LEFT_BUTTON)
 				{
 					if (ui->controllerWidgets[SELECTION_CH]->getValue() <= NR_SEQUENCER_CHS)
 					{
@@ -1244,7 +1221,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 				}
 
 				// Right button: copy pad to properties
-				else if ((pointerEvent->getButton() == BEvents::RIGHT_BUTTON) &&
+				else if ((pointerEvent->getButton() == BDevices::RIGHT_BUTTON) &&
 						 ((event->getEventType () == BEvents::BUTTON_PRESS_EVENT) ||
 						  (event->getEventType () == BEvents::POINTER_DRAG_EVENT)))
 				{
@@ -1256,7 +1233,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 			}
 		}
 
-		else if ((event->getEventType () == BEvents::BUTTON_RELEASE_EVENT) && (pointerEvent->getButton() == BEvents::LEFT_BUTTON))
+		else if ((event->getEventType () == BEvents::BUTTON_RELEASE_EVENT) && (pointerEvent->getButton() == BDevices::LEFT_BUTTON))
 		{
 			// Edit mode
 			if (ui->controllerWidgets[SELECTION_CH]->getValue() > NR_SEQUENCER_CHS + NR_CTRL_BUTTONS)
@@ -1329,6 +1306,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 					ui->clipBoard.ready = true;
 
 					// Hack focusWidget to cut / copy message
+					/*
 					if ((edit == EDIT_CUT) || (edit == EDIT_COPY))
 					{
 						if (ui->focusWidget)
@@ -1344,6 +1322,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 							ui->focusWidget->show ();
 						}
 					}
+					*/
 
 					ui->drawPad ();
 				}
@@ -1374,15 +1353,15 @@ void BSEQuencer_GUI::padsScrolledCallback (BEvents::Event* event)
 		const double width = ui->padSurface.getEffectiveWidth ();
 		const double height = ui->padSurface.getEffectiveHeight ();
 
-		int row = (ROWS - 1) - ((int) ((wheelEvent->getY () - widget->getYOffset()) / (height / ROWS)));
-		int step = (wheelEvent->getX () - widget->getXOffset()) / (width / ui->controllerWidgets[NR_OF_STEPS]->getValue ());
+		int row = (ROWS - 1) - ((int) ((wheelEvent->getPosition ().y - widget->getYOffset()) / (height / ROWS)));
+		int step = (wheelEvent->getPosition ().x - widget->getXOffset()) / (width / ui->controllerWidgets[NR_OF_STEPS]->getValue ());
 
 		if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < ((int)ui->controllerWidgets[NR_OF_STEPS]->getValue ())))
 		{
 			Pad pd = ui->pattern.getPad (row, step);
 			if (int (pd.ch) & 0x0F)
 			{
-				pd.velocity += 0.01 * wheelEvent->getDeltaY();
+				pd.velocity += 0.01 * wheelEvent->getDelta().y;
 				pd.velocity = LIMIT (pd.velocity, 0.0, 2.0);
 				ui->pattern.setPad (row, step, pd);
 				ui->drawPad (row, step);
@@ -1405,18 +1384,18 @@ void BSEQuencer_GUI::padsFocusedCallback (BEvents::Event* event)
 		const double width = ui->padSurface.getEffectiveWidth ();
 		const double height = ui->padSurface.getEffectiveHeight ();
 
-		int row = (ROWS - 1) - ((int) ((focusEvent->getY () - widget->getYOffset()) / (height / ROWS)));
-		int step = (focusEvent->getX () - widget->getXOffset()) / (width / ui->controllerWidgets[NR_OF_STEPS]->getValue ());
+		int row = (ROWS - 1) - ((int) ((focusEvent->getPosition ().y - widget->getYOffset()) / (height / ROWS)));
+		int step = (focusEvent->getPosition ().x - widget->getXOffset()) / (width / ui->controllerWidgets[NR_OF_STEPS]->getValue ());
 
 		if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < ((int)ui->controllerWidgets[NR_OF_STEPS]->getValue ())))
 		{
 			Pad pd = ui->pattern.getPad (row, step);
-			ui->padSurfaceFocusText.setText
+			ui->padSurface.focusText.setText
 			(
 				"Channel: " + std::to_string (int (pd.ch) & 0x0f) + "\n" +
 				"Octave: " + std::to_string (int (pd.pitchOctave)) + "\n" +
-				"Velocity: " + BValues::toBString ("%1.2f", pd.velocity) + "\n" +
-				"Duration: " + BValues::toBString ("%1.2f", pd.duration));
+				"Velocity: " + BUtilities::to_string (pd.velocity, "%1.2f") + "\n" +
+				"Duration: " + BUtilities::to_string (pd.duration, "%1.2f"));
 			ui->scaleFocus ();
 		}
 	}

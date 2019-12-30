@@ -1,5 +1,5 @@
 /* PopupListBox.cpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,8 +47,7 @@ PopupListBox::PopupListBox (const double x, const double y, const double width,
 			    const BItems::ItemList& items, double preselection) :
 		ItemBox (x, y, width, height, name, {UNSELECTED, nullptr}),
 		downButton (0, 0, 0, 0, name + BWIDGETS_DEFAULT_POPUPLISTBOX_BUTTON_NAME, 0.0),
-		listBox (0, 0, 0, 0, name + BWIDGETS_DEFAULT_POPUPLISTBOX_LISTBOX_NAME, items, preselection),
-		listBoxXOffset (listXOffset), listBoxYOffset (listYOffset), listBoxWidth (listWidth), listBoxHeight (listHeight)
+		listBox (listXOffset, listYOffset, listWidth, listHeight, name + BWIDGETS_DEFAULT_POPUPLISTBOX_LISTBOX_NAME, items, preselection)
 
 {
 	setScrollable (true);
@@ -61,7 +60,7 @@ PopupListBox::PopupListBox (const double x, const double y, const double width,
 			if (i.getValue() == preselection)
 			{
 				value = i.getValue ();
-				item.setValue (value);
+				item.setValue (i.getValue ());
 				item.cloneWidgetFrom (i.getWidget ());
 				initItem ();
 				if (item.getWidget ()) add (*item.getWidget ());
@@ -71,21 +70,17 @@ PopupListBox::PopupListBox (const double x, const double y, const double width,
 	}
 
 	downButton.setCallbackFunction (BEvents::EventType::BUTTON_PRESS_EVENT, PopupListBox::handleDownButtonClicked);
-	listBox.extensionData = this;
 	listBox.setCallbackFunction (BEvents::EventType::VALUE_CHANGED_EVENT, PopupListBox::handleValueChanged);
-
+	listBox.setOversize (true);
 	listBox.hide ();
 
 	add (downButton);
+	add (listBox);
 }
 
 PopupListBox::PopupListBox (const PopupListBox& that) :
-		ItemBox (that), downButton (that.downButton), listBox (that.listBox),
-		listBoxXOffset (that.listBoxXOffset),
-		listBoxYOffset (that.listBoxYOffset), listBoxWidth (that.listBoxWidth), listBoxHeight (that.listBoxHeight)
+		ItemBox (that), downButton (that.downButton), listBox (that.listBox)
 {
-	listBox.extensionData = this;
-	initItem ();
 	if (item.getWidget ()) add (*item.getWidget ());
 	add (downButton);
 }
@@ -93,18 +88,11 @@ PopupListBox::PopupListBox (const PopupListBox& that) :
 PopupListBox& PopupListBox::operator= (const PopupListBox& that)
 {
 	downButton = that.downButton;
-
 	listBox = that.listBox;
-	listBoxXOffset = that.listBoxXOffset;
-	listBoxYOffset = that.listBoxYOffset;
-	listBoxWidth = that.listBoxWidth;
-	listBoxHeight = that.listBoxHeight;
 
 	ItemBox::operator= (that);
 	initItem ();
-	if (item.getWidget ()) add (*item.getWidget ());
 
-	listBox.extensionData = this;
 	return *this;
 }
 
@@ -128,37 +116,40 @@ void PopupListBox::setValue (const double val)
 	if (val != listBox.getValue ()) listBox.setValue (val);
 	if (value != listBox.getValue ())
 	{
-		BItems::Item* it = listBox.getItem (listBox.getValue ());
-		item.setValue (it->getValue ());
-		item.cloneWidgetFrom (it->getWidget ());
+		// Release old item.widget
+		Widget* oldW = item.getWidget ();
+		if (oldW && isChild (oldW)) release (oldW);
+
+		// Copy value and clone widget from listbox item
+		BItems::Item* listboxItem = listBox.getItem (listBox.getValue ());
+		item.setValue (listboxItem ->getValue ());
+		item.cloneWidgetFrom (listboxItem ->getWidget ());
 		initItem ();
+
+		// Add new item.widget and set value
 		if (item.getWidget ()) add (*item.getWidget ());
 		ValueWidget::setValue (listBox.getValue ());
 	}
 }
 
-void PopupListBox::moveListBox (const double xOffset, const double yOffset)
+void PopupListBox::moveListBox (const BUtilities::Point& offset)
 {
-	listBoxXOffset = xOffset;
-	listBoxYOffset = yOffset;
-	if (listBox.isVisible()) update ();
+	listBox.moveTo (offset);
 }
 
-void PopupListBox::resizeListBox (const double width, const double height)
+void PopupListBox::resizeListBox (const BUtilities::Point& extends)
 {
-	listBoxWidth = width;
-	listBoxHeight = height;
-	if (listBox.isVisible()) update ();
+	listBox.resize (extends);
 }
 
-void PopupListBox::resizeListBoxItem (const double value, const double width, const double height)
+void PopupListBox::resizeListBoxItem (const double value, const BUtilities::Point& extends)
 {
-	listBox.resizeItem (value, width, height);
+	listBox.resizeItem (value, extends);
 }
 
-void PopupListBox::resizeListBoxItems (const double width, const double height)
+void PopupListBox::resizeListBoxItems (const BUtilities::Point& extends)
 {
-	listBox.resizeItems (width, height);
+	listBox.resizeItems (extends);
 }
 
 void PopupListBox::update ()
@@ -178,15 +169,14 @@ void PopupListBox::update ()
 		double h = getEffectiveHeight ();
 
 		widget->moveTo (x0, y0);
-		widget->setWidth (w2);
-		widget->setHeight (h);
+		widget->resize (w2, h);
 	}
 
 	// Keep button on top
 	int cs = children_.size ();
 	if ((cs >= 2) && (children_[cs - 1] != (Widget*) &downButton))
 	{
-		downButton.moveToTop ();
+		downButton.raiseToTop ();
 	}
 
 	// Calculate size and position of widget elements
@@ -198,20 +188,10 @@ void PopupListBox::update ()
 	// Down button
 	double dw = (w > BWIDGETS_DEFAULT_POPUPLISTBOX_BUTTON_WIDTH ? BWIDGETS_DEFAULT_POPUPLISTBOX_BUTTON_WIDTH : w);
 	downButton.moveTo (x0 + w - dw, y0);
-	downButton.setWidth (dw);
-	downButton.setHeight (h);
+	downButton.resize (dw, h);
 
 	// List box
-	if ((main_) && (!listBox.getMainWindow()))
-	{
-		main_->add (listBox);
-	}
-	if ((!main_) && (listBox.getMainWindow())) listBox.getMainWindow()->release (&listBox);
-	if ((listBoxXOffset == 0.0) && (listBoxYOffset == 0.0)) listBox.moveTo (getOriginX (), getOriginY () + getHeight ());
-	else listBox.moveTo (getOriginX () + listBoxXOffset, getOriginY () + listBoxYOffset);
-	listBox.setWidth (listBoxWidth);
-	listBox.setHeight (listBoxHeight);
-
+	if (listBox.getPosition() == BUtilities::Point()) listBox.moveTo (BUtilities::Point (0, getHeight()));
 }
 
 void PopupListBox::onButtonPressed (BEvents::PointerEvent* event)
@@ -219,9 +199,25 @@ void PopupListBox::onButtonPressed (BEvents::PointerEvent* event)
 	if (listBox.isVisible ()) listBox.hide ();
 	else
 	{
+		// Close all other same level popup widgets listboxes first
+		Widget* p = getParent();
+		if (p)
+		{
+			for (Widget* c : p->getChildren())
+			{
+				if (c != this)
+				{
+					PopupListBox* other = dynamic_cast<PopupListBox*> (c);
+					if (other && other->getListBox()) other->getListBox()->hide();
+				}
+			}
+		}
+
+		// Raise to top & show listbox
+		raiseToTop ();
 		update ();
 		listBox.show ();
-		listBox.moveToTop ();
+		listBox.raiseToTop ();
 	}
 
 	//Widget::cbfunction[BEvents::EventType::BUTTON_PRESS_EVENT] (event);
@@ -230,7 +226,7 @@ void PopupListBox::onButtonPressed (BEvents::PointerEvent* event)
 void PopupListBox::onWheelScrolled (BEvents::WheelEvent* event)
 {
 	BItems::ItemList* itemList = listBox.getItemList ();
-	double newNr = LIMIT (listBox.getActive () - event->getDeltaY (), 1, itemList->size ());
+	double newNr = LIMIT (listBox.getActive () - event->getDelta ().y, 1, itemList->size ());
 	BItems::ItemList::iterator it = std::next ((*itemList).begin (), newNr - 1);
 	setValue ((*it).getValue());
 }
@@ -272,18 +268,18 @@ void PopupListBox::handleValueChanged (BEvents::Event* event)
 if (event && (event->getEventType () == BEvents::EventType::VALUE_CHANGED_EVENT) && event->getWidget ())
 	{
 		BEvents::ValueChangedEvent* ev = (BEvents::ValueChangedEvent*) event;
-		ValueWidget* w = (ValueWidget*) ev->getWidget ();
-		if (w->extensionData)
+		ListBox* w = (ListBox*) ev->getWidget ();
+
+		if (w)
 		{
-			PopupListBox* p = (PopupListBox*) w->extensionData;
-			if (p->getParent () && (w == (ValueWidget*) &(p->listBox)))
+			PopupListBox* p = (PopupListBox*) w->getParent();
+			if (p)
 			{
 				p->setValue (w->getValue ());
 				p->listBox.hide ();
 			}
 		}
 	}
-
 }
 
 }

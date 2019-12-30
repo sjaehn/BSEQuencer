@@ -60,7 +60,7 @@ public:
 	cairo_surface_t* getIconSurface (BColors::State state) const;
 
 protected:
-	virtual void draw (const double x, const double y, const double width, const double height) override;
+	virtual void draw (const BUtilities::RectArea& area) override;
 
 	std::vector<cairo_surface_t*> iconSurface;
 };

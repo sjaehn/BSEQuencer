@@ -118,14 +118,14 @@ public:
 	 * @param width 	New width of the item.
 	 * @param height	New height of the item.
 	 */
-	virtual void resizeItem (const double value, const double width, const double height);
+	virtual void resizeItem (const double value, const BUtilities::Point& extends);
 
 	/**
 	 * Resizes a all items widgets.
 	 * @param width 	New width of the items.
 	 * @param height	New height of the items.
 	 */
-	virtual void resizeItems (const double width, const double height);
+	virtual void resizeItems (const BUtilities::Point& extends);
 
 	/**
 	 * Scans theme for widget properties and applies these properties.

@@ -1,5 +1,5 @@
 /* HSliderValue.hpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,8 +46,6 @@ public:
 	 * @param that Source slider
 	 */
 	HSliderValue (const HSliderValue& that);
-
-	~HSliderValue ();
 
 	/**
 	 * Assignment. Copies the slider properties from a source slider and keeps
@@ -119,10 +117,7 @@ protected:
 	Label valueDisplay;
 
 	std::string valFormat;
-	double displayHeight;
-	double displayWidth;
-	double displayX0;
-	double displayY0;
+	BUtilities::RectArea displayArea;
 };
 
 }

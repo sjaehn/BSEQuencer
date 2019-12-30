@@ -1,5 +1,5 @@
 /* DialValue.cpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,24 +16,28 @@
  */
 
 #include "DialValue.hpp"
+#include "../BUtilities/to_string.hpp"
 
 namespace BWidgets
 {
 
 DialValue::DialValue () :
-		DialValue (0.0, 0.0, BWIDGETS_DEFAULT_DIALVALUE_WIDTH, BWIDGETS_DEFAULT_DIALVALUE_HEIGHT,
-							  "dialvalue",
-							  BWIDGETS_DEFAULT_VALUE, BWIDGETS_DEFAULT_RANGE_MIN, BWIDGETS_DEFAULT_RANGE_MAX, BWIDGETS_DEFAULT_RANGE_STEP,
-							  BWIDGETS_DEFAULT_VALUE_FORMAT) {}
+	DialValue
+	(
+		0.0, 0.0, BWIDGETS_DEFAULT_DIALVALUE_WIDTH, BWIDGETS_DEFAULT_DIALVALUE_HEIGHT,
+		"dialvalue",
+		BWIDGETS_DEFAULT_VALUE, BWIDGETS_DEFAULT_RANGE_MIN, BWIDGETS_DEFAULT_RANGE_MAX, BWIDGETS_DEFAULT_RANGE_STEP,
+		BWIDGETS_DEFAULT_VALUE_FORMAT
+	) {}
 
 DialValue::DialValue (const double x, const double y, const double width, const double height, const std::string& name,
-											const double value, const double min, const double max, const double step,
-											const std::string& valueFormat) :
+		const double value, const double min, const double max, const double step,
+		const std::string& valueFormat) :
 	Dial (x, y, width, height, name, value, min, max, step),
 	valueDisplay(0, 0.75 * height, width, 0.25 * height, name),
 	valFormat (valueFormat)
 {
-	valueDisplay.setText (BValues::toBString (valueFormat, value));
+	valueDisplay.setText (BUtilities::to_string (value, valueFormat));
 	add (valueDisplay);
 }
 
@@ -61,7 +65,7 @@ Widget* DialValue::clone () const {return new DialValue (*this);}
 void DialValue::setValue (const double val)
 {
 	Dial::setValue (val);
-	valueDisplay.setText(BValues::toBString (valFormat, value));
+	valueDisplay.setText(BUtilities::to_string (value, valFormat));
 }
 
 void DialValue::setValueFormat (const std::string& valueFormat)
@@ -79,7 +83,7 @@ void DialValue::update ()
 	Dial::update();
 
 	// Update display
-	valueDisplay.moveTo (dialCenterX - dialRadius, dialCenterY + 0.7 * dialRadius);
+	valueDisplay.moveTo (dialCenter.x - dialRadius, dialCenter.y + 0.7 * dialRadius);
 	valueDisplay.setWidth (2 * dialRadius);
 	valueDisplay.setHeight (0.5 * dialRadius);
 	if (valueDisplay.getFont ()->getFontSize () != 0.4 * dialRadius)
@@ -87,7 +91,7 @@ void DialValue::update ()
 		valueDisplay.getFont ()->setFontSize (0.4 * dialRadius);
 		valueDisplay.update ();
 	}
-	valueDisplay.setText (BValues::toBString (valFormat, value));
+	valueDisplay.setText (BUtilities::to_string (value, valFormat));
 
 }
 
@@ -104,8 +108,8 @@ void DialValue::updateCoords ()
 	double w = getEffectiveWidth ();
 	double h = getEffectiveHeight ();
 	dialRadius = (w < h / 1.2 ? w / 2 : h / 2.4);
-	dialCenterX = width_ / 2;
-	dialCenterY = height_ / 2 - 0.2 * dialRadius;
+	dialCenter.x = getWidth () / 2;
+	dialCenter.y = getHeight () / 2 - 0.2 * dialRadius;
 }
 
 }

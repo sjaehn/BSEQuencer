@@ -1,5 +1,5 @@
 /* Dial.hpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,14 +22,13 @@
 #include "Knob.hpp"
 #include "DrawingSurface.hpp"
 #include "Label.hpp"
+#include "Focusable.hpp"
 
 #define BWIDGETS_DEFAULT_DIAL_WIDTH 50.0
 #define BWIDGETS_DEFAULT_DIAL_HEIGHT 50.0
 #define BWIDGETS_DEFAULT_DIAL_KNOB_SIZE 0.6
 #define BWIDGETS_DEFAULT_DIAL_DEPTH 1.0
 #define BWIDGETS_DEFAULT_DIAL_DOT_SIZE 0.1
-
-#define BWIDGETS_DEFAULT_FOCUS_LABEL_NAME "/label"
 
 namespace BWidgets
 {
@@ -39,12 +38,12 @@ namespace BWidgets
  * RangeWidget class dial.
  * The Widget is clickable by default.
  */
-class Dial : public RangeWidget
+class Dial : public RangeWidget, public Focusable
 {
 public:
 	Dial ();
 	Dial (const double x, const double y, const double width, const double height, const std::string& name,
-		  const double value, const double min, const double max, const double step);
+		const double value, const double min, const double max, const double step);
 
 	/**
 	 * Creates a new (orphan) dial and copies the dial properties from a
@@ -52,8 +51,6 @@ public:
 	 * @param that Source dial
 	 */
 	Dial (const Dial& that);
-
-	~Dial ();
 
 	/**
 	 * Assignment. Copies the dial properties from a source dial and keeps
@@ -125,22 +122,34 @@ public:
 	 */
 	virtual void onWheelScrolled (BEvents::WheelEvent* event) override;
 
+	/**
+	 * Predefined empty method to handle a
+	 * BEvents::EventType::FOCUS_IN_EVENT.
+	 * @param event Focus event
+	 */
+	virtual void onFocusIn (BEvents::FocusEvent* event) override;
+
+	/**
+	 * Predefined empty method to handle a
+	 * BEvents::EventType::FOCUS_OUT_EVENT.
+	 * @param event Focus event
+	 */
+	virtual void onFocusOut (BEvents::FocusEvent* event) override;
+
 
 protected:
 	void drawDot ();
 	virtual void updateCoords ();
-	virtual void draw (const double x, const double y, const double width, const double height) override;
+	virtual void draw (const BUtilities::RectArea& area) override;
 
-	double dialCenterX;
-	double dialCenterY;
+	BUtilities::Point dialCenter;
 	double dialRadius;
 
 	Knob knob;
 	DrawingSurface dot;
+	Label focusLabel;
 	BColors::ColorSet fgColors;
 	BColors::ColorSet bgColors;
-
-	Label focusLabel;
 };
 
 }

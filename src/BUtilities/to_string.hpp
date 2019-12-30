@@ -1,5 +1,5 @@
-/* BValues.cpp
- * Copyright (C) 2018  Sven Jähnichen
+/* to_string.hpp
+ * Copyright (C) 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,24 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "BValues.hpp"
+#ifndef BUTILITIES_TO_STRING_HPP_
+#define BUTILITIES_TO_STRING_HPP_
 
-namespace BValues {
+#include <string>
 
-std::string toBString (const double value)
-{
-	std::ostringstream os;
-	os << value;
-	std::string str = os.str();
-	return str;
-}
+namespace BUtilities {
 
-std::string toBString (const std::string& format, const double value)
-{
-	char c[64];
-	snprintf (c, 64, format.c_str (), value);
-	std::string str = c;
-	return c;
-}
+std::string to_string (const double value);
+std::string to_string (const double value, const std::string& format);
 
 }
+
+#endif /* BUTILITIES_TO_STRING_HPP_ */

@@ -1,5 +1,5 @@
 /* DrawingSurface.cpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,11 +83,15 @@ void DrawingSurface::setHeight (const double height)
 	update ();
 }
 
-void DrawingSurface::resize (const double width, const double height)
+void DrawingSurface::resize () {} // Do not auto resize
+
+void DrawingSurface::resize (const double width, const double height) {DrawingSurface::resize (BUtilities::Point (width, height));}
+
+void DrawingSurface::resize (const BUtilities::Point extends)
 {
 	double oldEffectiveHeight = getEffectiveHeight ();
 	double oldEffectiveWidth = getEffectiveWidth ();
-	Widget::resize (width, height);
+	Widget::resize (extends);
 
 	if ((oldEffectiveWidth != getEffectiveWidth ()) || (oldEffectiveHeight != getEffectiveHeight ()))
 	{
@@ -114,20 +118,20 @@ void DrawingSurface::setBorder (const BStyles::Border& border)
 	update ();
 }
 
-void DrawingSurface::draw (const double x, const double y, const double width, const double height)
+void DrawingSurface::draw (const BUtilities::RectArea& area)
 {
-	if ((!widgetSurface) || (cairo_surface_status (widgetSurface) != CAIRO_STATUS_SUCCESS)) return;
+	if ((!widgetSurface_) || (cairo_surface_status (widgetSurface_) != CAIRO_STATUS_SUCCESS)) return;
 
-	if ((width_ >= 4) && (height_ >= 4))
+	if ((getWidth () >= 4) && (getHeight () >= 4))
 	{
 		// Draw super class widget elements first
-		Widget::draw (x, y, width, height);
+		Widget::draw (area);
 
-		cairo_t* cr = cairo_create (widgetSurface);
+		cairo_t* cr = cairo_create (widgetSurface_);
 		if (cairo_status (cr) == CAIRO_STATUS_SUCCESS)
 		{
 			// Limit cairo-drawing area
-			cairo_rectangle (cr, x, y, width, height);
+			cairo_rectangle (cr, area.getX (), area.getY (), area.getWidth (), area.getHeight ());
 			cairo_clip (cr);
 			//TODO also clip to inner borders
 

@@ -1,5 +1,5 @@
 /* VSliderValue.cpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,43 +16,49 @@
  */
 
 #include "VSliderValue.hpp"
+#include "../BUtilities/to_string.hpp"
 
 namespace BWidgets
 {
 VSliderValue::VSliderValue () :
-		VSliderValue (0.0, 0.0, BWIDGETS_DEFAULT_VSLIDERVALUE_WIDTH, BWIDGETS_DEFAULT_VSLIDERVALUE_HEIGHT,
-								 "vslidervalue",
-								 BWIDGETS_DEFAULT_VALUE, BWIDGETS_DEFAULT_RANGE_MIN, BWIDGETS_DEFAULT_RANGE_MAX, BWIDGETS_DEFAULT_RANGE_STEP,
-								 BWIDGETS_DEFAULT_VALUE_FORMAT) {}
+	VSliderValue
+	(
+		0.0,
+		0.0,
+		BWIDGETS_DEFAULT_VSLIDERVALUE_WIDTH,
+		BWIDGETS_DEFAULT_VSLIDERVALUE_HEIGHT,
+		"vslidervalue",
+		BWIDGETS_DEFAULT_VALUE,
+		BWIDGETS_DEFAULT_RANGE_MIN,
+		BWIDGETS_DEFAULT_RANGE_MAX,
+		BWIDGETS_DEFAULT_RANGE_STEP,
+		BWIDGETS_DEFAULT_VALUE_FORMAT
+	)
+{}
 
 VSliderValue::VSliderValue (const double x, const double y, const double width, const double height, const std::string& name,
-												  const double value, const double min, const double max, const double step,
-												  const std::string& valueFormat) :
+	  const double value, const double min, const double max, const double step,
+	  const std::string& valueFormat) :
 	VSlider (x, y, width, height, name, value, min, max, step),
 	valueDisplay(0, 0, width, height, name),
-	valFormat (valueFormat), displayHeight (0), displayWidth (0), displayX0 (0), displayY0 (0)
+	valFormat (valueFormat), displayArea ()
 {
-	valueDisplay.setText (BValues::toBString (valueFormat, value));
+	valueDisplay.setText (BUtilities::to_string (value, valueFormat));
 	add (valueDisplay);
 }
 
 VSliderValue::VSliderValue (const VSliderValue& that) :
 		VSlider (that), valueDisplay (that.valueDisplay), valFormat (that.valFormat),
-		displayHeight (that.displayHeight), displayWidth (that.displayWidth), displayX0 (that.displayX0), displayY0 (that.displayY0)
+		displayArea (that.displayArea)
 {
 	add (valueDisplay);
 }
-
-VSliderValue::~VSliderValue () {}
 
 VSliderValue& VSliderValue::operator= (const VSliderValue& that)
 {
 	release (&valueDisplay);
 
-	displayHeight = that.displayHeight;
-	displayWidth = that.displayWidth;
-	displayX0 = that.displayX0;
-	displayY0 = that.displayY0;
+	displayArea = that.displayArea;
 	valFormat = that.valFormat;
 	valueDisplay = that.valueDisplay;
 	VSlider::operator= (that);
@@ -66,8 +72,8 @@ Widget* VSliderValue::clone () const {return new VSliderValue (*this);}
 
 void VSliderValue::setValue (const double val)
 {
-	VScale::setValue (val);
-	valueDisplay.setText(BValues::toBString (valFormat, value));
+	VSlider::setValue (val);
+	valueDisplay.setText(BUtilities::to_string (value, valFormat));
 }
 
 void VSliderValue::setValueFormat (const std::string& valueFormat)
@@ -85,15 +91,14 @@ void VSliderValue::update ()
 	VSlider::update ();
 
 	// Update display
-	valueDisplay.moveTo (displayX0, displayY0);
-	valueDisplay.setWidth (displayWidth);
-	valueDisplay.setHeight (displayHeight);
-	if (valueDisplay.getFont ()->getFontSize () != displayHeight * 0.8)
+	valueDisplay.moveTo (displayArea.getPosition());
+	valueDisplay.resize (displayArea.getExtends());
+	if (valueDisplay.getFont ()->getFontSize () != displayArea.getHeight() * 0.8)
 	{
-		valueDisplay.getFont ()->setFontSize (displayHeight * 0.8);
+		valueDisplay.getFont ()->setFontSize (displayArea.getHeight() * 0.8);
 		valueDisplay.update ();
 	}
-	valueDisplay.setText (BValues::toBString (valFormat, value));
+	valueDisplay.setText (BUtilities::to_string (value, valFormat));
 }
 
 void VSliderValue::applyTheme (BStyles::Theme& theme) {applyTheme (theme, name_);}
@@ -108,21 +113,24 @@ void VSliderValue::updateCoords ()
 	double w = getEffectiveWidth ();
 	double h = getEffectiveHeight ();
 
-	displayWidth = (w < h ? w : h);
-	displayHeight = displayWidth / 2.2;
-	displayX0 = getXOffset () + w / 2 - displayWidth / 2;
-	displayY0 = getYOffset ();
+	double dw = (w < h ? w : h);
+	double dh = dw / 2.2;
+	double dx = getXOffset () + w / 2 - dw / 2;
+	double dy = getYOffset ();
+	displayArea = BUtilities::RectArea (dx, dy, dw, dh);
 
-	double h2 = h - displayHeight;
-	double w2 = displayWidth / 2;
+	double h2 = h - displayArea.getHeight();
+	double w2 = displayArea.getWidth() / 2;
 	knobRadius = (w2 < h2 / 2 ? w2 / 2 : h2 / 4);
-	scaleX0 = getXOffset () + w / 2 - knobRadius / 2;
-	scaleY0 = getYOffset () + displayHeight + knobRadius;
-	scaleWidth = knobRadius;
-	scaleHeight = h2 - 2 * knobRadius;
-	scaleYValue = scaleY0 + (1 - getRelativeValue ()) * scaleHeight;
-	knobXCenter = scaleX0 + scaleWidth / 2;
-	knobYCenter = scaleYValue;
+	scaleArea = BUtilities::RectArea
+	(
+		getXOffset () + w / 2 - knobRadius / 2,
+		getYOffset () + displayArea.getHeight() + knobRadius,
+		knobRadius,
+		h2 - 2 * knobRadius
+	);
+	scaleYValue = scaleArea.getY() + (1 - getRelativeValue ()) * scaleArea.getHeight();
+	knobPosition = BUtilities::Point (scaleArea.getX() + scaleArea.getWidth() / 2, scaleYValue);
 }
 
 }

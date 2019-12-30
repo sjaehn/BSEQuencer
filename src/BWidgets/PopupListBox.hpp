@@ -112,13 +112,13 @@ public:
 	 */
 	virtual void setValue (const double val) override;
 
-	virtual void moveListBox (const double xOffset, const double yOffset);
+	virtual void moveListBox (const BUtilities::Point& offset);
 
-	virtual void resizeListBox (const double width, const double height);
+	virtual void resizeListBox (const BUtilities::Point& extends);
 
-	virtual void resizeListBoxItem (const double value, const double width, const double height);
+	virtual void resizeListBoxItem (const double value, const BUtilities::Point& extends);
 
-	virtual void resizeListBoxItems (const double width, const double height);
+	virtual void resizeListBoxItems (const BUtilities::Point& extends);
 
 	/**
 	 * Calls a redraw of the widget and calls postRedisplay () if the the
@@ -150,11 +150,6 @@ protected:
 
 	DownButton downButton;
 	ListBox listBox;
-
-	double listBoxXOffset;
-	double listBoxYOffset;
-	double listBoxWidth;
-	double listBoxHeight;
 
 };
 

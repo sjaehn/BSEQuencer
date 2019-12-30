@@ -62,17 +62,15 @@
 #include <functional>
 #include <chrono>
 
+#include "../BUtilities/RectArea.hpp"
 #include "BColors.hpp"
 #include "BStyles.hpp"
 #include "BEvents.hpp"
-#include "BValues.hpp"
 
 namespace BWidgets
 {
 
 class Window; // Forward declaration
-class Widget; // Forward declaration
-class FocusWidget; // Forward declaration
 
 /**
  * Class BWidgets::Widget
@@ -102,7 +100,7 @@ public:
 
 	/**
 	 * Assignment. Copies the widget properties from a source widget and keeps
-	 * its name and its position within the widget tree. Emits a
+	 * its position within the widget tree. Emits a
 	 * BEvents::ExposeEvent if the widget is visible.
 	 * @param that Source widget
 	 */
@@ -145,58 +143,48 @@ public:
 	/**
 	 * Moves the widget and emits a BEvents::ExposeEvent if the widget is
 	 * visible.
-	 * @param x New x coordinate
-	 * @param y New y coordinate
+	 * @param x 		New x coordinate
+	 * @param y 		New y coordinate
+	 * @param position	New position
 	 */
 	void moveTo (const double x, const double y);
+	void moveTo (const BUtilities::Point& position);
 
 	/**
-	 * Gets the widgets x position
-	 * @return X position
+	 * Gets the widgets position
+	 * @return Position
 	 */
-	double getX () const;
+	BUtilities::Point getPosition () const;
 
 	/**
-	 * Gets the widgets y position
-	 * @return Y position
+	 * Gets the widgets position relative to the position of its main window.
+	 * @return Position
 	 */
-	double getY () const;
-
-	/**
-	 * Gets the widgets x position relative to the position of its main window.
-	 * @return X position
-	 */
-	double getOriginX ();
-
-	/**
-	 * Gets the widgets y position relative to the position of its main window.
-	 * @return Y position
-	 */
-	double getOriginY ();
+	BUtilities::Point getAbsolutePosition () const;
 
 	/**
 	 * Pushes this widget one step backwards if it is linked to a
 	 * parent widget. Emits a BEvents::ExposeEvent if the widget is visible.
 	 */
-	void moveBackwards ();
+	void pushBackwards ();
 
 	/**
-	 * Pulls this widget one step frontwards if it is linked to a
+	 * Raises this widget one step frontwards if it is linked to a
 	 * parent widget. Emits a BEvents::ExposeEvent if the widget is visible.
 	 */
-	void moveFrontwards ();
+	void raiseFrontwards ();
 
 	/**
-	 * Pulls this widget to the front if it is linked to a
+	 * Raises this widget to the front if it is linked to a
 	 * parent widget. Emits a BEvents::ExposeEvent if the widget is visible.
 	 */
-	void moveToTop ();
+	void raiseToTop ();
 
 	/**
-	 * Pulls this widget to the bottom if it is linked to a
+	 * Pushs this widget to the bottom if it is linked to a
 	 * parent widget. Emits a BEvents::ExposeEvent if the widget is visible.
 	 */
-	// TODO void moveToBottom ();
+	// TODO void pushToBottom ();
 
 	/**
 	 * Resizes the widget, redraw and emits a BEvents::ExposeEvent if the
@@ -230,9 +218,17 @@ public:
 	 * resized to the size of the containing child widgets.
 	 * @param width		New widgets width
 	 * @param height	New widgets height
+	 * @param extends	New widget extends
 	 */
 	virtual void resize ();
 	virtual void resize (const double width, const double height);
+	virtual void resize (const BUtilities::Point extends);
+
+	/**
+	 * Gets the width and the height of the widget
+	 * @return Point containing width and height
+	 */
+	BUtilities::Point getExtends () const;
 
 	/**
 	 * Gets the x offset of the widget content. This is distance between the
@@ -262,6 +258,11 @@ public:
 	 */
 	double getEffectiveHeight ();
 
+	/**
+	 * Gets the widgets area without its borders
+	 * @return	Effective widgets area
+	 */
+	BUtilities::RectArea getEffectiveArea () const;
 
 	/**
 	 * Sets the widgets state
@@ -362,19 +363,6 @@ public:
 	std::vector<Widget*> getChildren () const;
 
 	/**
-	 * Links a widget that will pop up following a BEvents::FOCUS_EVENT.
-	 * @param widget	Pointer to a widget or nullptr
-	 */
-	void setFocusWidget (FocusWidget* widget);
-
-	/**
-	 * Fets the link to the widget that will pop up following a
-	 * BEvents::FOCUS_EVENT.
-	 * @param return	Pointer to a widget or nullptr
-	 */
-	FocusWidget* getFocusWidget ();
-
-	/**
 	 * Renames the widget.
 	 * @param name New name
 	 */
@@ -462,8 +450,8 @@ public:
 	 * This flag is ignored if merging doesn't make sense (e.g., in case of
 	 * BEvents::CLOSE_EVENT).
 	 * @param eventType	BEvents::EventType for which the status is defined
-	 * 		  status 	TRUE if the the events emitted by this widget and
-	 * 					specified by eventType may be merged, otherwise FALSE
+	 * @param status 	TRUE if the the events emitted by this widget and
+	 * 			specified by eventType may be merged, otherwise FALSE
 	 */
 	void setMergeable (const BEvents::EventType eventType, const bool status);
 
@@ -471,9 +459,13 @@ public:
 	 * Gets whether events emitted by this widget MAY be merged to precursor
 	 * events of the same type or not.
 	 * @return	TRUE if the the events emitted by this widget and specified by
-	 * 			eventType may be merged, otherwise FALSE
+	 * 		eventType may be merged, otherwise FALSE
 	 */
 	bool isMergeable (const BEvents::EventType eventType) const;
+
+	void setOversize (const bool status);
+
+	bool isOversize () const;
 
 	/**
 	 * Calls a redraw of the widget and calls postRedisplay () if the the
@@ -643,59 +635,65 @@ public:
 	 */
 	virtual void applyTheme (BStyles::Theme& theme, const std::string& name);
 
-
-	/**
-	 * Pointer to optional extension data.
-	 */
-	void* extensionData;
-
 protected:
 
-	/**
-	 * Linearizes the whole children tree.
-	 * @param queue Vector to which all (pointers to) children shall be added.
-	 * 				Default = empty.
-	 * @return Vector of pointers to all children.
-	 */
-	std::vector <Widget*> getChildrenAsQueue (std::vector <Widget*> queue = {}) const;
+	BUtilities::RectArea getArea () const;
+	BUtilities::RectArea getAbsoluteArea () const;
+	BUtilities::RectArea getTotalArea (std::function<bool (Widget* widget)> func = [] (Widget* widget) {return true;});
+	BUtilities::RectArea getAbsoluteTotalArea (std::function<bool (Widget* widget)> func = [] (Widget* widget) {return true;});
 
-	bool isPointInWidget (const double x, const double y) const;
-	Widget* getWidgetAt (const double x, const double y, const bool checkVisibility,
-			     const bool checkClickability, const bool checkDraggability,
-			     const bool checkScrollability, const bool checkFocusability);
+	void forEachChild (std::function<bool (Widget* widget)> func = [] (Widget* widget) {return true;});
+	void forEachChild (std::vector<Widget*>::iterator first, std::vector<Widget*>::iterator last,
+			   std::function<bool (Widget* widget)> func = [] (Widget* widget) {return true;});
+
+
+	Widget* getWidgetAt (const BUtilities::Point& position, std::function<bool (Widget* widget)> func = [] (Widget* widget) {return true;});
 
 	void postMessage (const std::string& name, const BUtilities::Any content);
-	void postRedisplay (const double x, const double y, const double width, const double height);
-	void redisplay (cairo_surface_t* surface, double x, double y, double width, double height);
+
+	void postRedisplay (const BUtilities::RectArea& area);
+
+	void redisplay (cairo_surface_t* surface, const BUtilities::RectArea& area);
 
 	virtual bool filter (Widget* widget);
 
-	virtual void draw (const double x, const double y, const double width, const double height);
+	virtual void draw (const BUtilities::RectArea& area);
 
-	bool fitToArea (double& x, double& y, double& width, double& height);
-
-	double x_, y_, width_, height_;
-	bool visible;
-	bool clickable;
-	bool draggable;
-	bool scrollable;
-	bool focusable;
-	bool scheduleDraw;
-	std::array<bool, BEvents::EventType::NO_EVENT> mergeable;
+	BUtilities::RectArea area_;
+	bool visible_;
+	bool clickable_;
+	bool draggable_;
+	bool scrollable_;
+	bool focusable_;
+	bool oversized_;
+	bool scheduleDraw_;
+	std::array<bool, BEvents::EventType::NO_EVENT> mergeable_;
 	Window* main_;
 	Widget* parent_;
 	std::vector <Widget*> children_;
 	BStyles::Border border_;
 	BStyles::Fill background_;
 	std::string name_;
-	std::array<std::function<void (BEvents::Event*)>, BEvents::EventType::NO_EVENT> cbfunction;
-	cairo_surface_t* widgetSurface;
-	BColors::State widgetState;
-	FocusWidget* focusWidget;
+	std::array<std::function<void (BEvents::Event*)>, BEvents::EventType::NO_EVENT> cbfunction_;
+	cairo_surface_t* widgetSurface_;
+	BColors::State widgetState_;
 
+private:
+	void redisplay (cairo_surface_t* surface, const BUtilities::RectArea& outerArea, const BUtilities::RectArea& area);
+	Widget* getWidgetAt (const BUtilities::Point& abspos, const BUtilities::RectArea& outerArea,
+			     const BUtilities::RectArea& area, std::function<bool (Widget* widget)> func = [] (Widget* widget) {return true;});
 };
+
+bool isVisible (Widget* widget);
+
+bool isClickable (Widget* widget);
+
+bool isDraggable (Widget* widget);
+
+bool isScrollable (Widget* widget);
+
+bool isFocusable (Widget* widget);
+
 }
-
-
 
 #endif /* BWIDGETS_WIDGET_HPP_ */

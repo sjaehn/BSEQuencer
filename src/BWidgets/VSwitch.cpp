@@ -1,5 +1,5 @@
 /* VSwitch.cpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,14 +50,20 @@ void VSwitch::updateCoords ()
 	double h = getEffectiveHeight ();
 
 	knobRadius = (w < h / 2 ? w / 2 : h / 4);
-	scaleX0 = getXOffset () + w / 2 - knobRadius;
-	scaleY0 = getYOffset ();
-	scaleWidth = 2 * knobRadius;
-	scaleHeight = h;
-	scaleYValue = scaleY0 + knobRadius + (1 - getRelativeValue ()) * (scaleHeight - 2 * knobRadius);
+	scaleArea = BUtilities::RectArea
+	(
+		getXOffset () + w / 2 - knobRadius,
+		getYOffset (),
+		2 * knobRadius,
+		h
+	);
+	scaleYValue = scaleArea.getY() + knobRadius + (1 - getRelativeValue ()) * (scaleArea.getHeight() - 2 * knobRadius);
 
-	knobXCenter = scaleX0 + scaleWidth / 2 + BWIDGETS_DEFAULT_KNOB_DEPTH;
-	knobYCenter = scaleYValue + BWIDGETS_DEFAULT_KNOB_DEPTH;
+	knobPosition = BUtilities::Point
+	(
+		scaleArea.getX() + scaleArea.getWidth() / 2 + BWIDGETS_DEFAULT_KNOB_DEPTH,
+		scaleYValue + BWIDGETS_DEFAULT_KNOB_DEPTH
+	);
 }
 
 }

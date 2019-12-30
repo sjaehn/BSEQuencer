@@ -1,5 +1,5 @@
 /* VScale.hpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,13 +19,10 @@
 #define BWIDGETS_VSCALE_HPP_
 
 #include "RangeWidget.hpp"
-#include "Label.hpp"
 
 #define BWIDGETS_DEFAULT_VSCALE_WIDTH 100.0
 #define BWIDGETS_DEFAULT_VSCALE_HEIGHT 6.0
 #define BWIDGETS_DEFAULT_VSCALE_DEPTH 1.0
-
-#define BWIDGETS_DEFAULT_FOCUS_LABEL_NAME "/label"
 
 namespace BWidgets
 {
@@ -49,8 +46,6 @@ public:
 	 */
 	VScale (const VScale& that);
 
-	~VScale ();
-
 	/**
 	 * Assignment. Copies the scale properties from a source scale and keeps
 	 * its name and its position within the widget tree. Emits an expose event
@@ -64,14 +59,6 @@ public:
 	 * its properties.
 	 */
 	virtual Widget* clone () const override;
-
-	/**
-	 * Changes the value of the widget and keeps it within the defined range.
-	 * Passes the value to its predefined child widgets.
-	 * Emits a value changed event and (if visible) an expose event.
-	 * @param val Value
-	 */
-	virtual void setValue (const double val) override;
 
 	/**
 	 * Calls a redraw of the widget and calls postRedisplay () if the the
@@ -123,16 +110,12 @@ public:
 
 protected:
 	virtual void updateCoords ();
-	virtual void draw (const double x, const double y, const double width, const double height) override;
+	virtual void draw (const BUtilities::RectArea& area) override;
 
 	BColors::ColorSet fgColors;
 	BColors::ColorSet bgColors;
-	double scaleX0;
-	double scaleY0;
-	double scaleWidth;
-	double scaleHeight;
+	BUtilities::RectArea scaleArea;
 	double scaleYValue;
-	Label focusLabel;
 };
 
 }

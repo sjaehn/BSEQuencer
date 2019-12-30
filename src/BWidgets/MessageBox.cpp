@@ -1,5 +1,5 @@
 /* MessageBox.cpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,15 +22,15 @@ namespace BWidgets
 MessageBox::MessageBox () : MessageBox (0.0, 0.0, 0.0, 0.0, "messagebox", "", "MessageBox") {}
 
 MessageBox::MessageBox (const double x, const double y, const double width, const double height,
-						const std::string& text, std::vector<std::string> buttons) :
+			const std::string& text, std::vector<std::string> buttons) :
 		MessageBox (x, y, width, height, text, "", text, buttons) {}
 
 MessageBox::MessageBox (const double x, const double y, const double width, const double height,
-						const std::string& title, const std::string& text, std::vector<std::string> buttons) :
+			const std::string& title, const std::string& text, std::vector<std::string> buttons) :
 		MessageBox (x, y, width, height, title, title, text, buttons) {}
 
 MessageBox::MessageBox (const double x, const double y, const double width, const double height,
-						const std::string& name, const std::string& title, const std::string& text, std::vector<std::string> buttonLabels) :
+			const std::string& name, const std::string& title, const std::string& text, std::vector<std::string> buttonLabels) :
 		ValueWidget (x, y, width, height, name, 0.0),
 		titleBox (0, 0, 0, 0, name + BWIDGETS_DEFAULT_MESSAGEBOX_TITLE_NAME, ""),
 		textBox (0, 0, 0, 0, name + BWIDGETS_DEFAULT_MESSAGEBOX_TEXT_NAME, ""),
@@ -145,10 +145,10 @@ std::string MessageBox::getText () const {return textBox.getText ();}
 void MessageBox::addButton (const std::string& label)
 {
 	TextButton* b = new TextButton(0, 0, BWIDGETS_DEFAULT_BUTTON_WIDTH, BWIDGETS_DEFAULT_BUTTON_HEIGHT,
-								   name_ + BWIDGETS_DEFAULT_MESSAGEBOX_BUTTON_NAME, label, 0.0);
+					name_ + BWIDGETS_DEFAULT_MESSAGEBOX_BUTTON_NAME, label, 0.0);
 	if (b)
 	{
-		cairo_t* cr = cairo_create (widgetSurface);
+		cairo_t* cr = cairo_create (widgetSurface_);
 		cairo_text_extents_t ext = b->getLabel()->getFont()->getTextExtents (cr, label);
 		cairo_destroy (cr);
 		b->setWidth (ext.width > BWIDGETS_DEFAULT_BUTTON_WIDTH - BWIDGETS_DEFAULT_MENU_PADDING ?

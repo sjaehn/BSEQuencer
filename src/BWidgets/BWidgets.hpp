@@ -1,5 +1,5 @@
 /* BWidgets.hpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,15 +18,7 @@
 #ifndef BWIDGETS_HPP_
 #define BWIDGETS_HPP_
 
-#include "BUtilities.hpp"
-#include "BColors.hpp"
-#include "BStyles.hpp"
-#include "BEvents.hpp"
-#include "BValues.hpp"
-#include "BItems.hpp"
-#include "Widget.hpp"
 #include "Window.hpp"
-#include "FocusWidget.hpp"
 #include "Display.hpp"
 #include "StateDisplay.hpp"
 #include "Label.hpp"

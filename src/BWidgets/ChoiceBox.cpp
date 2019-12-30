@@ -132,24 +132,24 @@ void ChoiceBox::addItem (const BItems::ItemList& newItems)
 	for (BItems::Item const& ni : newItems) addItem (ni);
 }
 
-void ChoiceBox::resizeItem (const double value, const double width, const double height)
+void ChoiceBox::resizeItem (const double value, const BUtilities::Point& extends)
 {
 	BItems::Item* it = getItem (value);
 	if (it)
 	{
 		BWidgets::Widget* w = it->getWidget ();
-		if (w) w->resize (width, height);
+		if (w) w->resize (extends);
 	}
 
 	updateItems ();
 }
 
-void ChoiceBox::resizeItems (const double width, const double height)
+void ChoiceBox::resizeItems (const BUtilities::Point& extends)
 {
 	for (BItems::Item const& it : items)
 	{
 		BWidgets::Widget* w = it.getWidget ();
-		if (w) w->resize (width, height);
+		if (w) w->resize (extends);
 	}
 
 	updateItems ();
@@ -218,8 +218,8 @@ void ChoiceBox::update ()
 	    ((children_[cs - 1] != (Widget*) &upButton) ||
 	     (children_[cs - 2] != (Widget*) &downButton)))
 	{
-		downButton.moveToTop ();
-		upButton.moveToTop ();
+		downButton.raiseToTop ();
+		upButton.raiseToTop ();
 	}
 
 	// Update items
@@ -236,8 +236,7 @@ void ChoiceBox::update ()
 	double upButtonHeight = (height >= BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT ?
 				 BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT : height);
 	upButton.moveTo (x0, y0);
-	upButton.setWidth (width);
-	upButton.setHeight (upButtonHeight);
+	upButton.resize (width, upButtonHeight);
 
 	if (height > BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT)
 	{
@@ -247,8 +246,7 @@ void ChoiceBox::update ()
 					   BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT :
 					   height - BWIDGETS_DEFAULT_CHOICEBOX_BUTTON_HEIGHT);
 		downButton.moveTo (x0, y0 + height - downButtonHeight);
-		downButton.setWidth (width);
-		downButton.setHeight (downButtonHeight);
+		downButton.resize (width, downButtonHeight);
 	}
 }
 
@@ -273,8 +271,7 @@ void ChoiceBox::updateItems ()
 			else w->hide ();
 
 			w->moveTo (x0, y0 + upButtonHeight);
-			w->setWidth (width);
-			w->setHeight (itemHeight);
+			w->resize (width, itemHeight);
 		}
 		++n;
 	}
@@ -282,7 +279,7 @@ void ChoiceBox::updateItems ()
 
 void ChoiceBox::onWheelScrolled (BEvents::WheelEvent* event)
 {
-	double newNr = LIMIT (activeNr - event->getDeltaY (), 1, items.size ());
+	double newNr = LIMIT (activeNr - event->getDelta ().y, 1, items.size ());
 	BItems::ItemList::iterator it = std::next (items.begin (), newNr - 1);
 	setValue ((*it).getValue ());
 }

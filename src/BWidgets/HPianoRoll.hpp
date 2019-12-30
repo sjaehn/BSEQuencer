@@ -80,8 +80,8 @@ public:
 	virtual void onPointerDragged (BEvents::PointerEvent* event) override;
 
 protected:
-	int getKey (const double x, const double y);
-	virtual void draw (const double x, const double y, const double width, const double height) override;
+	int getKey (const BUtilities::Point position);
+	virtual void draw (const BUtilities::RectArea& area) override;
 
 	bool toggleKeys;
 	int actKeyNr;

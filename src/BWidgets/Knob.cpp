@@ -1,5 +1,5 @@
 /* Knob.cpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,6 @@
  */
 
 #include "Knob.hpp"
-
-#ifndef PI
-#define PI 3.14159265
-#endif
 
 namespace BWidgets
 {
@@ -72,29 +68,29 @@ void Knob::applyTheme (BStyles::Theme& theme, const std::string& name)
 
 }
 
-void Knob::draw (const double x, const double y, const double width, const double height)
+void Knob::draw (const BUtilities::RectArea& area)
 {
-	if ((!widgetSurface) || (cairo_surface_status (widgetSurface) != CAIRO_STATUS_SUCCESS)) return;
+	if ((!widgetSurface_) || (cairo_surface_status (widgetSurface_) != CAIRO_STATUS_SUCCESS)) return;
 
 	// Draw super class widget elements first
-	Widget::draw (x, y, width, height);
+	Widget::draw (area);
 
 	double heff = getEffectiveHeight ();
 	double weff = getEffectiveWidth ();
 
 	// Draw knob
 	// only if minimum requirements satisfied
-	if ((height_ >= 1) && (width_ >= 1))
+	if ((getHeight () >= 1) && (getWidth () >= 1))
 	{
-		cairo_surface_clear (widgetSurface);
-		cairo_t* cr = cairo_create (widgetSurface);
+		cairo_surface_clear (widgetSurface_);
+		cairo_t* cr = cairo_create (widgetSurface_);
 
 		if (cairo_status (cr) == CAIRO_STATUS_SUCCESS)
 		{
 			cairo_pattern_t* pat;
 
 			// Limit cairo-drawing area
-			cairo_rectangle (cr, x, y, width, height);
+			cairo_rectangle (cr, area.getX (), area.getY (), area.getWidth (), area.getHeight ());
 			cairo_clip (cr);
 
 			// Calculate aspect ratios first
@@ -115,7 +111,7 @@ void Knob::draw (const double x, const double y, const double width, const doubl
 											   x0 + 0.5 * size - knobDepth, y0 + 0.5 * size - knobDepth, 0.75 * size);
 			if (pat && (cairo_pattern_status (pat) == CAIRO_STATUS_SUCCESS))
 			{
-				cairo_arc (cr,  x0 + 0.5 * size - knobDepth, y0 + 0.5 * size - knobDepth, size / 2, 0, 2 * PI);
+				cairo_arc (cr,  x0 + 0.5 * size - knobDepth, y0 + 0.5 * size - knobDepth, size / 2, 0, 2 * M_PI);
 				cairo_close_path (cr);
 				cairo_pattern_add_color_stop_rgba (pat, 0, cMid.getRed (), cMid.getGreen (), cMid.getBlue (), cMid.getAlpha ());
 				cairo_pattern_add_color_stop_rgba (pat, 1, cLo.getRed (), cLo.getGreen (), cLo.getBlue (), cLo.getAlpha ());
@@ -131,9 +127,9 @@ void Knob::draw (const double x, const double y, const double width, const doubl
 				cairo_pattern_add_color_stop_rgba (pat, 0, cMid.getRed (), cMid.getGreen (), cMid.getBlue (), cMid.getAlpha ());
 				cairo_pattern_add_color_stop_rgba (pat, 0.825, cHi.getRed (), cHi.getGreen (), cHi.getBlue (), cHi.getAlpha ());
 				cairo_pattern_add_color_stop_rgba (pat, 1, cMid.getRed (), cMid.getGreen (), cMid.getBlue (), cMid.getAlpha ());
-				cairo_arc (cr,  x0 + 0.5 * size - knobDepth, y0 + 0.5 * size - knobDepth, size / 2, -0.25 * PI, 0.75 * PI);
+				cairo_arc (cr,  x0 + 0.5 * size - knobDepth, y0 + 0.5 * size - knobDepth, size / 2, -0.25 * M_PI, 0.75 * M_PI);
 				cairo_line_to (cr, x0, y0 + 0.5 * size);
-				cairo_arc_negative (cr, x0 + 0.5 * size, y0 + 0.5 * size, size / 2, 0.75 * PI, -0.25 * PI);
+				cairo_arc_negative (cr, x0 + 0.5 * size, y0 + 0.5 * size, size / 2, 0.75 * M_PI, -0.25 * M_PI);
 				cairo_close_path (cr);
 				cairo_set_line_width (cr, 0.5);
 				cairo_set_source (cr, pat);
@@ -142,13 +138,19 @@ void Knob::draw (const double x, const double y, const double width, const doubl
 			}
 
 			// Knob edge
-			pat = cairo_pattern_create_linear (x0 + 0.5 * size * (1 + cos (0.25 * PI)) - knobDepth, y0 + 0.5 * size * (1 + sin (0.25 * PI)) - knobDepth,
-											   x0 + 0.5 * size * (1 - cos (0.25 * PI)) - knobDepth, y0 + 0.5 * size * (1 - sin (0.25 * PI)) - knobDepth);
+			pat = cairo_pattern_create_linear
+			(
+				x0 + 0.5 * size * (1 + cos (0.25 * M_PI)) - knobDepth,
+				y0 + 0.5 * size * (1 + sin (0.25 * M_PI)) - knobDepth,
+				x0 + 0.5 * size * (1 - cos (0.25 * M_PI)) - knobDepth,
+				y0 + 0.5 * size * (1 - sin (0.25 * M_PI)) - knobDepth
+			);
+
 			if (pat && (cairo_pattern_status (pat) == CAIRO_STATUS_SUCCESS))
 			{
 				cairo_pattern_add_color_stop_rgba (pat, 0, cHi.getRed (), cHi.getGreen (), cHi.getBlue (), cHi.getAlpha ());
 				cairo_pattern_add_color_stop_rgba (pat, 1, cSh.getRed (), cSh.getGreen (), cSh.getBlue (), cSh.getAlpha ());
-				cairo_arc (cr,  x0 + 0.5 * size - knobDepth, y0 + 0.5 * size - knobDepth, size / 2, 0, 2 * PI);
+				cairo_arc (cr,  x0 + 0.5 * size - knobDepth, y0 + 0.5 * size - knobDepth, size / 2, 0, 2 * M_PI);
 				cairo_set_line_width (cr, 0.2 * knobDepth);
 				cairo_set_source (cr, pat);
 				cairo_stroke (cr);

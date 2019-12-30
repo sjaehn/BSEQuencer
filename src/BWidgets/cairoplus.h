@@ -32,7 +32,7 @@ typedef struct {
 } cairo_rgba;
 
 typedef struct {
-	const char *family;
+	char family[64];
 	double size;
 	cairo_font_slant_t slant;
 	cairo_font_weight_t weight;
@@ -41,8 +41,8 @@ typedef struct {
 /**
  * Draws a rectangle with selected rounded edges.
  * @param cr	  Cairo context.
- * @param x		  X coordinate upper right
- * @param y		  Y coordinate upper right
+ * @param x	  X coordinate upper right
+ * @param y	  Y coordinate upper right
  * @param width   Rectangle width
  * @param height  Rectangle height
  * @param radius  Radius of edges

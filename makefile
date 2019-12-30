@@ -1,6 +1,13 @@
 SHELL = /bin/sh
 
 PKG_CONFIG ?= pkg-config
+GUI_LIBS += x11 cairo
+LV2_LIBS += lv2
+ifneq ($(shell $(PKG_CONFIG) --exists fontconfig || echo no), no)
+  GUI_LIBS += fontconfig
+  GUIPPFLAGS += -DPKG_HAVE_FONTCONFIG
+endif
+
 CXX ?= g++
 INSTALL ?= install
 INSTALL_PROGRAM ?= $(INSTALL)
@@ -16,10 +23,10 @@ LDFLAGS += -shared -Wl,-z,relro,-z,now
 STRIPFLAGS += -s --strip-program=$(STRIP)
 
 DSPFLAGS =
-GUIFLAGS = -DPUGL_HAVE_CAIRO
+GUIPPFLAGS += -DPUGL_HAVE_CAIRO
 
-DSPFLAGS += `$(PKG_CONFIG) --cflags --libs lv2`
-GUIFLAGS += `$(PKG_CONFIG) --cflags --libs lv2 x11 cairo`
+DSPFLAGS += `$(PKG_CONFIG) --cflags --libs $(LV2_LIBS)`
+GUIFLAGS += `$(PKG_CONFIG) --cflags --libs $(LV2_LIBS) $(GUI_LIBS)`
 
 BUNDLE = BSEQuencer.lv2
 DSP = BSEQuencer
@@ -60,17 +67,16 @@ GUI_INCL = \
 	src/BWidgets/ValueWidget.cpp \
 	src/BWidgets/Knob.cpp \
 	src/BWidgets/Label.cpp \
-	src/BWidgets/FocusWidget.cpp \
 	src/BWidgets/Window.cpp \
 	src/BWidgets/Widget.cpp \
 	src/BWidgets/BStyles.cpp \
 	src/BWidgets/BColors.cpp \
 	src/BWidgets/BItems.cpp \
-	src/BWidgets/BValues.cpp \
 	src/screen.c \
 	src/BWidgets/cairoplus.c \
 	src/BWidgets/pugl/pugl_x11_cairo.c \
-	src/BWidgets/pugl/pugl_x11.c
+	src/BWidgets/pugl/pugl_x11.c \
+	src/BUtilities/to_string.cpp
 
 ifeq ($(shell $(PKG_CONFIG) --exists lv2 || echo no), no)
   $(error LV2 not found. Please install LV2 first.)
@@ -98,7 +104,7 @@ $(DSP_OBJ): $(DSP_SRC)
 $(GUI_OBJ): $(GUI_SRC)
 	@echo -n Build $(BUNDLE) GUI...
 	@mkdir -p $(BUNDLE)
-	@$(CXX) $< $(GUI_INCL) -o $(BUNDLE)/$@ $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(GUIFLAGS)
+	@$(CXX) $< $(GUI_INCL) -o $(BUNDLE)/$@ $(CPPFLAGS) $(GUIPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(GUIFLAGS)
 	@echo \ done.
 
 install:

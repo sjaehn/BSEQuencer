@@ -1,5 +1,5 @@
 /* VScale.cpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,77 +27,29 @@ VScale::VScale (const double  x, const double y, const double width, const doubl
 				  const double value, const double min, const double max, const double step) :
 		RangeWidget (x, y, width, height, name, value, min, max, step),
 		fgColors (BWIDGETS_DEFAULT_FGCOLORS), bgColors (BWIDGETS_DEFAULT_BGCOLORS),
-		scaleX0 (0), scaleY0 (0), scaleWidth (width), scaleHeight (height), scaleYValue (0),
-		focusLabel (0, 0, 80, 20, name + BWIDGETS_DEFAULT_FOCUS_NAME + BWIDGETS_DEFAULT_FOCUS_LABEL_NAME, "")
+		scaleArea (), scaleYValue (0)
 {
 	setClickable (true);
 	setDraggable (true);
 	setScrollable (true);
-
-	std::string valstr = BValues::toBString (value);
-	focusLabel.setText(valstr);
-	focusLabel.resize (focusLabel.getTextWidth (valstr) + 10, 20);
-	focusWidget = new FocusWidget (this, name + BWIDGETS_DEFAULT_FOCUS_NAME);
-	if (focusWidget)
-	{
-		focusWidget->add (focusLabel);
-		focusWidget->resize ();
-	}
 }
 
 VScale::VScale (const VScale& that) :
-		RangeWidget (that), fgColors (that.fgColors), bgColors (that.bgColors), scaleX0 (that.scaleX0), scaleY0 (that.scaleY0),
-		scaleWidth (that.scaleWidth), scaleHeight (that.scaleHeight), scaleYValue (that.scaleYValue),
-		focusLabel (0, 0, 80, 20, that.name_ + BWIDGETS_DEFAULT_FOCUS_NAME + BWIDGETS_DEFAULT_FOCUS_LABEL_NAME, "")
-{
-	std::string valstr = BValues::toBString (value);
-	focusLabel.setText(valstr);
-	focusLabel.resize (focusLabel.getTextWidth (valstr) + 10, 20);
-	focusWidget = new FocusWidget (this, that.name_ + BWIDGETS_DEFAULT_FOCUS_NAME);
-	if (focusWidget)
-	{
-		focusWidget->add (focusLabel);
-		focusWidget->resize ();
-	}
-}
-
-VScale::~VScale ()
-{
-	if (focusWidget) delete focusWidget;
-}
+		RangeWidget (that), fgColors (that.fgColors), bgColors (that.bgColors), scaleArea (that.scaleArea),
+		scaleYValue (that.scaleYValue) {}
 
 VScale& VScale::operator= (const VScale& that)
 {
 	fgColors = that.fgColors;
 	bgColors = that.bgColors;
-	scaleX0 = that.scaleX0;
-	scaleY0 = that.scaleY0;
-	scaleWidth = that.scaleWidth;
-	scaleHeight = that.scaleHeight;
+	scaleArea = that.scaleArea;
 	scaleYValue = that.scaleYValue;
-	if (focusWidget) delete focusWidget;
-	focusLabel = that.focusLabel;
-	focusWidget = new FocusWidget (this, that.name_ + BWIDGETS_DEFAULT_FOCUS_NAME);
-	if (focusWidget)
-	{
-		focusWidget->add (focusLabel);
-		focusWidget->resize ();
-	}
 	RangeWidget::operator= (that);
 
 	return *this;
 }
 
 Widget* VScale::clone () const {return new VScale (*this);}
-
-void VScale::setValue (const double val)
-{
-	RangeWidget::setValue (val);
-	std::string valstr = BValues::toBString (value);
-	focusLabel.setText(valstr);
-	focusLabel.resize (focusLabel.getTextWidth (valstr) + 10, 20);
-	if (focusWidget) focusWidget->resize();
-}
 
 void VScale::update ()
 {
@@ -109,9 +61,6 @@ void VScale::applyTheme (BStyles::Theme& theme) {applyTheme (theme, name_);}
 
 void VScale::applyTheme (BStyles::Theme& theme, const std::string& name)
 {
-	if (focusWidget) focusWidget->applyTheme (theme, name + BWIDGETS_DEFAULT_FOCUS_NAME);
-	focusLabel.applyTheme (theme, name + BWIDGETS_DEFAULT_FOCUS_NAME + BWIDGETS_DEFAULT_FOCUS_LABEL_NAME);
-
 	Widget::applyTheme (theme, name);
 
 	// Foreground colors (scale)
@@ -128,7 +77,14 @@ void VScale::applyTheme (BStyles::Theme& theme, const std::string& name)
 
 void VScale::onButtonPressed (BEvents::PointerEvent* event)
 {
-	if (main_ && isVisible () && (height_ >= 1) && (width_ >= 1) && (scaleHeight > 0) && (event->getButton() == BEvents::LEFT_BUTTON))
+	if
+	(
+		main_ && isVisible () &&
+		(getHeight() >= 1) &&
+		(getWidth() >= 1) &&
+		(scaleArea.getHeight() > 0) &&
+		(event->getButton() == BDevices::LEFT_BUTTON)
+	)
 	{
 		double min = getMin ();
 		double max = getMax ();
@@ -137,7 +93,7 @@ void VScale::onButtonPressed (BEvents::PointerEvent* event)
 		// Y movement (drag mode)
 		if (hardChangeable)
 		{
-			double frac = (scaleY0 + scaleHeight - event->getY ()) / scaleHeight;
+			double frac = (scaleArea.getY() + scaleArea.getHeight() - event->getPosition().y) / scaleArea.getHeight();
 			if (getStep () < 0) frac = 1 - frac;
 			double hardValue = min + frac * (max - min);
 			softValue = 0;
@@ -147,7 +103,7 @@ void VScale::onButtonPressed (BEvents::PointerEvent* event)
 		{
 			if (min != max)
 			{
-				double deltaFrac = -event->getDeltaY () / scaleHeight;
+				double deltaFrac = -event->getDelta().y / scaleArea.getHeight();
 				if (getStep () < 0) deltaFrac = -deltaFrac;
 				softValue += deltaFrac * (max - min);
 				setValue (getValue() + softValue);
@@ -167,48 +123,53 @@ void VScale::onWheelScrolled (BEvents::WheelEvent* event)
 
 	if (min != max)
 	{
-		double step = (getStep () != 0 ? getStep () : (max - min) / scaleHeight);
-		setValue (getValue() + event->getDeltaY () * step);
+		double step = (getStep () != 0 ? getStep () : (max - min) / scaleArea.getHeight());
+		setValue (getValue() + event->getDelta().y * step);
 	}
 }
 
 void VScale::updateCoords ()
 {
-	scaleX0 = getXOffset ();
-	scaleY0 = getYOffset ();
-	scaleWidth = getEffectiveWidth ();
-	scaleHeight = getEffectiveHeight ();
-	scaleYValue = scaleY0 + (1 - getRelativeValue ()) * scaleHeight;
+	scaleArea = BUtilities::RectArea
+	(
+		getXOffset (),
+		getYOffset (),
+		getEffectiveWidth (),
+		getEffectiveHeight ()
+	);
+	scaleYValue = scaleArea.getY() + (1 - getRelativeValue ()) * scaleArea.getHeight();
 }
 
-void VScale::draw (const double x, const double y, const double width, const double height)
+void VScale::draw (const BUtilities::RectArea& area)
 {
-	if ((!widgetSurface) || (cairo_surface_status (widgetSurface) != CAIRO_STATUS_SUCCESS)) return;
+
+	if ((!widgetSurface_) || (cairo_surface_status (widgetSurface_) != CAIRO_STATUS_SUCCESS)) return;
 
 	// Draw super class widget elements first
-	Widget::draw (x, y, width, height);
+	Widget::draw (area);
 
 	// Draw scale only if it is not a null widget
-	if ((scaleHeight >= 1) && (scaleWidth >= 1))
+	if ((scaleArea.getHeight() >= 1) && (scaleArea.getWidth() >= 1))
 	{
-		cairo_surface_clear (widgetSurface);
-		cairo_t* cr = cairo_create (widgetSurface);
+		cairo_surface_clear (widgetSurface_);
+		cairo_t* cr = cairo_create (widgetSurface_);
 
 		if (cairo_status (cr) == CAIRO_STATUS_SUCCESS)
 		{
-			cairo_pattern_t* pat;
+
+			cairo_pattern_t* pat = nullptr;
 
 			// Limit cairo-drawing area
-			cairo_rectangle (cr, x, y, width, height);
+			cairo_rectangle (cr, area.getX (), area.getY (), area.getWidth (), area.getHeight ());
 			cairo_clip (cr);
 
 			// Calculate aspect ratios first
-			double h = scaleHeight;
-			double w = scaleWidth;
-			double x1 = scaleX0; double y1 = scaleY0;				// Top left
-			double x4 = x1 + w; double y4 = y1 + h; 				// Bottom right
+			double h = scaleArea.getHeight();
+			double w = scaleArea.getWidth();
+			double x1 = scaleArea.getX(); double y1 = scaleArea.getY();	// Top left
+			double x4 = x1 + w; double y4 = y1 + h; 			// Bottom right
 			double x2 = x1 + w; double y2 = scaleYValue; 			// Value line right
-			double x3 = x1; double y3 = y2;							// Value line left
+			double x3 = x1; double y3 = y2;					// Value line left
 
 
 			// Colors uses within this method
@@ -249,12 +210,12 @@ void VScale::draw (const double x, const double y, const double width, const dou
 				if (getStep () >= 0)
 				{
 					cairo_rectangle_rounded (cr, x3 + 0.5 * BWIDGETS_DEFAULT_VSCALE_DEPTH,
-											 y3 + 0.5 * BWIDGETS_DEFAULT_VSCALE_DEPTH, x4 - x3, y4 - y3, (x4 - x3) / 2, 0b1100);
+								 y3 + 0.5 * BWIDGETS_DEFAULT_VSCALE_DEPTH, x4 - x3, y4 - y3, (x4 - x3) / 2, 0b1100);
 				}
 				else
 				{
 					cairo_rectangle_rounded (cr, x1 + 0.5 * BWIDGETS_DEFAULT_VSCALE_DEPTH,
-											 y1 + 0.5 * BWIDGETS_DEFAULT_VSCALE_DEPTH, x2 - x1, y2 - y1, (x2 - x1) / 2, 0b0011);
+								 y1 + 0.5 * BWIDGETS_DEFAULT_VSCALE_DEPTH, x2 - x1, y2 - y1, (x2 - x1) / 2, 0b0011);
 				}
 				cairo_set_source (cr, pat);
 				cairo_fill (cr);
@@ -267,16 +228,18 @@ void VScale::draw (const double x, const double y, const double width, const dou
 			{
 				cairo_pattern_add_color_stop_rgba (pat, 0, bgLo.getRed (), bgLo.getGreen (), bgLo.getBlue (), bgLo.getAlpha ());
 				cairo_pattern_add_color_stop_rgba (pat, 1, bgHi.getRed (), bgHi.getGreen (), bgHi.getBlue (), bgHi.getAlpha ());
-				cairo_rectangle_rounded (cr, x1, y1, x4 - x1, y4 - y1, (x4 - x1) / 2);
 				cairo_set_source (cr, pat);
 				cairo_set_line_width (cr, 0.2 * BWIDGETS_DEFAULT_VSCALE_DEPTH);
+				cairo_rectangle_rounded (cr, x1, y1, x4 - x1, y4 - y1, (x4 - x1) / 2);
 				cairo_stroke (cr);
 				cairo_pattern_destroy (pat);
 			}
 		}
 
 		cairo_destroy (cr);
+
 	}
+
 }
 
 }

@@ -33,7 +33,7 @@ HPianoRoll::HPianoRoll (const double x, const double y, const double width, cons
 		whiteBgColors ({{0.9, 0.9, 0.9, 1.0}, {1.0, 0.6, 0.6, 1.0}, {0.5, 0.5, 0.5, 1.0}, {0.0, 0.0, 0.0, 1.0}})
 {
 	setDraggable (true);
-	cbfunction[BEvents::EventType::POINTER_DRAG_EVENT] = Widget::defaultCallback;
+	cbfunction_[BEvents::EventType::POINTER_DRAG_EVENT] = Widget::defaultCallback;
 }
 
 Widget* HPianoRoll::clone () const {return new HPianoRoll (*this);}
@@ -48,7 +48,7 @@ void HPianoRoll::onButtonPressed (BEvents::PointerEvent* event)
 {
 	if (event)
 	{
-		int newKeyNr = getKey (event->getX(), event->getY());
+		int newKeyNr = getKey (event->getPosition());
 		if ((newKeyNr >= startMidiKey) && (newKeyNr <= endMidiKey) && (activeKeys[newKeyNr - startMidiKey]))
 		{
 			if (toggleKeys)
@@ -99,7 +99,7 @@ void HPianoRoll::onPointerDragged (BEvents::PointerEvent* event)
 
 
 // TODO startMidiKey shift
-int HPianoRoll::getKey (const double x, const double y)
+int HPianoRoll::getKey (const BUtilities::Point position)
 {
 	double x0 = getXOffset();
 	double y0 = getYOffset();
@@ -114,7 +114,7 @@ int HPianoRoll::getKey (const double x, const double y)
 		double endKeyX = keyCoords[endKeyNrOffset].x + keyCoords[endKeyNrOffset].width + ((int)(endMidiKey / 12)) * 7;
 		double xs = w / (endKeyX - startKeyX);
 
-		double keyX = x / xs - x0;
+		double keyX = position.x / xs - x0;
 		int keyXOctave = keyX / 7;
 		double keyXOffset = keyX - keyXOctave * 7;
 
@@ -123,7 +123,13 @@ int HPianoRoll::getKey (const double x, const double y)
 		{
 			if (!keyCoords[i].whiteKey)
 			{
-				if ((y >= y0) && (y <= y0 + 0.6667 * h) && (keyXOffset >= keyCoords[i].x) && (keyXOffset <= keyCoords[i].x + keyCoords[i].width))
+				if
+				(
+					(position.y >= y0) &&
+					(position.y <= y0 + 0.6667 * h) &&
+					(keyXOffset >= keyCoords[i].x) &&
+					(keyXOffset <= keyCoords[i].x + keyCoords[i].width)
+				)
 				{
 					return keyXOctave * 12 + i + startMidiKey;
 				}
@@ -135,7 +141,13 @@ int HPianoRoll::getKey (const double x, const double y)
 		{
 			if (keyCoords[i].whiteKey)
 			{
-				if ((y >= y0) && (y <= y0 + h) && (keyXOffset >= keyCoords[i].x) && (keyXOffset <= keyCoords[i].x + keyCoords[i].width))
+				if
+				(
+					(position.y >= y0) &&
+					(position.y <= y0 + h) &&
+					(keyXOffset >= keyCoords[i].x)
+					&& (keyXOffset <= keyCoords[i].x + keyCoords[i].width)
+				)
 				{
 					return keyXOctave * 12 + i + startMidiKey;
 				}
@@ -146,9 +158,9 @@ int HPianoRoll::getKey (const double x, const double y)
 	return -1;
 }
 
-void HPianoRoll::draw (const double x, const double y, const double width, const double height)
+void HPianoRoll::draw (const BUtilities::RectArea& area)
 {
-	if ((!widgetSurface) || (cairo_surface_status (widgetSurface) != CAIRO_STATUS_SUCCESS)) return;
+	if ((!widgetSurface_) || (cairo_surface_status (widgetSurface_) != CAIRO_STATUS_SUCCESS)) return;
 
 	double x0 = getXOffset();
 	double y0 = getYOffset();
@@ -158,13 +170,13 @@ void HPianoRoll::draw (const double x, const double y, const double width, const
 	if ((w >= 2) && (h >= 2) && (endMidiKey >= startMidiKey))
 	{
 		// Draw widget class elements first
-		Widget::draw (x, y, width, height);
+		Widget::draw (area);
 
-		cairo_t* cr = cairo_create (widgetSurface);
+		cairo_t* cr = cairo_create (widgetSurface_);
 		if (cairo_status (cr) == CAIRO_STATUS_SUCCESS)
 		{
 			// Limit cairo-drawing area
-			cairo_rectangle (cr, x, y, width, height);
+			cairo_rectangle (cr, area.getX (), area.getY (), area.getWidth (), area.getHeight ());
 			cairo_clip (cr);
 
 			cairo_set_line_width (cr, 0.0);

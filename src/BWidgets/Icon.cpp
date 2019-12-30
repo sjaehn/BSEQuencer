@@ -78,14 +78,14 @@ cairo_surface_t* Icon::getIconSurface (BColors::State state) const
 	return iconSurface [getState ()];
 }
 
-void Icon::draw (const double x, const double y, const double width, const double height)
+void Icon::draw (const BUtilities::RectArea& area)
 {
-	if ((!widgetSurface) || (cairo_surface_status (widgetSurface) != CAIRO_STATUS_SUCCESS)) return;
+	if ((!widgetSurface_) || (cairo_surface_status (widgetSurface_) != CAIRO_STATUS_SUCCESS)) return;
 
-	if ((width_ >= 1) && (height_ >= 1))
+	if ((getWidth () >= 1) && (getHeight () >= 1))
 	{
 		// Draw super class widget elements first
-		Widget::draw (x, y, width, height);
+		Widget::draw (area);
 
 		double w = getEffectiveWidth ();
 		double h = getEffectiveHeight ();
@@ -96,11 +96,11 @@ void Icon::draw (const double x, const double y, const double width, const doubl
 
 			if (stateSurface && (cairo_surface_status (stateSurface) == CAIRO_STATUS_SUCCESS) && (w > 0) && (h > 0))
 			{
-				cairo_t* cr = cairo_create (widgetSurface);
+				cairo_t* cr = cairo_create (widgetSurface_);
 				if (cairo_status (cr) == CAIRO_STATUS_SUCCESS)
 				{
 					// Limit cairo-drawing area
-					cairo_rectangle (cr, x, y, width, height);
+					cairo_rectangle (cr, area.getX (), area.getY (), area.getWidth (), area.getHeight ());
 					cairo_clip (cr);
 					//TODO also clip to inner borders
 

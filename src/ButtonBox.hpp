@@ -3,46 +3,45 @@
 
 #include <vector>
 #include <cmath>
-#include "BWidgets/BColors.hpp"
 #include "BWidgets/ValueWidget.hpp"
 #include "BWidgets/DrawingSurface.hpp"
+#include "BWidgets/Focusable.hpp"
 #include "BWidgets/Label.hpp"
 #include "drawbutton.hpp"
 #include "ButtonStyle.hpp"
 
-class ButtonBox : public BWidgets::ValueWidget
+class ButtonBox : public BWidgets::ValueWidget, public BWidgets::Focusable
 {
 private:
-	typedef struct {
+	struct Button
+	{
 		BWidgets::DrawingSurface* widget;
 		ButtonStyle style;
-	} Button;
+	};
 	std::vector<Button> buttons;
+
+	BWidgets::Label focusLabel;
 
 public:
 	ButtonBox (const double x, const double y, const double width, const double height, const std::string name) :
-		BWidgets::ValueWidget (x, y, width, height, name, 0.0) {}
+		BWidgets::ValueWidget (x, y, width, height, name, 0.0),
+		Focusable (std::chrono::milliseconds (BWIDGETS_DEFAULT_FOCUS_IN_MS),
+			std::chrono::milliseconds (BWIDGETS_DEFAULT_FOCUS_OUT_MS)),
+		buttons(),
+		focusLabel (0, 0, 40, 20, name + "/focus", "")
+	{
+		focusLabel.setOversize (true);
+        	focusLabel.resize ();
+        	focusLabel.hide ();
+        	add (focusLabel);
+	}
 
 	~ButtonBox ()
 	{
 		while (!buttons.empty ())
 		{
 			BWidgets::DrawingSurface* b = buttons.back ().widget;
-			if (b)
-			{
-				BWidgets::FocusWidget* focus = b->getFocusWidget ();
-				if (focus)
-				{
-					std::vector<BWidgets::Widget*> children = focus->getChildren ();
-					if (children.size () > 0)
-					{
-						BWidgets::Label* label = (BWidgets::Label*) (children[0]);
-						delete label;
-					}
-					delete focus;
-				}
-				delete b;
-			}
+			if (b) delete b;
 			buttons.pop_back ();
 		}
 	}
@@ -75,7 +74,7 @@ public:
 
 	virtual void resize (const double width, const double height) override
 	{
-		if ((width != width_) || (height != height_))
+		if ((width != getWidth()) || (height != getHeight()))
 		{
 			double w = width / getWidth ();
 			double h = height / getHeight ();
@@ -83,7 +82,7 @@ public:
 
 			for (Button b : buttons)
 			{
-				b.widget->moveTo (b.widget->getX () * w, b.widget->getY () * h);
+				b.widget->moveTo (b.widget->getPosition().x * w, b.widget->getPosition().y * h);
 				b.widget->resize (b.widget->getWidth () * w, b.widget->getHeight () * h);
 				drawButton (b.widget->getDrawingSurface(), 0, 0, b.widget->getEffectiveWidth(), b.widget->getEffectiveHeight(), b.style.color, b.style.symbol);
 			}
@@ -94,30 +93,8 @@ public:
 	virtual void applyTheme (BStyles::Theme& theme, const std::string& name) override
 	{
 		ValueWidget::applyTheme (theme, name);
-
-		for (Button const& but : buttons)
-		{
-			if (but.widget)
-			{
-				BWidgets::FocusWidget* focus = but.widget->getFocusWidget ();
-				if (focus)
-				{
-					focus->applyTheme (theme, name + "/focus");
-
-					std::vector<BWidgets::Widget*> childs = focus->getChildren ();
-					for (BWidgets::Widget* c : childs)
-					{
-						if (c)
-						{
-							c->applyTheme (theme, name + "/focus/label");
-							c->resize ();
-						}
-					}
-
-					focus->resize ();
-				}
-			}
-		}
+                focusLabel.applyTheme (theme, name + "/focus");
+                focusLabel.resize ();
 	}
 
 	virtual void applyTheme (BStyles::Theme& theme) override
@@ -125,26 +102,52 @@ public:
 		applyTheme (theme, name_);
 	}
 
+	void onFocusIn (BEvents::FocusEvent* event) override
+        {
+        	if (event && event->getWidget())
+        	{
+        		BUtilities::Point pos = event->getPosition();
+
+			// Get focused button
+			Widget* w = getWidgetAt (pos, BWidgets::isVisible);
+			if (w)
+			{
+				focusLabel.setText ("");
+				for (Button const& b : buttons)
+				{
+					if (w == b.widget)
+					{
+						focusLabel.setText (b.style.name);
+						break;
+					}
+				}
+
+			}
+
+			focusLabel.resize();
+			focusLabel.raiseToTop();
+        		focusLabel.moveTo (pos.x - 0.5 * focusLabel.getWidth(), pos.y - focusLabel.getHeight());
+        		focusLabel.show();
+        	}
+        	Widget::onFocusIn (event);
+        }
+        void onFocusOut (BEvents::FocusEvent* event) override
+        {
+        	if (event && event->getWidget()) focusLabel.hide();
+        	Widget::onFocusOut (event);
+        }
+
 	void addButton (const double x, const double y, const double width, const double height, const ButtonStyle style)
 	{
 		BWidgets::DrawingSurface* newWidget = new BWidgets::DrawingSurface (x - 3, y - 3, width + 6, height + 6, "buttonbox");
 		if (!newWidget) throw std::bad_alloc ();
 		newWidget->setBorder ({{{1.0, 1.0, 1.0, 0.0}, 1.0}, 0.0, 2.0, 0.0});
+		newWidget->setFocusable (false);
 		newWidget->setCallbackFunction (BEvents::EventType::BUTTON_PRESS_EVENT, ButtonBox::handleButtonClicked);
 		drawButton (newWidget->getDrawingSurface(), 0, 0, width, height, style.color, style.symbol);
 		add (*newWidget);
 		Button newButton = {newWidget, style};
 		buttons.push_back (newButton);
-
-		newWidget->setFocusable (true);
-		BWidgets::FocusWidget* focus = new BWidgets::FocusWidget (newWidget, "buttonbox/focus");
-		if (!focus) throw std::bad_alloc ();
-		newWidget->setFocusWidget (focus);
-		BWidgets::Label* label = new BWidgets::Label (0, 0, 100, 20, "buttonbox/focus/label", style.name);
-		if (!label) throw std::bad_alloc ();
-		label->resize ();
-		focus->add (*label);
-		focus->resize ();
 	}
 
 	virtual void update () override

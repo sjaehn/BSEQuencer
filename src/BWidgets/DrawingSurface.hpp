@@ -1,5 +1,5 @@
 /* DrawingSurface.hpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,8 +87,11 @@ public:
 	 * resized to the size of the containing child widgets.
 	 * @param width		New widgets width
 	 * @param height	New widgets height
+	  * @param extends	New widget extends
 	 */
+	virtual void resize () override;
 	virtual void resize (const double width, const double height) override;
+	virtual void resize (const BUtilities::Point extends) override;
 
 	/**
 	 * (Re-)Defines the border of the widget and resizes the drawing surface.
@@ -99,7 +102,7 @@ public:
 	virtual void setBorder (const BStyles::Border& border) override;
 
 protected:
-	virtual void draw (const double x, const double y, const double width, const double height) override;
+	virtual void draw (const BUtilities::RectArea& area) override;
 
 	cairo_surface_t* drawingSurface;
 };

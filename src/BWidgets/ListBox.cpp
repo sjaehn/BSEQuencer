@@ -80,7 +80,7 @@ int ListBox::getTop () const {return listTop;}
 
 void ListBox::onWheelScrolled (BEvents::WheelEvent* event)
 {
-	setTop (getTop() - event->getDeltaY ());
+	setTop (getTop() - event->getDelta ().y);
 }
 
 void ListBox::handleButtonClicked (BEvents::Event* event)
@@ -126,8 +126,7 @@ void ListBox::updateItems ()
 			if ((n + 1 >= ((unsigned int) listTop)) && (n + 1 < listTop + lines))
 			{
 				w->moveTo (x0, y0 + upButtonHeight + (n + 1 - listTop) * lineHeight);
-				w->setWidth (width);
-				w->setHeight (lineHeight);
+				w->resize (width, lineHeight);
 
 				if (n + 1 == ((unsigned int) (activeNr))) w->setState (BColors::ACTIVE);
 				else w->setState (BColors::NORMAL);

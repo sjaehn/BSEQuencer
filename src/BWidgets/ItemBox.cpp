@@ -49,8 +49,7 @@ ItemBox::~ItemBox () {}
 
 ItemBox& ItemBox::operator= (const ItemBox& that)
 {
-	item = that.item;
-	if (item.getWidget ()) add (*item.getWidget ());
+	setItem (that.item);
 	ValueWidget::operator= (that);
 	return *this;
 }
@@ -61,19 +60,20 @@ void ItemBox::setItem (const BItems::Item item)
 {
 	bool wasClickable = false;
 
-	Widget* w = item.getWidget ();
-	if (w && isChild (w)) release (w);
+	// Release old item.widget
+	Widget* oldW = item.getWidget ();
+	if (oldW && isChild (oldW)) release (oldW);
 
-	// Set widget
+	// Copy item and set value
 	this->item = item;
 	setValue (this->item.getValue());
 
-	// Configure widget
-	w = item.getWidget ();
-	if (w)
+	// Add new item.widget
+	Widget* newW = item.getWidget ();
+	if (newW)
 	{
-		w->setClickable (wasClickable);
-		add (*w);
+		newW->setClickable (wasClickable);
+		add (*newW);
 	}
 
 	update ();
@@ -109,8 +109,7 @@ void ItemBox::update ()
 		double h = getEffectiveHeight ();
 
 		widget->moveTo (x0, y0);
-		widget->setWidth (w);
-		widget->setHeight (h);
+		widget->resize (BUtilities::Point (w, h));
 	}
 }
 

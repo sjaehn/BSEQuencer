@@ -1,5 +1,5 @@
-/* BValues.hpp
- * Copyright (C) 2018  Sven Jähnichen
+/* to_string.cpp
+ * Copyright (C) 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,25 +15,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BVALUES_HPP_
-#define BVALUES_HPP_
-
-#include <stdint.h>
-#include <string>
+#include "to_string.hpp"
 #include <sstream>
 
+namespace BUtilities {
 
-namespace BValues {
-
-/**
- * Converts a value to a string
- * @param value Value to be converted
- * @param format Number format, see printf.
- * @return Converted value as a std:string.
- */
-std::string toBString (const double value);
-std::string toBString (const std::string& format, const double value);
-
+std::string to_string (const double value)
+{
+	std::ostringstream os;
+	os << value;
+	std::string str = os.str();
+	return str;
 }
 
-#endif /* BVALUES_HPP_ */
+std::string to_string (const double value, const std::string& format)
+{
+	char c[64];
+	snprintf (c, 64, format.c_str (), value);
+	std::string str = c;
+	return c;
+}
+
+}

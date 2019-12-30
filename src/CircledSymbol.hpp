@@ -17,18 +17,18 @@ public:
 	CircledSymbol () : CircledSymbol (0, 0, 0, 0, "circledsymbol", "") {}
 
 protected:
-	virtual void draw (const double x, const double y, const double width, const double height) override
+	virtual void draw (const BUtilities::RectArea& area) override
 	{
-		BWidgets::Label::draw (x, y, width, height);
-		cairo_t* cr = cairo_create (widgetSurface);
-		cairo_rectangle (cr, x, y, width, height);
+		BWidgets::Label::draw (area);
+		cairo_t* cr = cairo_create (widgetSurface_);
+		cairo_rectangle (cr, area.getX (), area.getY (), area.getWidth (), area.getHeight ());
 		cairo_clip (cr);
 		cairo_set_line_width (cr, 2.0);
 		BColors::Color lc = *labelColors.getColor (getState ());
 		cairo_set_source_rgba (cr, CAIRO_RGBA (lc));
 		double radius = (getEffectiveWidth () > getEffectiveHeight () ? getEffectiveHeight () : getEffectiveWidth ()) / 2 - 1;
-		cairo_move_to (cr, width_ / 2 - radius, height_ / 2);
-		cairo_arc (cr, width_ / 2, height_ / 2, radius, -PI, PI);
+		cairo_move_to (cr, getWidth() / 2 - radius, getHeight() / 2);
+		cairo_arc (cr, getWidth() / 2, getHeight() / 2, radius, -PI, PI);
 		cairo_close_path (cr);
 		cairo_stroke (cr);
 		cairo_destroy (cr);

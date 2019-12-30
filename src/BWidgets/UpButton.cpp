@@ -1,5 +1,5 @@
 /* UpButton.cpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,20 +27,20 @@ UpButton::UpButton (const double x, const double y, const double width, const do
 
 Widget* UpButton::clone () const {return new UpButton (*this);}
 
-void UpButton::draw (const double x, const double y, const double width, const double height)
+void UpButton::draw (const BUtilities::RectArea& area)
 {
-	if ((!widgetSurface) || (cairo_surface_status (widgetSurface) != CAIRO_STATUS_SUCCESS)) return;
+	if ((!widgetSurface_) || (cairo_surface_status (widgetSurface_) != CAIRO_STATUS_SUCCESS)) return;
 
-	if ((width_ >= 6) && (height_ >= 6))
+	if ((getWidth () >= 6) && (getHeight () >= 6))
 	{
 
-		Button::draw (x, y, width, height);
+		Button::draw (area);
 
-		cairo_t* cr = cairo_create (widgetSurface);
+		cairo_t* cr = cairo_create (widgetSurface_);
 		if (cairo_status (cr) == CAIRO_STATUS_SUCCESS)
 		{
 			// Limit cairo-drawing area
-			cairo_rectangle (cr, x, y, width, height);
+			cairo_rectangle (cr, area.getX (), area.getY (), area.getWidth (), area.getHeight ());
 			cairo_clip (cr);
 
 			double x0 = getXOffset ();

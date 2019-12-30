@@ -18,7 +18,7 @@
 
 #include "Widget.hpp"
 #include "Window.hpp"
-#include "FocusWidget.hpp"
+#include <algorithm>
 
 namespace BWidgets
 {
@@ -28,31 +28,30 @@ Widget::Widget () : Widget (0.0, 0.0, BWIDGETS_DEFAULT_WIDTH, BWIDGETS_DEFAULT_H
 Widget::Widget (const double x, const double y, const double width, const double height) : Widget (x, y, width, height, "widget") {}
 
 Widget::Widget(const double x, const double y, const double width, const double height, const std::string& name) :
-		extensionData (nullptr), x_ (x), y_ (y), width_ (width), height_ (height), visible (true), clickable (true), draggable (false),
-		scrollable (true), focusable (true), scheduleDraw (false),
+		area_ (x, y, width, height),
+		visible_ (true), clickable_ (true), draggable_ (false),
+		scrollable_ (true), focusable_ (true), oversized_ (false), scheduleDraw_ (false),
 		main_ (nullptr), parent_ (nullptr), children_ (), border_ (BWIDGETS_DEFAULT_BORDER), background_ (BWIDGETS_DEFAULT_BACKGROUND),
-		name_ (name), widgetSurface (), widgetState (BWIDGETS_DEFAULT_STATE), focusWidget (nullptr)
+		name_ (name), widgetSurface_ (), widgetState_ (BWIDGETS_DEFAULT_STATE)
 {
-	mergeable.fill (false);
-	mergeable[BEvents::EXPOSE_REQUEST_EVENT] = true;
-	mergeable[BEvents::POINTER_MOTION_EVENT] = true;
-	mergeable[BEvents::POINTER_DRAG_EVENT] = true;
-	mergeable[BEvents::WHEEL_SCROLL_EVENT] = true;
-	cbfunction.fill (Widget::defaultCallback);
-	cbfunction[BEvents::EventType::POINTER_DRAG_EVENT] = Widget::dragAndDropCallback;
-	cbfunction[BEvents::EventType::FOCUS_IN_EVENT] = Widget::focusInCallback;
-	cbfunction[BEvents::EventType::FOCUS_OUT_EVENT] = Widget::focusOutCallback;
-	widgetSurface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width, height);
+	mergeable_.fill (false);
+	mergeable_[BEvents::EXPOSE_REQUEST_EVENT] = true;
+	mergeable_[BEvents::POINTER_MOTION_EVENT] = true;
+	mergeable_[BEvents::POINTER_DRAG_EVENT] = true;
+	mergeable_[BEvents::WHEEL_SCROLL_EVENT] = true;
+	cbfunction_.fill (Widget::defaultCallback);
+	cbfunction_[BEvents::EventType::POINTER_DRAG_EVENT] = Widget::dragAndDropCallback;
+	widgetSurface_ = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width, height);
 }
 
 Widget::Widget (const Widget& that) :
-		extensionData (that.extensionData), x_ (that.x_), y_ (that.y_), width_ (that.width_), height_ (that.height_),
-		visible (that.visible), clickable (that.clickable), draggable (that.draggable), scrollable (that.scrollable),
-		focusable (that.focusable), mergeable (that.mergeable),
+		area_ (that.area_),
+		visible_ (that.visible_), clickable_ (that.clickable_), draggable_ (that.draggable_), scrollable_ (that.scrollable_),
+		focusable_ (that.focusable_), oversized_ (that.oversized_), mergeable_ (that.mergeable_),
 		main_ (nullptr), parent_ (nullptr), children_ (), border_ (that.border_), background_ (that.background_), name_ (that.name_),
-		cbfunction (that.cbfunction), widgetSurface (), widgetState (that.widgetState), focusWidget (nullptr)
+		cbfunction_ (that.cbfunction_), widgetSurface_ (), widgetState_ (that.widgetState_)
 {
-	widgetSurface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, that.width_, that.height_);
+	widgetSurface_ = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, that.area_.getWidth (), that.area_.getHeight ());
 }
 
 Widget::~Widget()
@@ -67,33 +66,30 @@ Widget::~Widget()
 		release (w);
 
 		// Hard kick out if release failed
-		if (w == children_.back ()) children_.pop_back ();
+		if (!children_.empty () && (w == children_.back ())) children_.pop_back ();
 	}
 
-	cairo_surface_destroy (widgetSurface);
+	cairo_surface_destroy (widgetSurface_);
 }
 
 Widget& Widget::operator= (const Widget& that)
 {
-	extensionData = that.extensionData;
-	x_ = that.x_;
-	y_ = that.y_;
-	width_ = that.width_;
-	height_ = that.height_;
-	visible = that.visible;
-	clickable = that.clickable;
-	draggable = that.draggable;
-	scrollable = that.scrollable;
-	focusable = that.focusable;
-	focusWidget = nullptr;
-	mergeable = that.mergeable;
+	area_ = that.area_;
+	visible_ = that.visible_;
+	clickable_ = that.clickable_;
+	draggable_ = that.draggable_;
+	scrollable_ = that.scrollable_;
+	focusable_ = that.focusable_;
+	mergeable_ = that.mergeable_;
+	oversized_ = that.oversized_;
 	border_ = that.border_;
 	background_ = that.background_;
-	cbfunction = that.cbfunction;
-	widgetState = that.widgetState;
+	name_ = that.name_;
+	cbfunction_ = that.cbfunction_;
+	widgetState_ = that.widgetState_;
 
-	if (widgetSurface) cairo_surface_destroy (widgetSurface);
-	widgetSurface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, that.width_, that.height_);
+	if (widgetSurface_) cairo_surface_destroy (widgetSurface_);
+	widgetSurface_ = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, that.area_.getWidth (), that.area_.getHeight ());
 	update ();
 	return *this;
 }
@@ -102,16 +98,16 @@ Widget* Widget::clone () const {return new Widget (*this);}
 
 void Widget::show ()
 {
-	visible = true;
+	visible_ = true;
 
 	if (isVisible ())
 	{
 		// (Re-)draw children as they may become visible too
-		std::vector<Widget*> queue = getChildrenAsQueue ();
-		for (Widget* w : queue)
+		forEachChild ([] (Widget* w)
 		{
-			if (w->isVisible ()) w->draw (0, 0, w->width_, w->height_);
-		}
+			if (w->isVisible ()) w->draw (BUtilities::RectArea (0, 0, w->area_.getWidth (), w->area_.getHeight ()));
+			return w->isVisible ();
+		});
 
 		// (Re-)draw this widget and post redisplay
 		update ();
@@ -121,8 +117,24 @@ void Widget::show ()
 void Widget::hide ()
 {
 	bool wasVisible = isVisible ();
-	visible = false;
-	if (wasVisible && parent_) parent_->postRedisplay ();
+
+	// Get area occupied by this widget and its children
+	BUtilities::RectArea hideArea = getAbsoluteTotalArea (BWidgets::isVisible);
+	visible_ = false;
+
+	if (wasVisible && main_)
+	{
+		// Limit area to main boundaries
+		hideArea.intersect (main_->getAbsoluteArea());
+
+		// Find closest parent that includes the area
+		Widget* p = getParent();
+		for ( ; p && (!p->getAbsoluteArea().includes (hideArea)); p = p->getParent()) {}
+
+		// Redisplay hidden area
+		if (p) p->postRedisplay ();
+		else main_->postRedisplay (hideArea);
+	}
 }
 
 void Widget::add (Widget& child)
@@ -139,12 +151,12 @@ void Widget::add (Widget& child)
 	// they may become visible too
 	if (main_)
 	{
-		std::vector<Widget*> queue = child.getChildrenAsQueue ();
-		for (Widget* w : queue)
+		forEachChild ([this] (Widget* w)
 		{
-			w->main_ = main_;
-			/*if (w->isVisible ())*/ w->update ();
-		}
+			w->main_ = this->main_;
+			w->update ();
+			return true;
+		});
 	}
 
 	// (Re-)draw child widget and post redisplay
@@ -155,78 +167,69 @@ void Widget::release (Widget* child)
 {
 	if (child)
 	{
-		//std::cerr << "Release " << child->name_ << ":" << &(*child) << "\n";
-		bool wasVisible = child->isVisible ();
+		std::vector<Widget*>::iterator it = std::find (children_.begin(), children_.end(), child);
 
-		// Delete child's connection to this widget
-		child->parent_ = nullptr;
-
-		// Release child and all children of child
-		// from main window and from main windows input connections
-		std::vector<Widget*> queue = child->getChildrenAsQueue ();
-		queue.push_back (child);
-		for (Widget* w : queue)
+		if (it != children_.end())
 		{
-			if (w->main_)
+			// Store redisplay area information
+			bool wasVisible = child->isVisible ();
+
+			// Hide child
+			child->hide();
+
+			// Release child and all children of child
+			// from main window and from main windows input connections
+			forEachChild (it, it + 1, [] (Widget* w)
 			{
-				for (int i = (int) BEvents::NO_BUTTON; i < (int) BEvents::NR_OF_BUTTONS; ++i)
+				if (w->main_)
 				{
-					if (w->main_-> getInputWidget ((BEvents::InputDevice) i) == w)
-					{
-						w->main_->setInput ((BEvents::InputDevice) i, nullptr, 0.0, 0.0);
-					}
+					w->main_->purgeEventQueue (w);
+					w->main_->getButtonGrabStack()->remove (w);
+					w->main_->getKeyGrabStack()->remove (w);
+					w->main_ = nullptr;
 				}
-				w->main_->purgeEventQueue (w);
-				w->main_->removeKeyGrab (w);
-				w->main_ = nullptr;
-			}
+				return true;
+			});
+
+			// Delete child's connection to this widget
+			child->parent_ = nullptr;
+
+			// Delete from children_ vector
+			children_.erase (it);
+
+			// Restore visibility information
+			if (wasVisible) child->show();
 		}
 
-		// Delete connection to released child
-		for (std::vector<Widget*>::iterator it = children_.begin (); it !=children_.end (); ++it)
+		else
 		{
-			if ((Widget*) *it == child)
-			{
-				children_.erase (it);
-				if (wasVisible) postRedisplay ();
-				return;
-			}
+			std::cerr << "Msg from BWidgets::Widget::release(): Child " << child->name_ << ":" << &(*child)
+				  << " is not a child of " << name_ << ":" << &(*this) << std::endl;
 		}
-
-		std::cerr << "Msg from BWidgets::Widget::release(): Child " << child->name_ << ":" << &(*child)
-			  << " is not a child of " << name_ << ":" << &(*this) << std::endl;
 	}
 }
 
-void Widget::moveTo (const double x, const double y)
+void Widget::moveTo (const double x, const double y) {moveTo (BUtilities::Point (x, y));}
+
+void Widget::moveTo (const BUtilities::Point& position)
 {
-	if ((x_ != x) || (y_ != y))
+	if ((area_.getX () != position.x) || (area_.getY () != position.y))
 	{
-		x_ = x;
-		y_ = y;
+		area_.moveTo (position);
 		if (isVisible () && parent_) parent_->postRedisplay ();
 	}
 }
 
-double Widget::getX () const {return x_;}
+BUtilities::Point Widget::getPosition () const {return area_.getPosition();}
 
-double Widget::getY () const {return y_;}
-
-double Widget::getOriginX ()
+BUtilities::Point Widget::getAbsolutePosition () const
 {
-	double x = 0.0;
-	for (Widget* w = this; w->parent_; w = w->parent_) x += w->x_;
-	return x;
+	BUtilities::Point p = BUtilities::Point (0, 0);
+	for (const Widget* w = this; w->parent_; w = w->parent_) p += w->area_.getPosition ();
+	return p;
 }
 
-double Widget::getOriginY ()
-{
-	double y = 0.0;
-	for (Widget* w = this; w->parent_; w = w->parent_) y += w->y_;
-	return y;
-}
-
-void Widget::moveFrontwards ()
+void Widget::raiseFrontwards ()
 {
 	if (parent_)
 	{
@@ -247,7 +250,7 @@ void Widget::moveFrontwards ()
 	}
 }
 
-void Widget::moveBackwards ()
+void Widget::pushBackwards ()
 {
 	if (parent_)
 	{
@@ -268,7 +271,7 @@ void Widget::moveBackwards ()
 	}
 }
 
-void Widget::moveToTop ()
+void Widget::raiseToTop ()
 {
 	if (parent_)
 	{
@@ -289,29 +292,31 @@ void Widget::moveToTop ()
 
 void Widget::setWidth (const double width)
 {
-	if (width_ != width)
+	if (getWidth () != width)
 	{
-		width_ =  width;
-		cairo_surface_destroy (widgetSurface);	// destroy old surface first
-		widgetSurface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width_, height_);
+		area_.resize (width, getHeight ());
+		cairo_surface_destroy (widgetSurface_);	// destroy old surface first
+		widgetSurface_ = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, getWidth (), getHeight ());
 		update ();
 		if (isVisible () && parent_) parent_->postRedisplay ();
 	}
 }
 
-double Widget::getWidth () const {return width_;}
+double Widget::getWidth () const {return area_.getWidth ();}
 
 void Widget::setHeight (const double height)
 {
-	if (height_ != height)
+	if (getHeight () != height)
 	{
-		height_ = height;
-		cairo_surface_destroy (widgetSurface);	// destroy old surface first
-		widgetSurface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width_, height_);
+		area_.resize (getWidth (), height);
+		cairo_surface_destroy (widgetSurface_);	// destroy old surface first
+		widgetSurface_ = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, getWidth (), getHeight ());
 		update ();
 		if (isVisible () && parent_) parent_->postRedisplay ();
 	}
 }
+
+double Widget::getHeight () const {return area_.getHeight ();}
 
 void Widget::resize ()
 {
@@ -320,34 +325,35 @@ void Widget::resize ()
 
 	for (Widget* w : children_)
 	{
-		if (w->getX () + w->getWidth() > width) width = w->getX () + w->getWidth();
-		if (w->getY () + w->getHeight() > height) height = w->getY () + w->getHeight();
+		if (w->getPosition ().x + w->getWidth() > width) width = w->getPosition ().x + w->getWidth();
+		if (w->getPosition ().y + w->getHeight() > height) height = w->getPosition ().y + w->getHeight();
 	}
-	resize (width, height);
+	Widget::resize (BUtilities::Point (width, height));
 }
 
-void Widget::resize (const double width, const double height)
+void Widget::resize (const double width, const double height) {Widget::resize (BUtilities::Point (width, height));}
+
+void Widget::resize (const BUtilities::Point extends)
 {
-	if ((width_ != width) || (height_ != height))
+	if (area_.getExtends () != extends)
 	{
-		width_ =  width;
-		height_ = height;
-		cairo_surface_destroy (widgetSurface);	// destroy old surface first
-		widgetSurface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, width_, height_);
+		area_.resize (extends.x, extends.y);
+		cairo_surface_destroy (widgetSurface_);	// destroy old surface first
+		widgetSurface_ = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, getWidth (), getHeight ());
 		update ();
 		if (isVisible () && parent_) parent_->postRedisplay ();
 	}
 }
 
-double Widget::getHeight () const {return height_;}
+BUtilities::Point Widget::getExtends () const {return BUtilities::Point (area_.getWidth (), area_.getHeight ());}
 
 void Widget::setState (const BColors::State state)
 {
-	widgetState = state;
+	widgetState_ = state;
 	update ();
 }
 
-BColors::State Widget::getState () const {return widgetState;}
+BColors::State Widget::getState () const {return widgetState_;}
 
 void Widget::setBorder (const BStyles::Border& border)
 {
@@ -384,92 +390,124 @@ bool Widget::isChild (Widget* child)
 
 std::vector<Widget*> Widget::getChildren () const {return children_;}
 
-void  Widget::setFocusWidget (FocusWidget* widget) {focusWidget = widget;}
-
-FocusWidget*  Widget::getFocusWidget () {return focusWidget;}
-
 void Widget::rename (const std::string& name) {name_ = name;}
 
 std::string Widget::getName () const {return name_;}
 
 void Widget::setCallbackFunction (const BEvents::EventType eventType, const std::function<void (BEvents::Event*)>& callbackFunction)
 {
-	if (eventType <= BEvents::EventType::NO_EVENT) cbfunction[eventType] = callbackFunction;
+	if (eventType <= BEvents::EventType::NO_EVENT) cbfunction_[eventType] = callbackFunction;
 }
 
 bool Widget::isVisible()
 {
 	Widget* w;
-	for (w = this; w; w = w->parent_)				// Go backwards in widget tree until nullptr
+	for (w = this; w; w = w->parent_)			// Go backwards in widget tree until nullptr
 	{
-		if (!w->visible || !main_) return false;	// widget invisible? -> break as invisible
-		if (w == main_) return true;				// main reached ? -> visible
+		if (!w->visible_ || !main_) return false;	// widget invisible? -> break as invisible
+		if (w == main_) return true;			// main reached ? -> visible
 	}
-	return false;									// nullptr reached ? -> not connected to main -> invisible
+	return false;						// nullptr reached ? -> not connected to main -> invisible
 }
 
-void Widget::setClickable (const bool status) {clickable = status;}
+void Widget::setClickable (const bool status) {clickable_ = status;}
 
-bool Widget::isClickable () const {return clickable;}
+bool Widget::isClickable () const {return clickable_;}
 
-void Widget::setDraggable (const bool status) {draggable = status;}
+void Widget::setDraggable (const bool status) {draggable_ = status;}
 
-bool Widget::isDraggable () const {return draggable;}
+bool Widget::isDraggable () const {return draggable_;}
 
-void Widget::setScrollable (const bool status) {scrollable = status;}
+void Widget::setScrollable (const bool status) {scrollable_ = status;}
 
-bool Widget::isScrollable () const {return scrollable;}
+bool Widget::isScrollable () const {return scrollable_;}
 
-void Widget::setFocusable (const bool status) {focusable = status;}
+void Widget::setFocusable (const bool status) {focusable_ = status;}
 
-bool Widget::isFocusable () const {return focusable;}
+bool Widget::isFocusable () const {return focusable_;}
 
-void Widget::setMergeable (const BEvents::EventType eventType, const bool status) {mergeable[eventType] = status;}
+void Widget::setMergeable (const BEvents::EventType eventType, const bool status) {mergeable_[eventType] = status;}
 
-bool Widget::isMergeable (const BEvents::EventType eventType) const {return mergeable[eventType];}
+bool Widget::isMergeable (const BEvents::EventType eventType) const {return mergeable_[eventType];}
+
+void Widget::setOversize (const bool status) {oversized_ = status;}
+
+bool Widget::isOversize () const {return oversized_;};
 
 void Widget::update ()
 {
 	//draw (0, 0, width_, height_);
-	scheduleDraw = true;
+	scheduleDraw_ = true;
 	if (isVisible ()) postRedisplay ();
 }
 
-bool Widget::isPointInWidget (const double x, const double y) const {return ((x >= 0.0) && (x <= width_) && (y >= 0.0) && (y <= height_));}
+BUtilities::RectArea Widget::getArea () const {return area_;}
 
-Widget* Widget::getWidgetAt (const double x, const double y, const bool checkVisibility, const bool checkClickability,
-			     const bool checkDraggability, const bool checkScrollability, const bool checkFocusability)
+BUtilities::RectArea Widget::getAbsoluteArea () const
 {
-	if (main_ &&
-	    isPointInWidget (x, y) &&
-	    ((!checkVisibility) || visible))
+	BUtilities::RectArea a = area_;
+	a.moveTo (getAbsolutePosition ());
+	return a;
+}
+
+void Widget::forEachChild (std::function<bool (Widget* widget)> func)
+{
+	forEachChild (children_.begin(), children_.end(), func);
+}
+
+void Widget::forEachChild (std::vector<Widget*>::iterator first, std::vector<Widget*>::iterator last,
+		   std::function<bool (Widget* widget)> func)
+{
+	for (std::vector<Widget*>::iterator it = first; it != last; ++it)
 	{
-		Widget* finalw = ((((!checkVisibility) || visible) &&
-						   ((!checkClickability) || clickable) &&
-						   ((!checkDraggability) || draggable) &&
-						   ((!checkScrollability) || scrollable) &&
-				   	   	   ((!checkFocusability) || focusable)) ?
-						  this :
-						  nullptr);
+		Widget* w = *it;
+		if (w && func(w)) w->forEachChild (func);
+	}
+}
+
+BUtilities::RectArea Widget::getTotalArea (std::function<bool (Widget* widget)> func)
+{
+	BUtilities::RectArea a = getAbsoluteTotalArea (func);
+	a.moveTo (a.getPosition() - getAbsolutePosition());
+	return a;
+}
+
+BUtilities::RectArea Widget::getAbsoluteTotalArea (std::function<bool (Widget* widget)> func)
+{
+	BUtilities::RectArea a = getAbsoluteArea();
+	forEachChild ([&a, func] (Widget* w)
+	{
+		bool check = func (w);
+		if (check && w->isOversize()) a.extend (w->getAbsoluteArea());
+		return check;
+	});
+
+	return a;
+}
+
+Widget* Widget::getWidgetAt (const BUtilities::Point& position, std::function<bool (Widget* widget)> func)
+{
+	BUtilities::RectArea absarea = getAbsoluteArea ();
+	return getWidgetAt (getAbsolutePosition () + position, absarea, absarea, func);
+}
+
+Widget* Widget::getWidgetAt (const BUtilities::Point& abspos, const BUtilities::RectArea& outerArea,
+			     const BUtilities::RectArea& area, std::function<bool (Widget* widget)> func)
+{
+	BUtilities::RectArea a = (oversized_ ? outerArea : area);
+	BUtilities::RectArea thisArea = area_; thisArea.moveTo (getAbsolutePosition());
+	a.intersect (thisArea);
+	if (main_)
+	{
+		Widget* finalw = (((a != BUtilities::RectArea ()) && a.contains (abspos) && func (this)) ? this : nullptr);
+
 		for (Widget* w : children_)
 		{
 			if (w)
 			{
-				double xNew = x - w->x_;
-				double yNew = y - w->y_;
-
 				Widget* nextw = nullptr;
-				if (filter (w))
-				{
-					nextw = w->getWidgetAt (xNew, yNew, checkVisibility,
-								checkClickability, checkDraggability,
-								checkScrollability, checkFocusability);
-				}
-
-				if (nextw)
-				{
-					finalw = nextw;
-				}
+				if (filter (w)) nextw = w->getWidgetAt (abspos, outerArea, thisArea, func);
+				if (nextw) finalw = nextw;
 			}
 		}
 		return finalw;
@@ -496,12 +534,12 @@ void Widget::applyTheme (BStyles::Theme& theme, const std::string& name)
 	}
 }
 
-void Widget::onConfigureRequest (BEvents::ExposeEvent* event) {cbfunction[BEvents::EventType::CONFIGURE_REQUEST_EVENT] (event);}
-void Widget::onExposeRequest (BEvents::ExposeEvent* event) {cbfunction[BEvents::EventType::EXPOSE_REQUEST_EVENT] (event);}
+void Widget::onConfigureRequest (BEvents::ExposeEvent* event) {cbfunction_[BEvents::EventType::CONFIGURE_REQUEST_EVENT] (event);}
+void Widget::onExposeRequest (BEvents::ExposeEvent* event) {cbfunction_[BEvents::EventType::EXPOSE_REQUEST_EVENT] (event);}
 
 void Widget::onCloseRequest (BEvents::WidgetEvent* event)
 {
-	cbfunction[BEvents::EventType::CLOSE_REQUEST_EVENT] (event);
+	cbfunction_[BEvents::EventType::CLOSE_REQUEST_EVENT] (event);
 
 	if ((event) && (event->getWidget () == this))
 	{
@@ -511,18 +549,18 @@ void Widget::onCloseRequest (BEvents::WidgetEvent* event)
 	}
 }
 
-void Widget::onKeyPressed (BEvents::KeyEvent* event) {cbfunction[BEvents::EventType::KEY_PRESS_EVENT] (event);}
-void Widget::onKeyReleased (BEvents::KeyEvent* event) {cbfunction[BEvents::EventType::KEY_RELEASE_EVENT] (event);}
-void Widget::onButtonPressed (BEvents::PointerEvent* event) {cbfunction[BEvents::EventType::BUTTON_PRESS_EVENT] (event);}
-void Widget::onButtonReleased (BEvents::PointerEvent* event) {cbfunction[BEvents::EventType::BUTTON_RELEASE_EVENT] (event);}
-void Widget::onButtonClicked (BEvents::PointerEvent* event) {cbfunction[BEvents::EventType::BUTTON_CLICK_EVENT] (event);}
-void Widget::onPointerMotion (BEvents::PointerEvent* event) {cbfunction[BEvents::EventType::POINTER_MOTION_EVENT] (event);}
-void Widget::onPointerDragged (BEvents::PointerEvent* event) {cbfunction[BEvents::EventType::POINTER_DRAG_EVENT] (event);}
-void Widget::onWheelScrolled (BEvents::WheelEvent* event){cbfunction[BEvents::EventType::WHEEL_SCROLL_EVENT] (event);}
-void Widget::onValueChanged (BEvents::ValueChangedEvent* event) {cbfunction[BEvents::EventType::VALUE_CHANGED_EVENT] (event);}
-void Widget::onFocusIn (BEvents::FocusEvent* event) {cbfunction[BEvents::EventType::FOCUS_IN_EVENT] (event);}
-void Widget::onFocusOut (BEvents::FocusEvent* event) {cbfunction[BEvents::EventType::FOCUS_OUT_EVENT] (event);}
-void Widget::onMessage (BEvents::MessageEvent* event) {cbfunction[BEvents::EventType::MESSAGE_EVENT] (event);}
+void Widget::onKeyPressed (BEvents::KeyEvent* event) {cbfunction_[BEvents::EventType::KEY_PRESS_EVENT] (event);}
+void Widget::onKeyReleased (BEvents::KeyEvent* event) {cbfunction_[BEvents::EventType::KEY_RELEASE_EVENT] (event);}
+void Widget::onButtonPressed (BEvents::PointerEvent* event) {cbfunction_[BEvents::EventType::BUTTON_PRESS_EVENT] (event);}
+void Widget::onButtonReleased (BEvents::PointerEvent* event) {cbfunction_[BEvents::EventType::BUTTON_RELEASE_EVENT] (event);}
+void Widget::onButtonClicked (BEvents::PointerEvent* event) {cbfunction_[BEvents::EventType::BUTTON_CLICK_EVENT] (event);}
+void Widget::onPointerMotion (BEvents::PointerEvent* event) {cbfunction_[BEvents::EventType::POINTER_MOTION_EVENT] (event);}
+void Widget::onPointerDragged (BEvents::PointerEvent* event) {cbfunction_[BEvents::EventType::POINTER_DRAG_EVENT] (event);}
+void Widget::onWheelScrolled (BEvents::WheelEvent* event){cbfunction_[BEvents::EventType::WHEEL_SCROLL_EVENT] (event);}
+void Widget::onValueChanged (BEvents::ValueChangedEvent* event) {cbfunction_[BEvents::EventType::VALUE_CHANGED_EVENT] (event);}
+void Widget::onFocusIn (BEvents::FocusEvent* event) {cbfunction_[BEvents::EventType::FOCUS_IN_EVENT] (event);}
+void Widget::onFocusOut (BEvents::FocusEvent* event) {cbfunction_[BEvents::EventType::FOCUS_OUT_EVENT] (event);}
+void Widget::onMessage (BEvents::MessageEvent* event) {cbfunction_[BEvents::EventType::MESSAGE_EVENT] (event);}
 
 void Widget::defaultCallback (BEvents::Event* event) {}
 
@@ -533,45 +571,12 @@ void Widget::dragAndDropCallback (BEvents::Event* event)
 		Widget* w = event->getWidget();
 		BEvents::PointerEvent* pev = (BEvents::PointerEvent*) event;
 
-		w->moveTo (w->x_ + pev->getDeltaX (), w->y_ + pev->getDeltaY ());
+		w->moveTo (w->getPosition () + pev->getDelta ());
 	}
 }
 
-void Widget::focusInCallback (BEvents::Event* event)
-{
-	if (event && event->getWidget())
-	{
-		Widget* w = event->getWidget();
-		BEvents::FocusEvent* focusEvent = (BEvents::FocusEvent*) event;
-		if (w->getMainWindow() && w->getFocusWidget())
-		{
-			Window* main = w->getMainWindow();
-			FocusWidget* focusWidget = w->getFocusWidget();
-
-			// Release focusWidget first, if already added (somewhere)
-			if (focusWidget->getParent()) focusWidget->getParent()->release (focusWidget);
-
-			main->add (*focusWidget);
-			focusWidget->moveTo (w->getOriginX () + focusEvent->getX() + 2, w->getOriginY () + focusEvent->getY() - focusWidget->getHeight() - 2);
-			focusWidget->show ();
-		}
-	}
-}
-
-void Widget::focusOutCallback (BEvents::Event* event)
-{
-	if (event && event->getWidget())
-	{
-		Widget* w = event->getWidget();
-		if (w->getFocusWidget() && w->getMainWindow())
-		{
-			Window* main = w->getMainWindow();
-			FocusWidget* focusWidget = w->getFocusWidget();
-
-			main->release (focusWidget);
-		}
-	}
-}
+void Widget::focusInCallback (BEvents::Event* event) {}
+void Widget::focusOutCallback (BEvents::Event* event) {}
 
 double Widget::getXOffset () {return border_.getMargin () + border_.getLine()->getWidth() + border_.getPadding ();}
 
@@ -580,23 +585,13 @@ double Widget::getYOffset () {return border_.getMargin () + border_.getLine()->g
 double Widget::getEffectiveWidth ()
 {
 	double totalBorderWidth = getXOffset ();
-	return (width_ > 2 * totalBorderWidth ? width_ - 2 * totalBorderWidth : 0);
+	return (getWidth () > 2 * totalBorderWidth ? getWidth () - 2 * totalBorderWidth : 0);
 }
 
 double Widget::getEffectiveHeight ()
 {
 	double totalBorderHeight = getYOffset ();
-	return (height_ > 2 * totalBorderHeight ? height_ - 2 * totalBorderHeight : 0);
-}
-
-std::vector <Widget*> Widget::getChildrenAsQueue (std::vector <Widget*> queue) const
-{
-	for (Widget* w : children_)
-	{
-		queue.push_back (w);
-		if (!w->children_.empty()) queue = w->getChildrenAsQueue (queue);
-	}
-	return queue;
+	return (getHeight () > 2 * totalBorderHeight ? getHeight () - 2 * totalBorderHeight : 0);
 }
 
 void Widget::postMessage (const std::string& name, const BUtilities::Any content)
@@ -608,13 +603,18 @@ void Widget::postMessage (const std::string& name, const BUtilities::Any content
 	}
 }
 
-void Widget::postRedisplay () {postRedisplay (getOriginX (), getOriginY (), width_, height_);}
+void Widget::postRedisplay ()
+{
+	BUtilities::RectArea area = getTotalArea (BWidgets::isVisible);
+	area.moveTo (getAbsolutePosition ());
+	postRedisplay (area);
+}
 
-void Widget::postRedisplay (const double xabs, const double yabs, const double width, const double height)
+void Widget::postRedisplay (const BUtilities::RectArea& area)
 {
 	if (main_)
 	{
-		BEvents::ExposeEvent* event = new BEvents::ExposeEvent (main_, this, BEvents::EXPOSE_REQUEST_EVENT, xabs, yabs, width, height);
+		BEvents::ExposeEvent* event = new BEvents::ExposeEvent (main_, this, BEvents::EXPOSE_REQUEST_EVENT, area);
 		main_->addEventToQueue (event);
 	}
 }
@@ -630,52 +630,58 @@ void Widget::postCloseRequest (Widget* handle)
 	}
 }
 
-void Widget::redisplay (cairo_surface_t* surface, double x, double y, double width, double height)
+void Widget::redisplay (cairo_surface_t* surface, const BUtilities::RectArea& area)
 {
-	if (main_ && visible && fitToArea (x, y, width, height))
+	if (isVisible())
 	{
-		// Update draw
-		if (scheduleDraw) draw (0, 0, width_, height_);
+		// Calculate absolute area position and start private core method
+		BUtilities::RectArea absArea = area;
+		absArea.moveTo (absArea.getPosition() + getAbsolutePosition());
+		redisplay (surface, absArea, absArea);
+	}
+}
 
-		// Copy widgets surface onto main surface
-		double x0 = getOriginX ();
-		double y0 = getOriginY ();
+void Widget::redisplay (cairo_surface_t* surface, const BUtilities::RectArea& outerArea, const BUtilities::RectArea& area)
+{
+	BUtilities::RectArea a = (oversized_ ? outerArea : area);
+	BUtilities::RectArea thisArea = area_; thisArea.moveTo (getAbsolutePosition());
+	a.intersect (thisArea);
+	if (main_ && visible_)
+	{
+		if (a != BUtilities::RectArea ())
+		{
+			// Update draw
+			if (scheduleDraw_) draw (BUtilities::RectArea (0, 0, getWidth (), getHeight ()));
 
-		cairo_t* cr = cairo_create (surface);
-		cairo_set_source_surface (cr, widgetSurface, x0, y0);
-		cairo_rectangle (cr, x + x0, y + y0, width, height);
-		cairo_fill (cr);
-		cairo_destroy (cr);
+			// Copy widgets surface onto main surface
+			cairo_t* cr = cairo_create (surface);
+			cairo_set_source_surface (cr, widgetSurface_, thisArea.getX(), thisArea.getY());
+			cairo_rectangle (cr, a.getX (), a.getY (), a.getWidth (), a.getHeight ());
+			cairo_fill (cr);
+			cairo_destroy (cr);
+		}
 
 		for (Widget* w : children_)
 		{
-			if (w)
-			{
-				double xNew = x - w->x_;
-				double yNew = y - w->y_;
-				if (filter (w))
-				{
-					w->redisplay (surface, xNew, yNew, width, height);
-				}
-			}
+			if (w && filter (w)) w->redisplay (surface, outerArea, a);
 		}
 	}
 }
 
 bool Widget::filter (Widget* widget) {return true;}
 
-void Widget::draw (const double x, const double y, const double width, const double height)
+void Widget::draw (const BUtilities::RectArea& area)
 {
-	if ((!widgetSurface) || (cairo_surface_status (widgetSurface) != CAIRO_STATUS_SUCCESS)) return;
-	cairo_surface_clear (widgetSurface);
-	cairo_t* cr = cairo_create (widgetSurface);
+	if ((!widgetSurface_) || (cairo_surface_status (widgetSurface_) != CAIRO_STATUS_SUCCESS)) return;
+	cairo_surface_clear (widgetSurface_);
+	cairo_t* cr = cairo_create (widgetSurface_);
 
 	if (cairo_status (cr) == CAIRO_STATUS_SUCCESS)
 	{
-		scheduleDraw = false;
+		scheduleDraw_ = false;
 
 		// Limit cairo-drawing area
-		cairo_rectangle (cr, x, y, width, height);
+		cairo_rectangle (cr, area.getX (), area.getY (), area.getWidth (), area.getHeight ());
 		cairo_clip (cr);
 
 		double radius = border_.getRadius ();
@@ -694,13 +700,16 @@ void Widget::draw (const double x, const double y, const double width, const dou
 				if (fillSurface && cairo_surface_status (fillSurface) == CAIRO_STATUS_SUCCESS) cairo_set_source_surface (cr, fillSurface, 0, 0);
 
 				// Plain Background color ?
-				else cairo_set_source_rgba (cr, bc.getRed(), bc.getGreen(), bc.getBlue(), bc.getAlpha());
+				else cairo_set_source_rgba (cr, CAIRO_RGBA(bc));
 
 				// If drawing area < background are, draw only a rectangle for the drawing area (faster)
-				if ((x >= innerBorders) && (x + width <= width_ - innerBorders) &&
-					(y >= innerBorders) && (y + height <= height_ - innerBorders))
+				if
+				(
+					(area.getX () >= innerBorders) && (area.getX () + area.getWidth () <= getWidth () - innerBorders) &&
+					(area.getY () >= innerBorders) && (area.getY () + area.getHeight () <= getHeight () - innerBorders)
+				)
 				{
-					cairo_rectangle (cr, x, y, width, height);
+					cairo_rectangle (cr, area.getX (), area.getY (), area.getWidth (), area.getHeight ());
 				}
 				else
 				{
@@ -715,16 +724,24 @@ void Widget::draw (const double x, const double y, const double width, const dou
 		double outerBorders = border_.getMargin ();
 		BColors::Color lc = *border_.getLine()->getColor();
 
-		if ((lc.getAlpha() != 0.0) &&
+		if
+		(
+			(lc.getAlpha() != 0.0) &&
 			(border_.getLine()->getWidth() != 0.0) &&
-			(width_ >= 2 * outerBorders) &&
-			(height_ >= 2 * outerBorders))
+			(getWidth () >= 2 * outerBorders) &&
+			(getHeight () >= 2 * outerBorders)
+		)
 		{
 			double lw = border_.getLine()->getWidth();
-			cairo_rectangle_rounded (cr, outerBorders + lw / 2, outerBorders + lw / 2,
-									 width_ - 2 * outerBorders - lw, height_ - 2 * outerBorders - lw, radius);
+			cairo_rectangle_rounded
+			(
+				cr,
+				outerBorders + lw / 2,
+				outerBorders + lw / 2,
+				getWidth () - 2 * outerBorders - lw,
+				getHeight () - 2 * outerBorders - lw, radius);
 
-			cairo_set_source_rgba (cr, lc.getRed(), lc.getGreen(), lc.getBlue(), lc.getAlpha());
+			cairo_set_source_rgba (cr, CAIRO_RGBA (lc));
 			cairo_set_line_width (cr, lw);
 			cairo_stroke (cr);
 		}
@@ -733,67 +750,10 @@ void Widget::draw (const double x, const double y, const double width, const dou
 	cairo_destroy (cr);
 }
 
-bool Widget::fitToArea (double& x, double& y, double& width, double& height)
-{
-	bool isInArea = true;
-	if (x < 0.0)
-	{
-		if (x + width < 0.0)
-		{
-			x = 0.0;
-			width = 0.0;
-			isInArea = false;
-		}
-		else
-		{
-			width = x + width;
-			x = 0.0;
-
-		}
-	}
-	if (x + width > width_)
-	{
-		if (x > width_)
-		{
-			x = width_;
-			width = 0.0;
-			isInArea = false;
-		}
-		else
-		{
-			width = width_ - x;
-		}
-	}
-	if (y < 0.0)
-	{
-		if (y + height < 0.0)
-		{
-			y = 0.0;
-			height = 0.0;
-			isInArea = false;
-		}
-		else
-		{
-			height = y + height;
-			y = 0.0;
-
-		}
-	}
-	if (y + height > height_)
-	{
-		if (y > height_)
-		{
-			y = height_;
-			height = 0.0;
-			isInArea = false;
-		}
-		else
-		{
-			height = height_ - y;
-		}
-	}
-
-	return isInArea;
-}
+bool isVisible (Widget* widget) {return widget->isVisible();}
+bool isClicklable (Widget* widget) {return widget->isClickable();}
+bool isDraggable (Widget* widget) {return widget->isDraggable();}
+bool isScrollable (Widget* widget) {return widget->isScrollable();}
+bool isFocusable (Widget* widget) {return widget->isFocusable();}
 
 }

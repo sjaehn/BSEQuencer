@@ -1,5 +1,5 @@
 /* Label.cpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ Label::Label (const double x, const double y, const double width, const double h
 		cursorFrom (0),
 		cursorTo ()
 {
-	cbfunction[BEvents::EventType::POINTER_DRAG_EVENT] = Widget::defaultCallback;
+	cbfunction_[BEvents::EventType::POINTER_DRAG_EVENT] = Widget::defaultCallback;
 	setDraggable (true);
 
 	labelFont.setTextAlign (BWIDGETS_DEFAULT_LABEL_ALIGN);
@@ -113,7 +113,7 @@ BStyles::Font* Label::getFont () {return &labelFont;}
 double Label::getTextWidth (std::string& text)
 {
 	double textwidth = 0.0;
-	cairo_t* cr = cairo_create (widgetSurface);
+	cairo_t* cr = cairo_create (widgetSurface_);
 	cairo_text_extents_t ext = labelFont.getTextExtents(cr, text.c_str ());
 	textwidth = ext.width;
 	cairo_destroy (cr);
@@ -123,23 +123,23 @@ double Label::getTextWidth (std::string& text)
 void Label::resize ()
 {
 	// Get label text size
-	cairo_t* cr = cairo_create (widgetSurface);
+	cairo_t* cr = cairo_create (widgetSurface_);
 	cairo_text_extents_t ext = labelFont.getTextExtents(cr, labelText.c_str ());
-	double height = ext.height + 2 * getYOffset ();
-	double width = ext.width + 2 * getYOffset ();
+	BUtilities::Point contExt = BUtilities::Point (ext.width + 2 * getXOffset () + 2, ext.height + 2 * getYOffset () + 2);
 	cairo_destroy (cr);
 
 	// Or use embedded widgets size, if bigger
 	for (Widget* w : children_)
 	{
-		if (w->getX () + w->getWidth() > width) width = w->getX () + w->getWidth();
-		if (w->getY () + w->getHeight() > height) height = w->getY () + w->getHeight();
+		if (w->getPosition ().x + w->getWidth () > contExt.x) contExt.x = w->getPosition ().x + w->getWidth();
+		if (w->getPosition ().y + w->getHeight () > contExt.y) contExt.y = w->getPosition ().y + w->getHeight();
 	}
 
-	resize (width, height);
+	Label::resize (contExt);
 }
 
-void Label::resize (const double width, const double height) {Widget::resize (width, height);}
+void Label::resize (const double width, const double height) {Label::resize (BUtilities::Point (width, height));}
+void Label::resize (const BUtilities::Point extends) {Widget::resize (extends);}
 
 void Label::applyTheme (BStyles::Theme& theme) {applyTheme (theme, name_);}
 
@@ -201,7 +201,7 @@ void Label::setCursor (const size_t from, const size_t to)
 
 void Label::applyEdit ()
 {
-	if (main_) main_->removeKeyGrab (this);
+	if (main_) main_->getKeyGrabStack()->remove (this);
 	setEditMode (false);
 	if (labelText != oldText)
 	{
@@ -212,14 +212,21 @@ void Label::applyEdit ()
 
 void Label::discardEdit ()
 {
-	if (main_) main_->removeKeyGrab (this);
+	if (main_) main_->getKeyGrabStack()->remove (this);
 	setEditMode (false);
 	if (labelText != oldText) setText (oldText);
 }
 
 void Label::onKeyPressed (BEvents::KeyEvent* event)
 {
-	if (editable && (event) && (event->getWidget () == this) && (main_) && (main_->getKeyGrabWidget (0) == this))
+	if
+	(
+		editable &&
+		event &&
+		(event->getWidget () == this) &&
+		main_ &&
+		(main_->getKeyGrabStack()->getGrab(0)->getWidget() == this)
+	)
 	{
 		uint32_t key = event->getKey ();
 
@@ -296,41 +303,48 @@ void Label::onKeyPressed (BEvents::KeyEvent* event)
 		}
 	}
 
-	cbfunction[BEvents::EventType::KEY_PRESS_EVENT] (event);
+	cbfunction_[BEvents::EventType::KEY_PRESS_EVENT] (event);
 }
 
-void Label::onKeyReleased (BEvents::KeyEvent* event) {cbfunction[BEvents::EventType::KEY_RELEASE_EVENT] (event);}
+void Label::onKeyReleased (BEvents::KeyEvent* event) {cbfunction_[BEvents::EventType::KEY_RELEASE_EVENT] (event);}
 
 void Label::onButtonPressed (BEvents::PointerEvent* event)
 {
 	if (editable && (event) && (event->getWidget () == this) && (main_))
 	{
-		main_->setKeyGrab (this);
+		main_->getKeyGrabStack()->add (this);
 		setEditMode (true);
-		size_t cursor = getCursorFromCoords (event->getX (), event->getY ());
+		size_t cursor = getCursorFromCoords (event->getPosition ());
 		setCursor (cursor, cursor);
 	}
 
-	cbfunction[BEvents::EventType::BUTTON_PRESS_EVENT] (event);
+	cbfunction_[BEvents::EventType::BUTTON_PRESS_EVENT] (event);
 }
 
 void Label::onPointerDragged (BEvents::PointerEvent* event)
 {
-	if (editable && (event) && (event->getWidget () == this) && (main_) && (main_->getKeyGrabWidget (0) == this))
+	if
+	(
+		editable &&
+		(event) &&
+		(event->getWidget () == this) &&
+		(main_) &&
+		(main_->getKeyGrabStack()->getGrab(0)->getWidget() == this)
+	)
 	{
-		size_t cursor = getCursorFromCoords (event->getX (), event->getY ());
+		size_t cursor = getCursorFromCoords (event->getPosition ());
 		setCursor (cursorFrom, cursor);
 	}
 
-	cbfunction[BEvents::EventType::POINTER_DRAG_EVENT] (event);
+	cbfunction_[BEvents::EventType::POINTER_DRAG_EVENT] (event);
 }
 
-size_t Label::getCursorFromCoords (const double x, const double y)
+size_t Label::getCursorFromCoords (const BUtilities::Point& position)
 {
 	size_t cursor = u32labelText.length ();
-	if ((!widgetSurface) || (cairo_surface_status (widgetSurface) != CAIRO_STATUS_SUCCESS)) return 0;
+	if ((!widgetSurface_) || (cairo_surface_status (widgetSurface_) != CAIRO_STATUS_SUCCESS)) return 0;
 
-	cairo_t* cr = cairo_create (widgetSurface);
+	cairo_t* cr = cairo_create (widgetSurface_);
 
 	if (cairo_status (cr) == CAIRO_STATUS_SUCCESS)
 	{
@@ -364,7 +378,7 @@ size_t Label::getCursorFromCoords (const double x, const double y)
 			std::string fragment = convert.to_bytes (u32fragment);
 			cairo_text_extents_t ext1 = labelFont.getTextExtents(cr, "|" + fragment + "|");
 
-			if (x < xoff + x0 + ext1.width - 2 * ext0.width - 2 * ext0.x_bearing)
+			if (position.x < xoff + x0 + ext1.width - 2 * ext0.width - 2 * ext0.x_bearing)
 			{
 				cursor = i;
 				break;
@@ -377,19 +391,19 @@ size_t Label::getCursorFromCoords (const double x, const double y)
 	return cursor;
 }
 
-void Label::draw (const double x, const double y, const double width, const double height)
+void Label::draw (const BUtilities::RectArea& area)
 {
-	if ((!widgetSurface) || (cairo_surface_status (widgetSurface) != CAIRO_STATUS_SUCCESS)) return;
+	if ((!widgetSurface_) || (cairo_surface_status (widgetSurface_) != CAIRO_STATUS_SUCCESS)) return;
 
 	// Draw super class widget elements first
-	Widget::draw (x, y, width, height);
+	Widget::draw (area);
 
-	cairo_t* cr = cairo_create (widgetSurface);
+	cairo_t* cr = cairo_create (widgetSurface_);
 
 	if (cairo_status (cr) == CAIRO_STATUS_SUCCESS)
 	{
 		// Limit cairo-drawing area
-		cairo_rectangle (cr, x, y, width, height);
+		cairo_rectangle (cr, area.getX (), area.getY (), area.getWidth (), area.getHeight ());
 		cairo_clip (cr);
 
 		double xoff = getXOffset ();

@@ -1,5 +1,5 @@
 /* Label.hpp
- * Copyright (C) 2018  Sven Jähnichen
+ * Copyright (C) 2018, 2019  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -107,9 +107,11 @@ public:
 	 * extends (what is higher).
 	 * @param width		New widgets width
 	 * @param height	New widgets height
+	 * @param extends	New widget extends
 	 */
 	virtual void resize () override;
 	virtual void resize (const double width, const double height) override;
+	virtual void resize (const BUtilities::Point extends) override;
 
 	/**
 	 * Scans theme for widget properties and applies these properties.
@@ -141,8 +143,8 @@ public:
 	virtual void onKeyReleased (BEvents::KeyEvent* event) override;
 
 protected:
-	size_t getCursorFromCoords (const double x, const double y);
-	virtual void draw (const double x, const double y, const double width, const double height) override;
+	size_t getCursorFromCoords (const BUtilities::Point& position);
+	virtual void draw (const BUtilities::RectArea& area) override;
 
 	BColors::ColorSet labelColors;
 	BStyles::Font labelFont;
