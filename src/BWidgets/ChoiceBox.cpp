@@ -174,7 +174,7 @@ void ChoiceBox::applyTheme (BStyles::Theme& theme, const std::string& name)
 
 void ChoiceBox::setValue (const double val)
 {
-	if (items.empty ())
+	if (items.empty () || (val == UNSELECTED))
 	{
 		ValueWidget::setValue (UNSELECTED);
 		activeNr = 0;
@@ -313,23 +313,22 @@ void ChoiceBox::handleButtonClicked (BEvents::Event* event)
 
 void ChoiceBox::handleItemClicked (BEvents::Event* event)
 {
-if (event && (event->getEventType () == BEvents::EventType::BUTTON_PRESS_EVENT) && event->getWidget ())
+	if (!event) return;
+	if (event->getEventType () != BEvents::EventType::BUTTON_PRESS_EVENT) return;
+	BEvents::PointerEvent* ev = (BEvents::PointerEvent*) event;
+	Widget* w = ev->getWidget ();
+	if (!w) return;
+	ChoiceBox* p = (ChoiceBox*) w->getParent ();
+	if (!p) return;
+
+	for (BItems::Item const& i : p->items)
 	{
-		BEvents::PointerEvent* ev = (BEvents::PointerEvent*) event;
-		Widget* w = ev->getWidget ();
-		if (w->getParent ())
+		if (w == i.getWidget())
 		{
-			ChoiceBox* p = (ChoiceBox*) w->getParent ();
-			if (p->getParent ())
-			{
-				for (BItems::Item const& i : p->items)
-				{
-					if (w == i.getWidget()) p->setValue (i.getValue());
-				}
-			}
+			p->setValue (i.getValue());
+			break;
 		}
 	}
-
 }
 
 }

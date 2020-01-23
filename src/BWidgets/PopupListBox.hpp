@@ -147,7 +147,6 @@ protected:
 	static void handleValueChanged (BEvents::Event* event);
 	static void handleDownButtonClicked (BEvents::Event* event);
 
-
 	DownButton downButton;
 	ListBox listBox;
 
