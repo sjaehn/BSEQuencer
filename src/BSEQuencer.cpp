@@ -601,7 +601,7 @@ void BSEQuencer::run (uint32_t n_samples)
 							int step = (int) pMes[i].step;
 							if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < MAXSTEPS))
 							{
-								Pad pd (pMes->ch, pMes->pitchOctave, pMes->velocity, pMes->duration);
+								Pad pd (pMes[i].ch, pMes[i].pitchOctave, pMes[i].velocity, pMes[i].duration);
 								Pad valPad = validatePad (pd);
 								pads[row][step] = valPad;
 								if (valPad != pd)
