@@ -759,7 +759,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.7"
-     inkscape:cx="127.08224"
+     inkscape:cx="531.44638"
      inkscape:cy="790.44008"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -1065,5 +1065,65 @@
          x="97.971428"
          y="95.614273"
          style="font-size:3.52777767px;fill:#ffffff;stroke-width:0.26458332">V 1.2.1</tspan></text>
+    <g
+       transform="translate(10.214663,80.352448)"
+       style="enable-background:new"
+       id="g1197">
+      <text
+         id="text1143"
+         y="9.3116503"
+         x="83.81813"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:5.29166651px;font-family:'Good Times';-inkscape-font-specification:'Good Times';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.21166666"
+         xml:space="preserve"><tspan
+           style="font-size:5.64444447px;fill:#ffffff;stroke-width:0.21166666"
+           y="9.3116503"
+           x="83.81813"
+           id="tspan1141"
+           sodipodi:role="line">♯</tspan></text>
+      <text
+         id="text1143-3"
+         y="5.9098654"
+         x="81.777054"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:5.29166651px;font-family:'Good Times';-inkscape-font-specification:'Good Times';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.21166666;enable-background:new"
+         xml:space="preserve"><tspan
+           style="font-size:5.64444447px;fill:#ffffff;stroke-width:0.21166666"
+           y="5.9098654"
+           x="81.777054"
+           id="tspan1141-6"
+           sodipodi:role="line">♯</tspan></text>
+      <text
+         id="text1143-7"
+         y="5.0027213"
+         x="86.085991"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:5.29166651px;font-family:'Good Times';-inkscape-font-specification:'Good Times';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.21166666;enable-background:new"
+         xml:space="preserve"><tspan
+           style="font-size:5.64444447px;fill:#ffffff;stroke-width:0.21166666"
+           y="5.0027213"
+           x="86.085991"
+           id="tspan1141-5"
+           sodipodi:role="line">♯</tspan></text>
+      <text
+         id="text1143-35"
+         y="8.1777229"
+         x="88.051468"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:5.29166651px;font-family:'Good Times';-inkscape-font-specification:'Good Times';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.21166666;enable-background:new"
+         xml:space="preserve"><tspan
+           style="font-size:5.64444447px;fill:#ffffff;stroke-width:0.21166666"
+           y="8.1777229"
+           x="88.051468"
+           id="tspan1141-62"
+           sodipodi:role="line">♯</tspan></text>
+      <text
+         id="text1143-9"
+         y="11.352721"
+         x="90.092545"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.64444447px;line-height:5.29166651px;font-family:'Good Times';-inkscape-font-specification:'Good Times';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.21166666;enable-background:new"
+         xml:space="preserve"><tspan
+           style="font-size:5.64444447px;fill:#ffffff;stroke-width:0.21166666"
+           y="11.352721"
+           x="90.092545"
+           id="tspan1141-1"
+           sodipodi:role="line">♯</tspan></text>
+    </g>
   </g>
 </svg>
