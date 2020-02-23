@@ -36,7 +36,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	modeBox (920, 88, 260, 170, "box"),
 	modeBoxLabel (10, 10, 240, 20, "ctlabel", "Play mode"),
 	modeLabel (10, 80, 60, 20, "lflabel", "Mode"),
-	modeListBox (80, 80, 170, 20, 170, 60, "menu", BItems::ItemList ({"Autoplay", "Host controlled"}), 2.0),
+	modeListBox (80, 80, 170, 20, 170, 60, "menu", BItems::ItemList ({"Autoplay", "Host & MIDI controlled"}), 2.0),
 	modeAutoplayBpmLabel (10, 115, 120, 20, "lflabel", "Beats per min"),
 	modeAutoplayBpmSlider (120, 105, 130, 25, "slider", 120.0, 1.0, 300.0, 0.0, "%3.1f"),
 	modeAutoplayBpbLabel (10, 145, 120, 20, "lflabel", "Beats per bar"),
