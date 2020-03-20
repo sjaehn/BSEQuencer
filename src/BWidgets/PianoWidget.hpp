@@ -20,6 +20,9 @@
 
 #include "Widget.hpp"
 
+#define BWIDGETS_PIANO_KEY_PRESSED_MESSAGE "PIANO_KEY_PRESSED"
+#define BWIDGETS_PIANO_KEY_RELEASED_MESSAGE "PIANO_KEY_RELEASED"
+
 namespace BWidgets
 {
 

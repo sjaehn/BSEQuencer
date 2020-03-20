@@ -32,6 +32,7 @@ TextButton::TextButton (const double x, const double y, const double width, cons
 {
 	buttonLabel.setClickable  (false);
 	buttonLabel.setState (defaultValue ? BColors::ACTIVE : BColors::NORMAL);
+	buttonLabel.setBorder (BWIDGETS_DEFAULT_MENU_TEXTBORDER);
 	add (buttonLabel);
 }
 
@@ -70,8 +71,8 @@ void TextButton::setHeight (const double height)
 
 void TextButton::resize ()
 {
+	buttonLabel.resize ();
 	Widget::resize ();
-	buttonLabel.resize (getExtends());
 }
 
 void TextButton::resize (const double width, const double height) {TextButton::resize (BUtilities::Point (width, height));}

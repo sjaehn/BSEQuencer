@@ -495,11 +495,12 @@ Widget* Widget::getWidgetAt (const BUtilities::Point& abspos, const BUtilities::
 			     const BUtilities::RectArea& area, std::function<bool (Widget* widget)> func)
 {
 	BUtilities::RectArea a = (oversized_ ? outerArea : area);
-	BUtilities::RectArea thisArea = area_; thisArea.moveTo (getAbsolutePosition());
-	a.intersect (thisArea);
+	BUtilities::RectArea thisArea = area_;
+	thisArea.moveTo (getAbsolutePosition());
+	thisArea.intersect (a);
 	if (main_)
 	{
-		Widget* finalw = (((a != BUtilities::RectArea ()) && a.contains (abspos) && func (this)) ? this : nullptr);
+		Widget* finalw = (((thisArea != BUtilities::RectArea ()) && thisArea.contains (abspos) && func (this)) ? this : nullptr);
 
 		for (Widget* w : children_)
 		{

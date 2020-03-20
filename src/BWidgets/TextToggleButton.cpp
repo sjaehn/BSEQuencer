@@ -32,6 +32,7 @@ TextToggleButton::TextToggleButton (const double x, const double y, const double
 {
 	buttonLabel.setClickable  (false);
 	buttonLabel.setState (defaultValue ? BColors::ACTIVE : BColors::NORMAL);
+	buttonLabel.setBorder (BWIDGETS_DEFAULT_MENU_TEXTBORDER);
 	add (buttonLabel);
 }
 
@@ -70,8 +71,8 @@ void TextToggleButton::setHeight (const double height)
 
 void TextToggleButton::resize ()
 {
+	buttonLabel.resize ();
 	Widget::resize ();
-	buttonLabel.resize (getExtends());
 }
 
 void TextToggleButton::resize (const double width, const double height) {TextToggleButton::resize (BUtilities::Point (width, height));}

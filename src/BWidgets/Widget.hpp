@@ -40,6 +40,7 @@
 // Default settings for all menu widgets
 #define BWIDGETS_DEFAULT_MENU_PADDING 10
 #define BWIDGETS_DEFAULT_MENU_BORDER BStyles::greyBorder1pt
+#define BWIDGETS_DEFAULT_MENU_TEXTBORDER {{BColors::invisible, 4.0}, 0.0, 0.0, 0.0}
 #define BWIDGETS_DEFAULT_MENU_BACKGROUND BStyles::grey20Fill
 
 // BWidgets theme keywords

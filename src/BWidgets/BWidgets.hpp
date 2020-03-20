@@ -56,5 +56,6 @@
 #include "HPianoRoll.hpp"
 #include "Icon.hpp"
 #include "ImageIcon.hpp"
+#include "FileChooser.hpp"
 
 #endif /*BWIDGETS_HPP_*/

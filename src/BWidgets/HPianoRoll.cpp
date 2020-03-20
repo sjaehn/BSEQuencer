@@ -49,13 +49,16 @@ void HPianoRoll::onButtonPressed (BEvents::PointerEvent* event)
 	if (event)
 	{
 		int newKeyNr = getKey (event->getPosition());
-		if ((newKeyNr >= startMidiKey) && (newKeyNr <= endMidiKey) && (activeKeys[newKeyNr - startMidiKey]))
+		int relNewKeyNr = newKeyNr - startMidiKey;
+		if ((newKeyNr >= startMidiKey) && (newKeyNr <= endMidiKey) && (activeKeys[relNewKeyNr]))
 		{
 			if (toggleKeys)
 			{
 				if (actKeyNr != newKeyNr)
 				{
-					pressedKeys[newKeyNr - startMidiKey] = !pressedKeys[newKeyNr - startMidiKey];
+					pressedKeys[relNewKeyNr] = !pressedKeys[relNewKeyNr];
+					if (pressedKeys[relNewKeyNr]) postMessage (BWIDGETS_PIANO_KEY_PRESSED_MESSAGE, BUtilities::makeAny<int> (relNewKeyNr));
+					else postMessage (BWIDGETS_PIANO_KEY_RELEASED_MESSAGE, BUtilities::makeAny<int> (relNewKeyNr));
 					update();
 				}
 			}
@@ -63,8 +66,14 @@ void HPianoRoll::onButtonPressed (BEvents::PointerEvent* event)
 			{
 				if (actKeyNr != newKeyNr)
 				{
-					if ((actKeyNr >= startMidiKey) && (actKeyNr <= endMidiKey)) pressedKeys[actKeyNr - startMidiKey] = false;
-					pressedKeys[newKeyNr - startMidiKey] = true;
+					if ((actKeyNr >= startMidiKey) && (actKeyNr <= endMidiKey))
+					{
+						pressedKeys[actKeyNr - startMidiKey] = false;
+						postMessage (BWIDGETS_PIANO_KEY_RELEASED_MESSAGE, BUtilities::makeAny<int> (actKeyNr - startMidiKey));
+					}
+
+					pressedKeys[relNewKeyNr] = true;
+					postMessage (BWIDGETS_PIANO_KEY_PRESSED_MESSAGE, BUtilities::makeAny<int> (relNewKeyNr));
 					update();
 				}
 			}
@@ -84,6 +93,7 @@ void HPianoRoll::onButtonReleased (BEvents::PointerEvent* event)
 		if  ((!toggleKeys) && (pressedKeys[actKeyNr - startMidiKey]))
 		{
 			pressedKeys[actKeyNr - startMidiKey] = false;
+			postMessage (BWIDGETS_PIANO_KEY_RELEASED_MESSAGE, BUtilities::makeAny<int> (actKeyNr - startMidiKey));
 			update ();
 		}
 		actKeyNr = -1;

@@ -34,7 +34,7 @@ class ToggleButton : public Button
 public:
 	ToggleButton ();
 	ToggleButton (const double x, const double y, const double width, const double height, const std::string& name, double defaultValue = 0.0);
-	
+
 	/**
 	 * Pattern cloning. Creates a new instance of the widget and copies all
 	 * its properties.
