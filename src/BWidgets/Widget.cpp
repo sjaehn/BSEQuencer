@@ -349,8 +349,11 @@ BUtilities::Point Widget::getExtends () const {return BUtilities::Point (area_.g
 
 void Widget::setState (const BColors::State state)
 {
-	widgetState_ = state;
-	update ();
+	if (state != widgetState_)
+	{
+		widgetState_ = state;
+		update ();
+	}
 }
 
 BColors::State Widget::getState () const {return widgetState_;}

@@ -148,8 +148,8 @@ public:
 	 * @param y 		New y coordinate
 	 * @param position	New position
 	 */
-	void moveTo (const double x, const double y);
-	void moveTo (const BUtilities::Point& position);
+	virtual void moveTo (const double x, const double y);
+	virtual void moveTo (const BUtilities::Point& position);
 
 	/**
 	 * Gets the widgets position

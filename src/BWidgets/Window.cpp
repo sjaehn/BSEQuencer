@@ -127,94 +127,111 @@ void Window::onExposeRequest (BEvents::ExposeEvent* event)
 void Window::addEventToQueue (BEvents::Event* event)
 {
 	// Try to merge with precursor event
-	if ((event) && (!eventQueue_.empty ()) && (eventQueue_.back()))
+	if
+	(
+		(event) &&
+		(event->getWidget()) &&
+		(!eventQueue_.empty ()) &&
+		(eventQueue_.back())
+	)
 	{
-		BEvents::Event* precursor = eventQueue_.back ();
+		BEvents::EventType eventType = event->getEventType();
 
-		// Check for mergeable events
-		// EXPOSE_EVENT
 		if
 		(
-			(event->getEventType() == BEvents::EXPOSE_REQUEST_EVENT) &&
-			(precursor->getEventType() == BEvents::EXPOSE_REQUEST_EVENT) &&
-			(event->getWidget () == precursor->getWidget ())
+			(event->getWidget ()->isMergeable(eventType)) &&
+			(
+				(eventType == BEvents::EXPOSE_REQUEST_EVENT) ||
+				(eventType == BEvents::POINTER_MOTION_EVENT) ||
+				(eventType == BEvents::POINTER_DRAG_EVENT) ||
+				(eventType == BEvents::WHEEL_SCROLL_EVENT) ||
+				(eventType == BEvents::VALUE_CHANGED_EVENT)
+			)
 		)
 		{
-			if
-			(
-				(precursor->getWidget ()->isMergeable(BEvents::EXPOSE_REQUEST_EVENT)) &&
-				(event->getWidget ()->isMergeable(BEvents::EXPOSE_REQUEST_EVENT))
-			)
-
+			// Check for mergeable precursor events
+			for (std::deque<BEvents::Event*>::reverse_iterator rit = eventQueue_.rbegin(); rit != eventQueue_.rend(); ++rit)
 			{
-				BEvents::ExposeEvent* firstEvent = (BEvents::ExposeEvent*) precursor;
-				BEvents::ExposeEvent* nextEvent = (BEvents::ExposeEvent*) event;
+				BEvents::Event* precursor = *rit;
 
-				BUtilities::RectArea area = firstEvent->getArea ();
-				area.extend (nextEvent->getArea ());
-				firstEvent->setArea (area);
+				if ((precursor->getEventType() == eventType) && (event->getWidget () == precursor->getWidget ()))
+				{
 
-				delete event;
-				return;
-			}
-		}
+					// EXPOSE_EVENT
+					if (eventType == BEvents::EXPOSE_REQUEST_EVENT)
+					{
+						BEvents::ExposeEvent* firstEvent = (BEvents::ExposeEvent*) precursor;
+						BEvents::ExposeEvent* nextEvent = (BEvents::ExposeEvent*) event;
 
-		// POINTER_MOTION_EVENT
-		else if ((event->getEventType() == BEvents::POINTER_MOTION_EVENT) && (precursor->getEventType() == BEvents::POINTER_MOTION_EVENT))
-		{
-			BEvents::PointerEvent* firstEvent = (BEvents::PointerEvent*) precursor;
-			BEvents::PointerEvent* nextEvent = (BEvents::PointerEvent*) event;
+						BUtilities::RectArea area = firstEvent->getArea ();
+						area.extend (nextEvent->getArea ());
+						firstEvent->setArea (area);
 
-			if (
-					(nextEvent->getWidget() == firstEvent->getWidget()) &&
-					(nextEvent->getWidget()->isMergeable(BEvents::POINTER_MOTION_EVENT)))
-			{
-				firstEvent->setPosition (nextEvent->getPosition ());
-				firstEvent->setDelta (firstEvent->getDelta () + nextEvent->getDelta ());
-
-				delete event;
-				return;
-			}
-		}
-
-		// POINTER_DRAG_EVENT
-		else if ((event->getEventType() == BEvents::POINTER_DRAG_EVENT) && (precursor->getEventType() == BEvents::POINTER_DRAG_EVENT))
-		{
-			BEvents::PointerEvent* firstEvent = (BEvents::PointerEvent*) precursor;
-			BEvents::PointerEvent* nextEvent = (BEvents::PointerEvent*) event;
-
-			if (
-					(nextEvent->getWidget() == firstEvent->getWidget()) &&
-					(nextEvent->getWidget()->isMergeable(BEvents::POINTER_DRAG_EVENT)) &&
-					(nextEvent->getButton() == firstEvent->getButton()) &&
-					(nextEvent->getOrigin() == firstEvent->getOrigin())
-				)
-			{
-				firstEvent->setPosition (nextEvent->getPosition ());
-				firstEvent->setDelta (firstEvent->getDelta () + nextEvent->getDelta ());
-
-				delete event;
-				return;
-			}
-		}
+						delete event;
+						return;
+					}
 
 
-		// WHEEL_SCROLL_EVENT
-		else if ((event->getEventType() == BEvents::WHEEL_SCROLL_EVENT) && (precursor->getEventType() == BEvents::WHEEL_SCROLL_EVENT))
-		{
-			BEvents::WheelEvent* firstEvent = (BEvents::WheelEvent*) precursor;
-			BEvents::WheelEvent* nextEvent = (BEvents::WheelEvent*) event;
+					// POINTER_MOTION_EVENT
+					else if (eventType == BEvents::POINTER_MOTION_EVENT)
+					{
+						BEvents::PointerEvent* firstEvent = (BEvents::PointerEvent*) precursor;
+						BEvents::PointerEvent* nextEvent = (BEvents::PointerEvent*) event;
 
-			if (
-					(nextEvent->getWidget() == firstEvent->getWidget()) &&
-					(nextEvent->getWidget()->isMergeable(BEvents::WHEEL_SCROLL_EVENT)) &&
-					(nextEvent->getPosition() == firstEvent->getPosition())
-				)
-			{
-				firstEvent->setDelta (firstEvent->getDelta () + nextEvent->getDelta ());
+						firstEvent->setPosition (nextEvent->getPosition ());
+						firstEvent->setDelta (firstEvent->getDelta () + nextEvent->getDelta ());
 
-				delete event;
-				return;
+						delete event;
+						return;
+					}
+
+					// POINTER_DRAG_EVENT
+					else if (eventType == BEvents::POINTER_DRAG_EVENT)
+					{
+						BEvents::PointerEvent* firstEvent = (BEvents::PointerEvent*) precursor;
+						BEvents::PointerEvent* nextEvent = (BEvents::PointerEvent*) event;
+
+						if
+						(
+							(nextEvent->getButton() == firstEvent->getButton()) &&
+							(nextEvent->getOrigin() == firstEvent->getOrigin())
+						)
+						{
+							firstEvent->setPosition (nextEvent->getPosition ());
+							firstEvent->setDelta (firstEvent->getDelta () + nextEvent->getDelta ());
+
+							delete event;
+							return;
+						}
+					}
+
+
+					// WHEEL_SCROLL_EVENT
+					else if (eventType == BEvents::WHEEL_SCROLL_EVENT)
+					{
+						BEvents::WheelEvent* firstEvent = (BEvents::WheelEvent*) precursor;
+						BEvents::WheelEvent* nextEvent = (BEvents::WheelEvent*) event;
+
+						if (nextEvent->getPosition() == firstEvent->getPosition())
+						{
+							firstEvent->setDelta (firstEvent->getDelta () + nextEvent->getDelta ());
+
+							delete event;
+							return;
+						}
+					}
+
+					// VALUE_CHANGED_EVENT
+					else if (eventType == BEvents::VALUE_CHANGED_EVENT)
+					{
+						BEvents::ValueChangedEvent* firstEvent = (BEvents::ValueChangedEvent*) precursor;
+						BEvents::ValueChangedEvent* nextEvent = (BEvents::ValueChangedEvent*) event;
+
+						firstEvent->setValue (nextEvent->getValue());
+						delete event;
+						return;
+					}
+				}
 			}
 		}
 	}
