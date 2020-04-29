@@ -52,12 +52,12 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	toolBoxLabel (10, 10, 240, 20, "ctlabel", "Toolbox"),
 	toolButtonBox (0, 30, 260, 160, "widget"),
 	toolWholeStepButton (170, 40, 80, 20, "tgbutton", "Whole step", 0.0),
-	toolResetButton (80, 130, 20, 20, "tgbutton"),
-	toolUndoButton (110, 130, 20, 20, "tgbutton"),
-	toolRedoButton (140, 130, 20, 20, "tgbutton"),
+	toolResetButton (50, 130, 20, 20, "tgbutton"),
+	toolUndoButton (80, 130, 20, 20, "tgbutton"),
+	toolRedoButton (110, 130, 20, 20, "tgbutton"),
 	toolButtonBoxCtrlLabel (10, 10, 60, 20, "lflabel", "Controls"),
 	toolButtonBoxChLabel (10, 70, 60, 20, "lflabel", "Channels"),
-	toolButtonBoxEditLabel (10, 100, 60, 20, "lflabel", "Edit"),
+	toolButtonBoxEditLabel (10, 100, 40, 20, "lflabel", "Edit"),
 	toolOctaveLabel (30, 260, 60, 20, "ctlabel", "Octave"),
 	toolOctaveDial (35, 200, 50, 60, "dial", 0.0, -8.0, 8.0, 1.0, "%1.0f"),
 	toolVelocityLabel (100, 260, 60, 20, "ctlabel", "Velocity"),
@@ -111,7 +111,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	for (int i = 1; i < NR_SEQUENCER_CHS + 1; ++i) toolButtonBox.addButton (80 + i * 30, 70, 20, 20, chButtonStyles[i]);
 	toolButtonBox.addButton (80 , 10, 20, 20, {{0.0, 0.03, 0.06, 1.0}, NO_CTRL, "No control"});
 	for (int i = 1; i < NR_CTRL_BUTTONS; ++i) toolButtonBox.addButton (80 + (i % 6) * 30, 10 + ((int) (i / 6)) * 30, 20, 20, ctrlButtonStyles[i]);
-	for (int i = 0; i < NR_EDIT_BUTTONS; ++i) toolButtonBox.addButton (80 + i * 30, 100, 20, 20, editButtonStyles[i]);
+	for (int i = 0; i < NR_EDIT_BUTTONS; ++i) toolButtonBox.addButton (50 + i * 30, 100, 20, 20, editButtonStyles[i]);
 
 	// Init ChBoxes
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
@@ -311,78 +311,6 @@ BSEQuencer_GUI::~BSEQuencer_GUI ()
 	if (scaleEditor) delete scaleEditor;
 
 	send_ui_off ();
-}
-
-void BSEQuencer_GUI::Pattern::clear ()
-{
-	Pad pad0 = Pad ();
-
-	changes.oldMessage.clear ();
-	changes.newMessage.clear ();
-	journal.clear ();
-
-	for (int r = 0; r < ROWS; ++r)
-	{
-		for (int s = 0; s < MAXSTEPS; ++s)
-		{
-			setPad (r, s, pad0);
-		}
-	}
-
-	store ();
-}
-
-Pad BSEQuencer_GUI::Pattern::getPad (const size_t row, const size_t step) const
-{
-	return pads[LIMIT (row, 0, ROWS)][LIMIT (step, 0, MAXSTEPS)];
-}
-void BSEQuencer_GUI::Pattern::setPad (const size_t row, const size_t step, const Pad& pad)
-{
-	size_t r = LIMIT (row, 0, ROWS);
-	size_t s = LIMIT (step, 0, MAXSTEPS);
-	changes.oldMessage.push_back (PadMessage (s, r, pads[r][s]));
-	changes.newMessage.push_back (PadMessage (s, r, pad));
-	pads[r][s] = pad;
-}
-
-std::vector<PadMessage> BSEQuencer_GUI::Pattern::undo ()
-{
-	if (!changes.newMessage.empty ()) store ();
-
-	std::vector<PadMessage> padMessages = journal.undo ();
-	std::reverse (padMessages.begin (), padMessages.end ());
-	for (PadMessage const& p : padMessages)
-	{
-		size_t r = LIMIT (p.row, 0, ROWS);
-		size_t s = LIMIT (p.step, 0, MAXSTEPS);
-		pads[r][s] = Pad (p);
-	}
-
-	return padMessages;
-}
-
-std::vector<PadMessage> BSEQuencer_GUI::Pattern::redo ()
-{
-	if (!changes.newMessage.empty ()) store ();
-
-	std::vector<PadMessage> padMessages = journal.redo ();
-	for (PadMessage const& p : padMessages)
-	{
-		size_t r = LIMIT (p.row, 0, ROWS);
-		size_t s = LIMIT (p.step, 0, MAXSTEPS);
-		pads[r][s] = Pad (p);
-	}
-
-	return padMessages;
-}
-
-void BSEQuencer_GUI::Pattern::store ()
-{
-	if (changes.newMessage.empty ()) return;
-
-	journal.push (changes.oldMessage, changes.newMessage);
-	changes.oldMessage.clear ();
-	changes.newMessage.clear ();
 }
 
 void BSEQuencer_GUI::port_event(uint32_t port, uint32_t buffer_size,
@@ -624,9 +552,9 @@ void BSEQuencer_GUI::scale ()
 	RESIZE (toolBoxLabel, 10, 10, 240, 20, sz);
 	RESIZE (toolButtonBox, 0, 30, 260, 160, sz);
 	RESIZE (toolWholeStepButton, 170, 40, 80, 20, sz);
-	RESIZE (toolResetButton, 80, 130, 20, 20, sz);
-	RESIZE (toolUndoButton,110, 130, 20, 20, sz);
-	RESIZE (toolRedoButton, 140, 130, 20, 20, sz);
+	RESIZE (toolResetButton, 50, 130, 20, 20, sz);
+	RESIZE (toolUndoButton, 80, 130, 20, 20, sz);
+	RESIZE (toolRedoButton, 110, 130, 20, 20, sz);
 	RESIZE (toolButtonBoxCtrlLabel, 10, 10, 60, 20, sz);
 	RESIZE (toolButtonBoxChLabel, 10, 70, 60, 20, sz);
 	RESIZE (toolButtonBoxEditLabel, 10, 100, 60, 20, sz);
@@ -1085,8 +1013,9 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 
 			if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < (int (ui->controllerWidgets[NR_OF_STEPS]->getValue ()))))
 			{
-				Pad pd = ui->pattern.getPad (row, step);
-				//int pdch = ((int)pd->ch) & 0x0F;
+				int start = step;
+				while (ui->pattern.padHasAntecessor (row, start)) --start;
+				Pad pd = ui->pattern.getPad (row, start);
 				int pdctrl = (int (pd.ch) & 0xF0) / 0x10;
 
 				// Left button: apply properties to pad
@@ -1094,13 +1023,12 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 				{
 					if (ui->controllerWidgets[SELECTION_CH]->getValue() <= NR_SEQUENCER_CHS)
 					{
-						//std::cerr << "BSEQuencer.lv2#GUI: Pad CH at " << row << ", " << step << "\n";
 						Pad props
 						(
 							ui->controllerWidgets[SELECTION_CH]->getValue() + pdctrl * 0x10,
 							ui->controllerWidgets[SELECTION_OCTAVE]->getValue(),
 							ui->controllerWidgets[SELECTION_VELOCITY]->getValue(),
-							ui->controllerWidgets[SELECTION_DURATION]->getValue()
+							ui->controllerWidgets[SELECTION_DURATION]->getValue() + int (pd.duration - 0.00000001)
 						);
 
 						// Click on a pad with same settings as in toolbox => temporarily switch to delete
@@ -1115,9 +1043,15 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 						// Overwrite if new data
 						if (!(props == pd))
 						{
-							ui->pattern.setPad (row, step, props);
-							ui->drawPad (row, step);
-							ui->send_pad (row, step);
+							int s = 0;
+							do
+							{
+								ui->pattern.setPad (row, start + s, props);
+								--props.duration;
+								++s;
+							} while (props.duration > 0.0);
+							ui->drawPad (row, start);
+							ui->send_pad (row, start);
 						}
 					}
 
@@ -1148,13 +1082,13 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 						for (int irow = startrow; irow <= endrow; ++irow)
 						{
 							// Overwrite if new data
-							if ((int (ui->pattern.getPad (irow, step).ch) & 0xF0) != ctrl)
+							if ((int (ui->pattern.getPad (irow, start).ch) & 0xF0) != ctrl)
 							{
-								Pad iPad = ui->pattern.getPad (irow, step);
+								Pad iPad = ui->pattern.getPad (irow, start);
 								iPad.ch = (int (iPad.ch) & 0x0F) + ctrl;
-								ui->pattern.setPad (irow, step, iPad);
-								ui->drawPad (irow, step);
-								ui->send_pad (irow, step);
+								ui->pattern.setPad (irow, start, iPad);
+								ui->drawPad (irow, start);
+								ui->send_pad (irow, start);
 							}
 						}
 					}
@@ -1172,19 +1106,42 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 							ui->controllerWidgets[SELECTION_DURATION]->setValue(pd.duration);
 						}
 
-						else if ((edit == EDIT_CUT) || (edit == EDIT_COPY) || (edit == EDIT_FLIPX) || (edit = EDIT_FLIPY))
+						else if (edit == EDIT_MERGE)
 						{
 							if (ui->clipBoard.ready)
 							{
-								ui->clipBoard.origin = std::make_pair (row, step);
-								ui->clipBoard.extends = std::make_pair (0, 0);
+								ui->clipBoard.origin = std::make_pair (row, start);
+								ui->clipBoard.extends = std::make_pair (0, ui->pattern.padGetSize (row, start) - 1);
 								ui->clipBoard.ready = false;
 								ui->drawPad (row, step);
 							}
 
 							else
 							{
-								std::pair<int, int> newExtends = std::make_pair (row - ui->clipBoard.origin.first, step - ui->clipBoard.origin.second);
+								std::pair<int, int> newExtends = std::make_pair (0, step - ui->clipBoard.origin.second);
+								if (newExtends != ui->clipBoard.extends)
+								{
+									ui->clipBoard.extends = newExtends;
+									ui->drawPad ();
+								}
+							}
+						}
+
+						else if ((edit == EDIT_CUT) || (edit == EDIT_COPY) || (edit == EDIT_FLIPX) || (edit == EDIT_FLIPY))
+						{
+							if (ui->clipBoard.ready)
+							{
+								ui->clipBoard.origin = std::make_pair (row, start);
+								ui->clipBoard.extends = std::make_pair (0, ui->pattern.padGetSize (row, start) - 1);
+								ui->clipBoard.ready = false;
+								ui->drawPad (row, step);
+							}
+
+							else
+							{
+								int end = step;
+								while (ui->pattern.padHasSuccessor (row, end)) ++end;
+								std::pair<int, int> newExtends = std::make_pair (row - ui->clipBoard.origin.first, end - ui->clipBoard.origin.second);
 								if (newExtends != ui->clipBoard.extends)
 								{
 									ui->clipBoard.extends = newExtends;
@@ -1226,9 +1183,9 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 						  (event->getEventType () == BEvents::POINTER_DRAG_EVENT)))
 				{
 					ui->controllerWidgets[SELECTION_CH]->setValue (int (pd.ch) & 0x0F);
-					ui->controllerWidgets[SELECTION_OCTAVE]->setValue(pd.pitchOctave);
-					ui->controllerWidgets[SELECTION_VELOCITY]->setValue(pd.velocity);
-					ui->controllerWidgets[SELECTION_DURATION]->setValue(pd.duration);
+					ui->controllerWidgets[SELECTION_OCTAVE]->setValue (pd.pitchOctave);
+					ui->controllerWidgets[SELECTION_VELOCITY]->setValue (pd.velocity);
+					ui->controllerWidgets[SELECTION_DURATION]->setValue (fmod (pd.duration, 1.0));
 				}
 			}
 		}
@@ -1240,7 +1197,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 			{
 				int edit = ((int)ui->controllerWidgets[SELECTION_CH]->getValue() - NR_SEQUENCER_CHS - NR_CTRL_BUTTONS) * 0x100;
 
-				if ((edit == EDIT_CUT) || (edit == EDIT_COPY) || (edit == EDIT_FLIPX) || (edit == EDIT_FLIPY))
+				if (edit == EDIT_MERGE)
 				{
 					int clipRMin = ui->clipBoard.origin.first;
 					int clipRMax = ui->clipBoard.origin.first + ui->clipBoard.extends.first;
@@ -1249,54 +1206,161 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 					int clipSMax = ui->clipBoard.origin.second + ui->clipBoard.extends.second;
 					if (clipSMin > clipSMax) std::swap (clipSMin, clipSMax);
 
-					if (edit == EDIT_FLIPX)
+
+					// Split
+					if (ui->pattern.padGetSize (clipRMin, clipSMin) > 1)
 					{
-						for (int ds = 0; ds < int ((clipSMax + 1 - clipSMin) / 2); ++ds)
+						// Find start
+						int start = clipSMin;
+						while (ui->pattern.padHasAntecessor (clipRMin, start)) --start;
+
+						// Find end
+						int end = clipSMax;
+						while (ui->pattern.padHasSuccessor (clipRMin, end)) ++end;
+
+						// Limit pad duration to 1.0 (= split)
+						for (int i = start; i <= end; ++i)
 						{
-							for (int r = clipRMin; r <= clipRMax; ++r)
-							{
-								Pad pd = ui->pattern.getPad (r, clipSMin + ds);
-								ui->pattern.setPad (r, clipSMin + ds, ui->pattern.getPad (r, clipSMax - ds));
-								ui->send_pad (r, clipSMin + ds);
-								ui->pattern.setPad (r, clipSMax - ds, pd);
-								ui->send_pad (r, clipSMax - ds);
-							}
+							Pad pd = ui->pattern.getPad (clipRMin, i);
+							pd.duration = LIMIT (pd.duration, 0.0, 1.0);
+							ui->pattern.setPad (clipRMin, i, pd);
+							ui->send_pad (clipRMin, i);
 						}
-						ui->pattern.store ();
 					}
 
-					if (edit == EDIT_FLIPY)
+					// Merge
+					else
 					{
-						for (int dr = 0; dr < int ((clipRMax + 1 - clipRMin) / 2); ++dr)
+						// Find start
+						int start = clipSMin;
+						while (ui->pattern.padHasAntecessor (clipRMin, start)) --start;
+
+						// Find end
+						int end = clipSMax;
+						while (ui->pattern.padHasSuccessor (clipRMin, end)) ++end;
+
+						Pad pd0 = ui->pattern.getPad (clipRMin, start);
+
+						// Count number of mergeable pads
+						int size = 0;
+						do ++size;
+						while
+						(
+							(start + size - 1 < end) &&
+							((int (pd0.ch) & 0x0F) == (int (ui->pattern.getPad (clipRMin, start + size).ch) & 0x0F)) &&
+							(ui->pattern.getPad (clipRMin, start + size).duration > 0.0)
+						);
+
+						// TODO Set control to first element
+						int ctrl = 0;
+						for (int i = 0; i < size; ++i)
 						{
-							for (int s = clipSMin; s <= clipSMax; ++s)
+							Pad pdi = ui->pattern.getPad (clipRMin, start + i);
+							if (int (pdi.ch) & 0xF0)
 							{
-								Pad pd = ui->pattern.getPad (clipRMin + dr, s);
-								ui->pattern.setPad (clipRMin + dr, s, ui->pattern.getPad (clipRMax -dr, s));
-								ui->send_pad (clipRMin + dr, s);
-								ui->pattern.setPad (clipRMax - dr, s, pd);
-								ui->send_pad (clipRMax - dr, s);
+								ctrl = int (pdi.ch) & 0xF0;
+								break;
 							}
 						}
-						ui->pattern.store ();
+						pd0.ch = int (pd0.ch) | ctrl;
+
+						pd0.duration = ui->pattern.getPad (clipRMin, start + size - 1).duration + size - 1;
+
+						for (int i = 0; i < size; ++i)
+						{
+							ui->pattern.setPad (clipRMin, start + i, pd0);
+							ui->send_pad (clipRMin, start + i);
+							--pd0.duration;
+							if (i == 0) pd0.ch = int (pd0.ch) & 0x0F;
+						}
 					}
 
+					ui->clipBoard.ready = true;
+					ui->drawPad();
+					ui->pattern.store ();
+				}
+
+				else if ((edit == EDIT_CUT) || (edit == EDIT_COPY) || (edit == EDIT_FLIPX) || (edit == EDIT_FLIPY))
+				{
+					int clipRMin = ui->clipBoard.origin.first;
+					int clipRMax = ui->clipBoard.origin.first + ui->clipBoard.extends.first;
+					if (clipRMin > clipRMax) std::swap (clipRMin, clipRMax);
+					int clipSMin = ui->clipBoard.origin.second;
+					int clipSMax = ui->clipBoard.origin.second + ui->clipBoard.extends.second;
+					if (clipSMin > clipSMax) std::swap (clipSMin, clipSMax);
+
+					// Clip merged Pads
+					if ((edit == EDIT_CUT) || (edit == EDIT_FLIPX) || (edit == EDIT_FLIPY))
+					{
+						for (int r = clipRMin; r < clipRMax; ++r)
+						{
+							ui->padClip (r, clipSMin);
+							if (clipSMin != clipSMax) ui->padClip (r, clipSMax + 1);
+						}
+					}
+
+					// Copy to clipboard
 					ui->clipBoard.data.clear ();
 					for (int r = clipRMax; r >= clipRMin; --r)
 					{
 						std::vector<Pad> padRow;
 						padRow.clear ();
-						for (int s = clipSMin; s <= clipSMax; ++s) padRow.push_back (ui->pattern.getPad (r, s));
+						for (int s = clipSMin; s <= clipSMax; ++s)
+						{
+							Pad pd = ui->pattern.getPad (r, s);
+
+							// Clip oversized merged pads
+							if (float(s) + pd.duration > float(clipSMax + 1.0f)) pd.duration = clipSMax + 1 - s;
+
+							padRow.push_back (pd);
+						}
 						ui->clipBoard.data.push_back (padRow);
 					}
 
-					if (edit == EDIT_CUT)
+					if (edit == EDIT_FLIPX)
+					{
+						for (int dr = 0; dr < int (ui->clipBoard.data.size()); ++dr)
+						{
+							for (int ds = 0; ds < int (ui->clipBoard.data[dr].size());)
+							{
+								Pad pd = ui->clipBoard.data.at (dr).at (ds);
+								int pdsize = (pd.duration <= 0.0f ? 1.0 : int (ceil (pd.duration)));
+
+								for (int dds = 0; dds < pdsize; ++dds)
+								{
+									Pad pds = ui->clipBoard.data.at (dr).at (ds + dds);
+									ui->pattern.setPad (clipRMax - dr, clipSMax + 1 + dds - ds - pdsize, pds);
+									ui->send_pad (clipRMax - dr, clipSMax + 1 + dds - ds - pdsize);
+								}
+
+								ds += pdsize;
+							}
+						}
+						ui->pattern.store ();
+					}
+
+					else if (edit == EDIT_FLIPY)
+					{
+						for (int dr = 0; dr < int (ui->clipBoard.data.size()); ++dr)
+						{
+							for (int ds = 0; ds < int (ui->clipBoard.data[dr].size()); ++ds)
+							{
+								Pad pd = ui->clipBoard.data.at (dr).at (ds);
+								ui->pattern.setPad (clipRMin + dr, clipSMin + ds, pd);
+								ui->send_pad (clipRMin + dr, clipSMin + ds);
+							}
+						}
+						ui->pattern.store ();
+					}
+
+					// Cut: Clear pads
+					else if (edit == EDIT_CUT)
 					{
 						for (int r = clipRMax; r >= clipRMin; --r)
 						{
 							for (int s = clipSMin; s <= clipSMax; ++s)
 							{
-								ui->pattern.setPad (r, s,  Pad ());
+								ui->pattern.setPad (r, s, Pad ());
 								ui->send_pad (r, s);
 							}
 						}
@@ -1304,26 +1368,6 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 					}
 
 					ui->clipBoard.ready = true;
-
-					// Hack focusWidget to cut / copy message
-					/*
-					if ((edit == EDIT_CUT) || (edit == EDIT_COPY))
-					{
-						if (ui->focusWidget)
-						{
-							ui->clipBoard.time = std::chrono::steady_clock::now() + ui->focusWidget->getFocusInMilliseconds ();
-							ui->focusWidget->setFocused (true);
-							if (ui->focusWidget->getParent()) ui->focusWidget->getParent()->release (ui->focusWidget);
-							ui->add (*ui->focusWidget);
-			       				ui->padSurfaceFocusText.setText (edit == EDIT_CUT ? "Cut..." : "Copied...");
-			       				ui->scaleFocus ();
-							ui->focusWidget->moveTo (widget->getOriginX () + pointerEvent->getX() + 2,
-										 widget->getOriginY () + pointerEvent->getY() - ui->focusWidget->getHeight() - 2);
-							ui->focusWidget->show ();
-						}
-					}
-					*/
-
 					ui->drawPad ();
 				}
 			}
@@ -1332,7 +1376,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 			else if (ui->tempTool)
 			{
 				ui->tempTool = false;
-				ui->controllerWidgets[SELECTION_CH]->setValue(ui->tempToolCh);
+				ui->controllerWidgets[SELECTION_CH]->setValue (ui->tempToolCh);
 			}
 
 			else ui->pattern.store ();
@@ -1358,14 +1402,21 @@ void BSEQuencer_GUI::padsScrolledCallback (BEvents::Event* event)
 
 		if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < ((int)ui->controllerWidgets[NR_OF_STEPS]->getValue ())))
 		{
+			while (ui->pattern.padHasAntecessor (row, step)) --step;
 			Pad pd = ui->pattern.getPad (row, step);
 			if (int (pd.ch) & 0x0F)
 			{
-				pd.velocity += 0.01 * wheelEvent->getDelta().y;
-				pd.velocity = LIMIT (pd.velocity, 0.0, 2.0);
-				ui->pattern.setPad (row, step, pd);
-				ui->drawPad (row, step);
-				ui->send_pad (row, step);
+				float v = pd.velocity * (1.0f + 0.01f * wheelEvent->getDelta().y);
+				v = LIMIT (v, 0.0, 2.0);
+				do
+				{
+					Pad pds = ui->pattern.getPad (row, step);
+					pds.velocity = v;
+					ui->pattern.setPad (row, step, pds);
+					ui->drawPad (row, step);
+					ui->send_pad (row, step);
+					++step;
+				} while (ui->pattern.padHasSuccessor (row, step - 1));
 				ui->wheelScrolled = true;
 			}
 		}
@@ -1386,6 +1437,7 @@ void BSEQuencer_GUI::padsFocusedCallback (BEvents::Event* event)
 
 		int row = (ROWS - 1) - ((int) ((focusEvent->getPosition ().y - widget->getYOffset()) / (height / ROWS)));
 		int step = (focusEvent->getPosition ().x - widget->getXOffset()) / (width / ui->controllerWidgets[NR_OF_STEPS]->getValue ());
+		while (ui->pattern.padHasAntecessor (row, step)) --step;
 
 		if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < ((int)ui->controllerWidgets[NR_OF_STEPS]->getValue ())))
 		{
@@ -1469,13 +1521,17 @@ void BSEQuencer_GUI::drawPad ()
 	cairo_t* cr = cairo_create (surface);
 	for (int row = 0; row < ROWS; ++row)
 	{
-		for (int step = 0; step < ((int)controllerWidgets[NR_OF_STEPS]->getValue ()); ++step) drawPad (cr, row, step);
+		for (int step = 0; step < ((int)controllerWidgets[NR_OF_STEPS]->getValue ()); ++step)
+		{
+			drawPad (cr, row, step);
+			while (pattern.padHasSuccessor (row, step)) ++step;
+		}
 	}
 	cairo_destroy (cr);
 	padSurface.update();
 }
 
-void BSEQuencer_GUI::drawPad (int row, int step)
+void BSEQuencer_GUI::drawPad (const int row, const int step)
 {
 	cairo_surface_t* surface = padSurface.getDrawingSurface();
 	cairo_t* cr = cairo_create (surface);
@@ -1484,10 +1540,18 @@ void BSEQuencer_GUI::drawPad (int row, int step)
 	padSurface.update();
 }
 
-void BSEQuencer_GUI::drawPad (cairo_t* cr, int row, int step)
+void BSEQuencer_GUI::drawPad (cairo_t* cr, const int row, const int step)
 {
+	if (pattern.padHasAntecessor (row, step))
+	{
+		drawPad (cr, row, step - 1);
+		return;
+	}
+
+	Pad pd = pattern.getPad (row, step);
+
 	if ((!cr) || (cairo_status (cr) != CAIRO_STATUS_SUCCESS) || (row < 0) || (row >= ROWS) || (step < 0) ||
-		(step >= ((int)controllerWidgets[NR_OF_STEPS]->getValue ()))) return;
+		(step >= (int (controllerWidgets[NR_OF_STEPS]->getValue ())))) return;
 
 	// Get size of drawing area
 	const double width = padSurface.getEffectiveWidth ();
@@ -1498,13 +1562,13 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, int row, int step)
 	const double y = (ROWS - row - 1) * h;
 	const double xr = round (x);
 	const double yr = round (y);
-	const double wr = round (x + w) - xr;
+	const double wr = round (x + w * pattern.padGetSize (row, step)) - xr;
 	const double hr = round (y + h) - yr;
 
 
 	// Draw background
 	// Odd or even?
-	BColors::Color bg = (((int)(step / controllerWidgets[STEPS_PER]->getValue ())) % 2) ? oddPadBgColor : evenPadBgColor;
+	BColors::Color bg = ((int (step / controllerWidgets[STEPS_PER]->getValue ())) % 2) ? oddPadBgColor : evenPadBgColor;
 
 	// Highlight selection
 	int clipRMin = clipBoard.origin.first;
@@ -1513,7 +1577,7 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, int row, int step)
 	int clipSMin = clipBoard.origin.second;
 	int clipSMax = clipBoard.origin.second + clipBoard.extends.second;
 	if (clipSMin > clipSMax) std::swap (clipSMin, clipSMax);
-	if ((!clipBoard.ready) && (row >= clipRMin) && (row <= clipRMax) && (step >= clipSMin) && (step <= clipSMax)) bg.applyBrightness (1.5);
+	if (padIsSelected (row, step)) bg.applyBrightness (1.5);
 
 	cairo_set_source_rgba (cr, CAIRO_RGBA (bg));
 	cairo_set_line_width (cr, 0.0);
@@ -1521,24 +1585,84 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, int row, int step)
 	cairo_fill (cr);
 
 	// Draw pad
-	Pad pd = pattern.getPad (row, step);
-	int ch = (int (pd.ch) & 0x0F);
-	int ctrl = (int (pd.ch) & 0xF0) / 0x10;
+	int ch = padGetChannel (row, step);
+	int ctrl = padGetControl (row, step);
 	double vel = (pd.velocity <= 1 ?  pd.velocity - 1 : (pd.velocity - 1) * 0.5);
 
 	if ((ch >= 0) && (ch <= NR_SEQUENCER_CHS) && (ctrl >= 0) && (ctrl < NR_CTRL_BUTTONS))
 	{
 		BColors::Color color = chButtonStyles[ch].color;
 		if (ch > 0) color.applyBrightness(vel);
-		if (cursorBits[step] & (1 << row))
+		int i = 0;
+		do
 		{
-			color.setAlpha (1.0);
-			color.applyBrightness (0.75);
+			if (cursorBits[step + i] & (1 << row))
+			{
+				color.setAlpha (1.0);
+				color.applyBrightness (0.75);
+				break;
+			}
+			++i;
 		}
+		while (pattern.padHasSuccessor (row, step + i - 1));
 
 		int symbol = ctrlButtonStyles[ctrl].symbol;
 
 		drawButton (cr, xr + 1, yr + 1, wr - 2, hr - 2, color, symbol);
+	}
+}
+
+bool BSEQuencer_GUI::padIsSelected (const int row, const int step)
+{
+	int s = step;
+	while (pattern.padHasAntecessor (row, step)) --s;
+
+	int clipRMin = clipBoard.origin.first;
+	int clipRMax = clipBoard.origin.first + clipBoard.extends.first;
+	if (clipRMin > clipRMax) std::swap (clipRMin, clipRMax);
+	int clipSMin = clipBoard.origin.second;
+	int clipSMax = clipBoard.origin.second + clipBoard.extends.second;
+	if (clipSMin > clipSMax) std::swap (clipSMin, clipSMax);
+	if (clipBoard.ready || (row < clipRMin) || (row > clipRMax)) return false;
+
+	do
+	{
+		if ((s >= clipSMin) && (s <= clipSMax)) return true;
+		++s;
+	} while (pattern.padHasSuccessor (row, s - 1));
+
+	return false;
+}
+
+int BSEQuencer_GUI::padGetChannel (const int row, const int step)
+{
+	int start = step;
+	while (pattern.padHasAntecessor (row, start)) --start;
+	return int (pattern.getPad (row, start).ch) & 0x0F;
+}
+
+int BSEQuencer_GUI::padGetControl (const int row, const int step)
+{
+	int start = step;
+	while (pattern.padHasAntecessor (row, start)) --start;
+	return (int (pattern.getPad (row, start).ch) & 0xF0) / 0x10;
+}
+
+void BSEQuencer_GUI::padClip (const int row, const int step)
+{
+	if (pattern.padHasAntecessor (row, step))
+	{
+		int start = step - 1;
+		while (pattern.padHasAntecessor (row, start)) --start;
+		for (int s = start; s < step; ++s)
+		{
+			Pad pd = pattern.getPad (row, s);
+			pd.duration = step - s;
+			pattern.setPad (row, s, pd);
+			send_pad (row, s);
+		}
+		drawPad (row, start);
+		drawPad (row, step);
 	}
 }
 

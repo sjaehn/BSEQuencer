@@ -27,7 +27,7 @@
 #define ROWS 16
 #define NR_SEQUENCER_CHS 4
 #define NR_CTRL_BUTTONS 9
-#define NR_EDIT_BUTTONS 6
+#define NR_EDIT_BUTTONS 7
 #define NR_MIDI_KEYS 128
 #define AUTOPLAY_KEY 128
 #define ALL_CH 0xFF
@@ -69,11 +69,12 @@ typedef enum {
 
 typedef enum {
 	EDIT_PICK	= 0x100,
-	EDIT_CUT	= 0x200,
-	EDIT_COPY	= 0x300,
-	EDIT_FLIPX	= 0x400,
-	EDIT_FLIPY	= 0x500,
-	EDIT_PASTE	= 0x600
+	EDIT_MERGE	= 0x200,
+	EDIT_CUT	= 0x300,
+	EDIT_COPY	= 0x400,
+	EDIT_FLIPX	= 0x500,
+	EDIT_FLIPY	= 0x600,
+	EDIT_PASTE	= 0x700
 } EditButtons;
 
 

@@ -133,6 +133,27 @@ void drawButton (cairo_t* cr, double x, double y, double width, double height, B
 			cairo_stroke (cr);
 			break;
 
+			case EDIT_MERGE:
+			{
+				cairo_rectangle (cr, x + 0.5 * width - 0.5 * symbolSize, y + 0.5 * height - 0.2 * symbolSize, symbolSize, 0.4 * symbolSize);
+				cairo_set_line_width (cr, 1.0);
+				cairo_stroke (cr);
+				for (int i = 0; i < 3; ++i)
+				{
+					cairo_rectangle
+					(
+						cr,
+						x + 0.5 * width - (0.4 - 0.3 * i) * symbolSize,
+						y + 0.5 * height - 0.1 * symbolSize,
+						0.2 * symbolSize,
+						0.2 * symbolSize
+					);
+					cairo_fill (cr);
+				}
+
+			}
+			break;
+
 			case EDIT_CUT:
 			{
 				cairo_rectangle (cr, x + width / 2 - 0.375 * symbolSize, y + height / 2 - 0.25 * symbolSize, 0.5 * symbolSize, 0.75 * symbolSize);

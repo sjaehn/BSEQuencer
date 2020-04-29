@@ -93,6 +93,11 @@ private:
 	void startMidiOut (const int64_t frames, const int key, const uint8_t chbits);
 	void startMidiOut (const int64_t frames, const int key, const int row, const uint8_t chbits);
 	void cleanupInKeys ();
+	bool padHasAntecessor (const int row, const int step);
+	bool padHasSuccessor (const int row, const int step);
+	int getPadStart (const int row, const int step);
+	int getNextPadStart (const int key, const int row, const int step);
+	int getNextStep (const int key, const int row, const int step);
 	double getStep (const int key, const double relpos);
 	int getStepOffset (const int key, const int row, const int relStep);
 	void runSequencer (const double startpos, const uint32_t start, const uint32_t end);

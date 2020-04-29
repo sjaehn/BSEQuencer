@@ -12,6 +12,7 @@ a) Install the bsequencer (bsequencer-lv2) package for your system
 * [Arch linux](https://www.archlinux.org/packages/community/x86_64/bsequencer/) by David Runge
 * [Free BSD](https://www.freshports.org/audio/bsequencer-lv2) by yurivict
 * [NixOS](https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/audio/bsequencer/default.nix) by Bart Brouns
+* [Debian](https://kx.studio/Repositories:Plugins) by falkTX
 * Check https://repology.org/project/bsequencer/versions for other systems
 
 b) Build your own binaries in the following three steps.
@@ -58,6 +59,11 @@ Key features
 * Controls for playing direction, jump, skip, and stop options placeable to any position within the matrix
 * Notes can be associated with four different, configurable output channels
 * Output channels connectable with individual MIDI channels
+
+
+What's new
+----------
+* Merge pads
 
 
 Usage

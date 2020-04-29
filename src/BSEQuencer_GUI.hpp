@@ -61,12 +61,12 @@
 #include "PadMessage.hpp"
 #include "ScaleEditor.hpp"
 #include "Journal.hpp"
+#include "Pattern.hpp"
 
 #define BG_FILE "surface.png"
 #define EDIT_SYMBOL "EditSymbol.png"
 #define HELP_URL "https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer"
 #define OPEN_CMD "xdg-open"
-#define MAXUNDO 20
 
 #define RESIZE(widget, x, y, w, h, sz) widget.moveTo ((x) * (sz), (y) * (sz)); widget.resize ((w) * (sz), (h) * (sz));
 class BSEQuencer_GUI : public BWidgets::Window
@@ -99,8 +99,13 @@ private:
 	void scaleFocus ();
 	void drawCaption ();
 	void drawPad ();
-	void drawPad (int row, int step);
-	void drawPad (cairo_t* cr, int row, int step);
+	void drawPad (const int row, const int step);
+	void drawPad (cairo_t* cr, const int row, const int step);
+	bool padIsSelected (const int row, const int step);
+	int padGetChannel (const int row, const int step);
+	int padGetControl (const int row, const int step);
+	void padClip (const int row, const int step);
+
 
 	std::string pluginPath;
 	double sz;
@@ -114,25 +119,6 @@ private:
 	std::array<float, KNOBS_SIZE> controllers;
 
 	//Pads
-	class Pattern
-	{
-	public:
-		void clear ();
-		Pad getPad (const size_t row, const size_t step) const;
-		void setPad (const size_t row, const size_t step, const Pad& pad);
-		std::vector<PadMessage> undo ();
-		std::vector<PadMessage> redo ();
-		void store ();
-	private:
-		Journal<std::vector<PadMessage>, MAXUNDO> journal;
-		Pad pads [ROWS] [MAXSTEPS];
-		struct
-		{
-			std::vector<PadMessage> oldMessage;
-			std::vector<PadMessage> newMessage;
-		} changes;
-	};
-
 	Pattern pattern;
 
 	struct ClipBoard
@@ -272,6 +258,7 @@ private:
 	std::array<ButtonStyle, NR_EDIT_BUTTONS> editButtonStyles =
 	{{
 		{{0.0, 0.03, 0.06, 1.0}, EDIT_PICK, "Pick"},
+		{{0.0, 0.03, 0.06, 1.0}, EDIT_MERGE, "Merge / split"},
 		{{0.0, 0.03, 0.06, 1.0}, EDIT_CUT, "Select & cut"},
 	  	{{0.0, 0.03, 0.06, 1.0}, EDIT_COPY, "Select & copy"},
 		{{0.0, 0.03, 0.06, 1.0}, EDIT_FLIPX, "Select & X flip"},

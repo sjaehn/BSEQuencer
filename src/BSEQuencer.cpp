@@ -219,6 +219,60 @@ void BSEQuencer::cleanupInKeys ()
 	} while (! valid);
 }
 
+bool BSEQuencer::padHasAntecessor (const int row, const int step)
+{
+	return
+	(
+		(step > 0) &&
+		((int (pads[row][step].ch) & 0x0f) == (int (pads[row][step - 1].ch) & 0x0f)) &&
+		(pads[row][step - 1].duration > 1.0f)
+	);
+}
+
+bool BSEQuencer::padHasSuccessor (const int row, const int step)
+{
+	return
+	(
+		(step < int (controllers[NR_OF_STEPS]) - 1) &&
+		((int (pads[row][step].ch) & 0x0f) == (int (pads[row][step + 1].ch) & 0x0f)) &&
+		(pads[row][step].duration > 1.0f)
+	);
+}
+
+int BSEQuencer::getPadStart (const int row, const int step)
+{
+	int s = step;
+	while (padHasAntecessor (row, s)) --s;
+	return s;
+}
+
+int BSEQuencer::getNextPadStart (const int key, const int row, const int step)
+{
+	int nrsteps = controllers[NR_OF_STEPS];
+	int stepNr = step;
+
+	if (inKeys[key].output[row].direction < 0)
+	{
+		while (padHasAntecessor (row, stepNr)) --stepNr;
+		stepNr = (nrsteps + stepNr - 1) % nrsteps;
+		while (padHasAntecessor (row, stepNr)) --stepNr;
+	}
+
+	else
+	{
+		while (padHasSuccessor (row, stepNr)) ++stepNr;
+		stepNr = (stepNr + 1) % nrsteps;
+	}
+
+	return stepNr;
+}
+
+int BSEQuencer::getNextStep (const int key, const int row, const int step)
+{
+	if (padHasSuccessor (row, step)) return (step + 1) % int (controllers[NR_OF_STEPS]);
+	return getNextPadStart (key, row, step);
+}
+
 /*
  * Calculates a new position in steps from a starting position in steps and
  * position in beats relative to the starting position. Controls are not
@@ -252,81 +306,52 @@ int BSEQuencer::getStepOffset (const int key, const int row, const int relStep)
 {
 	if (relStep <= 0) return 0;
 
-	int startStepNr = (inKeys[key].stepNr + inKeys[key].output[row].stepOffset) % ((int)controllers[NR_OF_STEPS]);
+	int nrsteps = controllers[NR_OF_STEPS];
+	int startStepNr = (inKeys[key].stepNr + inKeys[key].output[row].stepOffset) % nrsteps;
 	int endStepNr = startStepNr + relStep;
 
 	int stepNr = startStepNr;
 	for (int it = startStepNr; it < endStepNr; )
 	{
-
-		// 1. This step interpretation: At the end of each step, calculate the next step to jump to
 		if (stepNr < 0)
 		{
 			++it;
 			++stepNr; // Always forward if stepNr negative
 		}
+
 		else
 		{
-			int ctrl = ((int) pads[row][stepNr].ch) & 0xF0;
+			// 1. This step interpretation: At the end of each step, calculate the next step to jump to
 
-			switch (ctrl)
+			int stepctrl = int (pads[row][stepNr].ch) & 0xF0;
+
+			if
+			(
+				(stepctrl != CTRL_STOP) &&
+				(stepctrl != CTRL_SKIP)
+			)
 			{
-			case CTRL_SKIP: break;
-			case CTRL_STOP: break;
+				int padctrl =
+				(
+					padHasSuccessor (row, stepNr) ?
+					NO_CTRL :
+					int (pads[row][getPadStart (row, stepNr)].ch) & 0xF0
+				);
 
-			case CTRL_PLAY_FWD:
-				inKeys[key].output[row].direction = 1;
-				stepNr = (stepNr + ((int)controllers[NR_OF_STEPS]) + inKeys[key].output[row].direction) % ((int)controllers[NR_OF_STEPS]);
-				++it;
-				break;
-
-			case CTRL_PLAY_REW:
-				inKeys[key].output[row].direction = -1;
-				stepNr = (stepNr + ((int)controllers[NR_OF_STEPS]) + inKeys[key].output[row].direction) % ((int)controllers[NR_OF_STEPS]);
-				++it;
-				break;
-
-			case CTRL_JUMP_FWD:
-			{
-				if (!inKeys[key].output[row].jumpOff[stepNr])
-				{
-					inKeys[key].output[row].jumpOff[stepNr] = true;
-					int newStepNr = stepNr;
-					for (int i = 1, jumpbackCount = 1; i < ((int)controllers[NR_OF_STEPS]); ++i)
-					{
-						newStepNr = (stepNr + i) % ((int)controllers[NR_OF_STEPS]);
-						if ((((int)pads[row][newStepNr].ch) & 0xF0) == CTRL_JUMP_FWD) ++jumpbackCount;
-						if ((((int)pads[row][newStepNr].ch) & 0xF0) == CTRL_ALL_MARK) break;
-						if ((((int)pads[row][newStepNr].ch) & 0xF0) == CTRL_MARK)
-						{
-							--jumpbackCount;
-							if (jumpbackCount <= 0) break;
-						}
-					}
-					stepNr = newStepNr;
-				}
-				else
-				{
-					inKeys[key].output[row].jumpOff[stepNr] = false;
-					stepNr = (stepNr + ((int)controllers[NR_OF_STEPS]) + inKeys[key].output[row].direction) % ((int)controllers[NR_OF_STEPS]);
-				}
-				++it;
-			}
-
-			break;
-
-			case CTRL_JUMP_BACK:
+				if (padctrl == CTRL_JUMP_FWD)
 				{
 					if (!inKeys[key].output[row].jumpOff[stepNr])
 					{
 						inKeys[key].output[row].jumpOff[stepNr] = true;
+						stepNr = getPadStart (row, stepNr);
 						int newStepNr = stepNr;
-						for (int i = 1, jumpbackCount = 1; i < ((int)controllers[NR_OF_STEPS]); ++i)
+						for (int i = 1, jumpbackCount = 1; i < nrsteps; ++i)
 						{
-							newStepNr = (i <= stepNr ? stepNr - i : stepNr + ((int)controllers[NR_OF_STEPS]) - i);
-							if ((((int)pads[row][newStepNr].ch) & 0xF0) == CTRL_JUMP_BACK) ++jumpbackCount;
-							if ((((int)pads[row][newStepNr].ch) & 0xF0) == CTRL_ALL_MARK) break;
-							if ((((int)pads[row][newStepNr].ch) & 0xF0) == CTRL_MARK)
+							newStepNr = (stepNr + i) % nrsteps;
+							int ch = int (pads[row][newStepNr].ch) & 0xF0;
+							if (ch == CTRL_JUMP_FWD) ++jumpbackCount;
+							if (ch == CTRL_ALL_MARK) break;
+							if (ch == CTRL_MARK)
 							{
 								--jumpbackCount;
 								if (jumpbackCount <= 0) break;
@@ -337,36 +362,74 @@ int BSEQuencer::getStepOffset (const int key, const int row, const int relStep)
 					else
 					{
 						inKeys[key].output[row].jumpOff[stepNr] = false;
-						stepNr = (stepNr + ((int)controllers[NR_OF_STEPS]) + inKeys[key].output[row].direction) % ((int)controllers[NR_OF_STEPS]);
+						stepNr = getNextStep (key, row, stepNr);
 					}
 					++it;
 				}
 
-				break;
-
-			default:
+				else if (padctrl == CTRL_JUMP_BACK)
 				{
+					if (!inKeys[key].output[row].jumpOff[stepNr])
+					{
+						inKeys[key].output[row].jumpOff[stepNr] = true;
+						stepNr = getPadStart (row, stepNr);
+						int newStepNr = stepNr;
+						for (int i = 1, jumpbackCount = 1; i < nrsteps; ++i)
+						{
+							newStepNr = (i <= stepNr ? stepNr - i : stepNr + nrsteps - i);
+							int ch = int (pads[row][newStepNr].ch) & 0xF0;
+							if (ch == CTRL_JUMP_BACK) ++jumpbackCount;
+							if (ch == CTRL_ALL_MARK) break;
+							if (ch == CTRL_MARK)
+							{
+								--jumpbackCount;
+								if (jumpbackCount <= 0) break;
+							}
+						}
+						stepNr = newStepNr;
+					}
+					else
+					{
+						inKeys[key].output[row].jumpOff[stepNr] = false;
+						stepNr = getNextStep (key, row, stepNr);
+					}
 					++it;
-					stepNr = (stepNr + ((int)controllers[NR_OF_STEPS]) + inKeys[key].output[row].direction) % ((int)controllers[NR_OF_STEPS]);
+				}
+
+				else
+				{
+					if (padctrl ==CTRL_PLAY_FWD) inKeys[key].output[row].direction = 1;
+					else if (padctrl == CTRL_PLAY_REW) inKeys[key].output[row].direction = -1;
+					
+					stepNr = getNextStep (key, row, stepNr);
+					++it;
 				}
 			}
-		}
 
-		// 2. Next step interpretation: SKIP and HALT controls that need to be
-		// handled already at the begin of the next step.
-		if (stepNr >= 0)
-		{
+			// 2. Next step interpretation: SKIP and HALT controls that need to be
+			// handled already at the begin of the next step.
+
+			// Update stepctrl as stepNr may be changed
+			stepctrl = int (pads[row][stepNr].ch) & 0xF0;
+
 			// CTRL_SKIP
-			for (int i = 0;
-					(i <= ((int)controllers[NR_OF_STEPS])) && ((((int) pads[row][stepNr].ch) & 0xF0) == CTRL_SKIP);
-					++i, stepNr = (stepNr + ((int)controllers[NR_OF_STEPS]) + inKeys[key].output[row].direction) % ((int)controllers[NR_OF_STEPS]))
+			for
+			(
+				int i = 0;
+				(i <= nrsteps) && ((int (pads[row][getPadStart (row, stepNr)].ch) & 0xF0) == CTRL_SKIP);
+				++i,
+				stepNr = getNextPadStart (key, row, stepNr)
+			)
 			{
 				// A whole loop of SKIPs => STOP
-				if (i == ((int)controllers[NR_OF_STEPS])) return HALT_STEP;
+				if (i == nrsteps) return HALT_STEP;
 			}
 
 			// CTRL_STOP
-			if ((((int) pads[row][stepNr].ch) & 0xF0) == CTRL_STOP) return HALT_STEP;
+			if (stepctrl == CTRL_STOP)
+			{
+				return HALT_STEP;
+			}
 		}
 	}
 	return stepNr - startStepNr - relStep;
@@ -399,37 +462,62 @@ void BSEQuencer::runSequencer (const double startpos, const uint32_t start, cons
 				int64_t actframes = LIMIT (start + (actpos - startpos) * FRAMES_PER_BEAT, start, end);
 				double actstep = getStep (key, actpos - inKeys[key].startPos);
 				int actStepNr = LIMIT (int (floor (actstep)), 0, int (controllers[NR_OF_STEPS]) - 1);
+				int oldStepNr = inKeys[key].stepNr;
 				double actStepFrac = actstep - actStepNr;
 
 				// Only present events
 				if (actstep >= 0)
 				{
 					// Just stepped?
-					if (inKeys[key].stepNr != actStepNr)
+					if (oldStepNr != actStepNr)
 					{
-
-						// fprintf (stderr, "BSEQuencer.lv2: Just stepped (key = %i, actpos = %f, actStepFrac = %f)\n", key, actpos, actStepFrac);
+						int nrsteps = controllers[NR_OF_STEPS];
 
 						// Stop all output for the last step
-						stopMidiOut (actframes, key, ALL_CH);
+						//stopMidiOut (actframes, key, ALL_CH);
 
 						// Update all rows, if not halted before
 						for (int row = 0; row < ROWS; ++row)
 						{
-							if (inKeys[key].output[row].stepOffset != HALT_STEP)
+							int oldoffset = inKeys[key].output[row].stepOffset;
+
+							if (oldoffset != HALT_STEP)
 							{
 								int rawoffset = getStepOffset (key, row, STEPS_PER_BEAT * (actpos - inKeys[key].startPos));
-								if (rawoffset == HALT_STEP) inKeys[key].output[row].stepOffset = HALT_STEP;
+								if (rawoffset == HALT_STEP)
+								{
+									inKeys[key].output[row].stepOffset = HALT_STEP;
+									stopMidiOut (actframes, key, row, ALL_CH);
+								}
+
 								else
 								{
 									// Only positive offset values allowed
-									int offset = (rawoffset >= 0 ?
-											  	  (inKeys[key].output[row].stepOffset + rawoffset) % ((int)controllers[NR_OF_STEPS]) :
-												  (((int)controllers[NR_OF_STEPS]) +
-												   (inKeys[key].output[row].stepOffset + rawoffset)) % ((int)controllers[NR_OF_STEPS]));
-									inKeys[key].output[row].stepOffset = offset;
-									int rowStepNr = (actStepNr + offset) % ((int)controllers[NR_OF_STEPS]);
-									inKeys[key].output[row].pad = pads[row][rowStepNr];
+									int newoffset =
+									(
+										rawoffset >= 0 ?
+										(oldoffset + rawoffset) % nrsteps :
+										(nrsteps + oldoffset + rawoffset) % nrsteps
+									);
+
+									int newRowStepNr = (actStepNr + newoffset) % nrsteps;
+									int oldRowStepNr = (oldStepNr + oldoffset) % nrsteps;
+									inKeys[key].output[row].stepOffset = newoffset;
+
+									if
+									(
+										(newRowStepNr <= 0) ||
+										(newRowStepNr != oldRowStepNr + 1) ||
+										((int (pads[row][newRowStepNr].ch) & 0x0f) != (int (pads[row][oldRowStepNr].ch) & 0x0f)) ||
+										(pads[row][oldRowStepNr].duration <= 1.0f)
+									)
+									{
+										stopMidiOut (actframes, key, row, ALL_CH);
+
+										inKeys[key].output[row].pad = pads[row][newRowStepNr];
+										startMidiOut (actframes, key, row, ALL_CH);
+									}
+
 								}
 							}
 						}
@@ -439,7 +527,7 @@ void BSEQuencer::runSequencer (const double startpos, const uint32_t start, cons
 						inKeys[key].startPos = actpos - actStepFrac / STEPS_PER_BEAT;
 
 						// Start new output
-						startMidiOut (actframes, key, ALL_CH);
+						//startMidiOut (actframes, key, ALL_CH);
 					}
 
 					for (int row = 0; row < ROWS; ++row)
@@ -1258,11 +1346,14 @@ float BSEQuencer::validateValue (float value, const Limit limit)
  */
 Pad BSEQuencer::validatePad (Pad pad)
 {
-
-	return Pad(validateValue (pad.ch, {0, 255, 1}),
-			   validateValue (pad.pitchOctave, controllerLimits[SELECTION_OCTAVE]),
-			   validateValue (pad.velocity, controllerLimits[SELECTION_VELOCITY]),
-			   validateValue (pad.duration, controllerLimits[SELECTION_DURATION]));
+	return Pad
+	(
+		validateValue (pad.ch, {0, 255, 1}),
+		validateValue (pad.pitchOctave, controllerLimits[SELECTION_OCTAVE]),
+		validateValue (pad.velocity, controllerLimits[SELECTION_VELOCITY]),
+		LIMIT (pad.duration, 0.0, 32.0)
+		//validateValue (pad.duration, controllerLimits[SELECTION_DURATION])
+	);
 }
 
 /*
