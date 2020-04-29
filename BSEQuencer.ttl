@@ -27,8 +27,8 @@
         rdfs:comment "Multi channel step sequencer" ;
 	doap:name "B.SEQuencer" ;
 	doap:license <http://usefulinc.com/doap/licenses/gpl>;
-	lv2:microVersion 1 ;
-	lv2:minorVersion 2 ;
+	lv2:microVersion 0 ;
+	lv2:minorVersion 3 ;
         doap:maintainer <http://www.jahnichen.de/sjaehn#me> ;
         lv2:optionalFeature lv2:hardRTCapable ;
         lv2:extensionData state:interface ;
