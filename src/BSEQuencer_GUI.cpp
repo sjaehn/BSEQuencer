@@ -86,10 +86,9 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	propertiesScaleEditIcon (70, 175, 20, 20, "widget", (bundle_path ? std::string (bundle_path) + EDIT_SYMBOL : std::string (""))),
 	propertiesScaleListBox (),
 
-	helpLabel (1140, 40, 30, 30, "ilabel", "?"),
+	helpButton (1116, 50, 24, 24, "halobutton", "Help"),
+	ytButton (1146, 50, 24, 24, "halobutton", "Feature tour"),
 	scaleEditor (nullptr)
-	//(420, 20, 360, 760, "scaleeditor", (bundle_path ? std::string (bundle_path) : std::string ("")), 0, RTScaleMap (), BScale (0,defaultScale))
-
 {
 	// Init scale maps
 	for (int scaleNr = 0; scaleNr < NR_SYSTEM_SCALES + NR_USER_SCALES; ++scaleNr)
@@ -182,7 +181,8 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	toolUndoButton.setCallbackFunction(BEvents::VALUE_CHANGED_EVENT, undoClickedCallback);
 	toolRedoButton.setCallbackFunction(BEvents::VALUE_CHANGED_EVENT, undoClickedCallback);
 
-	helpLabel.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, helpPressedCallback);
+	helpButton.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, helpPressedCallback);
+	ytButton.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, ytPressedCallback);
 	propertiesScaleEditIcon.setCallbackFunction(BEvents::BUTTON_PRESS_EVENT, editPressedCallback);
 
 	// Apply theme
@@ -278,7 +278,8 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	mContainer.add (toolBox);
 	mContainer.add (modeBox);
 	mContainer.add (propertiesBox);
-	mContainer.add (helpLabel);
+	mContainer.add (helpButton);
+	mContainer.add (ytButton);
 	mContainer.add (padSurface);
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i) mContainer.add (chBoxes[i].box);
 
@@ -596,7 +597,8 @@ void BSEQuencer_GUI::scale ()
 	propertiesScaleListBox.moveListBox (BUtilities::Point (0, -420 * sz));
 	propertiesScaleListBox.resizeListBoxItems (BUtilities::Point (150 * sz, 20 * sz));
 
-	RESIZE (helpLabel, 1140, 40, 30, 30, sz);
+	RESIZE (helpButton, 1116, 50, 24, 24, sz);
+	RESIZE (ytButton, 1146, 50, 24, 24, sz);
 	if (scaleEditor) {RESIZE ((*scaleEditor), 420, 20, 360, 760, sz);}
 
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
@@ -722,7 +724,8 @@ void BSEQuencer_GUI::applyTheme (BStyles::Theme& theme)
 		chBoxes[i].noteOffsetLabel.applyTheme (theme);
 	}
 
-	helpLabel.applyTheme (theme);
+	helpButton.applyTheme (theme);
+	ytButton.applyTheme (theme);
 	//scaleEditor.applyTheme (theme);
 }
 
@@ -899,6 +902,8 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 }
 
 void BSEQuencer_GUI::helpPressedCallback (BEvents::Event* event) {system(OPEN_CMD " " HELP_URL);}
+
+void BSEQuencer_GUI::ytPressedCallback (BEvents::Event* event) {system(OPEN_CMD " " YT_URL);}
 
 void BSEQuencer_GUI::editPressedCallback (BEvents::Event* event)
 {

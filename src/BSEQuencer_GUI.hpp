@@ -49,7 +49,7 @@
 #include "drawbutton.hpp"
 #include "PlayStopButton.hpp"
 #include "ButtonBox.hpp"
-#include "CircledSymbol.hpp"
+#include "HaloButton.hpp"
 #include "ResetButton.hpp"
 #include "UndoButton.hpp"
 #include "RedoButton.hpp"
@@ -66,6 +66,7 @@
 #define BG_FILE "surface.png"
 #define EDIT_SYMBOL "EditSymbol.png"
 #define HELP_URL "https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer"
+#define YT_URL "https://www.youtube.com/watch?v=J6bU4GdUVYc"
 #define OPEN_CMD "xdg-open"
 
 #define RESIZE(widget, x, y, w, h, sz) widget.moveTo ((x) * (sz), (y) * (sz)); widget.resize ((w) * (sz), (h) * (sz));
@@ -89,6 +90,7 @@ public:
 private:
 	static void valueChangedCallback(BEvents::Event* event);
 	static void helpPressedCallback (BEvents::Event* event);
+	static void ytPressedCallback (BEvents::Event* event);
 	static void editPressedCallback (BEvents::Event* event);
 	static void resetClickedCallback (BEvents::Event* event);
 	static void undoClickedCallback (BEvents::Event* event);
@@ -214,7 +216,8 @@ private:
 
 	std::array<ChBox, NR_SEQUENCER_CHS> chBoxes;
 
-	CircledSymbol helpLabel;
+	HaloButton helpButton;
+	HaloButton ytButton;
 	ScaleEditor* scaleEditor;
 
 	// Definition of styles
@@ -312,6 +315,9 @@ private:
 					 {"bgcolors", STYLEPTR (&tgBgColors)},
 					 {"font", STYLEPTR (&tgLabelFont)}}},
 		{"tgbutton/focus",	{{"uses", STYLEPTR (&focusStyles)}}},
+		{"halobutton", 		{{"uses", STYLEPTR (&defaultStyles)},
+					 {"fgcolors", STYLEPTR (&bgColors)}}},
+		{"halobutton/focus", {{"uses", STYLEPTR (&focusStyles)}}},
 		{"dial", 		{{"uses", STYLEPTR (&defaultStyles)},
 					 {"fgcolors", STYLEPTR (&fgColors)},
 					 {"bgcolors", STYLEPTR (&bgColors)},

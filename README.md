@@ -63,7 +63,8 @@ Key features
 
 What's new
 ----------
-* Merge pads
+* Merge pads option
+* Button link to features video
 
 
 Usage
