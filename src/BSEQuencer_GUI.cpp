@@ -1154,8 +1154,13 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 						{
 							if (!ui->clipBoard.data.empty ())
 							{
+
 								for (int r = 0; r < int (ui->clipBoard.data.size ()); ++r)
 								{
+									// Clip merged pads
+									ui->padClip (row - r, step);
+									if (ui->clipBoard.data[r].size () > 1) ui->padClip (row - r, step + ui->clipBoard.data[r].size ());
+
 									for (int s = 0; s < int (ui->clipBoard.data[r].size ()); ++s)
 									{
 										if
