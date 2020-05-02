@@ -7,25 +7,42 @@
 #include "BWidgets/BColors.hpp"
 #include "definitions.h"
 
-void drawButton (cairo_t* cr, double x, double y, double width, double height, BColors::Color color, int symbol)
+void drawButton (cairo_t* cr, double x, double y, double width, double height, BColors::Color color, int symbol, float fraction = 1.0f)
 {
 	if ((width <= 0) || (height <= 0)) return;
 
-	// Draw button
-	BColors::Color illuminated2 = color; illuminated2.applyBrightness (0.33);
-	BColors::Color illuminated = color; illuminated.applyBrightness (0.05);
-	BColors::Color darkened = color; darkened.applyBrightness (-0.33);
-	BColors::Color darkened2 = color; darkened2.applyBrightness (-0.67);
+	// Draw background
+	BColors::Color bgi = {0.0, 0.0, 0.0, 0.5}; bgi.applyBrightness (0.05);
+	BColors::Color bgd = {0.0, 0.0, 0.0, 0.5}; bgd.applyBrightness (-0.33);
 	cairo_pattern_t* pat = cairo_pattern_create_radial (x + width / 2, y + height / 2, 0.125 * width, x + width / 2, y + height / 2, 0.5 * width);
 
-	cairo_pattern_add_color_stop_rgba (pat, 0.0, CAIRO_RGBA (illuminated));
-	cairo_pattern_add_color_stop_rgba (pat, 1.0, CAIRO_RGBA (darkened));
+	cairo_pattern_add_color_stop_rgba (pat, 0.0, CAIRO_RGBA (bgi));
+	cairo_pattern_add_color_stop_rgba (pat, 1.0, CAIRO_RGBA (bgd));
 
 	double rad = ((width < 20) || (height < 20) ?  (width < height ? width : height) / 4 : 5);
 	cairo_rectangle_rounded (cr, x, y, width, height, rad);
 	cairo_set_source (cr, pat);
 	cairo_fill (cr);
 	cairo_pattern_destroy (pat);
+
+	// Draw button
+	BColors::Color illuminated2 = color; illuminated2.applyBrightness (0.33);
+	BColors::Color illuminated = color; illuminated.applyBrightness (0.05);
+	BColors::Color darkened = color; darkened.applyBrightness (-0.33);
+	BColors::Color darkened2 = color; darkened2.applyBrightness (-0.67);
+
+	if ((fraction > 0) && (color != BColors::Color (0.0, 0.0, 0.0, 0.5)))
+	{
+		pat = cairo_pattern_create_radial (x + width / 2, y + height / 2, 0.125 * width, x + width / 2, y + height / 2, 0.5 * width);
+
+		cairo_pattern_add_color_stop_rgba (pat, 0.0, CAIRO_RGBA (illuminated));
+		cairo_pattern_add_color_stop_rgba (pat, 1.0, CAIRO_RGBA (darkened));
+
+		cairo_rectangle_rounded (cr, x, y, width * fraction, height, rad);
+		cairo_set_source (cr, pat);
+		cairo_fill (cr);
+		cairo_pattern_destroy (pat);
+	}
 
 	// Draw symbol
 	if (symbol != NO_CTRL)

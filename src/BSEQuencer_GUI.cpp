@@ -1597,6 +1597,7 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, const int row, const int step)
 	// Draw pad
 	int ch = padGetChannel (row, step);
 	int ctrl = padGetControl (row, step);
+	float dur = pattern.getPad (row, step).duration;
 	double vel = (pd.velocity <= 1 ?  pd.velocity - 1 : (pd.velocity - 1) * 0.5);
 
 	if ((ch >= 0) && (ch <= NR_SEQUENCER_CHS) && (ctrl >= 0) && (ctrl < NR_CTRL_BUTTONS))
@@ -1618,7 +1619,7 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, const int row, const int step)
 
 		int symbol = ctrlButtonStyles[ctrl].symbol;
 
-		drawButton (cr, xr + 1, yr + 1, wr - 2, hr - 2, color, symbol);
+		drawButton (cr, xr + 1, yr + 1, wr - 2, hr - 2, color, symbol, (dur == 0 ? 0 : dur / ceil (dur)));
 	}
 }
 

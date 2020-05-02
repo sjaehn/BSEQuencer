@@ -64,6 +64,7 @@ Key features
 What's new
 ----------
 * Merge pads option
+* Visualize pad duration
 * Button link to features video
 
 
