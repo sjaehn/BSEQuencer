@@ -65,6 +65,7 @@ What's new
 ----------
 * Merge pads option
 * Visualize pad duration
+* SHIFT + SCROLL: Change pad duration
 * Button link to features video
 
 

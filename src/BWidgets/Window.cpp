@@ -275,11 +275,13 @@ void Window::handleEvents ()
 					break;
 
 				case BEvents::KEY_PRESS_EVENT:
+					unfocus();
 					buttonGrabStack_.remove (BDevices::MouseDevice (BDevices::NO_BUTTON));
 					widget->onKeyPressed ((BEvents::KeyEvent*) event);
 					break;
 
 				case BEvents::KEY_RELEASE_EVENT:
+					unfocus();
 					buttonGrabStack_.remove (BDevices::MouseDevice (BDevices::NO_BUTTON));
 					widget->onKeyReleased ((BEvents::KeyEvent*) event);
 					break;

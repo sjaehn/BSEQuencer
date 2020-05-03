@@ -82,6 +82,8 @@ public:
 	void send_scaleMaps (int scaleNr);
 	virtual void onConfigureRequest (BEvents::ExposeEvent* event) override;
 	virtual void onCloseRequest (BEvents::WidgetEvent* event) override;
+	virtual void onKeyPressed (BEvents::KeyEvent* event) override;
+	virtual void onKeyReleased (BEvents::KeyEvent* event) override;
 	void applyTheme (BStyles::Theme& theme) override;
 
 	LV2UI_Controller controller;
@@ -144,6 +146,7 @@ private:
 	bool tempTool;
 	double tempToolCh;
 	bool wheelScrolled;
+	bool shiftPressed;
 
 	ScaleMap scaleMaps[NR_SYSTEM_SCALES + NR_USER_SCALES];
 

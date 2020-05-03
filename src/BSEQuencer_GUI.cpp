@@ -28,7 +28,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	sz (1.0), bgImageSurface (nullptr),
 	uris (), forge (), clipBoard (),
 	cursorBits {0}, noteBits (0), chBits (0),
-	tempTool (false), tempToolCh (0), wheelScrolled (false),
+	tempTool (false), tempToolCh (0), wheelScrolled (false), shiftPressed (false),
 	mContainer (0, 0, 1200, 820, "main"),
 	padSurface (98, 88, 804, 484, "box"),
 	captionSurface (18, 88, 64, 484, "box"),
@@ -286,6 +286,8 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	drawCaption ();
 	drawPad();
 	add (mContainer);
+
+	getKeyGrabStack()->add (this);
 
 	pattern.clear ();
 
@@ -761,6 +763,16 @@ void BSEQuencer_GUI::onCloseRequest (BEvents::WidgetEvent* event)
 		scaleEditor = nullptr;
 	}
 	else Window::onCloseRequest (event);
+}
+
+void BSEQuencer_GUI::onKeyPressed (BEvents::KeyEvent* event)
+{
+	if ((event) && (event->getKey() == BDevices::KEY_SHIFT)) shiftPressed = true;
+}
+
+void BSEQuencer_GUI::onKeyReleased (BEvents::KeyEvent* event)
+{
+	if ((event) && (event->getKey() == BDevices::KEY_SHIFT)) shiftPressed = false;
 }
 
 void BSEQuencer_GUI::send_ui_on ()
@@ -1416,17 +1428,54 @@ void BSEQuencer_GUI::padsScrolledCallback (BEvents::Event* event)
 			Pad pd = ui->pattern.getPad (row, step);
 			if (int (pd.ch) & 0x0F)
 			{
-				float v = pd.velocity * (1.0f + 0.01f * wheelEvent->getDelta().y);
-				v = LIMIT (v, 0.0, 2.0);
-				do
+				// SHIFT: Change duration
+				if (ui->shiftPressed)
 				{
-					Pad pds = ui->pattern.getPad (row, step);
-					pds.velocity = v;
-					ui->pattern.setPad (row, step, pds);
-					ui->drawPad (row, step);
-					ui->send_pad (row, step);
-					++step;
-				} while (ui->pattern.padHasSuccessor (row, step - 1));
+					float d = pd.duration * (1.0f + 0.01f * wheelEvent->getDelta().y);
+					if ((d >= 0.0f) && (d <= int (ui->controllerWidgets[NR_OF_STEPS]->getValue() - step)))
+					{
+
+						// Delete last step of pad shinked
+						if (int (ceil(d)) < int (ceil (pd.duration)))
+						{
+							Pad pds = ui->pattern.getPad (row, step + int (pd.duration));
+							pds.ch = int (pds.ch) & 0xF0;
+							pds.duration = 0.0f;
+							ui->pattern.setPad (row, step + int (pd.duration), pds);
+							ui->drawPad (row, step + int (pd.duration));
+							ui->send_pad (row, step + int (pd.duration));
+						}
+
+						// Change duration
+						do
+						{
+							pd.duration = d;
+							ui->pattern.setPad (row, step, pd);
+							ui->drawPad (row, step);
+							ui->send_pad (row, step);
+							pd.ch = int (pd.ch) & 0x0F;
+							++step;
+							--d;
+						} while (d > 0.0f);
+					}
+				}
+
+				// Otherwise: Change velocity
+				else
+				{
+					float v = pd.velocity * (1.0f + 0.01f * wheelEvent->getDelta().y);
+					v = LIMIT (v, 0.0f, 2.0f);
+					do
+					{
+						Pad pds = ui->pattern.getPad (row, step);
+						pds.velocity = v;
+						ui->pattern.setPad (row, step, pds);
+						ui->drawPad (row, step);
+						ui->send_pad (row, step);
+						++step;
+					} while (ui->pattern.padHasSuccessor (row, step - 1));
+				}
+
 				ui->wheelScrolled = true;
 			}
 		}
