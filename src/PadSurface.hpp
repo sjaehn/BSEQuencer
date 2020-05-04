@@ -49,7 +49,7 @@ public:
         	if (event && event->getWidget())
         	{
         		BUtilities::Point pos = event->getPosition();
-        		focusText.moveTo (pos.x - 0.5 * focusText.getWidth(), pos.y - focusText.getHeight());
+        		focusText.moveTo (pos.x - 0.5 * focusText.getWidth(), pos.y - focusText.getHeight() - 3);
         		focusText.show();
         	}
         }
