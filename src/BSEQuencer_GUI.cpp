@@ -1098,14 +1098,22 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 
 						for (int irow = startrow; irow <= endrow; ++irow)
 						{
+							int istart = step;
+							while (ui->pattern.padHasAntecessor (irow, istart)) --istart;
+
 							// Overwrite if new data
-							if ((int (ui->pattern.getPad (irow, start).ch) & 0xF0) != ctrl)
+							if ((int (ui->pattern.getPad (irow, istart).ch) & 0xF0) != ctrl)
 							{
-								Pad iPad = ui->pattern.getPad (irow, start);
-								iPad.ch = (int (iPad.ch) & 0x0F) + ctrl;
-								ui->pattern.setPad (irow, start, iPad);
-								ui->drawPad (irow, start);
-								ui->send_pad (irow, start);
+								int istep = istart;
+								do
+								{
+									Pad iPad = ui->pattern.getPad (irow, istep);
+									iPad.ch = (int (iPad.ch) & 0x0F) + (istep == istart ? ctrl : 0);
+									ui->pattern.setPad (irow, istep, iPad);
+									ui->drawPad (irow, istep);
+									ui->send_pad (irow, istep);
+									++istep;
+								} while (ui->pattern.padHasSuccessor (irow, istep - 1));
 							}
 						}
 					}
