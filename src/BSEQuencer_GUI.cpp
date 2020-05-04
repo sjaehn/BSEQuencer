@@ -1609,33 +1609,29 @@ void BSEQuencer_GUI::drawPad (const int row, const int step)
 
 void BSEQuencer_GUI::drawPad (cairo_t* cr, const int row, const int step)
 {
-	if (pattern.padHasAntecessor (row, step))
-	{
-		drawPad (cr, row, step - 1);
-		return;
-	}
+	int start = step;
+	while (pattern.padHasAntecessor (row, start)) --start;
 
-	Pad pd = pattern.getPad (row, step);
+	Pad pd = pattern.getPad (row, start);
 
-	if ((!cr) || (cairo_status (cr) != CAIRO_STATUS_SUCCESS) || (row < 0) || (row >= ROWS) || (step < 0) ||
-		(step >= (int (controllerWidgets[NR_OF_STEPS]->getValue ())))) return;
+	if ((!cr) || (cairo_status (cr) != CAIRO_STATUS_SUCCESS) || (row < 0) || (row >= ROWS) || (start < 0) ||
+		(start >= (int (controllerWidgets[NR_OF_STEPS]->getValue ())))) return;
 
 	// Get size of drawing area
 	const double width = padSurface.getEffectiveWidth ();
 	const double height = padSurface.getEffectiveHeight ();
 	const double w = width / controllerWidgets[NR_OF_STEPS]->getValue ();
 	const double h = height / ROWS;
-	const double x = step * w;
+	const double x = start * w;
 	const double y = (ROWS - row - 1) * h;
 	const double xr = round (x);
 	const double yr = round (y);
-	const double wr = round (x + w * pattern.padGetSize (row, step)) - xr;
+	const double wr = round (x + w * pattern.padGetSize (row, start)) - xr;
 	const double hr = round (y + h) - yr;
 
 
-	// Draw background
 	// Odd or even?
-	BColors::Color bg = ((int (step / controllerWidgets[STEPS_PER]->getValue ())) % 2) ? oddPadBgColor : evenPadBgColor;
+	BColors::Color bg = ((int (start / controllerWidgets[STEPS_PER]->getValue ())) % 2) ? oddPadBgColor : evenPadBgColor;
 
 	// Highlight selection
 	int clipRMin = clipBoard.origin.first;
@@ -1644,17 +1640,29 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, const int row, const int step)
 	int clipSMin = clipBoard.origin.second;
 	int clipSMax = clipBoard.origin.second + clipBoard.extends.second;
 	if (clipSMin > clipSMax) std::swap (clipSMin, clipSMax);
-	if (padIsSelected (row, step)) bg.applyBrightness (1.5);
 
-	cairo_set_source_rgba (cr, CAIRO_RGBA (bg));
-	cairo_set_line_width (cr, 0.0);
-	cairo_rectangle (cr, xr, yr, wr, hr);
-	cairo_fill (cr);
+	// Draw backgroung
+	int i = 0;
+	do
+	{
+		if ((start + i >= 0) && (start + i < int (controllerWidgets[NR_OF_STEPS]->getValue ())))
+		{
+			BColors::Color bgi = bg;
+			double xi = round (x + i * w);
+			double wi = round (x + (i + 1) * w) - xi;
+			if ((!clipBoard.ready) && (row >= clipRMin) && (row <= clipRMax) && (start + i >= clipSMin) && (start + i <= clipSMax)) bgi.applyBrightness (1.5);
+			cairo_set_source_rgba (cr, CAIRO_RGBA (bgi));
+			cairo_set_line_width (cr, 0.0);
+			cairo_rectangle (cr, xi, yr, wi, hr);
+			cairo_fill (cr);
+			++i;
+		}
+	} while (pattern.padHasSuccessor (row, start + i - 1));
 
 	// Draw pad
-	int ch = padGetChannel (row, step);
-	int ctrl = padGetControl (row, step);
-	float dur = pattern.getPad (row, step).duration;
+	int ch = padGetChannel (row, start);
+	int ctrl = padGetControl (row, start);
+	float dur = pattern.getPad (row, start).duration;
 	double vel = (pd.velocity <= 1 ?  pd.velocity - 1 : (pd.velocity - 1) * 0.5);
 
 	if ((ch >= 0) && (ch <= NR_SEQUENCER_CHS) && (ctrl >= 0) && (ctrl < NR_CTRL_BUTTONS))
@@ -1664,7 +1672,7 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, const int row, const int step)
 		int i = 0;
 		do
 		{
-			if (cursorBits[step + i] & (1 << row))
+			if (cursorBits[start + i] & (1 << row))
 			{
 				color.setAlpha (1.0);
 				color.applyBrightness (0.75);
@@ -1672,7 +1680,7 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, const int row, const int step)
 			}
 			++i;
 		}
-		while (pattern.padHasSuccessor (row, step + i - 1));
+		while (pattern.padHasSuccessor (row, start + i - 1));
 
 		int symbol = ctrlButtonStyles[ctrl].symbol;
 
