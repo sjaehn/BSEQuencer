@@ -1631,7 +1631,9 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, const int row, const int step)
 	const double y = (ROWS - row - 1) * h;
 	const double xr = round (x);
 	const double yr = round (y);
-	const double wr = round (x + w * pattern.padGetSize (row, start)) - xr;
+	int ps = pattern.padGetSize (row, start);
+	if (start + ps > int (controllerWidgets[NR_OF_STEPS]->getValue ())) ps = int (controllerWidgets[NR_OF_STEPS]->getValue ()) - start;
+	const double wr = round (x + w * ps) - xr;
 	const double hr = round (y + h) - yr;
 
 
