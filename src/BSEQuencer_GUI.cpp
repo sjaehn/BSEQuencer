@@ -1218,7 +1218,7 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 					ui->controllerWidgets[SELECTION_CH]->setValue (int (pd.ch) & 0x0F);
 					ui->controllerWidgets[SELECTION_OCTAVE]->setValue (pd.pitchOctave);
 					ui->controllerWidgets[SELECTION_VELOCITY]->setValue (pd.velocity);
-					ui->controllerWidgets[SELECTION_DURATION]->setValue (fmod (pd.duration, 1.0));
+					ui->controllerWidgets[SELECTION_DURATION]->setValue (LIMIT (pd.duration, 0.0, 1.0));
 				}
 			}
 		}
