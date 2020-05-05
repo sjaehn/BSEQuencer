@@ -1048,6 +1048,9 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 							ui->controllerWidgets[SELECTION_DURATION]->getValue() + int (pd.duration - 0.00000001)
 						);
 
+						// Delete ch if duration == 0
+						if (props.duration == 0.0f) props.ch = pdctrl * 0x10;
+
 						// Click on a pad with same settings as in toolbox => temporarily switch to delete
 						if ((props == pd) && (!ui->tempTool) && (event->getEventType () == BEvents::BUTTON_PRESS_EVENT))
 						{
@@ -1684,7 +1687,7 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, const int row, const int step)
 
 		int symbol = ctrlButtonStyles[ctrl].symbol;
 
-		drawButton (cr, xr + 1, yr + 1, wr - 2, hr - 2, color, symbol, (dur == 0 ? 0 : dur / ceil (dur)));
+		drawButton (cr, xr + 1, yr + 1, wr - 2, hr - 2, color, symbol, (dur == 0 ? 1 : dur / ceil (dur)));
 	}
 }
 
