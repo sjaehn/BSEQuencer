@@ -117,8 +117,9 @@ public:
                 const size_t s = LIMIT (step, 0, MAXSTEPS);
         	const Pad pad = pads[r][s];
         	const Pad ant = pads[r][s-1];
+                const int ch = int (pad.ch) & 0x0F;
 
-        	if (((int (pad.ch) & 0x0F) == (int (ant.ch) & 0x0F)) && (ant.duration > 1.0)) return true;
+        	if ((ch != 0) && (ch == (int (ant.ch) & 0x0F)) && (ant.duration > 1.0)) return true;
         	return false;
         }
 
@@ -130,8 +131,9 @@ public:
                 const size_t s = LIMIT (step, 0, MAXSTEPS);
         	const Pad pad = pads[r][s];
         	const Pad suc = pads[r][s+1];
+                const int ch = int (pad.ch) & 0x0F;
 
-        	if (((int (pad.ch) & 0x0F) == (int (suc.ch) & 0x0F)) && (pad.duration > 1.0)) return true;
+        	if ((ch != 0) && (ch == (int (suc.ch) & 0x0F)) && (pad.duration > 1.0)) return true;
         	return false;
 
         }

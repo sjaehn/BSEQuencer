@@ -1064,14 +1064,16 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 						if (!(props == pd))
 						{
 							int s = 0;
+							float d = props.duration;
 							do
 							{
+								props.duration = ((int (props.ch) & 0x0F) == 0 ? ui->controllerWidgets[SELECTION_DURATION]->getValue() : d);
 								ui->pattern.setPad (row, start + s, props);
-								--props.duration;
+								ui->drawPad (row, start + s);
+								ui->send_pad (row, start + s);
+								--d;
 								++s;
-							} while (props.duration > 0.0);
-							ui->drawPad (row, start);
-							ui->send_pad (row, start);
+							} while (d > 0.0);
 						}
 					}
 
@@ -1658,8 +1660,8 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, const int row, const int step)
 			cairo_set_line_width (cr, 0.0);
 			cairo_rectangle (cr, xi, yr, wi, hr);
 			cairo_fill (cr);
-			++i;
 		}
+		++i;
 	} while (pattern.padHasSuccessor (row, start + i - 1));
 
 	// Draw pad
