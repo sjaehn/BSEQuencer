@@ -400,7 +400,7 @@ int BSEQuencer::getStepOffset (const int key, const int row, const int relStep)
 				{
 					if (padctrl ==CTRL_PLAY_FWD) inKeys[key].output[row].direction = 1;
 					else if (padctrl == CTRL_PLAY_REW) inKeys[key].output[row].direction = -1;
-					
+
 					stepNr = getNextStep (key, row, stepNr);
 					++it;
 				}
@@ -1434,7 +1434,7 @@ void BSEQuencer::notifyStatusToGui ()
 		if ((element != ENOTE) && (size != ENOTE))
 		{
 			// Set notebits
-			notebits = notebits | (1 << (element % size));
+			notebits = notebits | (1 << (element - int (floor (double (element) / double (size)) * double (size))));
 
 			for (int row = 0; row < ROWS; ++row)
 			{
