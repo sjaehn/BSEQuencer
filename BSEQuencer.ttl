@@ -4,6 +4,7 @@
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix pset:    <http://lv2plug.in/ns/ext/presets#> .
 @prefix time: <http://lv2plug.in/ns/ext/time#> .
 @prefix urid: <http://lv2plug.in/ns/ext/urid#> .
 @prefix midi: <http://lv2plug.in/ns/ext/midi#> .
@@ -383,3 +384,99 @@
                 lv2:minimum -127 ;
                 lv2:maximum 127 ;
         ] .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#Arp_Basic_Falling_4>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "Arp Basic Falling 4" ;
+	rdfs:seeAlso <BSEQuencer_Arp_Basic_Falling_4.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#Arp_Basic_Falling_6>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "Arp Basic Falling 6" ;
+	rdfs:seeAlso <BSEQuencer_Arp_Basic_Falling_6.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#Arp_Basic_Falling_8>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "Arp Basic Falling 8" ;
+	rdfs:seeAlso <BSEQuencer_Arp_Basic_Falling_8.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#Arp_Basic_Rising_4>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "Arp Basic Rising 4" ;
+	rdfs:seeAlso <BSEQuencer_Arp_Basic_Rising_4.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#Arp_Basic_Rising_6>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "Arp Basic Rising 6" ;
+	rdfs:seeAlso <BSEQuencer_Arp_Basic_Rising_6.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#Arp_Basic_Rising_8>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "Arp Basic Rising 8" ;
+	rdfs:seeAlso <BSEQuencer_Arp_Basic_Rising_8.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#Arp_Basic_Up_Down_4>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "Arp Basic Up Down 4" ;
+	rdfs:seeAlso <BSEQuencer_Arp_Basic_Up_Down_4.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#Arp_Basic_Up_Down_6>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "Arp Basic Up Down 6" ;
+	rdfs:seeAlso <BSEQuencer_Arp_Basic_Up_Down_6.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#Arp_Basic_Up_Down_8>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "Arp Basic Up Down 8" ;
+	rdfs:seeAlso <BSEQuencer_Arp_Basic_Up_Down_8.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#Arp_Basic_Up_Down_12>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "Arp Basic Up Down 12" ;
+	rdfs:seeAlso <BSEQuencer_Arp_Basic_Up_Down_12.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#Arp_Alberti_Bass>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "Arp Alberti Bass" ;
+	rdfs:seeAlso <BSEQuencer_Arp_Alberti_Bass.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#Arp_Banjo_Roll_Fwd>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "Arp Banjo Roll Forward" ;
+	rdfs:seeAlso <BSEQuencer_Arp_Banjo_Roll_Fwd.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#Arp_Banjo_Roll_Bck>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "Arp Banjo Roll Backward" ;
+	rdfs:seeAlso <BSEQuencer_Arp_Banjo_Roll_Bck.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#Arp_Banjo_Roll_Mixed>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "Arp Banjo Roll Mixed" ;
+	rdfs:seeAlso <BSEQuencer_Arp_Banjo_Roll_Mixed.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#Arp_Moonlight>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "Arp Moonlight" ;
+	rdfs:seeAlso <BSEQuencer_Arp_Moonlight.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#Arp_Pachelbels_Canon>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "Arp Pachelbels Canon" ;
+	rdfs:seeAlso <BSEQuencer_Arp_Pachelbels_Canon.ttl> .

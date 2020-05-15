@@ -37,7 +37,7 @@ OBJ_EXT = .so
 DSP_OBJ = $(DSP)$(OBJ_EXT)
 GUI_OBJ = $(GUI)$(OBJ_EXT)
 B_OBJECTS = $(addprefix $(BUNDLE)/, $(DSP_OBJ) $(GUI_OBJ))
-FILES = manifest.ttl BSEQuencer.ttl surface.png DrumSymbol.png NoteSymbol.png EditSymbol.png ScaleEditor.png LICENSE
+FILES = *.ttl surface.png DrumSymbol.png NoteSymbol.png EditSymbol.png ScaleEditor.png LICENSE
 B_FILES = $(addprefix $(BUNDLE)/, $(FILES))
 
 GUI_INCL = \
