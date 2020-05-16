@@ -28,7 +28,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	sz (1.0), bgImageSurface (nullptr),
 	uris (), forge (), clipBoard (),
 	cursorBits {0}, noteBits (0), chBits (0),
-	tempTool (false), tempToolCh (0), wheelScrolled (false), shiftPressed (false),
+	tempTool (false), tempToolCh (0), wheelScrolled (false), modifier (MODIFIER_VELOCITY),
 	mContainer (0, 0, 1200, 820, "main"),
 	padSurface (98, 88, 804, 484, "box"),
 	captionSurface (18, 88, 64, 484, "box"),
@@ -767,12 +767,14 @@ void BSEQuencer_GUI::onCloseRequest (BEvents::WidgetEvent* event)
 
 void BSEQuencer_GUI::onKeyPressed (BEvents::KeyEvent* event)
 {
-	if ((event) && (event->getKey() == BDevices::KEY_SHIFT)) shiftPressed = true;
+	if (!event) return;
+	if (event->getKey() == BDevices::KEY_SHIFT) modifier = MODIFIER_DURATION;
+	else if (event->getKey() == BDevices::KEY_CTRL) modifier = MODIFIER_OCTAVE;
 }
 
 void BSEQuencer_GUI::onKeyReleased (BEvents::KeyEvent* event)
 {
-	if ((event) && (event->getKey() == BDevices::KEY_SHIFT)) shiftPressed = false;
+	if ((event) && ((event->getKey() == BDevices::KEY_SHIFT) || (event->getKey() == BDevices::KEY_CTRL))) modifier = MODIFIER_VELOCITY;
 }
 
 void BSEQuencer_GUI::send_ui_on ()
@@ -1442,7 +1444,7 @@ void BSEQuencer_GUI::padsScrolledCallback (BEvents::Event* event)
 			if (int (pd.ch) & 0x0F)
 			{
 				// SHIFT: Change duration
-				if (ui->shiftPressed)
+				if (ui->modifier == MODIFIER_DURATION)
 				{
 					float d = pd.duration * (1.0f + 0.01f * wheelEvent->getDelta().y);
 					if ((d >= 0.0f) && (d <= int (ui->controllerWidgets[NR_OF_STEPS]->getValue() - step)))
@@ -1471,6 +1473,22 @@ void BSEQuencer_GUI::padsScrolledCallback (BEvents::Event* event)
 							--d;
 						} while (d > 0.0f);
 					}
+				}
+
+				// CTRL: Change pitch octave
+				else if (ui->modifier == MODIFIER_OCTAVE)
+				{
+					int o = pd.pitchOctave + wheelEvent->getDelta().y;
+					o = LIMIT (o, -8, 8);
+					do
+					{
+						Pad pds = ui->pattern.getPad (row, step);
+						pds.pitchOctave = o;
+						ui->pattern.setPad (row, step, pds);
+						ui->drawPad (row, step);
+						ui->send_pad (row, step);
+						++step;
+					} while (ui->pattern.padHasSuccessor (row, step - 1));
 				}
 
 				// Otherwise: Change velocity
@@ -1703,7 +1721,7 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, const int row, const int step)
 			else cairo_set_source_rgba (cr, CAIRO_RGBA (BColors::white));
 			cairo_select_font_face (cr, lfLabelFont.getFontFamily ().c_str (), lfLabelFont.getFontSlant (), lfLabelFont.getFontWeight ());
 			cairo_set_font_size (cr, 0.75 *lfLabelFont.getFontSize ());
-			cairo_move_to (cr, xr + 3, yr + 3 + 0.75 * lfLabelFont.getFontSize ());
+			cairo_move_to (cr, xr + 1.0 + 2.0 * sz, yr + 1.0 + 2.0 * sz + 0.75 * lfLabelFont.getFontSize ());
 			cairo_show_text (cr, valstr.c_str ());
 			cairo_destroy (cr);
 		}

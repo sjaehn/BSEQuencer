@@ -146,7 +146,14 @@ private:
 	bool tempTool;
 	double tempToolCh;
 	bool wheelScrolled;
-	bool shiftPressed;
+
+	enum ModifierIndex
+	{
+		MODIFIER_VELOCITY = 0,
+		MODIFIER_DURATION = 1,
+		MODIFIER_OCTAVE = 2
+	};
+	ModifierIndex modifier;
 
 	ScaleMap scaleMaps[NR_SYSTEM_SCALES + NR_USER_SCALES];
 
