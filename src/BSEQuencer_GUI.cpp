@@ -1669,8 +1669,8 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, const int row, const int step)
 	// Draw pad
 	int ch = padGetChannel (row, start);
 	int ctrl = padGetControl (row, start);
-	float dur = pattern.getPad (row, start).duration;
 	double vel = (pd.velocity <= 1 ?  pd.velocity - 1 : (pd.velocity - 1) * 0.5);
+	int oct = pd.pitchOctave;
 
 	if ((ch >= 0) && (ch <= NR_SEQUENCER_CHS) && (ctrl >= 0) && (ctrl < NR_CTRL_BUTTONS))
 	{
@@ -1691,7 +1691,22 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, const int row, const int step)
 
 		int symbol = ctrlButtonStyles[ctrl].symbol;
 
-		drawButton (cr, xr + 1, yr + 1, wr - 2, hr - 2, color, symbol, (dur == 0 ? 1 : dur / ceil (dur)));
+		drawButton (cr, xr + 1, yr + 1, wr - 2, hr - 2, color, symbol, (pd.duration == 0 ? 1 : pd.duration / ceil (pd.duration)));
+
+		// Displays pitch octave
+		if ((pd.duration > 0.0) && (pd.velocity > 0.0) && (oct != 0))
+		{
+			std::string valstr = (oct < 0 ? "-" : "+") + std::to_string (oct);
+			cairo_surface_t* surface = padSurface.getDrawingSurface();
+			cairo_t* cr = cairo_create (surface);
+			if ((ch == 4) && (pd.velocity > 0.5)) cairo_set_source_rgba (cr, CAIRO_RGBA (BColors::black));
+			else cairo_set_source_rgba (cr, CAIRO_RGBA (BColors::white));
+			cairo_select_font_face (cr, lfLabelFont.getFontFamily ().c_str (), lfLabelFont.getFontSlant (), lfLabelFont.getFontWeight ());
+			cairo_set_font_size (cr, 0.75 *lfLabelFont.getFontSize ());
+			cairo_move_to (cr, xr + 3, yr + 3 + 0.75 * lfLabelFont.getFontSize ());
+			cairo_show_text (cr, valstr.c_str ());
+			cairo_destroy (cr);
+		}
 	}
 }
 
