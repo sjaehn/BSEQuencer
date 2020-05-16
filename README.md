@@ -63,7 +63,9 @@ Key features
 
 What's new
 ----------
-* Factory presets added
+* Factory presets added (arpeggios)
+* Display pad octave
+* Change pad octave using CTRL + SCROLL
 
 
 Usage
