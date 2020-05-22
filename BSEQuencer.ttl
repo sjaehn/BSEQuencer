@@ -44,6 +44,7 @@
                 lv2:index 0 ;
                 lv2:symbol "input" ;
                 lv2:name "Input" ;
+		rsz:minimumSize 65536 ;
                 rdfs:comment "MIDI in and GUI to plugin communication" ;
         ] , [
 		a lv2:OutputPort , atom:AtomPort ;
@@ -52,7 +53,7 @@
 		lv2:index 1 ;
 		lv2:symbol "output" ;
 		lv2:name "Output" ;
-		rsz:minimumSize 16384 ;
+		rsz:minimumSize 65536 ;
 	  	rdfs:comment "Plugin to GUI communication" ;
 	] , [
                 a lv2:InputPort , lv2:ControlPort ;
