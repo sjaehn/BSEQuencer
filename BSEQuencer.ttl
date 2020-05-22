@@ -28,7 +28,7 @@
         rdfs:comment "Multi channel step sequencer" ;
 	doap:name "B.SEQuencer" ;
 	doap:license <http://usefulinc.com/doap/licenses/gpl>;
-	lv2:microVersion 2 ;
+	lv2:microVersion 3 ;
 	lv2:minorVersion 4 ;
         doap:maintainer <http://www.jahnichen.de/sjaehn#me> ;
         lv2:optionalFeature lv2:hardRTCapable ;
@@ -480,3 +480,63 @@
 	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
 	rdfs:label "Arp Pachelbels Canon" ;
 	rdfs:seeAlso <BSEQuencer_Arp_Pachelbels_Canon.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Techno_01>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Techno 01" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Techno_01.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Techno_02>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Techno 02" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Techno_02.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Techno_03>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Techno 03" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Techno_03.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_01>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Standard Rock 01" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Standard_Rock_01.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_02>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Standard Rock 02" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Standard_Rock_02.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_03>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Standard Rock 03" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Standard_Rock_03.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_04>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Standard Rock 04" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Standard_Rock_04.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_05>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Standard Rock 05" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Standard_Rock_05.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_06>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Standard Rock 06" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Standard_Rock_06.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_07>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Standard Rock 07" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Standard_Rock_07.ttl> .

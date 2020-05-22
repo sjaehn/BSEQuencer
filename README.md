@@ -63,9 +63,7 @@ Key features
 
 What's new
 ----------
-* Factory presets added (arpeggios)
-* Display pad octave
-* Change pad octave using CTRL + SCROLL
+* Factory presets added (Techno and Standard Rock drumkits)
 
 
 Usage
