@@ -26,6 +26,7 @@
 struct MidiData
 {
         int64_t frames;
+        uint8_t size;
         uint8_t ch;
         uint8_t status;
         int note;

@@ -39,14 +39,14 @@
 
  	size_t size () {return sz;}
 
- 	void append (const int64_t frames, const uint8_t ch, const uint8_t status, const int note, const uint8_t velocity)
+ 	void append (const int64_t frames, const uint8_t ch, const uint8_t status, const int note, const uint8_t velocity, uint8_t size = 3)
  	{
  		if (sz < MIDIBUFFERSIZE)
  		{
  			size_t insertpos = sz;
  			for (; (insertpos > 0) && (frames < operator[] (insertpos - 1).frames); --insertpos);
  			if (insertpos != sz) memmove (&operator[] (insertpos + 1), &operator[] (insertpos), (sz - insertpos) * sizeof (MidiData));
- 			operator[] (insertpos) = {frames, ch, status, note, velocity};
+ 			operator[] (insertpos) = {frames, size, ch, status, note, velocity};
  			++sz;
  		}
  	}

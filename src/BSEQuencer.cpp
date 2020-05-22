@@ -846,6 +846,7 @@ void BSEQuencer::run (uint32_t n_samples)
 			if ((controllers[PLAY]) && (controllers[MODE] == HOST_CONTROLLED))
 			{
 				const uint8_t* const msg = (const uint8_t*)(ev + 1);
+				const uint8_t msize = ev->body.size;
 				uint8_t typ = lv2_midi_message_type(msg);
 				uint8_t chn = msg[0] & 0x0F;
 				uint8_t note = msg[1];
@@ -933,7 +934,8 @@ void BSEQuencer::run (uint32_t n_samples)
 
 							// All other MIDI signals
 							default:
-								//fprintf (stderr, "BSEQuencer.lv2: Ignored MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
+								//fprintf (stderr, "BSEQuencer.lv2: Ignored MIDI_in CTL message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
+								midiStack.append (act_t, 0xff, msg[0], msg[1], msg[2], msize);
 								break;
 							}
 
@@ -944,10 +946,15 @@ void BSEQuencer::run (uint32_t n_samples)
 					// All other MIDI signals
 					default:
 						//fprintf (stderr, "BSEQuencer.lv2: Ignored MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
+						midiStack.append (act_t, 0xff, msg[0], msg[1], msg[2], msize);
 						break;
 					}
 				}
-				//else fprintf (stderr, "BSEQuencer.lv2: MIDI input channel filter passed MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
+				else
+				{
+					//fprintf (stderr, "BSEQuencer.lv2: MIDI input channel filter passed MIDI_in message in run (): #%i (%i, %i).\n", msg[0], msg[1], msg[2]);
+					midiStack.append (act_t, 0xff, msg[0], msg[1], msg[2], msize);
+				}
 			}
 		}
 
@@ -1498,12 +1505,12 @@ void BSEQuencer::notifyMidi ()
 	{
 		MidiData& midiData = midiStack[i];
 		// ch -> MIDI channel
-		int channel = controllers[CH + (midiData.ch - 1) * CH_SIZE + MIDI_CHANNEL] - 1;
+		int channel = (midiData.ch <= NR_SEQUENCER_CHS ? controllers[CH + (midiData.ch - 1) * CH_SIZE + MIDI_CHANNEL] - 1 : 0);
 
 		// compose MIDI message block
 		LV2_Atom midiatom;
 		midiatom.type = uris.midi_Event;
-		midiatom.size = 3;
+		midiatom.size = midiData.size;
 
 		uint8_t msg[3];
 		msg[0] = midiData.status + channel;
@@ -1513,8 +1520,8 @@ void BSEQuencer::notifyMidi ()
 		// send MIDI message
 		if (!lv2_atom_forge_frame_time (&output_forge, midiData.frames)) return;
 		if (!lv2_atom_forge_raw (&output_forge, &midiatom, sizeof (LV2_Atom))) return;
-		if (!lv2_atom_forge_raw (&output_forge, &msg, 3)) return;
-		lv2_atom_forge_pad (&output_forge, sizeof (LV2_Atom) + 3);
+		if (!lv2_atom_forge_raw (&output_forge, &msg, midiatom.size)) return;
+		lv2_atom_forge_pad (&output_forge, sizeof (LV2_Atom) + midiatom.size);
 	}
 }
 
