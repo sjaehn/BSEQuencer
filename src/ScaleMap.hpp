@@ -100,7 +100,7 @@ const std::array<ScaleMap, NR_SYSTEM_SCALES + NR_USER_SCALES> defaultScaleMaps =
 	{
 		18, "GM drumkit 1 (36-51)",
 		{292, 294, 296, 297, 299, 301, 303, 304, 306, 293, 295, 298, 300, 302, 305, 307},
-		{"Kick", "Snare 1", "Snare2", "Low F Tom", "Hi F Tom", "Low Tom", "Low M Tom", "Hi M Tom", "Hi Tom", "Side stick", "Clap", "Closed HH", "Pedal HH", "Open HH", "Crash", "Ride"},
+		{"Kick", "Snare 1", "Snare 2", "Low F Tom", "Hi F Tom", "Low Tom", "Low M Tom", "Hi M Tom", "Hi Tom", "Side stick", "Clap", "Closed HH", "Pedal HH", "Open HH", "Crash", "Ride"},
 		{CROMATICSCALE}
 	},
 	{
