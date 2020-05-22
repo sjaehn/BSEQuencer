@@ -6,10 +6,10 @@
 @prefix state: <http://lv2plug.in/ns/ext/state#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_01>
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_(1_16)_01>
 	a pset:Preset ;
 	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
-	rdfs:label "DR GM Standard Rock (1/8) 01" ;
+	rdfs:label "DR GM Standard Rock (1/16) 01" ;
 	lv2:port [
 		lv2:symbol "autoplay_beats_per_bar" ;
 		pset:value 4.0
@@ -136,7 +136,7 @@ id:23; ch:0; oc:0; ve:1,00; du:1,00;
 id:24; ch:0; oc:0; ve:1,00; du:1,00;
 id:25; ch:0; oc:0; ve:1,00; du:1,00;
 id:26; ch:0; oc:0; ve:1,00; du:1,00;
-id:27; ch:0; oc:0; ve:1,00; du:1,00;
+id:27; ch:3; oc:0; ve:0,66; du:1,00;
 id:28; ch:0; oc:0; ve:1,00; du:1,00;
 id:29; ch:0; oc:0; ve:0,75; du:1,00;
 id:30; ch:0; oc:0; ve:1,00; du:1,00;
@@ -168,7 +168,7 @@ id:55; ch:0; oc:0; ve:0,00; du:0,00;
 id:56; ch:0; oc:0; ve:0,00; du:0,00;
 id:57; ch:0; oc:0; ve:0,00; du:0,00;
 id:58; ch:0; oc:0; ve:1,00; du:1,00;
-id:59; ch:0; oc:0; ve:1,00; du:1,00;
+id:59; ch:3; oc:0; ve:0,66; du:1,00;
 id:60; ch:0; oc:0; ve:1,00; du:1,00;
 id:61; ch:0; oc:0; ve:0,75; du:1,00;
 id:62; ch:0; oc:0; ve:0,00; du:0,00;
@@ -200,7 +200,7 @@ id:87; ch:0; oc:0; ve:0,00; du:0,00;
 id:88; ch:0; oc:0; ve:0,00; du:0,00;
 id:89; ch:0; oc:0; ve:0,00; du:0,00;
 id:90; ch:0; oc:0; ve:0,66; du:1,00;
-id:91; ch:0; oc:0; ve:1,00; du:1,00;
+id:91; ch:3; oc:0; ve:0,66; du:1,00;
 id:92; ch:0; oc:0; ve:1,00; du:1,00;
 id:93; ch:0; oc:0; ve:0,75; du:1,00;
 id:94; ch:0; oc:0; ve:0,00; du:0,00;
@@ -232,7 +232,7 @@ id:119; ch:0; oc:0; ve:0,00; du:0,00;
 id:120; ch:0; oc:0; ve:0,00; du:0,00;
 id:121; ch:0; oc:0; ve:0,00; du:0,00;
 id:122; ch:0; oc:0; ve:1,00; du:1,00;
-id:123; ch:0; oc:0; ve:1,00; du:1,00;
+id:123; ch:3; oc:0; ve:0,66; du:1,00;
 id:124; ch:0; oc:0; ve:1,00; du:1,00;
 id:125; ch:0; oc:0; ve:0,75; du:1,00;
 id:126; ch:0; oc:0; ve:0,00; du:0,00;

@@ -502,41 +502,59 @@
 <https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_01>
 	a pset:Preset ;
 	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
-	rdfs:label "DR GM Standard Rock 01" ;
+	rdfs:label "DR GM Standard Rock (1/8) 01" ;
 	rdfs:seeAlso <BSEQuencer_DR_GM_Standard_Rock_01.ttl> .
 
 <https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_02>
 	a pset:Preset ;
 	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
-	rdfs:label "DR GM Standard Rock 02" ;
+	rdfs:label "DR GM Standard Rock (1/8) 02" ;
 	rdfs:seeAlso <BSEQuencer_DR_GM_Standard_Rock_02.ttl> .
 
 <https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_03>
 	a pset:Preset ;
 	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
-	rdfs:label "DR GM Standard Rock 03" ;
+	rdfs:label "DR GM Standard Rock (1/8) 03" ;
 	rdfs:seeAlso <BSEQuencer_DR_GM_Standard_Rock_03.ttl> .
 
 <https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_04>
 	a pset:Preset ;
 	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
-	rdfs:label "DR GM Standard Rock 04" ;
+	rdfs:label "DR GM Standard Rock (1/8) 04" ;
 	rdfs:seeAlso <BSEQuencer_DR_GM_Standard_Rock_04.ttl> .
 
 <https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_05>
 	a pset:Preset ;
 	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
-	rdfs:label "DR GM Standard Rock 05" ;
+	rdfs:label "DR GM Standard Rock (1/8) 05" ;
 	rdfs:seeAlso <BSEQuencer_DR_GM_Standard_Rock_05.ttl> .
 
 <https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_06>
 	a pset:Preset ;
 	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
-	rdfs:label "DR GM Standard Rock 06" ;
+	rdfs:label "DR GM Standard Rock (1/8) 06" ;
 	rdfs:seeAlso <BSEQuencer_DR_GM_Standard_Rock_06.ttl> .
 
 <https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_07>
 	a pset:Preset ;
 	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
-	rdfs:label "DR GM Standard Rock 07" ;
+	rdfs:label "DR GM Standard Rock (1/8+) 07" ;
 	rdfs:seeAlso <BSEQuencer_DR_GM_Standard_Rock_07.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_(1_4)_01>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Standard Rock (1/4) 01" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Standard_Rock_(1_4)_01.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_(1_16)_01>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Standard Rock (1/16) 01" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Standard_Rock_(1_16)_01.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Jazz_Swing_Cymbal_Beat_01>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Jazz Swing Cymbal Beat 01" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Jazz_Swing_Cymbal_Beat_01.ttl> .

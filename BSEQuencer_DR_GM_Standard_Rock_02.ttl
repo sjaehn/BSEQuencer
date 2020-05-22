@@ -9,7 +9,7 @@
 <https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_02>
 	a pset:Preset ;
 	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
-	rdfs:label "DR GM Standard Rock 02" ;
+	rdfs:label "DR GM Standard Rock (1/8) 02" ;
 	lv2:port [
 		lv2:symbol "autoplay_beats_per_bar" ;
 		pset:value 4.0

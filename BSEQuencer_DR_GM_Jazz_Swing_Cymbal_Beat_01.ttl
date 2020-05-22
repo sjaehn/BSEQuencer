@@ -6,10 +6,10 @@
 @prefix state: <http://lv2plug.in/ns/ext/state#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_01>
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Jazz_Swing_Cymbal_Beat_01>
 	a pset:Preset ;
 	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
-	rdfs:label "DR GM Standard Rock (1/8) 01" ;
+	rdfs:label "DR GM Jazz Swing Cymbal Beat 01" ;
 	lv2:port [
 		lv2:symbol "autoplay_beats_per_bar" ;
 		pset:value 4.0
@@ -75,7 +75,7 @@
 		pset:value 2.0
 	] , [
 		lv2:symbol "nr_of_steps" ;
-		pset:value 8.0
+		pset:value 16.0
 	] , [
 		lv2:symbol "octave" ;
 		pset:value 4.0
@@ -90,7 +90,7 @@
 		pset:value 14.0
 	] , [
 		lv2:symbol "selection_channel" ;
-		pset:value 3.0
+		pset:value 4.0
 	] , [
 		lv2:symbol "selection_duration" ;
 		pset:value 1.0
@@ -99,17 +99,17 @@
 		pset:value 0.0
 	] , [
 		lv2:symbol "selection_velocity" ;
-		pset:value 0.66000003
+		pset:value 0.44138962
 	] , [
 		lv2:symbol "signature" ;
 		pset:value 0.0
 	] , [
 		lv2:symbol "steps_per" ;
-		pset:value 4.0
+		pset:value 3.0
 	] ;
 	state:state [
 		<https://www.jahnichen.de/plugins/lv2/BSEQuencer#STATEpad> """Matrix data:
-id:0; ch:1; oc:0; ve:1,00; du:1,00;
+id:0; ch:0; oc:0; ve:1,00; du:1,00;
 id:1; ch:0; oc:0; ve:0,00; du:0,00;
 id:2; ch:0; oc:0; ve:0,00; du:0,00;
 id:3; ch:0; oc:0; ve:0,00; du:0,00;
@@ -120,11 +120,11 @@ id:7; ch:0; oc:0; ve:0,00; du:0,00;
 id:8; ch:0; oc:0; ve:0,00; du:0,00;
 id:9; ch:0; oc:0; ve:0,00; du:0,00;
 id:10; ch:0; oc:0; ve:0,00; du:0,00;
-id:11; ch:3; oc:0; ve:0,66; du:1,00;
-id:12; ch:0; oc:0; ve:0,00; du:0,00;
-id:13; ch:0; oc:0; ve:0,66; du:1,00;
+id:11; ch:0; oc:0; ve:1,00; du:1,00;
+id:12; ch:0; oc:0; ve:1,00; du:1,00;
+id:13; ch:0; oc:0; ve:1,00; du:1,00;
 id:14; ch:0; oc:0; ve:0,00; du:0,00;
-id:15; ch:0; oc:0; ve:0,00; du:0,00;
+id:15; ch:4; oc:0; ve:0,75; du:1,00;
 id:16; ch:0; oc:0; ve:1,00; du:1,00;
 id:17; ch:0; oc:0; ve:0,00; du:0,00;
 id:18; ch:0; oc:0; ve:0,00; du:0,00;
@@ -152,11 +152,11 @@ id:39; ch:0; oc:0; ve:0,00; du:0,00;
 id:40; ch:0; oc:0; ve:0,00; du:0,00;
 id:41; ch:0; oc:0; ve:1,00; du:1,00;
 id:42; ch:0; oc:0; ve:0,66; du:1,00;
-id:43; ch:3; oc:0; ve:0,66; du:1,00;
+id:43; ch:0; oc:0; ve:0,66; du:1,00;
 id:44; ch:0; oc:0; ve:1,00; du:1,00;
 id:45; ch:0; oc:0; ve:0,66; du:1,00;
 id:46; ch:0; oc:0; ve:1,00; du:1,00;
-id:47; ch:0; oc:0; ve:0,00; du:0,00;
+id:47; ch:0; oc:0; ve:1,00; du:1,00;
 id:48; ch:0; oc:0; ve:0,00; du:0,00;
 id:49; ch:0; oc:0; ve:0,00; du:0,00;
 id:50; ch:0; oc:0; ve:0,00; du:0,00;
@@ -169,12 +169,12 @@ id:56; ch:0; oc:0; ve:0,00; du:0,00;
 id:57; ch:0; oc:0; ve:0,00; du:0,00;
 id:58; ch:0; oc:0; ve:1,00; du:1,00;
 id:59; ch:0; oc:0; ve:1,00; du:1,00;
-id:60; ch:0; oc:0; ve:1,00; du:1,00;
+id:60; ch:3; oc:0; ve:1,00; du:1,00;
 id:61; ch:0; oc:0; ve:0,75; du:1,00;
 id:62; ch:0; oc:0; ve:0,00; du:0,00;
-id:63; ch:0; oc:0; ve:0,00; du:0,00;
+id:63; ch:4; oc:0; ve:1,00; du:1,00;
 id:64; ch:0; oc:0; ve:1,00; du:1,00;
-id:65; ch:2; oc:0; ve:0,66; du:1,00;
+id:65; ch:0; oc:0; ve:0,66; du:1,00;
 id:66; ch:0; oc:0; ve:0,00; du:0,00;
 id:67; ch:0; oc:0; ve:0,00; du:0,00;
 id:68; ch:0; oc:0; ve:0,00; du:0,00;
@@ -184,11 +184,11 @@ id:71; ch:0; oc:0; ve:0,00; du:0,00;
 id:72; ch:0; oc:0; ve:0,00; du:0,00;
 id:73; ch:0; oc:0; ve:0,00; du:0,00;
 id:74; ch:0; oc:0; ve:0,66; du:1,00;
-id:75; ch:3; oc:0; ve:0,66; du:1,00;
-id:76; ch:0; oc:0; ve:0,00; du:0,00;
-id:77; ch:0; oc:0; ve:0,66; du:1,00;
+id:75; ch:0; oc:0; ve:1,00; du:1,00;
+id:76; ch:0; oc:0; ve:1,00; du:1,00;
+id:77; ch:0; oc:0; ve:1,00; du:1,00;
 id:78; ch:0; oc:0; ve:0,00; du:0,00;
-id:79; ch:0; oc:0; ve:0,00; du:0,00;
+id:79; ch:0; oc:0; ve:0,75; du:1,00;
 id:80; ch:0; oc:0; ve:1,00; du:1,00;
 id:81; ch:0; oc:0; ve:0,66; du:1,00;
 id:82; ch:0; oc:0; ve:0,00; du:0,00;
@@ -204,7 +204,7 @@ id:91; ch:0; oc:0; ve:1,00; du:1,00;
 id:92; ch:0; oc:0; ve:1,00; du:1,00;
 id:93; ch:0; oc:0; ve:0,75; du:1,00;
 id:94; ch:0; oc:0; ve:0,00; du:0,00;
-id:95; ch:0; oc:0; ve:0,00; du:0,00;
+id:95; ch:4; oc:0; ve:0,44; du:1,00;
 id:96; ch:0; oc:0; ve:0,75; du:1,00;
 id:97; ch:0; oc:0; ve:0,75; du:1,00;
 id:98; ch:0; oc:0; ve:0,00; du:0,00;
@@ -216,11 +216,11 @@ id:103; ch:0; oc:0; ve:0,00; du:0,00;
 id:104; ch:0; oc:0; ve:0,00; du:0,00;
 id:105; ch:0; oc:0; ve:1,00; du:1,00;
 id:106; ch:0; oc:0; ve:0,66; du:1,00;
-id:107; ch:3; oc:0; ve:0,66; du:1,00;
-id:108; ch:0; oc:0; ve:0,00; du:0,00;
+id:107; ch:0; oc:0; ve:0,66; du:1,00;
+id:108; ch:0; oc:0; ve:1,00; du:1,00;
 id:109; ch:0; oc:0; ve:0,66; du:1,00;
 id:110; ch:0; oc:0; ve:0,00; du:0,00;
-id:111; ch:0; oc:0; ve:0,00; du:0,00;
+id:111; ch:4; oc:0; ve:0,75; du:1,00;
 id:112; ch:0; oc:0; ve:0,00; du:0,00;
 id:113; ch:0; oc:0; ve:0,00; du:0,00;
 id:114; ch:0; oc:0; ve:0,00; du:0,00;
@@ -252,7 +252,7 @@ id:139; ch:0; oc:0; ve:0,00; du:0,00;
 id:140; ch:0; oc:0; ve:0,00; du:0,00;
 id:141; ch:0; oc:0; ve:0,00; du:0,00;
 id:142; ch:0; oc:0; ve:0,00; du:0,00;
-id:143; ch:0; oc:0; ve:0,00; du:0,00;
+id:143; ch:0; oc:0; ve:1,00; du:1,00;
 id:144; ch:0; oc:0; ve:0,00; du:0,00;
 id:145; ch:0; oc:0; ve:0,00; du:0,00;
 id:146; ch:0; oc:0; ve:0,00; du:0,00;
@@ -265,10 +265,10 @@ id:152; ch:0; oc:0; ve:0,00; du:0,00;
 id:153; ch:0; oc:0; ve:0,00; du:0,00;
 id:154; ch:0; oc:0; ve:0,00; du:0,00;
 id:155; ch:0; oc:0; ve:0,00; du:0,00;
-id:156; ch:0; oc:0; ve:0,00; du:0,00;
+id:156; ch:3; oc:0; ve:1,00; du:1,00;
 id:157; ch:0; oc:0; ve:0,00; du:0,00;
 id:158; ch:0; oc:0; ve:0,00; du:0,00;
-id:159; ch:0; oc:0; ve:0,00; du:0,00;
+id:159; ch:4; oc:0; ve:1,00; du:1,00;
 id:160; ch:0; oc:0; ve:0,00; du:0,00;
 id:161; ch:0; oc:0; ve:0,00; du:0,00;
 id:162; ch:0; oc:0; ve:0,00; du:0,00;
@@ -300,71 +300,71 @@ id:187; ch:0; oc:0; ve:0,00; du:0,00;
 id:188; ch:0; oc:0; ve:0,00; du:0,00;
 id:189; ch:0; oc:0; ve:0,00; du:0,00;
 id:190; ch:0; oc:0; ve:0,00; du:0,00;
-id:191; ch:0; oc:0; ve:0,00; du:0,00;
-id:192; ch:0; oc:0; ve:0,00; du:0,00;
-id:193; ch:0; oc:0; ve:0,00; du:0,00;
-id:194; ch:0; oc:0; ve:0,00; du:0,00;
-id:195; ch:0; oc:0; ve:0,00; du:0,00;
-id:196; ch:0; oc:0; ve:0,00; du:0,00;
-id:197; ch:0; oc:0; ve:0,00; du:0,00;
-id:198; ch:0; oc:0; ve:0,00; du:0,00;
-id:199; ch:0; oc:0; ve:0,00; du:0,00;
-id:200; ch:0; oc:0; ve:0,00; du:0,00;
-id:201; ch:0; oc:0; ve:0,00; du:0,00;
-id:202; ch:0; oc:0; ve:0,00; du:0,00;
-id:203; ch:0; oc:0; ve:0,00; du:0,00;
-id:204; ch:0; oc:0; ve:0,00; du:0,00;
-id:205; ch:0; oc:0; ve:0,00; du:0,00;
-id:206; ch:0; oc:0; ve:0,00; du:0,00;
-id:207; ch:0; oc:0; ve:0,00; du:0,00;
-id:208; ch:0; oc:0; ve:0,00; du:0,00;
-id:209; ch:0; oc:0; ve:0,00; du:0,00;
-id:210; ch:0; oc:0; ve:0,00; du:0,00;
-id:211; ch:0; oc:0; ve:0,00; du:0,00;
-id:212; ch:0; oc:0; ve:0,00; du:0,00;
-id:213; ch:0; oc:0; ve:0,00; du:0,00;
-id:214; ch:0; oc:0; ve:0,00; du:0,00;
-id:215; ch:0; oc:0; ve:0,00; du:0,00;
-id:216; ch:0; oc:0; ve:0,00; du:0,00;
-id:217; ch:0; oc:0; ve:0,00; du:0,00;
-id:218; ch:0; oc:0; ve:0,00; du:0,00;
-id:219; ch:0; oc:0; ve:0,00; du:0,00;
-id:220; ch:0; oc:0; ve:0,00; du:0,00;
-id:221; ch:0; oc:0; ve:0,00; du:0,00;
-id:222; ch:0; oc:0; ve:0,00; du:0,00;
-id:223; ch:0; oc:0; ve:0,00; du:0,00;
-id:224; ch:0; oc:0; ve:0,00; du:0,00;
-id:225; ch:0; oc:0; ve:0,00; du:0,00;
-id:226; ch:0; oc:0; ve:0,00; du:0,00;
-id:227; ch:0; oc:0; ve:0,00; du:0,00;
-id:228; ch:0; oc:0; ve:0,00; du:0,00;
-id:229; ch:0; oc:0; ve:0,00; du:0,00;
-id:230; ch:0; oc:0; ve:0,00; du:0,00;
-id:231; ch:0; oc:0; ve:0,00; du:0,00;
-id:232; ch:0; oc:0; ve:0,00; du:0,00;
-id:233; ch:0; oc:0; ve:0,00; du:0,00;
-id:234; ch:0; oc:0; ve:0,00; du:0,00;
-id:235; ch:0; oc:0; ve:0,00; du:0,00;
-id:236; ch:0; oc:0; ve:0,00; du:0,00;
-id:237; ch:0; oc:0; ve:0,00; du:0,00;
-id:238; ch:0; oc:0; ve:0,00; du:0,00;
-id:239; ch:0; oc:0; ve:0,00; du:0,00;
-id:240; ch:0; oc:0; ve:0,00; du:0,00;
-id:241; ch:0; oc:0; ve:0,00; du:0,00;
-id:242; ch:0; oc:0; ve:0,00; du:0,00;
-id:243; ch:0; oc:0; ve:0,00; du:0,00;
-id:244; ch:0; oc:0; ve:0,00; du:0,00;
-id:245; ch:0; oc:0; ve:0,00; du:0,00;
-id:246; ch:0; oc:0; ve:0,00; du:0,00;
-id:247; ch:0; oc:0; ve:0,00; du:0,00;
-id:248; ch:0; oc:0; ve:0,00; du:0,00;
-id:249; ch:0; oc:0; ve:0,00; du:0,00;
-id:250; ch:0; oc:0; ve:0,00; du:0,00;
-id:251; ch:0; oc:0; ve:0,00; du:0,00;
-id:252; ch:0; oc:0; ve:0,00; du:0,00;
-id:253; ch:0; oc:0; ve:0,00; du:0,00;
-id:254; ch:0; oc:0; ve:0,00; du:0,00;
-id:255; ch:0; oc:0; ve:0,00; du:0,00;
+id:191; ch:4; oc:0; ve:0,44; du:1,00;
+id:192; ch:112; oc:0; ve:0,00; du:0,00;
+id:193; ch:112; oc:0; ve:0,00; du:0,00;
+id:194; ch:112; oc:0; ve:0,00; du:0,00;
+id:195; ch:112; oc:0; ve:0,00; du:0,00;
+id:196; ch:112; oc:0; ve:0,00; du:0,00;
+id:197; ch:112; oc:0; ve:0,00; du:0,00;
+id:198; ch:112; oc:0; ve:0,00; du:0,00;
+id:199; ch:112; oc:0; ve:0,00; du:0,00;
+id:200; ch:112; oc:0; ve:0,00; du:0,00;
+id:201; ch:112; oc:0; ve:0,00; du:0,00;
+id:202; ch:112; oc:0; ve:0,00; du:0,00;
+id:203; ch:112; oc:0; ve:0,00; du:0,00;
+id:204; ch:112; oc:0; ve:1,00; du:1,00;
+id:205; ch:112; oc:0; ve:0,00; du:0,00;
+id:206; ch:112; oc:0; ve:0,00; du:0,00;
+id:207; ch:112; oc:0; ve:0,75; du:1,00;
+id:208; ch:112; oc:0; ve:0,00; du:0,00;
+id:209; ch:112; oc:0; ve:0,00; du:0,00;
+id:210; ch:112; oc:0; ve:0,00; du:0,00;
+id:211; ch:112; oc:0; ve:0,00; du:0,00;
+id:212; ch:112; oc:0; ve:0,00; du:0,00;
+id:213; ch:112; oc:0; ve:0,00; du:0,00;
+id:214; ch:112; oc:0; ve:0,00; du:0,00;
+id:215; ch:112; oc:0; ve:0,00; du:0,00;
+id:216; ch:112; oc:0; ve:0,00; du:0,00;
+id:217; ch:112; oc:0; ve:0,00; du:0,00;
+id:218; ch:112; oc:0; ve:0,00; du:0,00;
+id:219; ch:112; oc:0; ve:0,00; du:0,00;
+id:220; ch:112; oc:0; ve:0,00; du:0,00;
+id:221; ch:112; oc:0; ve:0,00; du:0,00;
+id:222; ch:112; oc:0; ve:0,00; du:0,00;
+id:223; ch:112; oc:0; ve:0,00; du:0,00;
+id:224; ch:112; oc:0; ve:0,00; du:0,00;
+id:225; ch:112; oc:0; ve:0,00; du:0,00;
+id:226; ch:112; oc:0; ve:0,00; du:0,00;
+id:227; ch:112; oc:0; ve:0,00; du:0,00;
+id:228; ch:112; oc:0; ve:0,00; du:0,00;
+id:229; ch:112; oc:0; ve:0,00; du:0,00;
+id:230; ch:112; oc:0; ve:0,00; du:0,00;
+id:231; ch:112; oc:0; ve:0,00; du:0,00;
+id:232; ch:112; oc:0; ve:0,00; du:0,00;
+id:233; ch:112; oc:0; ve:0,00; du:0,00;
+id:234; ch:112; oc:0; ve:0,00; du:0,00;
+id:235; ch:112; oc:0; ve:0,00; du:0,00;
+id:236; ch:112; oc:0; ve:0,00; du:0,00;
+id:237; ch:112; oc:0; ve:0,00; du:0,00;
+id:238; ch:112; oc:0; ve:0,00; du:0,00;
+id:239; ch:112; oc:0; ve:0,00; du:0,00;
+id:240; ch:112; oc:0; ve:0,00; du:0,00;
+id:241; ch:112; oc:0; ve:0,00; du:0,00;
+id:242; ch:112; oc:0; ve:0,00; du:0,00;
+id:243; ch:112; oc:0; ve:0,00; du:0,00;
+id:244; ch:112; oc:0; ve:0,00; du:0,00;
+id:245; ch:112; oc:0; ve:0,00; du:0,00;
+id:246; ch:112; oc:0; ve:0,00; du:0,00;
+id:247; ch:112; oc:0; ve:0,00; du:0,00;
+id:248; ch:112; oc:0; ve:0,00; du:0,00;
+id:249; ch:112; oc:0; ve:0,00; du:0,00;
+id:250; ch:112; oc:0; ve:0,00; du:0,00;
+id:251; ch:112; oc:0; ve:0,00; du:0,00;
+id:252; ch:112; oc:0; ve:0,00; du:0,00;
+id:253; ch:112; oc:0; ve:0,00; du:0,00;
+id:254; ch:112; oc:0; ve:0,00; du:0,00;
+id:255; ch:112; oc:0; ve:0,00; du:0,00;
 id:256; ch:0; oc:0; ve:0,00; du:0,00;
 id:257; ch:0; oc:0; ve:0,00; du:0,00;
 id:258; ch:0; oc:0; ve:0,00; du:0,00;

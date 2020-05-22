@@ -6,10 +6,10 @@
 @prefix state: <http://lv2plug.in/ns/ext/state#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_01>
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Standard_Rock_(1_4)_01>
 	a pset:Preset ;
 	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
-	rdfs:label "DR GM Standard Rock (1/8) 01" ;
+	rdfs:label "DR GM Standard Rock (1/4) 01" ;
 	lv2:port [
 		lv2:symbol "autoplay_beats_per_bar" ;
 		pset:value 4.0
@@ -99,7 +99,7 @@
 		pset:value 0.0
 	] , [
 		lv2:symbol "selection_velocity" ;
-		pset:value 0.66000003
+		pset:value 0.99838549
 	] , [
 		lv2:symbol "signature" ;
 		pset:value 0.0
@@ -120,9 +120,9 @@ id:7; ch:0; oc:0; ve:0,00; du:0,00;
 id:8; ch:0; oc:0; ve:0,00; du:0,00;
 id:9; ch:0; oc:0; ve:0,00; du:0,00;
 id:10; ch:0; oc:0; ve:0,00; du:0,00;
-id:11; ch:3; oc:0; ve:0,66; du:1,00;
-id:12; ch:0; oc:0; ve:0,00; du:0,00;
-id:13; ch:0; oc:0; ve:0,66; du:1,00;
+id:11; ch:3; oc:0; ve:1,00; du:1,00;
+id:12; ch:0; oc:0; ve:1,00; du:1,00;
+id:13; ch:0; oc:0; ve:1,00; du:1,00;
 id:14; ch:0; oc:0; ve:0,00; du:0,00;
 id:15; ch:0; oc:0; ve:0,00; du:0,00;
 id:16; ch:0; oc:0; ve:1,00; du:1,00;
@@ -152,7 +152,7 @@ id:39; ch:0; oc:0; ve:0,00; du:0,00;
 id:40; ch:0; oc:0; ve:0,00; du:0,00;
 id:41; ch:0; oc:0; ve:1,00; du:1,00;
 id:42; ch:0; oc:0; ve:0,66; du:1,00;
-id:43; ch:3; oc:0; ve:0,66; du:1,00;
+id:43; ch:0; oc:0; ve:0,66; du:1,00;
 id:44; ch:0; oc:0; ve:1,00; du:1,00;
 id:45; ch:0; oc:0; ve:0,66; du:1,00;
 id:46; ch:0; oc:0; ve:1,00; du:1,00;
@@ -184,9 +184,9 @@ id:71; ch:0; oc:0; ve:0,00; du:0,00;
 id:72; ch:0; oc:0; ve:0,00; du:0,00;
 id:73; ch:0; oc:0; ve:0,00; du:0,00;
 id:74; ch:0; oc:0; ve:0,66; du:1,00;
-id:75; ch:3; oc:0; ve:0,66; du:1,00;
-id:76; ch:0; oc:0; ve:0,00; du:0,00;
-id:77; ch:0; oc:0; ve:0,66; du:1,00;
+id:75; ch:3; oc:0; ve:1,00; du:1,00;
+id:76; ch:0; oc:0; ve:1,00; du:1,00;
+id:77; ch:0; oc:0; ve:1,00; du:1,00;
 id:78; ch:0; oc:0; ve:0,00; du:0,00;
 id:79; ch:0; oc:0; ve:0,00; du:0,00;
 id:80; ch:0; oc:0; ve:1,00; du:1,00;
@@ -216,7 +216,7 @@ id:103; ch:0; oc:0; ve:0,00; du:0,00;
 id:104; ch:0; oc:0; ve:0,00; du:0,00;
 id:105; ch:0; oc:0; ve:1,00; du:1,00;
 id:106; ch:0; oc:0; ve:0,66; du:1,00;
-id:107; ch:3; oc:0; ve:0,66; du:1,00;
+id:107; ch:0; oc:0; ve:0,66; du:1,00;
 id:108; ch:0; oc:0; ve:0,00; du:0,00;
 id:109; ch:0; oc:0; ve:0,66; du:1,00;
 id:110; ch:0; oc:0; ve:0,00; du:0,00;
