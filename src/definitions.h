@@ -50,6 +50,11 @@ typedef enum {
 } ModeIndex;
 
 typedef enum {
+	ON_KEY_RESTART	= 0,
+	ON_KEY_CONTINUE	= 1
+} OnKeyIndex;
+
+typedef enum {
 	Chromatic	= 1,
 	Major		= 2,
 	Minor		= 3

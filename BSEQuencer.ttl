@@ -28,8 +28,8 @@
         rdfs:comment "Multi channel step sequencer" ;
 	doap:name "B.SEQuencer" ;
 	doap:license <http://usefulinc.com/doap/licenses/gpl>;
-	lv2:microVersion 3 ;
-	lv2:minorVersion 4 ;
+	lv2:microVersion 0 ;
+	lv2:minorVersion 5 ;
         doap:maintainer <http://www.jahnichen.de/sjaehn#me> ;
         lv2:optionalFeature lv2:hardRTCapable ;
         lv2:extensionData state:interface ;
@@ -89,6 +89,17 @@
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
                 lv2:index 5 ;
+                lv2:symbol "on_key" ;
+                lv2:name "On NOTE ON" ;
+                lv2:portProperty lv2:integer, lv2:enumeration ;
+		lv2:scalePoint [ rdfs:label "Restart"; rdf:value 0 ] ;
+		lv2:scalePoint [ rdfs:label "Continue"; rdf:value 1 ] ;
+                lv2:default 0 ;
+                lv2:minimum 0 ;
+                lv2:maximum 1 ;
+        ] , [
+                a lv2:InputPort , lv2:ControlPort ;
+                lv2:index 6 ;
                 lv2:symbol "nr_of_steps" ;
                 lv2:name "Nr of steps" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -101,7 +112,7 @@
                 lv2:maximum 32 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 6 ;
+                lv2:index 7 ;
                 lv2:symbol "steps_per" ;
                 lv2:name "Steps per" ;
                 lv2:portProperty lv2:integer ;
@@ -110,7 +121,7 @@
                 lv2:maximum 8 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 7 ;
+                lv2:index 8 ;
                 lv2:symbol "base" ;
                 lv2:name "Base" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -121,7 +132,7 @@
                 lv2:maximum 2 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 8 ;
+                lv2:index 9 ;
                 lv2:symbol "root" ;
                 lv2:name "Root note" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -137,7 +148,7 @@
                 lv2:maximum 11 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 9 ;
+                lv2:index 10 ;
                 lv2:symbol "signature" ;
                 lv2:name "Signature" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -149,7 +160,7 @@
                 lv2:maximum 1 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 10 ;
+                lv2:index 11 ;
                 lv2:symbol "octave" ;
                 lv2:name "Octave" ;
                 lv2:portProperty lv2:integer ;
@@ -158,7 +169,7 @@
                 lv2:maximum 8 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 11 ;
+                lv2:index 12 ;
                 lv2:symbol "scale" ;
                 lv2:name "Scale" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -187,7 +198,7 @@
                 lv2:maximum 19 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 12 ;
+                lv2:index 13 ;
                 lv2:symbol "autoplay_bpm" ;
                 lv2:name "Autoplay: bpm" ;
                 lv2:default 120.0 ;
@@ -195,7 +206,7 @@
                 lv2:maximum 300.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 13 ;
+                lv2:index 14 ;
                 lv2:symbol "autoplay_beats_per_bar" ;
                 lv2:name "Autoplay: beats per bar" ;
                 lv2:portProperty lv2:integer ;
@@ -204,7 +215,7 @@
                 lv2:maximum 16 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 14 ;
+                lv2:index 15 ;
                 lv2:symbol "selection_channel" ;
                 lv2:name "Selection: Channel" ;
                 lv2:portProperty lv2:integer ;
@@ -213,7 +224,7 @@
                 lv2:maximum 14 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 15 ;
+                lv2:index 16 ;
                 lv2:symbol "selection_pitch_octave" ;
                 lv2:name "Selection: pitch octave" ;
                 lv2:portProperty lv2:integer ;
@@ -222,7 +233,7 @@
                 lv2:maximum 8 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 16 ;
+                lv2:index 17 ;
                 lv2:symbol "selection_velocity" ;
                 lv2:name "Selection: Veloctity" ;
                 lv2:default 1.0 ;
@@ -230,7 +241,7 @@
                 lv2:maximum 2.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 17 ;
+                lv2:index 18 ;
                 lv2:symbol "selection_duration" ;
                 lv2:name "Selection: Duration" ;
                 lv2:default 1.0 ;
@@ -238,7 +249,7 @@
                 lv2:maximum 1.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 18 ;
+                lv2:index 19 ;
                 lv2:symbol "ch1_pitch" ;
                 lv2:name "CH1: Pitch" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -249,7 +260,7 @@
                 lv2:maximum 1 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 19 ;
+                lv2:index 20 ;
                 lv2:symbol "ch1_velocity" ;
                 lv2:name "CH1: Velocity" ;
                 lv2:default 1.0 ;
@@ -257,7 +268,7 @@
                 lv2:maximum 2.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 20 ;
+                lv2:index 21 ;
                 lv2:symbol "ch1_midi_channel" ;
                 lv2:name "CH1: MIDI Channel" ;
                 lv2:portProperty lv2:integer ;
@@ -266,7 +277,7 @@
                 lv2:maximum 16 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 21 ;
+                lv2:index 22 ;
                 lv2:symbol "ch1_note_offset" ;
                 lv2:name "CH1: Note offset" ;
                 lv2:portProperty lv2:integer ;
@@ -275,7 +286,7 @@
                 lv2:maximum 127 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 22 ;
+                lv2:index 23 ;
                 lv2:symbol "ch2_pitch" ;
                 lv2:name "CH2: Pitch" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -286,7 +297,7 @@
                 lv2:maximum 1 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 23 ;
+                lv2:index 24 ;
                 lv2:symbol "ch2_velocity" ;
                 lv2:name "CH2: Velocity" ;
                 lv2:default 1.0 ;
@@ -294,7 +305,7 @@
                 lv2:maximum 2.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 24 ;
+                lv2:index 25 ;
                 lv2:symbol "ch2_midi_channel" ;
                 lv2:name "CH2: MIDI Channel" ;
                 lv2:portProperty lv2:integer ;
@@ -303,7 +314,7 @@
                 lv2:maximum 16 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 25 ;
+                lv2:index 26 ;
                 lv2:symbol "ch2_note_offset" ;
                 lv2:name "CH2: Note offset" ;
                 lv2:portProperty lv2:integer ;
@@ -312,7 +323,7 @@
                 lv2:maximum 127 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 26 ;
+                lv2:index 27 ;
                 lv2:symbol "ch3_pitch" ;
                 lv2:name "CH3: Pitch" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -323,7 +334,7 @@
                 lv2:maximum 1 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 27 ;
+                lv2:index 28 ;
                 lv2:symbol "ch3_velocity" ;
                 lv2:name "CH3: Velocity" ;
                 lv2:default 1.0 ;
@@ -331,7 +342,7 @@
                 lv2:maximum 2.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 28 ;
+                lv2:index 29 ;
                 lv2:symbol "ch3_midi_channel" ;
                 lv2:name "CH3: MIDI Channel" ;
                 lv2:portProperty lv2:integer ;
@@ -340,7 +351,7 @@
                 lv2:maximum 16 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 29 ;
+                lv2:index 30 ;
                 lv2:symbol "ch3_note_offset" ;
                 lv2:name "CH3: Note offset" ;
                 lv2:portProperty lv2:integer ;
@@ -349,7 +360,7 @@
                 lv2:maximum 127 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 30 ;
+                lv2:index 31 ;
                 lv2:symbol "ch4_pitch" ;
                 lv2:name "CH4: Pitch" ;
                 lv2:portProperty lv2:integer, lv2:enumeration ;
@@ -360,7 +371,7 @@
                 lv2:maximum 1 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 31 ;
+                lv2:index 32 ;
                 lv2:symbol "ch4_velocity" ;
                 lv2:name "CH4: Velocity" ;
                 lv2:default 1.0 ;
@@ -368,7 +379,7 @@
                 lv2:maximum 2.0 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 32 ;
+                lv2:index 33 ;
                 lv2:symbol "ch4_midi_channel" ;
                 lv2:name "CH4: MIDI Channel" ;
                 lv2:portProperty lv2:integer ;
@@ -377,7 +388,7 @@
                 lv2:maximum 16 ;
         ] , [
                 a lv2:InputPort , lv2:ControlPort ;
-                lv2:index 33 ;
+                lv2:index 34 ;
                 lv2:symbol "ch4_note_offset" ;
                 lv2:name "CH4: Note offset" ;
                 lv2:portProperty lv2:integer ;

@@ -63,7 +63,9 @@ Key features
 
 What's new
 ----------
-* Factory presets added (Techno and Standard Rock drumkits)
+* Select between restart from step 0 or continue from running step if key pressed
+* Enable MIDI Thru (important for downstream generator plugins!)
+* Factory presets added (Techno, Standard Rock, Jazz, and Disco drumkits)
 
 
 Usage

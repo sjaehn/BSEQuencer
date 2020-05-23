@@ -515,7 +515,7 @@ void BSEQuencer::runSequencer (const double startpos, const uint32_t start, cons
 										stopMidiOut (actframes, key, row, ALL_CH);
 
 										inKeys[key].output[row].pad = pads[row][newRowStepNr];
-										startMidiOut (actframes, key, row, ALL_CH);
+										if (inKeys[key].note != 0xff) startMidiOut (actframes, key, row, ALL_CH);
 									}
 
 								}
@@ -592,14 +592,18 @@ void BSEQuencer::run (uint32_t n_samples)
 	// Update global controllers
 	// 1. Stop MIDI out if midi_in channel, steps, play, mode or root (note/signature/octave) changed
 	bool midiStopped[NR_SEQUENCER_CHS] = {false, false, false, false};
-	if (CONTROLLER_CHANGED(MIDI_IN_CHANNEL) ||
+	if
+	(
+		CONTROLLER_CHANGED(MIDI_IN_CHANNEL) ||
 		CONTROLLER_CHANGED(NR_OF_STEPS) ||
 		CONTROLLER_CHANGED(PLAY) ||
 		CONTROLLER_CHANGED(MODE) ||
+		CONTROLLER_CHANGED(ON_KEY_PRESSED) ||
 		CONTROLLER_CHANGED(SCALE) ||
 		CONTROLLER_CHANGED(ROOT) ||
 		CONTROLLER_CHANGED(SIGNATURE) ||
-		CONTROLLER_CHANGED(OCTAVE))
+		CONTROLLER_CHANGED(OCTAVE)
+	)
 	{
 		//fprintf (stderr, "Call stopMidiOut from 'Update global controllers' at %f\n", position);
 		stopMidiOut(0, ALL_CH);
@@ -607,8 +611,14 @@ void BSEQuencer::run (uint32_t n_samples)
 	}
 
 	// 2. Stop also MIDI in if midi_in channel, steps, play or mode is changed
-	if (CONTROLLER_CHANGED(MIDI_IN_CHANNEL) || CONTROLLER_CHANGED(NR_OF_STEPS) || (CONTROLLER_CHANGED(MODE)) ||
-		(CONTROLLER_CHANGED(PLAY)))
+	if
+	(
+		CONTROLLER_CHANGED(MIDI_IN_CHANNEL) ||
+		CONTROLLER_CHANGED(NR_OF_STEPS) ||
+		CONTROLLER_CHANGED(MODE) ||
+		CONTROLLER_CHANGED(ON_KEY_PRESSED) ||
+		CONTROLLER_CHANGED(PLAY)
+	)
 	{
 		while (!inKeys.empty ()) inKeys.pop_back ();
 	}
@@ -874,11 +884,29 @@ void BSEQuencer::run (uint32_t n_samples)
 							// Build new key from MIDI data
 							if (newNote)
 							{
-								Key key = defaultKey; // stepNr = -1; direction = 1; output.pads, output.playing and jumpOff ()-initialized
-								key.note = note;
-								key.velocity = msg[2];
-								key.startPos = position + double (act_t) / FRAMES_PER_BEAT - (1 / STEPS_PER_BEAT);
-								inKeys.push_back (key);
+								if
+								(
+									(controllers[MODE] == AUTOPLAY) ||
+									(controllers[ON_KEY_PRESSED] == ON_KEY_RESTART) ||
+									(inKeys.empty())
+								)
+								{
+									Key key = defaultKey; // stepNr = -1; direction = 1; output.pads, output.playing and jumpOff ()-initialized
+									key.note = note;
+									key.velocity = msg[2];
+									key.startPos = position + double (act_t) / FRAMES_PER_BEAT - (1 / STEPS_PER_BEAT);
+									inKeys.push_back (key);
+								}
+
+								else
+								{
+									Key key = inKeys.back();
+									key.note = note;
+									key.velocity = msg[2];
+									if (inKeys.back().note == 0xff) inKeys.back() = key;
+									else inKeys.push_back (key);
+								}
+
 								// fprintf (stderr, "BSEQuencer.lv2: Key on (frames: %li, note: %i, velocity: %i) at %f\n", act_t, key.note, key.velocity, key.startPos);
 							}
 						}
@@ -894,7 +922,15 @@ void BSEQuencer::run (uint32_t n_samples)
 									// fprintf (stderr, "BSEQuencer.lv2: Key off (frames: %li, note: %i, velocity: %i) at %f + frames\n", act_t, note, msg[2], position);
 
 									stopMidiOut (act_t, i, ALL_CH);
-									inKeys.erase (&inKeys.iterator[i]);
+
+									if
+									(
+										(controllers[MODE] == AUTOPLAY) ||
+										(controllers[ON_KEY_PRESSED] == ON_KEY_RESTART) ||
+										(inKeys.size > 1)
+									) inKeys.erase (&inKeys.iterator[i]);
+									else inKeys[i].note = 0xff;
+
 									break;
 								}
 							}
@@ -1435,25 +1471,28 @@ void BSEQuencer::notifyStatusToGui ()
 	int8_t size = scale.getSize ();
 	for (size_t i = 0; i < inKeys.size; ++i)
 	{
-		int8_t element = scale.getElement(inKeys[i].note);
-
-		// Only valid keys
-		if ((element != ENOTE) && (size != ENOTE))
+		if (inKeys[i].note != 0xff)
 		{
-			// Set notebits
-			notebits = notebits | (1 << (element - int (floor (double (element) / double (size)) * double (size))));
+			int8_t element = scale.getElement(inKeys[i].note);
 
-			for (int row = 0; row < ROWS; ++row)
+			// Only valid keys
+			if ((element != ENOTE) && (size != ENOTE))
 			{
-				if ((inKeys[i].stepNr >= 0) && (inKeys[i].output[row].stepOffset != HALT_STEP))
+				// Set notebits
+				notebits = notebits | (1 << (element - int (floor (double (element) / double (size)) * double (size))));
+
+				for (int row = 0; row < ROWS; ++row)
 				{
-					int stepNr = (inKeys[i].stepNr + inKeys[i].output[row].stepOffset) % ((int)controllers[NR_OF_STEPS]);
+					if ((inKeys[i].stepNr >= 0) && (inKeys[i].output[row].stepOffset != HALT_STEP))
+					{
+						int stepNr = (inKeys[i].stepNr + inKeys[i].output[row].stepOffset) % ((int)controllers[NR_OF_STEPS]);
 
-					// Set cursorbits
-					cursorbits[stepNr] = (cursorbits[stepNr] | (1 << row));
+						// Set cursorbits
+						cursorbits[stepNr] = (cursorbits[stepNr] | (1 << row));
 
-					// Set chbits
-					if (((int)inKeys[i].output[row].pad.ch) & 0x0F) chbits = (chbits | (1 << (((int)inKeys[i].output[row].pad.ch - 1) & 0x0F)));
+						// Set chbits
+						if (((int)inKeys[i].output[row].pad.ch) & 0x0F) chbits = (chbits | (1 << (((int)inKeys[i].output[row].pad.ch - 1) & 0x0F)));
+					}
 				}
 			}
 		}

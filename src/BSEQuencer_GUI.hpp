@@ -172,6 +172,8 @@ private:
 	BWidgets::HSliderValue modeAutoplayBpbSlider;
 	BWidgets::Label modeMidiInChannelLabel;
 	BWidgets::PopupListBox modeMidiInChannelListBox;
+	BWidgets::Label modeOnKeyLabel;
+	BWidgets::PopupListBox modeOnKeyListBox;
 	BWidgets::Label modePlayLabel;
 	PlayStopButton modePlayButton;
 

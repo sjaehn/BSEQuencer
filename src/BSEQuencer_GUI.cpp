@@ -41,10 +41,12 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	modeAutoplayBpmSlider (120, 105, 130, 25, "slider", 120.0, 1.0, 300.0, 0.0, "%3.1f"),
 	modeAutoplayBpbLabel (10, 145, 120, 20, "lflabel", "Beats per bar"),
 	modeAutoplayBpbSlider (120, 135, 130, 25, "slider", 4.0, 1.0, 16.0, 1.0, "%2.0f"),
-	modeMidiInChannelLabel (10, 110, 150, 20 , "lflabel", "MIDI input channel"),
-	modeMidiInChannelListBox (180, 110, 70, 20, 70, 200, "menu",
+	modeMidiInChannelLabel (10, 110, 130, 20 , "lflabel", "MIDI input channel"),
+	modeMidiInChannelListBox (160, 110, 90, 20, 90, 200, "menu",
 				  BItems::ItemList ({{0, "All"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}, {9, "9"},
 						     {10, "10"}, {11, "11"}, {12, "12"}, {13, "13"}, {14, "14"}, {15, "15"}, {16, "16"}})),
+	modeOnKeyLabel (10, 140, 130, 20, "lflabel", "On NOTE ON"),
+	modeOnKeyListBox (160, 140, 90, 20, 90, 60, "menu", BItems::ItemList ({{0, "Restart"}, {1, "Continue"}})),
 	modePlayLabel (10, 50, 205, 20, "lflabel", "Status: playing ..."),
 	modePlayButton (220, 40, 30, 30, "box", 1.0),
 
@@ -136,6 +138,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	controllerWidgets[MIDI_IN_CHANNEL] = (BWidgets::ValueWidget*) &modeMidiInChannelListBox;
 	controllerWidgets[PLAY] = (BWidgets::ValueWidget*) &modePlayButton;
 	controllerWidgets[MODE] = (BWidgets::ValueWidget*) &modeListBox;
+	controllerWidgets[ON_KEY_PRESSED] = (BWidgets::ValueWidget*) &modeOnKeyListBox;
 	controllerWidgets[NR_OF_STEPS] = (BWidgets::ValueWidget*) &propertiesNrStepsListBox;
 	controllerWidgets[STEPS_PER] = (BWidgets::ValueWidget*) &propertiesStepsPerSlider;
 	controllerWidgets[BASE] = (BWidgets::ValueWidget*) &propertiesBaseListBox;
@@ -223,6 +226,8 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	modeBox.add (modeAutoplayBpbSlider);
 	modeBox.add (modeMidiInChannelLabel);
 	modeBox.add (modeMidiInChannelListBox);
+	modeBox.add (modeOnKeyLabel);
+	modeBox.add (modeOnKeyListBox);
 	modeBox.add (modePlayLabel);
 	modeBox.add (modePlayButton);
 
@@ -544,10 +549,14 @@ void BSEQuencer_GUI::scale ()
 	RESIZE (modeAutoplayBpmSlider, 120, 105, 130, 25, sz);
 	RESIZE (modeAutoplayBpbLabel, 10, 145, 120, 20, sz);
 	RESIZE (modeAutoplayBpbSlider, 120, 135, 130, 25, sz);
-	RESIZE (modeMidiInChannelLabel, 10, 110, 150, 20, sz);
-	RESIZE (modeMidiInChannelListBox, 180, 110, 70, 20, sz);
-	modeMidiInChannelListBox.resizeListBox (BUtilities::Point (70 * sz, 200 * sz));
-	modeMidiInChannelListBox.resizeListBoxItems (BUtilities::Point (70 * sz, 20 * sz));
+	RESIZE (modeMidiInChannelLabel, 10, 110, 130, 20, sz);
+	RESIZE (modeMidiInChannelListBox, 160, 110, 90, 20, sz);
+	modeMidiInChannelListBox.resizeListBox (BUtilities::Point (90 * sz, 200 * sz));
+	modeMidiInChannelListBox.resizeListBoxItems (BUtilities::Point (90 * sz, 20 * sz));
+	RESIZE (modeOnKeyLabel, 10, 140, 130, 20, sz);
+	RESIZE (modeOnKeyListBox, 160, 140, 90, 20, sz);
+	modeOnKeyListBox.resizeListBox (BUtilities::Point (90 * sz, 60 * sz));
+	modeOnKeyListBox.resizeListBoxItems (BUtilities::Point (90 * sz, 20 * sz));
 	RESIZE (modePlayLabel, 10, 50, 205, 20, sz);
 	RESIZE (modePlayButton, 220, 40, 30, 30, sz);
 
@@ -674,6 +683,8 @@ void BSEQuencer_GUI::applyTheme (BStyles::Theme& theme)
 	modeAutoplayBpbSlider.applyTheme (theme);
 	modeMidiInChannelLabel.applyTheme (theme);
 	modeMidiInChannelListBox.applyTheme (theme);
+	modeOnKeyLabel.applyTheme (theme);
+	modeOnKeyListBox.applyTheme (theme);
 	modePlayLabel.applyTheme (theme);
 	modePlayButton.applyTheme (theme);
 
@@ -882,6 +893,8 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 						ui->modeAutoplayBpbSlider.show ();
 						ui->modeMidiInChannelLabel.hide ();
 						ui->modeMidiInChannelListBox.hide ();
+						ui->modeOnKeyLabel.hide ();
+						ui->modeOnKeyListBox.hide ();
 						for (int i = 0; i < NR_SEQUENCER_CHS; ++i) ui->chBoxes[i].pitchScreen.show ();
 					}
 
@@ -893,6 +906,8 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 						ui->modeAutoplayBpbSlider.hide ();
 						ui->modeMidiInChannelLabel.show ();
 						ui->modeMidiInChannelListBox.show ();
+						ui->modeOnKeyLabel.show ();
+						ui->modeOnKeyListBox.show ();
 						for (int i = 0; i < NR_SEQUENCER_CHS; ++i) ui->chBoxes[i].pitchScreen.hide ();
 					}
 				}
