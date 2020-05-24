@@ -898,6 +898,15 @@ void BSEQuencer::run (uint32_t n_samples)
 									inKeys.push_back (key);
 								}
 
+								else if (controllers[ON_KEY_PRESSED] == ON_KEY_SYNC)
+								{
+									Key key = defaultKey;
+									key.note = note;
+									key.velocity = msg[2];
+									key.startPos = inKeys.back().startPos;
+									inKeys.push_back (key);
+								}
+
 								else
 								{
 									Key key = inKeys.back();
@@ -927,6 +936,7 @@ void BSEQuencer::run (uint32_t n_samples)
 									(
 										(controllers[MODE] == AUTOPLAY) ||
 										(controllers[ON_KEY_PRESSED] == ON_KEY_RESTART) ||
+										(controllers[ON_KEY_PRESSED] == ON_KEY_SYNC) ||
 										(inKeys.size > 1)
 									) inKeys.erase (&inKeys.iterator[i]);
 									else inKeys[i].note = 0xff;

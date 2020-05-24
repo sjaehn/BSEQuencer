@@ -51,6 +51,7 @@ typedef enum {
 
 typedef enum {
 	ON_KEY_RESTART	= 0,
+	ON_KEY_SYNC	= 2,
 	ON_KEY_CONTINUE	= 1
 } OnKeyIndex;
 
