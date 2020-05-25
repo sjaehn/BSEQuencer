@@ -64,9 +64,9 @@ Key features
 What's new
 ----------
 * Select between
-* * Restart from step 0,
-* * Restart from step 0 and sync with running steps,
-* * Or continue from running step if key pressed
+  * Restart from step 0,
+  * Restart from step 0 and sync with running steps,
+  * Or continue from running step if key pressed
 * Enable MIDI Thru (important for downstream generator plugins!)
 * Factory presets added (Techno, Standard Rock, Jazz, and Disco drumkits)
 
