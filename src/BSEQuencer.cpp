@@ -19,6 +19,7 @@
  */
 
 #include "BSEQuencer.hpp"
+#include <stdexcept>
 
 BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
 	map (NULL), unmap (NULL), inputPort (NULL), outputPort (NULL),
