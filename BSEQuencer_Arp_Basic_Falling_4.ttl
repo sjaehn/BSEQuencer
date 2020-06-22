@@ -71,6 +71,9 @@
 		lv2:symbol "midi_in" ;
 		pset:value 0.0
 	] , [
+		lv2:symbol "on_key" ;
+		pset:value 0.0
+	] , [
 		lv2:symbol "mode" ;
 		pset:value 2.0
 	] , [
