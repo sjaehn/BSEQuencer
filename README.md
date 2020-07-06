@@ -69,6 +69,7 @@ What's new
   * Or continue from running step if key pressed
 * Enable MIDI Thru (important for downstream generator plugins!)
 * Factory presets added (Techno, Standard Rock, Jazz, and Disco drumkits)
+* Compiler error with gcc10 fixed
 
 
 Usage

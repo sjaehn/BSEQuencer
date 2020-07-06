@@ -20,6 +20,7 @@
 
 #include "BSEQuencer_GUI.hpp"
 #include "BUtilities/to_string.hpp"
+#include <exception>
 
 BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *const *features, PuglNativeWindow parentWindow) :
 	Window (1200, 820, "B.SEQuencer", parentWindow, true),
