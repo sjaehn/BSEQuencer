@@ -46,7 +46,8 @@ typedef enum {
 
 typedef enum {
 	AUTOPLAY	= 1,
-	HOST_CONTROLLED	= 2
+	HOST_CONTROLLED	= 2,
+	HOST_AUTOPLAY	= 3
 } ModeIndex;
 
 typedef enum {

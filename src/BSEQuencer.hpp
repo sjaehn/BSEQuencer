@@ -133,7 +133,7 @@ private:
 	{
 		{0, 16, 1},	// MIDI_IN_CHANNEL
 		{0, 1, 1},	// PLAY
-		{1, 2, 1},	// MODE
+		{1, 3, 1},	// MODE
 		{0, 2, 1},	// ON_KEY_PRESSED
 		{8, 32, 8}, 	// NR_OF_STEPS
 		{1, 8, 1},	// STEPS_PER

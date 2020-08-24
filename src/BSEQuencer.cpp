@@ -802,7 +802,7 @@ void BSEQuencer::run (uint32_t n_samples)
 			// Host time notifications
 			else if (obj->body.otype == uris.time_Position)
 			{
-				if (controllers[MODE] == HOST_CONTROLLED)
+				if ((controllers[MODE] == HOST_CONTROLLED) || (controllers[MODE] == HOST_AUTOPLAY))
 				{
 					bool scheduleStopMidi = false;
 					LV2_Atom *oBpm = NULL, *oBpb = NULL;
@@ -818,26 +818,23 @@ void BSEQuencer::run (uint32_t n_samples)
 					if (oBpm && (oBpm->type == uris.atom_Float) && (bpm != ((LV2_Atom_Float*)oBpm)->body))
 					{
 						bpm = ((LV2_Atom_Float*)oBpm)->body;
-						//fprintf (stderr, "BSEQuencer.lv2: bpm set to %f.\n", bpm);
-						if (controllers[MODE] == HOST_CONTROLLED) scheduleStopMidi = true;
+						scheduleStopMidi = true;
 					}
 
 					// Beats per bar changed?
 					if (oBpb && (oBpb->type == uris.atom_Float) && (beatsPerBar != ((LV2_Atom_Float*)oBpb)->body) && (((LV2_Atom_Float*)oBpb)->body > 0))
 					{
 						beatsPerBar = ((LV2_Atom_Float*)oBpb)->body;
-						//fprintf (stderr, "BSEQuencer.lv2: bpb set to %f.\n", beatsPerBar);
-						if (controllers[MODE] == HOST_CONTROLLED) scheduleStopMidi = true;
+						scheduleStopMidi = true;
 					}
 
 					// Stop MIDI output for all BSEQuencer channels
-					if (scheduleStopMidi && (controllers[MODE] != AUTOPLAY))
+					if (scheduleStopMidi)
 					{
 						for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
 						{
 							if (!midiStopped[i])
 							{
-								// fprintf (stderr, "Call stopMidiOut from 'Stop MIDI output for all BSEQuencer channels' at %f\n", position);
 								stopMidiOut (act_t, 1 << i);
 								midiStopped[i] = true;
 							}
@@ -888,6 +885,7 @@ void BSEQuencer::run (uint32_t n_samples)
 								if
 								(
 									(controllers[MODE] == AUTOPLAY) ||
+									(controllers[MODE] == HOST_AUTOPLAY) ||
 									(controllers[ON_KEY_PRESSED] == ON_KEY_RESTART) ||
 									(inKeys.empty())
 								)
@@ -936,6 +934,7 @@ void BSEQuencer::run (uint32_t n_samples)
 									if
 									(
 										(controllers[MODE] == AUTOPLAY) ||
+										(controllers[MODE] == HOST_AUTOPLAY) ||
 										(controllers[ON_KEY_PRESSED] == ON_KEY_RESTART) ||
 										(controllers[ON_KEY_PRESSED] == ON_KEY_SYNC) ||
 										(inKeys.size > 1)
@@ -1015,7 +1014,7 @@ void BSEQuencer::run (uint32_t n_samples)
 	}
 
 	// AUTOPLAY pseudo MIDI in
-	if ((controllers[PLAY]) && (controllers[MODE] == AUTOPLAY))
+	if ((controllers[PLAY]) && ((controllers[MODE] == AUTOPLAY) || (controllers[MODE] == HOST_AUTOPLAY)))
 	{
 		// Exactly one inKey needed for autoplay
 		// No inKeys => create an empty preliminary key
