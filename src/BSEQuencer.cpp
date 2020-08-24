@@ -25,7 +25,7 @@ BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
 	map (NULL), unmap (NULL), inputPort (NULL), outputPort (NULL),
 	output_forge (), output_frame (),
 	new_controllers {nullptr}, controllers {0},
-	rate (samplerate), bpm (120.0f), beatsPerBar (4.0f),
+	rate (samplerate), bpm (120.0f), beatsPerBar (4.0f), speed (0.0f),
 	outCapacity (0), position (0.0),
 	ui_on (false), scheduleNotifyPadsToGui (false), scheduleNotifyStatusToGui (false),
 	scheduleNotifyScaleMapsToGui (true),
@@ -218,6 +218,44 @@ void BSEQuencer::cleanupInKeys ()
 			}
 		}
 	} while (! valid);
+}
+
+void BSEQuencer::makeAutoKey (const uint64_t last_t)
+{
+	// Exactly one inKey needed for autoplay
+	// No inKeys => create an empty preliminary key
+	if (inKeys.empty())
+	{
+		Key key = defaultKey;
+		key.note = -99;
+		inKeys.push_back (key);
+	}
+
+	// More than one inKey => shrink to one
+	while (inKeys.size > 1)
+	{
+		stopMidiOut (last_t, inKeys.size - 1, ALL_CH);
+		inKeys.pop_back ();
+	}
+
+	// Check if inKey already plays the root key
+	if (inKeys[0].note != controllers[ROOT] + controllers[SIGNATURE] + (controllers[OCTAVE] + 1) * 12)
+	{
+		stopMidiOut (last_t, 0, ALL_CH);
+		inKeys[0] = defaultKey; // stepNr = -1; direction = 1; output.pads, output.playing and jumpOff ()-initialized
+		inKeys[0].note = controllers[ROOT] + controllers[SIGNATURE] + (controllers[OCTAVE] + 1) * 12;
+		inKeys[0].velocity = 64;
+		inKeys[0].startPos = position + double (last_t) / FRAMES_PER_BEAT - (1 / STEPS_PER_BEAT);
+	}
+}
+
+void BSEQuencer::stopAutoKey (const uint64_t act_t)
+{
+	if ((inKeys.size > 0) && (inKeys[0].note == controllers[ROOT] + controllers[SIGNATURE] + (controllers[OCTAVE] + 1) * 12))
+	{
+		stopMidiOut (act_t, 0, ALL_CH);
+		inKeys.erase (&inKeys.iterator[0]);
+	}
 }
 
 bool BSEQuencer::padHasAntecessor (const int row, const int step)
@@ -802,15 +840,16 @@ void BSEQuencer::run (uint32_t n_samples)
 			// Host time notifications
 			else if (obj->body.otype == uris.time_Position)
 			{
-				if ((controllers[MODE] == HOST_CONTROLLED) || (controllers[MODE] == HOST_AUTOPLAY))
+				if ((controllers[MODE] == HOST_CONTROLLED) || (controllers[MODE] == HOST_PLAYBACK))
 				{
 					bool scheduleStopMidi = false;
-					LV2_Atom *oBpm = NULL, *oBpb = NULL;
+					LV2_Atom *oBpm = NULL, *oBpb = NULL, *oSpeed = NULL;
 					lv2_atom_object_get
 					(
 						obj,
 						uris.time_beatsPerMinute,  &oBpm,
 						uris.time_beatsPerBar,  &oBpb,
+						uris.time_speed,  &oSpeed,
 						NULL
 					);
 
@@ -826,6 +865,14 @@ void BSEQuencer::run (uint32_t n_samples)
 					{
 						beatsPerBar = ((LV2_Atom_Float*)oBpb)->body;
 						scheduleStopMidi = true;
+					}
+
+					// Speed changed?
+					if (oSpeed && (oSpeed->type == uris.atom_Float) && (speed != ((LV2_Atom_Float*)oSpeed)->body) && (controllers[MODE] == HOST_PLAYBACK))
+					{
+						speed = ((LV2_Atom_Float*)oSpeed)->body;
+						if (speed == 0.0f) stopAutoKey (last_t);
+						else makeAutoKey (act_t);
 					}
 
 					// Stop MIDI output for all BSEQuencer channels
@@ -885,7 +932,7 @@ void BSEQuencer::run (uint32_t n_samples)
 								if
 								(
 									(controllers[MODE] == AUTOPLAY) ||
-									(controllers[MODE] == HOST_AUTOPLAY) ||
+									(controllers[MODE] == HOST_PLAYBACK) ||
 									(controllers[ON_KEY_PRESSED] == ON_KEY_RESTART) ||
 									(inKeys.empty())
 								)
@@ -934,7 +981,7 @@ void BSEQuencer::run (uint32_t n_samples)
 									if
 									(
 										(controllers[MODE] == AUTOPLAY) ||
-										(controllers[MODE] == HOST_AUTOPLAY) ||
+										(controllers[MODE] == HOST_PLAYBACK) ||
 										(controllers[ON_KEY_PRESSED] == ON_KEY_RESTART) ||
 										(controllers[ON_KEY_PRESSED] == ON_KEY_SYNC) ||
 										(inKeys.size > 1)
@@ -1014,34 +1061,7 @@ void BSEQuencer::run (uint32_t n_samples)
 	}
 
 	// AUTOPLAY pseudo MIDI in
-	if ((controllers[PLAY]) && ((controllers[MODE] == AUTOPLAY) || (controllers[MODE] == HOST_AUTOPLAY)))
-	{
-		// Exactly one inKey needed for autoplay
-		// No inKeys => create an empty preliminary key
-		if (inKeys.empty())
-		{
-			Key key = defaultKey;
-			key.note = -99;
-			inKeys.push_back (key);
-		}
-
-		// More than one inKey => shrink to one
-		while (inKeys.size > 1)
-		{
-			stopMidiOut (last_t, inKeys.size - 1, ALL_CH);
-			inKeys.pop_back ();
-		}
-
-		// Check if inKey already plays the root key
-		if (inKeys[0].note != controllers[ROOT] + controllers[SIGNATURE] + (controllers[OCTAVE] + 1) * 12)
-		{
-			stopMidiOut (last_t, 0, ALL_CH);
-			inKeys[0] = defaultKey; // stepNr = -1; direction = 1; output.pads, output.playing and jumpOff ()-initialized
-			inKeys[0].note = controllers[ROOT] + controllers[SIGNATURE] + (controllers[OCTAVE] + 1) * 12;
-			inKeys[0].velocity = 64;
-			inKeys[0].startPos = position + double (last_t) / FRAMES_PER_BEAT - (1 / STEPS_PER_BEAT);
-		}
-	}
+	if ((controllers[PLAY]) && (controllers[MODE] == AUTOPLAY)) makeAutoKey (last_t);
 
 	// Update for the remainder of the cycle
 	if ((controllers[PLAY]) && (last_t < n_samples)) runSequencer (position + double (last_t) / FRAMES_PER_BEAT, last_t, n_samples);

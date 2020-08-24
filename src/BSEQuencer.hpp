@@ -93,6 +93,8 @@ private:
 	void startMidiOut (const int64_t frames, const int key, const uint8_t chbits);
 	void startMidiOut (const int64_t frames, const int key, const int row, const uint8_t chbits);
 	void cleanupInKeys ();
+	void makeAutoKey (const uint64_t last_t);
+	void stopAutoKey (const uint64_t act_t);
 	bool padHasAntecessor (const int row, const int step);
 	bool padHasSuccessor (const int row, const int step);
 	int getPadStart (const int row, const int step);
@@ -173,6 +175,7 @@ private:
 	double rate;
 	float bpm;
 	float beatsPerBar;
+	float speed;
 	uint32_t outCapacity;
 
 	// Data derived from controllers or host
