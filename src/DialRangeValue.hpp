@@ -299,10 +299,35 @@ protected:
 				// Arc
 				cairo_set_source_rgba (cr, CAIRO_RGBA (fgHi));
 				cairo_set_line_width (cr, 0.0);
-				cairo_arc (cr, dialCenter.x, dialCenter.y, 1.04 * dialRadius, p1, p2);
-				cairo_arc_negative (cr, dialCenter.x, dialCenter.y ,  1.16 * dialRadius, p2, p1);
+				cairo_arc (cr, dialCenter.x, dialCenter.y, 1.06 * dialRadius, p1, p2);
+				cairo_arc_negative (cr, dialCenter.x, dialCenter.y ,  1.14 * dialRadius, p2, p1);
 				cairo_close_path (cr);
 				cairo_fill (cr);
+
+				// Arrow
+				cairo_save (cr);
+				if ((direction == BIDIRECTIONAL) || (vr <= 0))
+				{
+					cairo_translate (cr, dialCenter.x, dialCenter.y);
+					cairo_rotate (cr, p1);
+					cairo_move_to (cr, 1.2 * dialRadius, 0);
+					cairo_rel_line_to (cr, -0.2 * dialRadius, 0);
+					cairo_rel_line_to (cr, 0.1 * dialRadius, -0.16 * dialRadius);
+					cairo_close_path (cr);
+					cairo_fill (cr);
+				}
+				if ((direction == BIDIRECTIONAL) || (vr > 0))
+				{
+					cairo_restore (cr);
+					cairo_translate (cr, dialCenter.x, dialCenter.y);
+					cairo_rotate (cr, p2);
+					cairo_move_to (cr, 1.2 * dialRadius, 0);
+					cairo_rel_line_to (cr, -0.2 * dialRadius, 0);
+					cairo_rel_line_to (cr, 0.1 * dialRadius, 0.16 * dialRadius);
+					cairo_close_path (cr);
+					cairo_fill (cr);
+				}
+
 			}
 
 			cairo_destroy (cr);
