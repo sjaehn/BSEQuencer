@@ -12,7 +12,8 @@ a) Install the bsequencer (bsequencer-lv2) package for your system
 * [Arch linux](https://www.archlinux.org/packages/community/x86_64/bsequencer/) by David Runge
 * [Free BSD](https://www.freshports.org/audio/bsequencer-lv2) by yurivict
 * [NixOS](https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/audio/bsequencer/default.nix) by Bart Brouns
-* [Debian](https://kx.studio/Repositories:Plugins) by falkTX
+* [Debian](https://librazik.tuxfamily.org/doc3/logiciels/bsequencer) by Olivier Humbert
+* [Ubuntu](https://packages.ubuntu.com/source/groovy/bsequencer)
 * Check https://repology.org/project/bsequencer/versions for other systems
 
 b) Build your own binaries in the following three steps.
