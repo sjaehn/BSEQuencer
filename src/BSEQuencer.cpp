@@ -20,6 +20,7 @@
 
 #include "BSEQuencer.hpp"
 #include <stdexcept>
+#include <ctime>
 
 BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
 	map (NULL), unmap (NULL), inputPort (NULL), outputPort (NULL),
@@ -29,9 +30,12 @@ BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
 	outCapacity (0), position (0.0),
 	ui_on (false), scheduleNotifyPadsToGui (false), scheduleNotifyStatusToGui (false),
 	scheduleNotifyScaleMapsToGui (true),
-	defaultKey (), scale (60, defaultScale)
+	defaultKey (), scale (60, defaultScale),
+	distUni (0.0, 1.0), distBi (-1.0, 1.0)
 
 {
+	rnd.seed (time(0));
+
 	//Scan host features for URID map
 	LV2_URID_Map* m = NULL;
 	LV2_URID_Unmap* u = NULL;
@@ -104,54 +108,6 @@ void BSEQuencer::connect_port (uint32_t port, void *data)
 	}
 }
 
-/* Prepares MIDI output of the respective key for sending
- * @param frames: time.frames
- * @param status: MIDI status byte
- * @param key: key number as element of inKeys
- * @param row: pad row
- * @param chbits: BSEQencer channels as bits
- */
-bool BSEQuencer::makeMidi (const int64_t frames, const uint8_t status, const int key, const int row, uint8_t chbits)
-{
-	if ((key >= 0) && (key < int (inKeys.size)))
-	{
-		int inKeyElement = scale.getElement(inKeys[key].note);
-
-		// Allow only valid keys
-		if (inKeyElement != ENOTE)
-		{
-			Pad* pd = &inKeys[key].output[row].pad;
-			uint8_t outCh = (((uint8_t)pd->ch) & 0x0F);
-			if ((1 << (outCh - 1)) & chbits)
-			{
-				int scaleNr = controllers[SCALE];
-				int outNote;
-
-				// Drumkit: absolute MIDI notes, not input pitched
-				if (rtScaleMaps[scaleNr].elements[row] &0x100) outNote = rtScaleMaps[scaleNr].elements[row] & 0x0FF;
-
-				// Scale: relative Notes obtained from actual scale, input pitched
-				else
-				{
-					int pitch = ((controllers[CH + (outCh - 1) * CH_SIZE + PITCH]) ? inKeyElement : 0);
-					outNote = scale.getMIDInote((rtScaleMaps[scaleNr].elements[row] & 0x0FF) + pitch);
-				}
-
-				// Apply octave shift, note offset
-				outNote += pd->pitchOctave * 12 + controllers[CH + (outCh - 1) * CH_SIZE + NOTE_OFFSET];
-
-				float outVelocity = ((float)inKeys[key].velocity) * pd->velocity * controllers[CH + (outCh - 1) * CH_SIZE + VELOCITY];
-				if ((outNote >=0) && (outNote <= 127))
-				{
-					midiStack.append (frames, outCh, status, outNote, LIMIT (outVelocity, 0, 127));
-					return (status == LV2_MIDI_MSG_NOTE_ON);
-				}
-			}
-		}
-	}
-	return false;
-}
-
 /*
  * Stops MIDI output and deletes the output playing flag for the respective pads
  */
@@ -165,11 +121,11 @@ void BSEQuencer::stopMidiOut (const int64_t frames, const int key, const uint8_t
 }
 void BSEQuencer::stopMidiOut (const int64_t frames, const int key, const int row, const uint8_t chbits)
 {
-	if ((key >= 0) && (key < ((int) inKeys.size)) && inKeys[key].output[row].playing)
-	{
-		makeMidi (frames, LV2_MIDI_MSG_NOTE_OFF, key, row, chbits);
-		inKeys[key].output[row].playing = false;
-	}
+	if ((key < 0) || (key >= ((int) inKeys.size)) || (!inKeys[key].output[row].playing)) return;
+
+	Output& o = inKeys[key].output[row];
+	if (o.gate) midiStack.append (frames, o.ch, LV2_MIDI_MSG_NOTE_OFF, o.note, o.velocity);
+	o.playing = false;
 }
 
 /*
@@ -179,11 +135,64 @@ void BSEQuencer::startMidiOut (const int64_t frames, const int key, const uint8_
 {
 	for (int i = 0; i < ROWS; ++i) startMidiOut (frames, key, i, chbits);
 }
+
 void BSEQuencer::startMidiOut (const int64_t frames, const int key, const int row, const uint8_t chbits)
 {
-	if ((key >= 0) && (key < ((int) inKeys.size)) && (chbits & ((uint8_t) inKeys[key].output[row].pad.ch) & 0x0F))
+	if ((key < 0) || (key >= ((int) inKeys.size))) return;
+
+	Output& o = inKeys[key].output[row];
+	int inKeyElement = scale.getElement(inKeys[key].note);
+
+	if
+	(
+		(inKeyElement != ENOTE) &&				// Ignore invalid keys
+		((uint8_t (o.pad.ch) & 0x0F) != 0) &&			// Ignore empty pad
+		(chbits & (1 << ((uint8_t (o.pad.ch) & 0x0F) - 1))) &&	// Filter channels
+		(!o.playing)						// Ignore if note is already playing
+	)
 	{
-		inKeys[key].output[row].playing = (inKeys[key].output[row].playing || makeMidi (frames, LV2_MIDI_MSG_NOTE_ON, key, row, chbits));
+		// Set sequencer channel
+		o.ch = (uint8_t (o.pad.ch) & 0x0F) - 1;
+
+		// Set / randomize gate
+		o.gate = (distUni (rnd) < o.pad.randGate);
+
+		// Set / randomize note
+		int scaleNr = controllers[SCALE];
+		int outNote;
+
+		// Drumkit: absolute MIDI notes, not input pitched
+		if (rtScaleMaps[scaleNr].elements[row] &0x100) outNote = rtScaleMaps[scaleNr].elements[row] & 0x0FF;
+
+		// Scale: relative Notes obtained from actual scale, input pitched
+		else
+		{
+			int pitch = ((controllers[CH + o.ch * CH_SIZE + PITCH]) ? inKeyElement : 0);
+			outNote = scale.getMIDInote((rtScaleMaps[scaleNr].elements[row] & 0x0FF) + pitch);
+		}
+
+		// Apply octave shift, note offset
+		int padOctave = o.pad.pitchOctave + round (distBi (rnd) * o.pad.randOctave);
+		int padNote = o.pad.pitchNote + round (distBi (rnd) * o.pad.randNote);
+		outNote += LIMIT (padOctave, -8, 8) * 12 + LIMIT (padNote, -16, 16) + controllers[CH + o.ch * CH_SIZE + NOTE_OFFSET];
+
+		o.note = LIMIT (outNote, 0, 127);
+
+		// Set / randomize velocity
+		int padVelocity = o.pad.velocity + round (distBi (rnd) * o.pad.randVelocity);
+		float outVelocity = float (inKeys[key].velocity) * padVelocity * controllers[CH + o.ch * CH_SIZE + VELOCITY];
+
+		o.velocity = LIMIT (outVelocity, 0, 127);
+
+		// Set / randomize duration
+		float dm = fmod (o.pad.duration, 1.0);
+		if (dm == 0.0) dm = 1.0;
+		float rd = LIMIT (o.pad.randDuration, -dm, 0.0);
+		float duration = o.pad.duration * (1 + distUni (rnd) * rd / dm);
+		o.duration = LIMIT (duration, 0.0, 32.0);
+
+		if (o.gate) midiStack.append (frames, o.ch, LV2_MIDI_MSG_NOTE_ON, o.note, o.velocity);
+		o.playing = true;
 	}
 }
 
@@ -557,6 +566,15 @@ void BSEQuencer::runSequencer (const double startpos, const uint32_t start, cons
 										if (inKeys[key].note != 0xff) startMidiOut (actframes, key, row, ALL_CH);
 									}
 
+									if
+									(
+										(pads[row][oldRowStepNr].duration > 1.0f) &&
+										(inKeys[key].output[row].playing)
+									)
+									{
+										inKeys[key].output[row].duration -= 1.0;
+									}
+
 								}
 							}
 						}
@@ -577,7 +595,7 @@ void BSEQuencer::runSequencer (const double startpos, const uint32_t start, cons
 							// Scan pads and calculate note off position
 							if (inKeys[key].output[row].playing)
 							{
-								double noteoffpos = inKeys[key].startPos + inKeys[key].output[row].pad.duration / STEPS_PER_BEAT;
+								double noteoffpos = inKeys[key].startPos + inKeys[key].output[row].duration / STEPS_PER_BEAT;
 								if ((noteoffpos >= lastpos) && (noteoffpos <= actpos))
 								{
 									int64_t noteoffframes = LIMIT (start + (noteoffpos - startpos) * FRAMES_PER_BEAT, start, end);
@@ -738,7 +756,11 @@ void BSEQuencer::run (uint32_t n_samples)
 							int step = (int) pMes[i].step;
 							if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < MAXSTEPS))
 							{
-								Pad pd (pMes[i].ch, pMes[i].pitchOctave, pMes[i].velocity, pMes[i].duration);
+								Pad pd
+								(
+									pMes[i].ch, pMes[i].pitchNote, pMes[i].pitchOctave, pMes[i].velocity, pMes[i].duration,
+									pMes[i].randGate, pMes[i].randNote, pMes[i].randOctave,pMes[i].randVelocity, pMes[i].randDuration
+								);
 								Pad valPad = validatePad (pd);
 								pads[row][step] = valPad;
 								if (valPad != pd)
@@ -1083,16 +1105,21 @@ LV2_State_Status BSEQuencer::state_save (LV2_State_Store_Function store, LV2_Sta
 			const LV2_Feature* const* features)
 {
 	// Store pads
-	char padDataString[0x8010] = "Matrix data:\n";
+	char padDataString[0x10010] = "Matrix data:\n";
 
 	for (int step = 0; step < MAXSTEPS; ++step)
 	{
 		for (int row = 0; row < ROWS; ++row)
 		{
-			char valueString[64];
+			char valueString[128];
 			int id = step * ROWS + row;
 			Pad* pd = &pads[row][step];
-			snprintf (valueString, 62, "id:%d; ch:%d; oc:%d; ve:%1.2f; du:%1.2f", id, (int) pd->ch, (int) pd->pitchOctave, pd->velocity, pd->duration);
+			snprintf
+			(
+				valueString, 126, "id:%d; ch:%d; st:%d; oc:%d; ve:%1.2f; du:%1.2f; rg:%d; rs:%d; ro:%d; rv:%1.2f; rd:%1.2f",
+				id, (int) pd->ch, (int)pd->pitchNote, (int) pd->pitchOctave, pd->velocity, pd->duration,
+				(int) pd->randGate, (int) pd->randNote, (int) pd->randOctave, pd->randVelocity, pd->randDuration
+			);
 			if ((step < MAXSTEPS - 1) || (row < ROWS)) strcat (valueString, ";\n");
 			else strcat(valueString, "\n");
 			strcat (padDataString, valueString);
@@ -1156,7 +1183,7 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 		// Restore pads
 		// Parse retrieved data
 		std::string padDataString = (char*) padData;
-		const std::string keywords[5] = {"id:", "ch:", "oc:", "ve:", "du:"};
+		const std::string keywords[11] = {"id:", "ch:", "st:", "oc:", "ve:", "du:", "rg:", "rs:", "ro:", "rv:", "rd:"};
 		while (!padDataString.empty())
 		{
 			// Look for next "id:"
@@ -1183,7 +1210,7 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 			int step = id / ROWS;
 
 			// Look for pad data
-			for (int i = 1; i < 5; ++i)
+			for (int i = 1; i < 11; ++i)
 			{
 				strPos = padDataString.find (keywords[i]);
 				if (strPos == std::string::npos) continue;	// Keyword not found => next keyword
@@ -1206,11 +1233,23 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 				switch (i) {
 				case 1: pads[row][step].ch = val;
 						break;
-				case 2: pads[row][step].pitchOctave = val;
+				case 2: pads[row][step].pitchNote = val;
 						break;
-				case 3:	pads[row][step].velocity = val;
+				case 3: pads[row][step].pitchOctave = val;
 						break;
-				case 4:	pads[row][step].duration = val;
+				case 4:	pads[row][step].velocity = val;
+						break;
+				case 5:	pads[row][step].duration = val;
+						break;
+				case 6:	pads[row][step].randGate = val;
+						break;
+				case 7:	pads[row][step].randNote = val;
+						break;
+				case 8:	pads[row][step].randOctave = val;
+						break;
+				case 9:	pads[row][step].randVelocity = val;
+						break;
+				case 10:pads[row][step].randDuration = val;
 						break;
 				default:break;
 				}
@@ -1422,10 +1461,15 @@ Pad BSEQuencer::validatePad (Pad pad)
 	return Pad
 	(
 		validateValue (pad.ch, {0, 255, 1}),
+		validateValue (pad.pitchNote, controllerLimits[SELECTION_NOTE]),
 		validateValue (pad.pitchOctave, controllerLimits[SELECTION_OCTAVE]),
 		validateValue (pad.velocity, controllerLimits[SELECTION_VELOCITY]),
-		LIMIT (pad.duration, 0.0, 32.0)
-		//validateValue (pad.duration, controllerLimits[SELECTION_DURATION])
+		LIMIT (pad.duration, 0.0, 32.0),
+		validateValue (pad.randGate, controllerLimits[SELECTION_GATE_RAND]),
+		validateValue (pad.randNote, controllerLimits[SELECTION_NOTE_RAND]),
+		validateValue (pad.randOctave, controllerLimits[SELECTION_OCTAVE_RAND]),
+		validateValue (pad.randVelocity, controllerLimits[SELECTION_VELOCITY_RAND]),
+		validateValue (pad.randDuration, controllerLimits[SELECTION_DURATION_RAND])
 	);
 }
 
@@ -1435,7 +1479,11 @@ Pad BSEQuencer::validatePad (Pad pad)
 bool BSEQuencer::padMessageBufferAppendPad (int row, int step, Pad pad)
 {
 	PadMessage end = PadMessage (ENDPADMESSAGE);
-	PadMessage msg = PadMessage (step, row, pad.ch, pad.pitchOctave, pad.velocity, pad.duration);
+	PadMessage msg = PadMessage
+	(
+		step, row, pad.ch, pad.pitchNote, pad.pitchOctave, pad.velocity, pad.duration,
+		pad.randGate, pad.randNote, pad.randOctave, pad.randVelocity, pad.randDuration
+	);
 
 	for (int i = 0; i < MAXSTEPS * ROWS; ++i)
 	{
@@ -1460,7 +1508,11 @@ void BSEQuencer::padMessageBufferAllPads ()
 		for (int j = 0; j < ROWS; ++j)
 		{
 			Pad* pd = &(pads[j][i]);
-			padMessageBuffer[i * ROWS + j] = PadMessage (i, j, pd->ch, pd->pitchOctave, pd->velocity, pd->duration);
+			padMessageBuffer[i * ROWS + j] = PadMessage
+			(
+				i, j, pd->ch, pd->pitchNote, pd->pitchOctave, pd->velocity, pd->duration,
+				pd->randGate, pd->randNote, pd->randOctave, pd->randVelocity, pd->randDuration
+			);
 		}
 	}
 }

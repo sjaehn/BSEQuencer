@@ -23,74 +23,78 @@
 #include <exception>
 
 BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *const *features, PuglNativeWindow parentWindow) :
-	Window (1200, 820, "B.SEQuencer", parentWindow, true),
+	Window (1250, 820, "B.SEQuencer", parentWindow, true),
 	controller (NULL), write_function (NULL),
 	pluginPath (bundle_path ? std::string (bundle_path) : std::string ("")),
 	sz (1.0), bgImageSurface (nullptr),
 	uris (), forge (), clipBoard (),
 	cursorBits {0}, noteBits (0), chBits (0),
 	tempTool (false), tempToolCh (0), wheelScrolled (false), modifier (MODIFIER_VELOCITY),
-	mContainer (0, 0, 1200, 820, "main"),
+	mContainer (0, 0, 1250, 820, "main"),
 	padSurface (98, 88, 804, 484, "box"),
 	captionSurface (18, 88, 64, 484, "box"),
 
-	modeBox (920, 88, 260, 170, "box"),
-	modeBoxLabel (10, 10, 240, 20, "ctlabel", "Play mode"),
+	modeBox (920, 88, 310, 170, "box"),
+	modeBoxLabel (10, 10, 290, 20, "ctlabel", "Play mode"),
 	modeLabel (10, 80, 60, 20, "lflabel", "Mode"),
-	modeListBox (80, 80, 170, 20, 170, 80, "menu", BItems::ItemList ({{1, "Autoplay"}, {3, "Host-controlled playback"} , {2, "Host & MIDI controlled"}}), 2.0),
+	modeListBox (80, 80, 220, 20, 220, 80, "menu", BItems::ItemList ({{1, "Autoplay"}, {3, "Host-controlled playback"} , {2, "Host & MIDI controlled"}}), 2.0),
 	modeAutoplayBpmLabel (10, 115, 120, 20, "lflabel", "Beats per min"),
-	modeAutoplayBpmSlider (120, 105, 130, 25, "slider", 120.0, 1.0, 300.0, 0.0, "%3.1f"),
+	modeAutoplayBpmSlider (120, 105, 180, 25, "slider", 120.0, 1.0, 300.0, 0.0, "%3.1f"),
 	modeAutoplayBpbLabel (10, 145, 120, 20, "lflabel", "Beats per bar"),
-	modeAutoplayBpbSlider (120, 135, 130, 25, "slider", 4.0, 1.0, 16.0, 1.0, "%2.0f"),
+	modeAutoplayBpbSlider (120, 135, 180, 25, "slider", 4.0, 1.0, 16.0, 1.0, "%2.0f"),
 	modeMidiInChannelLabel (10, 110, 130, 20 , "lflabel", "MIDI input channel"),
-	modeMidiInChannelListBox (180, 110, 70, 20, 70, 200, "menu",
+	modeMidiInChannelListBox (180, 110, 120, 20, 120, 200, "menu",
 				  BItems::ItemList ({{0, "All"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}, {9, "9"},
 						     {10, "10"}, {11, "11"}, {12, "12"}, {13, "13"}, {14, "14"}, {15, "15"}, {16, "16"}})),
 	modeOnKeyLabel (10, 140, 100, 20, "lflabel", "On NOTE ON"),
-	modeOnKeyListBox (130, 140, 120, 20, 120, 80, "menu", BItems::ItemList ({{0, "Restart"}, {2, "Restart & sync"}, {1, "Continue"}})),
+	modeOnKeyListBox (180, 140, 120, 20, 120, 80, "menu", BItems::ItemList ({{0, "Restart"}, {2, "Restart & sync"}, {1, "Continue"}})),
 	modePlayLabel (10, 50, 205, 20, "lflabel", "Status: playing ..."),
-	modePlayButton (220, 40, 30, 30, "box", 1.0),
+	modePlayButton (270, 40, 30, 30, "box", 1.0),
 
-	toolBox (920, 280, 260, 292, "box"),
-	toolBoxLabel (10, 10, 240, 20, "ctlabel", "Toolbox"),
-	toolButtonBox (0, 30, 260, 160, "widget"),
-	toolWholeStepButton (170, 40, 80, 20, "tgbutton", "Whole step", 0.0),
-	toolResetButton (50, 130, 20, 20, "tgbutton"),
-	toolUndoButton (80, 130, 20, 20, "tgbutton"),
-	toolRedoButton (110, 130, 20, 20, "tgbutton"),
+	toolBox (920, 280, 310, 292, "box"),
+	toolBoxLabel (10, 10, 290, 20, "ctlabel", "Toolbox"),
+	toolButtonBox (0, 30, 310, 160, "widget"),
+	toolWholeStepButton (210, 40, 80, 20, "tgbutton", "Whole step", 0.0),
+	toolResetButton (90, 130, 20, 20, "tgbutton"),
+	toolUndoButton (120, 130, 20, 20, "tgbutton"),
+	toolRedoButton (150, 130, 20, 20, "tgbutton"),
 	toolButtonBoxCtrlLabel (10, 10, 60, 20, "lflabel", "Controls"),
 	toolButtonBoxChLabel (10, 70, 60, 20, "lflabel", "Channels"),
 	toolButtonBoxEditLabel (10, 100, 40, 20, "lflabel", "Edit"),
-	toolOctaveLabel (30, 260, 60, 20, "ctlabel", "Octave"),
-	toolOctaveDial (35, 200, 50, 60, "dial", 0.0, -8.0, 8.0, 1.0, "%1.0f"),
-	toolVelocityLabel (100, 260, 60, 20, "ctlabel", "Velocity"),
-	toolVelocityDial  (105, 200, 50, 60, "dial", 1.0, 0.0, 2.0, 0.0, "%1.2f"),
-	toolDurationLabel (170, 260, 60, 20, "ctlabel", "Duration"),
-	toolDurationDial (175, 200, 50, 60, "dial", 1.0, 0.0, 1.0, 0.0, "%1.2f"),
+	toolGateLabel (10, 260, 30, 20, "ctlabel", "Gate"),
+	toolGateSlider (12.5, 200, 25, 60, "dial", 1.0, 0.0, 1.0, 0.0, "%1.2f"),
+	toolNoteLabel (45, 260, 60, 20, "ctlabel", "Note"),
+	toolNoteDial (50, 200, 50, 60, "dial", 0.0, -16.0, 16.0, 1.0, "%1.0f"),
+	toolOctaveLabel (110, 260, 60, 20, "ctlabel", "Octave"),
+	toolOctaveDial (115, 200, 50, 60, "dial", 0.0, -8.0, 8.0, 1.0, "%1.0f"),
+	toolVelocityLabel (175, 260, 60, 20, "ctlabel", "Velocity"),
+	toolVelocityDial  (180, 200, 50, 60, "dial", 1.0, 0.0, 2.0, 0.0, "%1.2f"),
+	toolDurationLabel (240, 260, 60, 20, "ctlabel", "Duration"),
+	toolDurationDial (245, 200, 50, 60, "dial", 1.0, 0.0, 1.0, 0.0, "%1.2f", UNIDIRECTIONAL),
 
-	propertiesBox (920, 590, 260, 210, "box"),
-	propertiesBoxLabel (10, 10, 240, 20, "ctlabel", "Properties"),
+	propertiesBox (920, 590, 310, 210, "box"),
+	propertiesBoxLabel (10, 10, 290, 20, "ctlabel", "Properties"),
 	propertiesNrStepsLabel (10, 50, 170, 20, "lflabel", "Total number of steps"),
-	propertiesNrStepsListBox (180, 50, 70, 20, 70, 100, "menu",
+	propertiesNrStepsListBox (210, 50, 90, 20, 90, 100, "menu",
 				  BItems::ItemList ({{8, "8"}, {16, "16"}, {24, "24"}, {32, "32"}}), 16.0),
-	propertiesStepsPerLabel (100, 85, 80, 20, "lflabel", "steps per"),
-	propertiesStepsPerSlider (10, 75, 80, 25, "slider", 4.0, 1.0, 8.0, 1.0, "%2.0f"),
-	propertiesBaseListBox (180, 85, 70, 20, 70, 60, "menu",
+	propertiesStepsPerLabel (110, 85, 80, 20, "lflabel", "steps per"),
+	propertiesStepsPerSlider (10, 75, 90, 25, "slider", 4.0, 1.0, 8.0, 1.0, "%2.0f"),
+	propertiesBaseListBox (210, 85, 90, 20, 90, 60, "menu",
 			       BItems::ItemList ({"beat", "bar"}), 1.0),
 	propertiesRootLabel (10, 115, 40, 20, "lflabel", "Root"),
-	propertiesRootListBox (100, 115, 70, 20, 0, -160, 70, 160, "menu",
+	propertiesRootListBox (110, 115, 90, 20, 0, -160, 90, 160, "menu",
 			       BItems::ItemList ({{0, "C"}, {2, "D"}, {4, "E"}, {5, "F"}, {7, "G"}, {9, "A"}, {11, "B"}}), 0.0),
-	propertiesSignatureListBox (180, 115, 70, 20, 70, 80, "menu",
+	propertiesSignatureListBox (210, 115, 90, 20, 90, 80, "menu",
 				    BItems::ItemList ({{-1, "b"}, {0, ""}, {1, "#"}}), 0.0),
 	propertiesOctaveLabel (10, 145, 55, 20, "lflabel", "Octave"),
-	propertiesOctaveListBox (180, 145, 70, 20, 0, -220, 70, 220, "menu",
+	propertiesOctaveListBox (210, 145, 90, 20, 0, -220, 90, 220, "menu",
 				 BItems::ItemList ({{-1, "-1"}, {0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}}), 4.0),
 	propertiesScaleLabel (10, 175, 50, 20, "lflabel", "Scale"),
 	propertiesScaleEditIcon (70, 175, 20, 20, "widget", (bundle_path ? std::string (bundle_path) + EDIT_SYMBOL : std::string (""))),
 	propertiesScaleListBox (),
 
-	helpButton (1116, 50, 24, 24, "halobutton", "Help"),
-	ytButton (1146, 50, 24, 24, "halobutton", "Feature tour"),
+	helpButton (1166, 50, 24, 24, "halobutton", "Help"),
+	ytButton (1196, 50, 24, 24, "halobutton", "Feature tour"),
 	scaleEditor (nullptr)
 {
 	// Init scale maps
@@ -105,15 +109,15 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	{
 		scaleItems.push_back (BItems::Item (scaleNr, scaleMaps[scaleNr].name));
 	}
-	propertiesScaleListBox = BWidgets::PopupListBox (100, 175, 150, 20, 0, -420, 150, 420, "menu", scaleItems, 0.0);
+	propertiesScaleListBox = BWidgets::PopupListBox (100, 175, 200, 20, 0, -420, 200, 420, "menu", scaleItems, 0.0);
 	propertiesScaleListBox.rename ("menu");
 
 	// Init toolbox buttons
-	toolButtonBox.addButton (80, 70, 20, 20, {{0.0, 0.03, 0.06, 1.0}, NO_CTRL, "No channel"});
-	for (int i = 1; i < NR_SEQUENCER_CHS + 1; ++i) toolButtonBox.addButton (80 + i * 30, 70, 20, 20, chButtonStyles[i]);
-	toolButtonBox.addButton (80 , 10, 20, 20, {{0.0, 0.03, 0.06, 1.0}, NO_CTRL, "No control"});
-	for (int i = 1; i < NR_CTRL_BUTTONS; ++i) toolButtonBox.addButton (80 + (i % 6) * 30, 10 + ((int) (i / 6)) * 30, 20, 20, ctrlButtonStyles[i]);
-	for (int i = 0; i < NR_EDIT_BUTTONS; ++i) toolButtonBox.addButton (50 + i * 30, 100, 20, 20, editButtonStyles[i]);
+	toolButtonBox.addButton (90, 70, 20, 20, {{0.0, 0.03, 0.06, 1.0}, NO_CTRL, "No channel"});
+	for (int i = 1; i < NR_SEQUENCER_CHS + 1; ++i) toolButtonBox.addButton (90 + i * 30, 70, 20, 20, chButtonStyles[i]);
+	toolButtonBox.addButton (90 , 10, 20, 20, {{0.0, 0.03, 0.06, 1.0}, NO_CTRL, "No control"});
+	for (int i = 1; i < NR_CTRL_BUTTONS; ++i) toolButtonBox.addButton (90 + (i % 7) * 30, 10 + ((int) (i / 7)) * 30, 20, 20, ctrlButtonStyles[i]);
+	for (int i = 0; i < NR_EDIT_BUTTONS; ++i) toolButtonBox.addButton (90 + i * 30, 100, 20, 20, editButtonStyles[i]);
 
 	// Init ChBoxes
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
@@ -131,7 +135,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 		chBoxes[i].pitchScreen.hide ();
 		chBoxes[i].velocityDial = BWidgets::DialValue (25, 120, 50, 60, "ch" + std::to_string (i + 1), 1.0, 0.0, 2.0, 0.0, "%1.2f");
 		chBoxes[i].velocityLabel = BWidgets::Label (20, 180, 60, 20, "ctlabel", "Velocity");
-		chBoxes[i].noteOffsetDial = BWidgets::DialValue (118.5, 120, 50, 60, "ch" + std::to_string (i + 1), 0.0, -127.0, 127.0, 1.0, "%3.0f");
+		chBoxes[i].noteOffsetDial = BWidgets::DialValue (118.5, 120, 50, 60, "ch" + std::to_string (i + 1), 0.0, -127.0, 127.0, 1.0, "%1.0f");
 		chBoxes[i].noteOffsetLabel = BWidgets::Label (113.5, 180, 60, 20, "ctlabel", "Offset");
 	}
 
@@ -150,9 +154,15 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	controllerWidgets[AUTOPLAY_BPM] = (BWidgets::ValueWidget*) &modeAutoplayBpmSlider;
 	controllerWidgets[AUTOPLAY_BPB] = (BWidgets::ValueWidget*) &modeAutoplayBpbSlider;
 	controllerWidgets[SELECTION_CH] = (BWidgets::ValueWidget*) &toolButtonBox;
+	controllerWidgets[SELECTION_NOTE] = (BWidgets::ValueWidget*) &toolNoteDial;
 	controllerWidgets[SELECTION_OCTAVE] = (BWidgets::ValueWidget*) &toolOctaveDial;
 	controllerWidgets[SELECTION_VELOCITY] = (BWidgets::ValueWidget*) &toolVelocityDial;
 	controllerWidgets[SELECTION_DURATION] = (BWidgets::ValueWidget*) &toolDurationDial;
+	controllerWidgets[SELECTION_GATE_RAND] = (BWidgets::ValueWidget*) &toolGateSlider;
+	controllerWidgets[SELECTION_NOTE_RAND] = (BWidgets::ValueWidget*) &toolNoteDial.range;
+	controllerWidgets[SELECTION_OCTAVE_RAND] = (BWidgets::ValueWidget*) &toolOctaveDial.range;
+	controllerWidgets[SELECTION_VELOCITY_RAND] = (BWidgets::ValueWidget*) &toolVelocityDial.range;
+	controllerWidgets[SELECTION_DURATION_RAND] = (BWidgets::ValueWidget*) &toolDurationDial.range;
 
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
 	{
@@ -194,9 +204,16 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	widgetBg.loadFillFromCairoSurface (bgImageSurface);
 	applyTheme (theme);
 
+	toolDurationDial.range.setMax (0.0);
+	toolGateSlider.setHardChangeable (false);
+	toolNoteDial.setHardChangeable (false);
+	toolNoteDial.range.setHardChangeable (false);
 	toolOctaveDial.setHardChangeable (false);
+	toolOctaveDial.range.setHardChangeable (false);
 	toolVelocityDial.setHardChangeable (false);
+	toolVelocityDial.range.setHardChangeable (false);
 	toolDurationDial.setHardChangeable (false);
+	toolDurationDial.range.setHardChangeable (false);
 
 	modeAutoplayBpmLabel.hide ();
 	modeAutoplayBpmSlider.hide ();
@@ -243,6 +260,10 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	toolButtonBox.add (toolUndoButton);
 	toolButtonBox.add (toolRedoButton);
 
+	toolBox.add (toolGateLabel);
+	toolBox.add (toolGateSlider);
+	toolBox.add (toolNoteLabel);
+	toolBox.add (toolNoteDial);
 	toolBox.add (toolOctaveLabel);
 	toolBox.add (toolOctaveDial);
 	toolBox.add (toolVelocityLabel);
@@ -523,7 +544,7 @@ void BSEQuencer_GUI::scale ()
 	lfLabelFont.setFontSize (12 * sz);
 
 	//Background
-	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 1200 * sz, 820 * sz);
+	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 1250 * sz, 820 * sz);
 	cairo_t* cr = cairo_create (surface);
 	cairo_scale (cr, sz, sz);
 	cairo_set_source_surface(cr, bgImageSurface, 0, 0);
@@ -533,84 +554,88 @@ void BSEQuencer_GUI::scale ()
 	cairo_surface_destroy (surface);
 
 	//Scale widgets
-	RESIZE (mContainer, 0, 0, 1200, 820, sz);
+	RESIZE (mContainer, 0, 0, 1250, 820, sz);
 	RESIZE (padSurface, 98, 88, 804, 484, sz);
 
 	//RESIZE (padSurfaceFocusText, 0, 0, 100, 60, sz);
 	scaleFocus ();
 	RESIZE (captionSurface, 18, 88, 64, 484, sz);
 
-	RESIZE (modeBox, 920, 88, 260, 180, sz);
-	RESIZE (modeBoxLabel, 10, 10, 240, 20, sz);
+	RESIZE (modeBox, 920, 88, 310, 180, sz);
+	RESIZE (modeBoxLabel, 10, 10, 290, 20, sz);
 	RESIZE (modeLabel, 10, 80, 60, 20, sz);
-	RESIZE (modeListBox, 80, 80, 170, 20, sz);
-	modeListBox.resizeListBox(BUtilities::Point (170 * sz, 80 * sz));
-	modeListBox.resizeListBoxItems(BUtilities::Point (170 * sz, 20 * sz));
+	RESIZE (modeListBox, 80, 80, 220, 20, sz);
+	modeListBox.resizeListBox(BUtilities::Point (220 * sz, 80 * sz));
+	modeListBox.resizeListBoxItems(BUtilities::Point (220 * sz, 20 * sz));
 	RESIZE (modeAutoplayBpmLabel, 10, 115, 120, 20, sz);
-	RESIZE (modeAutoplayBpmSlider, 120, 105, 130, 25, sz);
+	RESIZE (modeAutoplayBpmSlider, 120, 105, 180, 25, sz);
 	RESIZE (modeAutoplayBpbLabel, 10, 145, 120, 20, sz);
-	RESIZE (modeAutoplayBpbSlider, 120, 135, 130, 25, sz);
+	RESIZE (modeAutoplayBpbSlider, 120, 135, 180, 25, sz);
 	RESIZE (modeMidiInChannelLabel, 10, 110, 130, 20, sz);
-	RESIZE (modeMidiInChannelListBox, 180, 110, 70, 20, sz);
-	modeMidiInChannelListBox.resizeListBox (BUtilities::Point (70 * sz, 200 * sz));
-	modeMidiInChannelListBox.resizeListBoxItems (BUtilities::Point (70 * sz, 20 * sz));
+	RESIZE (modeMidiInChannelListBox, 180, 110, 120, 20, sz);
+	modeMidiInChannelListBox.resizeListBox (BUtilities::Point (120 * sz, 200 * sz));
+	modeMidiInChannelListBox.resizeListBoxItems (BUtilities::Point (120 * sz, 20 * sz));
 	RESIZE (modeOnKeyLabel, 10, 140, 100, 20, sz);
-	RESIZE (modeOnKeyListBox, 130, 140, 120, 20, sz);
+	RESIZE (modeOnKeyListBox, 180, 140, 120, 20, sz);
 	modeOnKeyListBox.resizeListBox (BUtilities::Point (120 * sz, 80 * sz));
 	modeOnKeyListBox.resizeListBoxItems (BUtilities::Point (120 * sz, 20 * sz));
 	RESIZE (modePlayLabel, 10, 50, 205, 20, sz);
-	RESIZE (modePlayButton, 220, 40, 30, 30, sz);
+	RESIZE (modePlayButton, 270, 40, 30, 30, sz);
 
-	RESIZE (toolBox, 920, 280, 260, 292, sz);
-	RESIZE (toolBoxLabel, 10, 10, 240, 20, sz);
-	RESIZE (toolButtonBox, 0, 30, 260, 160, sz);
-	RESIZE (toolWholeStepButton, 170, 40, 80, 20, sz);
-	RESIZE (toolResetButton, 50, 130, 20, 20, sz);
-	RESIZE (toolUndoButton, 80, 130, 20, 20, sz);
-	RESIZE (toolRedoButton, 110, 130, 20, 20, sz);
+	RESIZE (toolBox, 920, 280, 310, 292, sz);
+	RESIZE (toolBoxLabel, 10, 10, 290, 20, sz);
+	RESIZE (toolButtonBox, 0, 30, 310, 160, sz);
+	RESIZE (toolWholeStepButton, 210, 40, 80, 20, sz);
+	RESIZE (toolResetButton, 90, 130, 20, 20, sz);
+	RESIZE (toolUndoButton, 120, 130, 20, 20, sz);
+	RESIZE (toolRedoButton, 150, 130, 20, 20, sz);
 	RESIZE (toolButtonBoxCtrlLabel, 10, 10, 60, 20, sz);
 	RESIZE (toolButtonBoxChLabel, 10, 70, 60, 20, sz);
 	RESIZE (toolButtonBoxEditLabel, 10, 100, 60, 20, sz);
-	RESIZE (toolOctaveLabel, 30, 260, 60, 20, sz);
-	RESIZE (toolOctaveDial, 35, 200, 50, 60, sz);
-	RESIZE (toolVelocityLabel, 100, 260, 60, 20, sz);
-	RESIZE (toolVelocityDial, 105, 200, 50, 60, sz);
-	RESIZE (toolDurationLabel, 170, 260, 60, 20, sz);
-	RESIZE (toolDurationDial, 175, 200, 50, 60, sz);
+	RESIZE (toolGateLabel, 10, 260, 30, 20, sz);
+	RESIZE (toolGateSlider, 12.5, 200, 25, 60, sz);
+	RESIZE (toolNoteLabel, 45, 260, 60, 20, sz);
+	RESIZE (toolNoteDial, 50, 200, 50, 60, sz);
+	RESIZE (toolOctaveLabel, 110, 260, 60, 20, sz);
+	RESIZE (toolOctaveDial, 115, 200, 50, 60, sz);
+	RESIZE (toolVelocityLabel, 175, 260, 60, 20, sz);
+	RESIZE (toolVelocityDial, 180, 200, 50, 60, sz);
+	RESIZE (toolDurationLabel, 240, 260, 60, 20, sz);
+	RESIZE (toolDurationDial, 245, 200, 50, 60, sz);
 
-	RESIZE (propertiesBox, 920, 590, 260, 210, sz);
-	RESIZE (propertiesBoxLabel, 10, 10, 240, 20, sz);
+	RESIZE (propertiesBox, 920, 590, 310, 210, sz);
+	RESIZE (propertiesBoxLabel, 10, 10, 290, 20, sz);
 	RESIZE (propertiesNrStepsLabel, 10, 50, 170, 20, sz);
-	RESIZE (propertiesNrStepsListBox, 180, 50, 70, 20, sz);
-	propertiesNrStepsListBox.resizeListBox (BUtilities::Point (70 * sz, 100 * sz));
-	propertiesNrStepsListBox.resizeListBoxItems (BUtilities::Point (70 * sz, 20 * sz));
-	RESIZE (propertiesStepsPerSlider, 10, 75, 80, 25, sz);
-	RESIZE (propertiesStepsPerLabel, 100, 85, 80, 20, sz);
-	RESIZE (propertiesBaseListBox, 180, 85, 70, 20, sz);
-	propertiesBaseListBox.resizeListBox (BUtilities::Point (70 * sz, 60 * sz));
-	propertiesBaseListBox.resizeListBoxItems (BUtilities::Point (70 * sz, 20 * sz));
+	RESIZE (propertiesNrStepsListBox, 210, 50, 90, 20, sz);
+	propertiesNrStepsListBox.resizeListBox (BUtilities::Point (90 * sz, 100 * sz));
+	propertiesNrStepsListBox.resizeListBoxItems (BUtilities::Point (90 * sz, 20 * sz));
+	RESIZE (propertiesStepsPerSlider, 10, 75, 90, 25, sz);
+	RESIZE (propertiesStepsPerLabel, 110, 85, 80, 20, sz);
+	RESIZE (propertiesBaseListBox, 210, 85, 90, 20, sz);
+	propertiesBaseListBox.resizeListBox (BUtilities::Point (90 * sz, 60 * sz));
+	propertiesBaseListBox.resizeListBoxItems (BUtilities::Point (90 * sz, 20 * sz));
 	RESIZE (propertiesRootLabel, 10, 115, 40, 20, sz);
-	RESIZE (propertiesRootListBox, 100, 115, 70, 20, sz);
-	propertiesRootListBox.resizeListBox (BUtilities::Point (70 * sz, 160 * sz));
+	RESIZE (propertiesRootListBox, 110, 115, 90, 20, sz);
+	propertiesRootListBox.resizeListBox (BUtilities::Point (90 * sz, 160 * sz));
 	propertiesRootListBox.moveListBox (BUtilities::Point (0, -160 * sz));
-	propertiesRootListBox.resizeListBoxItems (BUtilities::Point (70 * sz, 20 * sz));
-	RESIZE (propertiesSignatureListBox, 180, 115, 70, 20, sz);
-	propertiesSignatureListBox.resizeListBox (BUtilities::Point (70 * sz, 80 * sz));
-	propertiesSignatureListBox.resizeListBoxItems (BUtilities::Point (70 * sz, 20 * sz));
+	propertiesRootListBox.resizeListBoxItems (BUtilities::Point (90 * sz, 20 * sz));
+	RESIZE (propertiesSignatureListBox, 210, 115, 90, 20, sz);
+	propertiesSignatureListBox.resizeListBox (BUtilities::Point (90 * sz, 80 * sz));
+	propertiesSignatureListBox.resizeListBoxItems (BUtilities::Point (90 * sz, 20 * sz));
 	RESIZE (propertiesOctaveLabel, 10, 145, 55, 20, sz);
-	RESIZE (propertiesOctaveListBox, 180, 145, 70, 20, sz);
-	propertiesOctaveListBox.resizeListBox (BUtilities::Point (70 * sz, 220 * sz));
+	RESIZE (propertiesOctaveListBox, 210, 145, 90, 20, sz);
+	propertiesOctaveListBox.resizeListBox (BUtilities::Point (90 * sz, 220 * sz));
 	propertiesOctaveListBox.moveListBox (BUtilities::Point (0, -220 * sz));
-	propertiesOctaveListBox.resizeListBoxItems (BUtilities::Point (70 * sz, 20 * sz));
+	propertiesOctaveListBox.resizeListBoxItems (BUtilities::Point (90 * sz, 20 * sz));
 	RESIZE (propertiesScaleLabel, 10, 175, 50, 20, sz);
 	RESIZE (propertiesScaleEditIcon, 70, 175, 20, 20, sz);
-	RESIZE (propertiesScaleListBox, 100, 175, 150, 20, sz);
-	propertiesScaleListBox.resizeListBox (BUtilities::Point (150 * sz, 420 * sz));
+	RESIZE (propertiesScaleListBox, 100, 175, 200, 20, sz);
+	propertiesScaleListBox.resizeListBox (BUtilities::Point (200 * sz, 420 * sz));
 	propertiesScaleListBox.moveListBox (BUtilities::Point (0, -420 * sz));
-	propertiesScaleListBox.resizeListBoxItems (BUtilities::Point (150 * sz, 20 * sz));
+	propertiesScaleListBox.resizeListBoxItems (BUtilities::Point (200 * sz, 20 * sz));
 
-	RESIZE (helpButton, 1116, 50, 24, 24, sz);
-	RESIZE (ytButton, 1146, 50, 24, 24, sz);
+	RESIZE (helpButton, 1166, 50, 24, 24, sz);
+	RESIZE (ytButton, 1196, 50, 24, 24, sz);
 	if (scaleEditor) {RESIZE ((*scaleEditor), 420, 20, 360, 760, sz);}
 
 	for (int i = 0; i < NR_SEQUENCER_CHS; ++i)
@@ -699,6 +724,10 @@ void BSEQuencer_GUI::applyTheme (BStyles::Theme& theme)
 	toolButtonBoxCtrlLabel.applyTheme (theme);
 	toolButtonBoxChLabel.applyTheme (theme);
 	toolButtonBoxEditLabel.applyTheme (theme);
+	toolGateLabel.applyTheme (theme);
+	toolGateSlider.applyTheme (theme);
+	toolNoteLabel.applyTheme (theme);
+	toolNoteDial.applyTheme (theme);
 	toolOctaveLabel.applyTheme (theme);
 	toolOctaveDial.applyTheme (theme);
 	toolVelocityLabel.applyTheme (theme);
@@ -747,7 +776,7 @@ void BSEQuencer_GUI::onConfigureRequest (BEvents::ExposeEvent* event)
 {
 	Window::onConfigureRequest (event);
 
-	sz = (getWidth() / 1200 > getHeight() / 820 ? getHeight() / 820 : getWidth() / 1200);
+	sz = (getWidth() / 1250 > getHeight() / 820 ? getHeight() / 820 : getWidth() / 1250);
 	scale ();
 }
 
@@ -939,6 +968,18 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 
 				// Caption relevant changes
 				if ((widgetNr == ROOT) || (widgetNr == SIGNATURE) || (widgetNr == SCALE)) ui->drawCaption ();
+
+				// Range dials: also update parents
+				if
+				(
+					(widgetNr == SELECTION_NOTE_RAND) ||
+					(widgetNr == SELECTION_OCTAVE_RAND) ||
+					(widgetNr == SELECTION_VELOCITY_RAND) ||
+					(widgetNr == SELECTION_DURATION_RAND)
+				)
+				{
+					if (widget->getParent()) widget->getParent()->update();
+				}
 			}
 		}
 	}
@@ -1080,9 +1121,15 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 						Pad props
 						(
 							ui->controllerWidgets[SELECTION_CH]->getValue() + pdctrl * 0x10,
+							ui->controllerWidgets[SELECTION_NOTE]->getValue(),
 							ui->controllerWidgets[SELECTION_OCTAVE]->getValue(),
 							ui->controllerWidgets[SELECTION_VELOCITY]->getValue(),
-							ui->controllerWidgets[SELECTION_DURATION]->getValue() + int (pd.duration - 0.00000001)
+							ui->controllerWidgets[SELECTION_DURATION]->getValue() + int (pd.duration - 0.00000001),
+							ui->controllerWidgets[SELECTION_GATE_RAND]->getValue(),
+							ui->controllerWidgets[SELECTION_NOTE_RAND]->getValue(),
+							ui->controllerWidgets[SELECTION_OCTAVE_RAND]->getValue(),
+							ui->controllerWidgets[SELECTION_VELOCITY_RAND]->getValue(),
+							ui->controllerWidgets[SELECTION_DURATION_RAND]->getValue()
 						);
 
 						// Delete ch if duration == 0
@@ -1567,12 +1614,18 @@ void BSEQuencer_GUI::padsFocusedCallback (BEvents::Event* event)
 		if ((row >= 0) && (row < ROWS) && (step >= 0) && (step < ((int)ui->controllerWidgets[NR_OF_STEPS]->getValue ())))
 		{
 			Pad pd = ui->pattern.getPad (row, step);
+			double dm = fmod (pd.duration, 1.0);
+			if (dm == 0.0) dm = 1.0;
+			double rd = LIMIT (pd.randDuration, - dm, 0.0);
+			double pdr = pd.duration * rd / dm;
 			ui->padSurface.focusText.setText
 			(
 				"Channel: " + std::to_string (int (pd.ch) & 0x0f) + "\n" +
-				"Octave: " + std::to_string (int (pd.pitchOctave)) + "\n" +
-				"Velocity: " + BUtilities::to_string (pd.velocity, "%1.2f") + "\n" +
-				"Duration: " + BUtilities::to_string (pd.duration, "%1.2f"));
+				"Gate: " + BUtilities::to_string (pd.randGate, "%1.2f") + "\n" +
+				"Note pitch: " + std::to_string (int (pd.pitchNote)) + " ± " + std::to_string (int (abs (pd.randNote))) + "\n" +
+				"Octave pitch: " + std::to_string (int (pd.pitchOctave)) + " ± " + std::to_string (int (abs (pd.randOctave))) + "\n" +
+				"Velocity: " + BUtilities::to_string (pd.velocity, "%1.2f") + " ± " + BUtilities::to_string (abs (pd.randVelocity), "%1.2f") + "\n" +
+				"Duration: " + BUtilities::to_string (pd.duration, "%1.2f") + " (" + BUtilities::to_string (pdr, "%1.2f") + ")");
 			ui->scaleFocus ();
 		}
 	}
@@ -1747,17 +1800,49 @@ void BSEQuencer_GUI::drawPad (cairo_t* cr, const int row, const int step)
 		drawButton (cr, xr + 1, yr + 1, wr - 2, hr - 2, color, symbol, (pd.duration == 0 ? 1 : pd.duration / ceil (pd.duration)));
 
 		// Displays pitch octave
-		if ((pd.duration > 0.0) && (pd.velocity > 0.0) && (oct != 0))
+		if ((pd.duration > 0.0) && (pd.velocity > 0.0))
 		{
-			std::string valstr = (oct < 0 ? "-" : "+") + std::to_string (oct);
 			cairo_surface_t* surface = padSurface.getDrawingSurface();
 			cairo_t* cr = cairo_create (surface);
-			if ((ch == 4) && (pd.velocity > 0.5)) cairo_set_source_rgba (cr, CAIRO_RGBA (BColors::black));
-			else cairo_set_source_rgba (cr, CAIRO_RGBA (BColors::white));
-			cairo_select_font_face (cr, lfLabelFont.getFontFamily ().c_str (), lfLabelFont.getFontSlant (), lfLabelFont.getFontWeight ());
-			cairo_set_font_size (cr, 0.75 *lfLabelFont.getFontSize ());
-			cairo_move_to (cr, xr + 1.0 + 2.0 * sz, yr + 1.0 + 2.0 * sz + 0.75 * lfLabelFont.getFontSize ());
-			cairo_show_text (cr, valstr.c_str ());
+			double h = 0.75 * lfLabelFont.getFontSize ();
+
+			if (pd.pitchNote > 0)
+			{
+				cairo_move_to (cr, xr + 1.0 + 3.0 * sz, yr + 1.0 + 2.0 * sz + h);
+				cairo_line_to (cr, xr + 1.0 + 3.0 * sz, yr + 1.0 + 2.0 * sz + (1.0 - pd.pitchNote / 16.0) * h);
+				cairo_line_to (cr, xr + 1.0 + 2.0 * sz, yr + 1.0 + 3.0 * sz + (1.0 - pd.pitchNote / 16.0) * h);
+				cairo_move_to (cr, xr + 1.0 + 3.0 * sz, yr + 1.0 + 2.0 * sz + (1.0 - pd.pitchNote / 16.0) * h);
+				cairo_line_to (cr, xr + 1.0 + 4.0 * sz, yr + 1.0 + 3.0 * sz + (1.0 - pd.pitchNote / 16.0) * h);
+				cairo_set_line_width (cr, 1.0);
+				if ((ch == 4) && (pd.velocity > 0.5)) cairo_set_source_rgba (cr, CAIRO_RGBA (BColors::black));
+				else cairo_set_source_rgba (cr, CAIRO_RGBA (BColors::white));
+				cairo_stroke (cr);
+			}
+
+			if (pd.pitchNote < 0)
+			{
+				cairo_move_to (cr, xr + 1.0 + 3.0 * sz, yr + 1.0 + 2.0 * sz);
+				cairo_line_to (cr, xr + 1.0 + 3.0 * sz, yr + 1.0 + 2.0 * sz + (-pd.pitchNote / 16.0) * h);
+				cairo_line_to (cr, xr + 1.0 + 2.0 * sz, yr + 1.0 + 1.0 * sz + (-pd.pitchNote / 16.0) * h);
+				cairo_move_to (cr, xr + 1.0 + 3.0 * sz, yr + 1.0 + 2.0 * sz + (-pd.pitchNote / 16.0) * h);
+				cairo_line_to (cr, xr + 1.0 + 4.0 * sz, yr + 1.0 + 1.0 * sz + (-pd.pitchNote / 16.0) * h);
+				cairo_set_line_width (cr, 1.0);
+				if ((ch == 4) && (pd.velocity > 0.5)) cairo_set_source_rgba (cr, CAIRO_RGBA (BColors::black));
+				else cairo_set_source_rgba (cr, CAIRO_RGBA (BColors::white));
+				cairo_stroke (cr);
+			}
+
+			if (oct != 0)
+			{
+				std::string valstr = (oct <= 0 ? "" : "+") + std::to_string (oct);
+				if ((ch == 4) && (pd.velocity > 0.5)) cairo_set_source_rgba (cr, CAIRO_RGBA (BColors::black));
+				else cairo_set_source_rgba (cr, CAIRO_RGBA (BColors::white));
+				cairo_select_font_face (cr, lfLabelFont.getFontFamily ().c_str (), lfLabelFont.getFontSlant (), lfLabelFont.getFontWeight ());
+				cairo_set_font_size (cr, h);
+				cairo_move_to (cr, xr + 1.0 + 6.0 * sz, yr + 1.0 + 2.0 * sz + h);
+				cairo_show_text (cr, valstr.c_str ());
+			}
+
 			cairo_destroy (cr);
 		}
 	}
@@ -1857,15 +1942,15 @@ LV2UI_Handle instantiate (const LV2UI_Descriptor *descriptor,
 	double sz = 1.0;
 	int screenWidth  = getScreenWidth ();
 	int screenHeight = getScreenHeight ();
-	if ((screenWidth < 840) || (screenHeight < 580)) sz = 0.5;
-	else if ((screenWidth < 1240) || (screenHeight < 860)) sz = 0.66;
+	if ((screenWidth < 870) || (screenHeight < 580)) sz = 0.5;
+	else if ((screenWidth < 1290) || (screenHeight < 860)) sz = 0.66;
 
 	/*
 	std::cerr << "B.SEQuencer_GUI.lv2 screen size " << screenWidth << " x " << screenHeight <<
-			". Set GUI size to " << 1200 * sz << " x " << 820 * sz << ".\n";
+			". Set GUI size to " << 1250 * sz << " x " << 820 * sz << ".\n";
 	*/
 
-	if (resize) resize->ui_resize(resize->handle, 1200 * sz, 820 * sz);
+	if (resize) resize->ui_resize(resize->handle, 1250 * sz, 820 * sz);
 
 	*widget = (LV2UI_Widget) puglGetNativeWindow (ui->getPuglView ());
 

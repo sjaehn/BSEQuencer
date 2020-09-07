@@ -60,6 +60,9 @@ GUI_INCL = \
 	src/BWidgets/DrawingSurface.cpp \
 	src/BWidgets/DialValue.cpp \
 	src/BWidgets/Dial.cpp \
+	src/BWidgets/VSliderValue.cpp \
+	src/BWidgets/VSlider.cpp \
+	src/BWidgets/VScale.cpp \
 	src/BWidgets/HSliderValue.cpp \
 	src/BWidgets/HSlider.cpp \
 	src/BWidgets/HScale.cpp \

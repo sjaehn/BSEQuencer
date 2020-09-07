@@ -36,6 +36,7 @@
 #include "BWidgets/Label.hpp"
 #include "BWidgets/DrawingSurface.hpp"
 #include "BWidgets/HSliderValue.hpp"
+#include "BWidgets/VSliderValue.hpp"
 #include "BWidgets/DialValue.hpp"
 #include "BWidgets/HSwitch.hpp"
 #include "BWidgets/TextToggleButton.hpp"
@@ -54,6 +55,7 @@
 #include "UndoButton.hpp"
 #include "RedoButton.hpp"
 #include "PadSurface.hpp"
+#include "DialRangeValue.hpp"
 #include "definitions.h"
 #include "ports.h"
 #include "urids.h"
@@ -187,12 +189,17 @@ private:
 	BWidgets::Label toolButtonBoxCtrlLabel;
 	BWidgets::Label toolButtonBoxChLabel;
 	BWidgets::Label toolButtonBoxEditLabel;
+	BWidgets::Label toolGateLabel;
+	BWidgets::VSliderValue toolGateSlider;
+	BWidgets::Label toolNoteLabel;
+	DialRangeValue toolNoteDial;
 	BWidgets::Label toolOctaveLabel;
-	BWidgets::DialValue toolOctaveDial;
+	DialRangeValue toolOctaveDial;
 	BWidgets::Label toolVelocityLabel;
-	BWidgets::DialValue toolVelocityDial;
+	DialRangeValue toolVelocityDial;
 	BWidgets::Label toolDurationLabel;
-	BWidgets::DialValue toolDurationDial;
+	DialRangeValue toolDurationDial;
+
 
 	BWidgets::Widget propertiesBox;
 	BWidgets::Label propertiesBoxLabel;

@@ -35,6 +35,7 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <random>
 #include <lv2/lv2plug.in/ns/lv2core/lv2.h>
 #include <lv2/lv2plug.in/ns/ext/atom/atom.h>
 #include <lv2/lv2plug.in/ns/ext/atom/util.h>
@@ -64,6 +65,11 @@ typedef struct {
 	int stepOffset;
 	int direction;
 	Pad pad;
+	uint8_t ch;
+	bool gate;
+	uint8_t note;
+	uint8_t velocity;
+	float duration;
 	std::array<bool, MAXSTEPS> jumpOff;
 } Output;
 
@@ -147,9 +153,15 @@ private:
 		{1, 300, 0},	// AUTOPLAY_BPM
 		{1, 16, 1},	// AUTOPLAY_BPB
 		{0, NR_SEQUENCER_CHS + NR_CTRL_BUTTONS + NR_EDIT_BUTTONS, 1},	// SELECTION_CH
+		{0, 1, 0},	// SELECTION_GATE_RAND
+		{-16, 16, 1},	// SELECTION_NOTE
+		{-32, 32, 1},	// SELECTION_NOTE_RAND
 		{-8, 8, 1},	// SELECTION_OCTAVE
+		{-16, 16, 1},	// SELECTION_OCTAVE_RAND
 		{0, 2, 0},	// SELECTION_VELOCITY
+		{-2, 2, 0},	// SELECTION_VELOCITY_RAND
 		{0, 1, 0},	// SELECTION_DURATION
+		{-1, 0, 0},	// SELECTION_DURATION_RAND
 		{0, 1, 1},	// CH PITCH
 		{0, 2, 0},	// CH VELOCITY
 		{1, 16, 1},	// CH MIDI_CHANNEL
@@ -191,6 +203,10 @@ private:
 	BScale scale;
 
 	RTScaleMap rtScaleMaps[NR_SYSTEM_SCALES + NR_USER_SCALES];
+
+	std::minstd_rand rnd;
+	std::uniform_real_distribution<float> distUni;
+	std::uniform_real_distribution<float> distBi;
 
 
 };

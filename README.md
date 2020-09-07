@@ -63,7 +63,9 @@ Key features
 
 What's new
 ----------
-* Host-controlled autoplay mode
+* Bugfix duration of merged pads
+* New pad properties: Gate, note pitch
+* Randomization of pad properties
 
 
 Usage
