@@ -38,9 +38,10 @@ HSliderValue::HSliderValue () :
 
 HSliderValue::HSliderValue (const double x, const double y, const double width, const double height, const std::string& name,
 	const double value, const double min, const double max, const double step,
-	const std::string& valueFormat) :
+	const std::string& valueFormat, LabelPosition valuePos) :
 	HSlider (x, y, width, height, name, value, min, max, step),
 	valueDisplay(0, 0, width, height / 2, name),
+	valPosition (valuePos == LABEL_BOTTOM ? LABEL_BOTTOM : LABEL_TOP),
 	valFormat (valueFormat), displayArea ()
 {
 	valueDisplay.setText (BUtilities::to_string (value, valueFormat));
@@ -48,8 +49,8 @@ HSliderValue::HSliderValue (const double x, const double y, const double width, 
 }
 
 HSliderValue::HSliderValue (const HSliderValue& that) :
-		HSlider (that), valueDisplay (that.valueDisplay), valFormat (that.valFormat),
-		displayArea (that.displayArea)
+		HSlider (that), valueDisplay (that.valueDisplay), valPosition (that.valPosition),
+		valFormat (that.valFormat), displayArea (that.displayArea)
 {
 	add (valueDisplay);
 }
@@ -59,6 +60,7 @@ HSliderValue& HSliderValue::operator= (const HSliderValue& that)
 	release (&valueDisplay);
 
 	displayArea = that.displayArea;
+	valPosition = that.valPosition;
 	valFormat = that.valFormat;
 	valueDisplay = that.valueDisplay;
 	HSlider::operator= (that);
@@ -75,6 +77,14 @@ void HSliderValue::setValue (const double val)
 	HSlider::setValue (val);
 	valueDisplay.setText(BUtilities::to_string (value, valFormat));
 }
+
+void HSliderValue::setValuePosition (const LabelPosition pos)
+{
+	valPosition = pos;
+	update();
+}
+
+LabelPosition HSliderValue::getValuePosition () const {return valPosition;}
 
 void HSliderValue::setValueFormat (const std::string& valueFormat) {valFormat = valueFormat;}
 std::string HSliderValue::getValueFormat () const {return valFormat;}
@@ -111,7 +121,7 @@ void HSliderValue::updateCoords ()
 	scaleArea = BUtilities::RectArea
 	(
 		getXOffset () + knobRadius,
-		getYOffset () + h + knobRadius / 2,
+		(valPosition == LABEL_TOP ? getYOffset () + knobRadius / 2 : getYOffset () + h + knobRadius / 2),
 		w - 2 * knobRadius,
 		knobRadius
 	);
@@ -121,7 +131,7 @@ void HSliderValue::updateCoords ()
 
 	double dh = knobRadius * 2;
 	double dw = 2.2 * dh;
-	double dy = getYOffset () + h - dh;
+	double dy = (valPosition == LABEL_TOP ? getYOffset() : getYOffset() + h - dh);
 	double dx = LIMIT (scaleXValue - dw / 2, getXOffset (), getXOffset () + getEffectiveWidth () - dw);
 	displayArea = BUtilities::RectArea (dx, dy, dw, dh);
 }

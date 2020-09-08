@@ -31,6 +31,15 @@
 namespace BWidgets
 {
 
+enum LabelPosition
+{
+	LABEL_CENTER,
+	LABEL_TOP,
+	LABEL_BOTTOM,
+	LABEL_RIGHT,
+	LABEL_LEFT
+};
+
 /**
  * Class BWidgets::Label
  *

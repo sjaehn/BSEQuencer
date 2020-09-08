@@ -62,7 +62,7 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	toolButtonBoxChLabel (10, 70, 60, 20, "lflabel", "Channels"),
 	toolButtonBoxEditLabel (10, 100, 40, 20, "lflabel", "Edit"),
 	toolGateLabel (10, 260, 30, 20, "ctlabel", "Gate"),
-	toolGateSlider (12.5, 200, 25, 60, "dial", 1.0, 0.0, 1.0, 0.0, "%1.2f"),
+	toolGateSlider (12.5, 200, 25, 60, "dial", 1.0, 0.0, 1.0, 0.0, "%1.2f", BWidgets::LABEL_BOTTOM),
 	toolNoteLabel (45, 260, 60, 20, "ctlabel", "Note"),
 	toolNoteDial (50, 200, 50, 60, "dial", 0.0, -16.0, 16.0, 1.0, "%1.0f"),
 	toolOctaveLabel (110, 260, 60, 20, "ctlabel", "Octave"),

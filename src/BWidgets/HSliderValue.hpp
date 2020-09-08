@@ -37,8 +37,8 @@ class HSliderValue : public HSlider
 public:
 	HSliderValue ();
 	HSliderValue (const double x, const double y, const double width, const double height, const std::string& name,
-				    const double value, const double min, const double max, const double step,
-				    const std::string& valueFormat);
+		      const double value, const double min, const double max, const double step,
+		      const std::string& valueFormat, LabelPosition valuePos = LABEL_TOP);
 
 	/**
 	 * Creates a new (orphan) slider and copies the slider properties from a
@@ -68,6 +68,18 @@ public:
 	 * @param val Value
 	 */
 	virtual void setValue (const double val) override;
+
+	/**
+	 * Sets the position of the value display label.
+	 * @param pos	Position of the value display label.
+	 */
+	virtual void setValuePosition (const LabelPosition pos);
+
+	/**
+	 * Gets the position of the value display label.
+	 * @return	Position of the value display label.
+	 */
+	LabelPosition getValuePosition () const;
 
 	/**
 	 * Sets the value output format.
@@ -116,6 +128,7 @@ protected:
 
 	Label valueDisplay;
 
+	LabelPosition valPosition;
 	std::string valFormat;
 	BUtilities::RectArea displayArea;
 };
