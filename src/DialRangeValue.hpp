@@ -46,7 +46,7 @@ public:
 		   const double value, const double min, const double max, const double step, const std::string& valueFormat,
 	   	   RangeDirections dir = BIDIRECTIONAL) :
 		Dial (x, y, width, height, name, value, min, max, step),
-		range (0, 0, 0, 0, "name/range", 0.0, min - max, max - min, step),
+		range (0, 0, 0, 0, "name/range", 0.0, (dir == BIDIRECTIONAL ? 0.0 : min - max), max - min, step),
 		valueDisplay(0, 0.75 * height, width, 0.25 * height, name),
 		valFormat (valueFormat),
 		direction (dir)
@@ -193,8 +193,8 @@ public:
 					{
 						double deltaFrac = -event->getDelta ().y / (dialRadius * 1.5 * M_PI);
 						if (getStep () < 0) deltaFrac = -deltaFrac;
-						softValue += deltaFrac * (max - min);
-						range.setValue (range.getValue() + softValue);
+						double dv = deltaFrac * (max - min);
+						range.setValue (range.getValue() + dv);
 					}
 				}
 			}

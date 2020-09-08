@@ -207,13 +207,9 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	toolDurationDial.range.setMax (0.0);
 	toolGateSlider.setHardChangeable (false);
 	toolNoteDial.setHardChangeable (false);
-	toolNoteDial.range.setHardChangeable (false);
 	toolOctaveDial.setHardChangeable (false);
-	toolOctaveDial.range.setHardChangeable (false);
 	toolVelocityDial.setHardChangeable (false);
-	toolVelocityDial.range.setHardChangeable (false);
 	toolDurationDial.setHardChangeable (false);
-	toolDurationDial.range.setHardChangeable (false);
 
 	modeAutoplayBpmLabel.hide ();
 	modeAutoplayBpmSlider.hide ();
