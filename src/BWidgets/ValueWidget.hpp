@@ -74,6 +74,10 @@ public:
 	 */
 	virtual double getValue () const;
 
+	virtual void setValueable (const bool status);
+
+	virtual bool isValueable () const;
+
 	/**
 	 * Defines whether the widget may allow direct setting of a value by
 	 * clicking or it only allows relative changes by dragging.
@@ -91,6 +95,7 @@ public:
 protected:
 	void postValueChanged ();
 	double value;
+	bool valueable_;
 	bool hardChangeable;
 	double softValue;
 };

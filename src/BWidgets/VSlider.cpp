@@ -129,7 +129,7 @@ void VSlider::updateCoords ()
 	double w = getEffectiveWidth ();
 	double h = getEffectiveHeight ();
 
-	knobRadius = (w < h / 2 ? w / 2 : h / 4);
+	knobRadius = (w < h ? w / 2 : h / 2);
 	scaleArea = BUtilities::RectArea
 	(
 		getXOffset () + w / 2 - knobRadius / 2,

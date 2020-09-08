@@ -30,8 +30,13 @@ void ToggleButton::onButtonPressed (BEvents::PointerEvent* event)
 {
 	if (getValue ()) setValue (0.0);
 	else setValue (1.0);
+
+	Widget::cbfunction_[BEvents::EventType::BUTTON_PRESS_EVENT] (event);
 }
 
-void ToggleButton::onButtonReleased (BEvents::PointerEvent* event) {}
+void ToggleButton::onButtonReleased (BEvents::PointerEvent* event)
+{
+	Widget::cbfunction_[BEvents::EventType::BUTTON_RELEASE_EVENT] (event);
+}
 
 }

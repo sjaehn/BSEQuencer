@@ -22,16 +22,17 @@ namespace BWidgets
 ValueWidget::ValueWidget () : ValueWidget (0, 0, BWIDGETS_DEFAULT_WIDTH, BWIDGETS_DEFAULT_HEIGHT, "valuewidget", BWIDGETS_DEFAULT_VALUE) {}
 
 ValueWidget::ValueWidget (const double  x, const double y, const double width, const double height, const std::string& name, const double value) :
-		Widget (x, y, width, height, name), value (value), hardChangeable (true), softValue (0.0) {}
+		Widget (x, y, width, height, name), value (value), valueable_ (true), hardChangeable (true), softValue (0.0) {}
 
 ValueWidget::ValueWidget (const ValueWidget& that) :
-		Widget (that), value (that.value), hardChangeable (that.hardChangeable), softValue (that.softValue) {}
+		Widget (that), value (that.value), valueable_ (that.valueable_), hardChangeable (that.hardChangeable), softValue (that.softValue) {}
 
 ValueWidget::~ValueWidget () {}
 
 ValueWidget& ValueWidget::operator= (const ValueWidget& that)
 {
 	Widget::operator= (that);
+	valueable_ = that.valueable_;
 	hardChangeable = that.hardChangeable;
 	softValue = that.softValue;
 	setValue (that.value);
@@ -47,11 +48,15 @@ void ValueWidget::setValue (const double val)
 		value = val;
 		softValue = 0.0;
 		update ();
-		postValueChanged ();
+		if (valueable_) postValueChanged ();
 	}
 }
 
 double ValueWidget::getValue () const {return value;}
+
+void ValueWidget::setValueable (const bool status) {valueable_ = status;}
+
+bool ValueWidget::isValueable () const {return valueable_;}
 
 void ValueWidget::setHardChangeable (const bool status) {hardChangeable = status;}
 

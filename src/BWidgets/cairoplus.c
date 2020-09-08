@@ -45,6 +45,8 @@ void cairo_rectangle_rounded (cairo_t* cr, double x, double y, double width, dou
 			y = y - height;
 		}
 
+		cairo_new_sub_path (cr);
+
 		if (corners & 1) cairo_arc (cr, x + radius, y + radius, radius, -PI, -0.5 * PI);
 		else cairo_move_to (cr, x, y);
 

@@ -1,5 +1,5 @@
 /* Widget.cpp
- * Copyright (C) 2018, 2019 by Sven Jähnichen
+ * Copyright (C) 2018 - 2020 by Sven Jähnichen
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
