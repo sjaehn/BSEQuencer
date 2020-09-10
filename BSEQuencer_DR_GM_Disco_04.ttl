@@ -93,16 +93,34 @@
 		pset:value 14.0
 	] , [
 		lv2:symbol "selection_channel" ;
-		pset:value 4.0
-	] , [
-		lv2:symbol "selection_duration" ;
 		pset:value 1.0
+	] , [
+		lv2:symbol "selection_gate_rand" ;
+		pset:value 1.0
+	] , [
+		lv2:symbol "selection_pitch_note" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "selection_pitch_note_rand" ;
+		pset:value 0.0
 	] , [
 		lv2:symbol "selection_pitch_octave" ;
 		pset:value 0.0
 	] , [
+		lv2:symbol "selection_pitch_octave_rand" ;
+		pset:value 0.0
+	] , [
 		lv2:symbol "selection_velocity" ;
 		pset:value 1.0
+	] , [
+		lv2:symbol "selection_velocity_rand" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "selection_duration" ;
+		pset:value 1.0
+	] , [
+		lv2:symbol "selection_duration_rand" ;
+		pset:value 0.0
 	] , [
 		lv2:symbol "signature" ;
 		pset:value 0.0
