@@ -1208,6 +1208,7 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 			}
 			int row = id % ROWS;
 			int step = id / ROWS;
+			pads[row][step] = Pad (0, 0, 0, 0, 0, 1, 0, 0, 0, 0);
 
 			// Look for pad data
 			for (int i = 1; i < 11; ++i)
