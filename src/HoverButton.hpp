@@ -39,7 +39,7 @@ public:
 			   std::chrono::milliseconds (BWIDGETS_DEFAULT_FOCUS_OUT_MS)),
                 focusLabel (0, 0, 40, 20, name + "/focus", hovertext)
         {
-                focusLabel.setOversize (true);
+                focusLabel.setStacking (BWidgets::STACKING_OVERSIZE);
         	focusLabel.resize ();
         	focusLabel.hide ();
         	add (focusLabel);

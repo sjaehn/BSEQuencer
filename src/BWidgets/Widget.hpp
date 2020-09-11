@@ -71,6 +71,16 @@
 namespace BWidgets
 {
 
+enum WidgetStacking
+{
+	STACKING_NORMAL,
+	STACKING_CATCH,
+	//STACKING_FIT,
+	//STACKING_RESIZE_TO_FIT,
+	//STACKING_RESIZE_PARENT_TO_FIT,
+	STACKING_OVERSIZE
+};
+
 class Window; // Forward declaration
 
 /**
@@ -263,7 +273,7 @@ public:
 	 * Gets the widgets area without its borders
 	 * @return	Effective widgets area
 	 */
-	BUtilities::RectArea getEffectiveArea () const;
+	BUtilities::RectArea getEffectiveArea ();
 
 	/**
 	 * Sets the widgets state
@@ -464,9 +474,9 @@ public:
 	 */
 	bool isMergeable (const BEvents::EventType eventType) const;
 
-	void setOversize (const bool status);
+	void setStacking (const WidgetStacking stacking);
 
-	bool isOversize () const;
+	WidgetStacking getStacking () const;
 
 	/**
 	 * Calls a redraw of the widget and calls postRedisplay () if the the
@@ -650,6 +660,8 @@ protected:
 
 	Widget* getWidgetAt (const BUtilities::Point& position, std::function<bool (Widget* widget)> func = [] (Widget* widget) {return true;});
 
+	void stackingCatch ();
+
 	void postMessage (const std::string& name, const BUtilities::Any content);
 
 	void postRedisplay (const BUtilities::RectArea& area);
@@ -666,9 +678,9 @@ protected:
 	bool draggable_;
 	bool scrollable_;
 	bool focusable_;
-	bool oversized_;
 	bool scheduleDraw_;
 	std::array<bool, BEvents::EventType::NO_EVENT> mergeable_;
+	WidgetStacking stacking_;
 	Window* main_;
 	Widget* parent_;
 	std::vector <Widget*> children_;

@@ -48,14 +48,18 @@ public:
 	double getWidth () const {return (p2.x - p1.x);}
 	double getHeight () const {return (p2.y - p1.y);}
 
-	void moveTo (const double x, const double y) {return moveTo (Point (x, y));}
+	void setX (const double x) {moveTo (x, getY());}
+	void setY (const double y) {moveTo (getX(), y);}
+	void moveTo (const double x, const double y) {moveTo (Point (x, y));}
 	void moveTo (const Point& position)
 	{
 		p2 = p2 - p1 + position;
 		p1 = position;
 	}
 
-	void resize (const double width, const double height) {return resize (Point (width, height));}
+	void setWidth (const double width) {resize (width, getHeight());}
+	void setHeight (const double height) {resize (getWidth(), height);}
+	void resize (const double width, const double height) {resize (Point (width, height));}
 	void resize (const Point& extends) {p2 = p1 + extends;}
 
 	bool contains (const Point& p) const

@@ -30,7 +30,7 @@ public:
 		buttons(),
 		focusLabel (0, 0, 40, 20, name + "/focus", "")
 	{
-		focusLabel.setOversize (true);
+		focusLabel.setStacking (BWidgets::STACKING_OVERSIZE);
         	focusLabel.resize ();
         	focusLabel.hide ();
         	add (focusLabel);

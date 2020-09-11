@@ -56,7 +56,7 @@ Dial::Dial (const double x, const double y, const double width, const double hei
 
 	std::string valstr = BUtilities::to_string (getValue());
 	focusLabel.setText (valstr);
-	focusLabel.setOversize (true);
+	focusLabel.setStacking (STACKING_OVERSIZE);
 	focusLabel.resize ();
 	focusLabel.hide ();
 	add (focusLabel);

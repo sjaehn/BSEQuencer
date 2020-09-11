@@ -36,7 +36,7 @@ public:
 			   std::chrono::milliseconds (BWIDGETS_DEFAULT_FOCUS_OUT_MS)),
 			   focusLabel_ (0, 0, 40, 20, name_ + BWIDGETS_DEFAULT_FOCUS_NAME, focusText)
    	{
-   		focusLabel_.setOversize (true);
+   		focusLabel_.setStacking (BWidgets::STACKING_OVERSIZE);
    		focusLabel_.resize ();
    		focusLabel_.hide ();
    		add (focusLabel_);

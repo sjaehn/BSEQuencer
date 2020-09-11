@@ -160,6 +160,7 @@ ScaleEditor::ScaleEditor(const double x, const double y, const double width, con
 {
 	setDraggable (true);
 	setFocusable (true);	// Only to block underlying pads callback
+	setStacking (BWidgets::STACKING_CATCH);
 
 	bgSurface = cairo_image_surface_create_from_png ((pluginPath + "ScaleEditor.png").c_str());
 	scaleEditorBg.loadFillFromCairoSurface(bgSurface);

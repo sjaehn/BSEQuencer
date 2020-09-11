@@ -71,7 +71,7 @@ PopupListBox::PopupListBox (const double x, const double y, const double width,
 
 	downButton.setCallbackFunction (BEvents::EventType::BUTTON_PRESS_EVENT, PopupListBox::handleDownButtonClicked);
 	listBox.setCallbackFunction (BEvents::EventType::VALUE_CHANGED_EVENT, PopupListBox::handleValueChanged);
-	listBox.setOversize (true);
+	listBox.setStacking (STACKING_OVERSIZE);
 	listBox.hide ();
 
 	add (downButton);
