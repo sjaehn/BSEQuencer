@@ -11,7 +11,7 @@ struct Pad
 			randGate (randGate), randNote (randNote), randOctave (randOctave), randVelocity (randVelocity), randDuration (randDuration)
 	{}
 
-	bool operator== (Pad& that)
+	bool operator== (const Pad& that)
 	{
 		return
 		(
@@ -22,7 +22,7 @@ struct Pad
 		);
 	}
 
-	bool operator!= (Pad& that) {return (!operator== (that));}
+	bool operator!= (const Pad& that) {return (!operator== (that));}
 
 	float ch;			// Output channel number (1..4)
 	float pitchNote;

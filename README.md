@@ -53,12 +53,15 @@ to run it stand-alone and connect it to the JACK system.
 Key features
 ------------
 * Step sequencer with a selectable pattern matrix size (8x16, 16x16, 24x16, or 32x16)
-* Autoplay or host / MIDI controlled playing
+* Autoplay or host or host + MIDI controlled playing
+* User defined pad features: Gate, note pitch, octave pitch, velocity, and duration
+* Optional individual randomization of each pad feature
 * Handles multiple MIDI inputs signals (keys) in one sequencer instance
 * Use musical scales and / or drumkits
 * Scale & drumkit editor
 * Controls for playing direction, jump, skip, and stop options placeable to any position within the matrix
 * Notes can be associated with four different, configurable output channels
+* Additional channel features: velocity and MIDI note offset
 * Output channels connectable with individual MIDI channels
 
 
@@ -67,6 +70,7 @@ What's new
 * Bugfix duration of merged pads
 * New pad properties: Gate, note pitch
 * Randomization of pad properties
+* Reduce preset file size
 
 
 Usage

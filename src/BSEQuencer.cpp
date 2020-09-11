@@ -1111,18 +1111,21 @@ LV2_State_Status BSEQuencer::state_save (LV2_State_Store_Function store, LV2_Sta
 	{
 		for (int row = 0; row < ROWS; ++row)
 		{
-			char valueString[128];
-			int id = step * ROWS + row;
-			Pad* pd = &pads[row][step];
-			snprintf
-			(
-				valueString, 126, "id:%d; ch:%d; st:%d; oc:%d; ve:%1.2f; du:%1.2f; rg:%d; rs:%d; ro:%d; rv:%1.2f; rd:%1.2f",
-				id, (int) pd->ch, (int)pd->pitchNote, (int) pd->pitchOctave, pd->velocity, pd->duration,
-				(int) pd->randGate, (int) pd->randNote, (int) pd->randOctave, pd->randVelocity, pd->randDuration
-			);
-			if ((step < MAXSTEPS - 1) || (row < ROWS)) strcat (valueString, ";\n");
-			else strcat(valueString, "\n");
-			strcat (padDataString, valueString);
+			if ((pads[row][step] != Pad()) && (pads[row][step] != Pad (0, 0, 0, 0, 0, 1, 0, 0, 0, 0)))
+			{
+				Pad* pd = &pads[row][step];
+				char valueString[128];
+				int id = step * ROWS + row;
+				snprintf
+				(
+					valueString, 126, "id:%d; ch:%d; st:%d; oc:%d; ve:%1.2f; du:%1.2f; rg:%d; rs:%d; ro:%d; rv:%1.2f; rd:%1.2f",
+					id, (int) pd->ch, (int)pd->pitchNote, (int) pd->pitchOctave, pd->velocity, pd->duration,
+					(int) pd->randGate, (int) pd->randNote, (int) pd->randOctave, pd->randVelocity, pd->randDuration
+				);
+				if ((step < MAXSTEPS - 1) || (row < ROWS)) strcat (valueString, ";\n");
+				else strcat(valueString, "\n");
+				strcat (padDataString, valueString);
+			}
 		}
 	}
 	store (handle, uris.state_pad, padDataString, strlen (padDataString) + 1, uris.atom_String, LV2_STATE_IS_POD);
@@ -1179,6 +1182,12 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 
 		// Clear all MIDI in
 		while (!inKeys.empty()) inKeys.pop_back();
+
+		// Clear all pads
+		for (int r = 0; r < ROWS; ++r)
+		{
+			for (int s = 0; s < MAXSTEPS; ++s) pads[r][s] = Pad();
+		}
 
 		// Restore pads
 		// Parse retrieved data
