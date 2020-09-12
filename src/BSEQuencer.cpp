@@ -21,6 +21,7 @@
 #include "BSEQuencer.hpp"
 #include <stdexcept>
 #include <ctime>
+#include "BUtilities/stof.hpp"
 
 BSEQuencer::BSEQuencer (double samplerate, const LV2_Feature* const* features) :
 	map (NULL), unmap (NULL), inputPort (NULL), outputPort (NULL),
@@ -1202,7 +1203,7 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 			if (strPos + 3 > padDataString.length()) break;	// Nothing more after id => end
 			padDataString.erase (0, strPos + 3);
 			int id;
-			try {id = std::stof (padDataString, &nextPos);}
+			try {id = BUtilities::stof (padDataString, &nextPos);}
 			catch  (const std::exception& e)
 			{
 				fprintf (stderr, "BSEQuencer.lv2: Restore pad state incomplete. Can't parse ID from \"%s...\"", padDataString.substr (0, 63).c_str());
@@ -1231,7 +1232,7 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 				}
 				if (strPos > 0) padDataString.erase (0, strPos + 3);
 				float val;
-				try {val = std::stof (padDataString, &nextPos);}
+				try {val = BUtilities::stof (padDataString, &nextPos);}
 				catch  (const std::exception& e)
 				{
 					fprintf (stderr, "BSEQuencer.lv2: Restore padstate incomplete. Can't parse %s from \"%s...\"",
@@ -1307,7 +1308,7 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 			int id = -1;
 			int scaleNr = -1;
 
-			try {id = std::stof (scaleDataString, &nextPos);}
+			try {id = BUtilities::stof (scaleDataString, &nextPos);}
 			catch  (const std::exception& e)
 			{
 				fprintf (stderr, "BSEQuencer.lv2: Restore scale map state incomplete. Can't parse ID from \"%s...\"", scaleDataString.substr (0, 63).c_str());
