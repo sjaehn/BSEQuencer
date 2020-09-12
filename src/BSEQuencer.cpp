@@ -1111,7 +1111,7 @@ LV2_State_Status BSEQuencer::state_save (LV2_State_Store_Function store, LV2_Sta
 	{
 		for (int row = 0; row < ROWS; ++row)
 		{
-			if ((pads[row][step] != Pad()) && (pads[row][step] != Pad (0, 0, 0, 0, 0, 1, 0, 0, 0, 0)))
+			if (pads[row][step].ch != 0)
 			{
 				Pad* pd = &pads[row][step];
 				char valueString[128];
