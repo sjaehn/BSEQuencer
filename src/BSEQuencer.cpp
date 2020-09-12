@@ -179,7 +179,7 @@ void BSEQuencer::startMidiOut (const int64_t frames, const int key, const int ro
 		o.note = LIMIT (outNote, 0, 127);
 
 		// Set / randomize velocity
-		int padVelocity = o.pad.velocity + round (distBi (rnd) * o.pad.randVelocity);
+		float padVelocity = o.pad.velocity + round (distBi (rnd) * o.pad.randVelocity);
 		float outVelocity = float (inKeys[key].velocity) * padVelocity * controllers[CH + o.ch * CH_SIZE + VELOCITY];
 
 		o.velocity = LIMIT (outVelocity, 0, 127);
