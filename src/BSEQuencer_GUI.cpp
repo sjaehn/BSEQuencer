@@ -1298,9 +1298,15 @@ void BSEQuencer_GUI::padsPressedCallback (BEvents::Event* event)
 						  (event->getEventType () == BEvents::POINTER_DRAG_EVENT)))
 				{
 					ui->controllerWidgets[SELECTION_CH]->setValue (int (pd.ch) & 0x0F);
+					ui->controllerWidgets[SELECTION_GATE_RAND]->setValue (pd.randGate);
+					ui->controllerWidgets[SELECTION_NOTE]->setValue (pd.pitchNote);
 					ui->controllerWidgets[SELECTION_OCTAVE]->setValue (pd.pitchOctave);
 					ui->controllerWidgets[SELECTION_VELOCITY]->setValue (pd.velocity);
 					ui->controllerWidgets[SELECTION_DURATION]->setValue (LIMIT (pd.duration, 0.0, 1.0));
+					ui->controllerWidgets[SELECTION_NOTE_RAND]->setValue (pd.randNote);
+					ui->controllerWidgets[SELECTION_OCTAVE_RAND]->setValue (pd.randOctave);
+					ui->controllerWidgets[SELECTION_VELOCITY_RAND]->setValue (pd.randVelocity);
+					ui->controllerWidgets[SELECTION_DURATION_RAND]->setValue (pd.randDuration);
 				}
 			}
 		}
