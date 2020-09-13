@@ -71,6 +71,8 @@ What's new
 * New pad properties: Gate, note pitch
 * Randomization of pad properties
 * Reduce preset file size
+* International preset exchange (decimal point <-> decimal comma)
+* Factory presets adapted to the new features
 
 
 Usage
