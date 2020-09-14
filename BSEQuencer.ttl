@@ -720,3 +720,27 @@
 	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
 	rdfs:label "DR GM Samba 03" ;
 	rdfs:seeAlso <BSEQuencer_DR_GM_Samba_03.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Afro_Cuban_Bembe_01>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Afro Cuban Bembe 01" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Afro_Cuban_Bembe_01.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Afro_Cuban_Bembe_02>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Afro Cuban Bembe 02" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Afro_Cuban_Bembe_02.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Afro_Cuban_Bembe_03>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Afro Cuban Bembe 03" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Afro_Cuban_Bembe_03.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Afro_Cuban_Songo_01>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Afro Cuban Songo 01" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Afro_Cuban_Songo_01.ttl> .

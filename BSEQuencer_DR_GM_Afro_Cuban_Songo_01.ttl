@@ -1,0 +1,171 @@
+@prefix atom: <http://lv2plug.in/ns/ext/atom#> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix state: <http://lv2plug.in/ns/ext/state#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Afro_Cuban_Songo_01>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Afro Cuban Songo 01" ;
+	lv2:port [
+		lv2:symbol "autoplay_beats_per_bar" ;
+		pset:value 4.0
+	] , [
+		lv2:symbol "autoplay_bpm" ;
+		pset:value 158.13404846
+	] , [
+		lv2:symbol "base" ;
+		pset:value 1.0
+	] , [
+		lv2:symbol "ch1_midi_channel" ;
+		pset:value 1.0
+	] , [
+		lv2:symbol "ch1_note_offset" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "ch1_pitch" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "ch1_velocity" ;
+		pset:value 1.0
+	] , [
+		lv2:symbol "ch2_midi_channel" ;
+		pset:value 2.0
+	] , [
+		lv2:symbol "ch2_note_offset" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "ch2_pitch" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "ch2_velocity" ;
+		pset:value 1.0
+	] , [
+		lv2:symbol "ch3_midi_channel" ;
+		pset:value 3.0
+	] , [
+		lv2:symbol "ch3_note_offset" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "ch3_pitch" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "ch3_velocity" ;
+		pset:value 1.0
+	] , [
+		lv2:symbol "ch4_midi_channel" ;
+		pset:value 4.0
+	] , [
+		lv2:symbol "ch4_note_offset" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "ch4_pitch" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "ch4_velocity" ;
+		pset:value 1.0
+	] , [
+		lv2:symbol "midi_in" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "mode" ;
+		pset:value 2.0
+	] , [
+		lv2:symbol "nr_of_steps" ;
+		pset:value 16.0
+	] , [
+		lv2:symbol "octave" ;
+		pset:value 4.0
+	] , [
+		lv2:symbol "on_key" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "play" ;
+		pset:value 1.0
+	] , [
+		lv2:symbol "root" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "scale" ;
+		pset:value 14.0
+	] , [
+		lv2:symbol "selection_channel" ;
+		pset:value 2.0
+	] , [
+		lv2:symbol "selection_duration" ;
+		pset:value 1.0
+	] , [
+		lv2:symbol "selection_duration_rand" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "selection_gate_rand" ;
+		pset:value 1.0
+	] , [
+		lv2:symbol "selection_pitch_note" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "selection_pitch_note_rand" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "selection_pitch_octave" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "selection_pitch_octave_rand" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "selection_velocity" ;
+		pset:value 0.65976548
+	] , [
+		lv2:symbol "selection_velocity_rand" ;
+		pset:value 0.21244133
+	] , [
+		lv2:symbol "signature" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "steps_per" ;
+		pset:value 4.0
+	] ;
+	state:state [
+		<https://www.jahnichen.de/plugins/lv2/BSEQuencer#STATEpad> """Matrix data:
+id:12; ch:4; st:0; oc:0; ve:1,34; du:1,00; rg:1; rs:0; ro:0; rv:0,45; rd:0,00;
+id:33; ch:2; st:0; oc:0; ve:0,66; du:1,00; rg:1; rs:0; ro:0; rv:0,21; rd:0,00;
+id:48; ch:1; st:0; oc:0; ve:1,00; du:1,00; rg:1; rs:0; ro:0; rv:0,34; rd:0,00;
+id:76; ch:4; st:0; oc:0; ve:1,34; du:1,00; rg:1; rs:0; ro:0; rv:0,45; rd:0,00;
+id:81; ch:2; st:0; oc:0; ve:0,49; du:1,00; rg:1; rs:0; ro:0; rv:0,17; rd:0,00;
+id:96; ch:1; st:0; oc:0; ve:1,00; du:1,00; rg:1; rs:0; ro:0; rv:0,34; rd:0,00;
+id:113; ch:2; st:0; oc:0; ve:0,66; du:1,00; rg:1; rs:0; ro:0; rv:0,21; rd:0,00;
+id:140; ch:4; st:0; oc:0; ve:1,34; du:1,00; rg:1; rs:0; ro:0; rv:0,45; rd:0,00;
+id:145; ch:2; st:0; oc:0; ve:0,49; du:1,00; rg:1; rs:0; ro:0; rv:0,17; rd:0,00;
+id:161; ch:2; st:0; oc:0; ve:0,49; du:1,00; rg:1; rs:0; ro:0; rv:0,17; rd:0,00;
+id:176; ch:1; st:0; oc:0; ve:1,00; du:1,00; rg:1; rs:0; ro:0; rv:0,34; rd:0,00;
+id:204; ch:4; st:0; oc:0; ve:1,34; du:1,00; rg:1; rs:0; ro:0; rv:0,45; rd:0,00;
+id:209; ch:2; st:0; oc:0; ve:0,49; du:1,00; rg:1; rs:0; ro:0; rv:0,17; rd:0,00;
+id:224; ch:1; st:0; oc:0; ve:1,00; du:1,00; rg:1; rs:0; ro:0; rv:0,34; rd:0,00;
+id:241; ch:2; st:0; oc:0; ve:0,66; du:1,00; rg:1; rs:0; ro:0; rv:0,21; rd:0,00;
+""" ;
+		<https://www.jahnichen.de/plugins/lv2/BSEQuencer#STATEscales> """Scale data:
+id:14;
+nm:"User scale 1";
+el:0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;
+as:"";"";"";"";"";"";"";"";"";"";"";"";"";"";"";"";
+sc:0;1;2;3;4;5;6;7;8;9;10;11;
+id:15;
+nm:"User scale 2";
+el:0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;
+as:"";"";"";"";"";"";"";"";"";"";"";"";"";"";"";"";
+sc:0;1;2;3;4;5;6;7;8;9;10;11;
+id:16;
+nm:"User scale 3";
+el:0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;
+as:"";"";"";"";"";"";"";"";"";"";"";"";"";"";"";"";
+sc:0;1;2;3;4;5;6;7;8;9;10;11;
+id:17;
+nm:"User scale 4";
+el:0;1;2;3;4;5;6;7;8;9;10;11;261;260;258;256;
+as:"";"";"";"D#";"E";"F";"G";"A";"B";"C";"C#";"D";"DrEI";"ZWEI";"EINS";"NULL";
+sc:0;2;4;5;7;9;11;-128;-128;-128;-128;-128;
+"""
+	] .

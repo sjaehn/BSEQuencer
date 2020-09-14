@@ -72,6 +72,7 @@ What's new
 * Randomization of pad properties
 * Reduce preset file size
 * International preset exchange (decimal point <-> decimal comma)
+* New factory presets: Waltz, Bossa Nova, Samba, Afro Cuban
 * Factory presets adapted to the new features
 
 
