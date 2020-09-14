@@ -756,9 +756,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.48"
-     inkscape:cx="407.29166"
-     inkscape:cy="26.607459"
+     inkscape:zoom="0.8944"
+     inkscape:cx="625"
+     inkscape:cy="410"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -1063,7 +1063,7 @@
          id="tspan955"
          x="97.971428"
          y="98.260109"
-         style="font-size:3.52778px;fill:#ffffff;stroke-width:0.264583">V 1.8.0</tspan></text>
+         style="font-size:3.52778px;fill:#ffffff;stroke-width:0.264583">V 1.8.1</tspan></text>
     <g
        transform="translate(8.8916616,80.352557)"
        style="enable-background:new"

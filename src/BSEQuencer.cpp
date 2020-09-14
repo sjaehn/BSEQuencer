@@ -1027,7 +1027,7 @@ void BSEQuencer::run (uint32_t n_samples)
 							case LV2_MIDI_CTL_SUSTAIN:
 								for (int ch = 1; ch <= NR_SEQUENCER_CHS; ++ch)
 								{
-									midiStack.append (act_t, ch, LV2_MIDI_MSG_CONTROLLER, LV2_MIDI_CTL_SUSTAIN, msg[2]);
+									midiStack.append (act_t, ch - 1, LV2_MIDI_MSG_CONTROLLER, LV2_MIDI_CTL_SUSTAIN, msg[2]);
 								}
 								break;
 
@@ -1637,7 +1637,7 @@ void BSEQuencer::notifyMidi ()
 	{
 		MidiData& midiData = midiStack[i];
 		// ch -> MIDI channel
-		int channel = (midiData.ch <= NR_SEQUENCER_CHS ? controllers[CH + (midiData.ch - 1) * CH_SIZE + MIDI_CHANNEL] - 1 : 0);
+		int channel = (midiData.ch < NR_SEQUENCER_CHS ? controllers[CH + midiData.ch * CH_SIZE + MIDI_CHANNEL] - 1 : 0);
 
 		// compose MIDI message block
 		LV2_Atom midiatom;
