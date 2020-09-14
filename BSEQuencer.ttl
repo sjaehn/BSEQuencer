@@ -690,3 +690,33 @@
 	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
 	rdfs:label "DR GM Waltz 06" ;
 	rdfs:seeAlso <BSEQuencer_DR_GM_Waltz_06.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Bossa_Nova_01>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Bossa Nova 01" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Bossa_Nova_01.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Bossa_Nova_02>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Bossa Nova 02" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Bossa_Nova_02.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Samba_01>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Samba 01" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Samba_01.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Samba_02>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Samba 02" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Samba_02.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Samba_03>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Samba 03" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Samba_03.ttl> .
