@@ -1,0 +1,204 @@
+@prefix atom: <http://lv2plug.in/ns/ext/atom#> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix state: <http://lv2plug.in/ns/ext/state#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Waltz_02>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Waltz 02" ;
+	lv2:port [
+		lv2:symbol "autoplay_beats_per_bar" ;
+		pset:value 4.0
+	] , [
+		lv2:symbol "autoplay_bpm" ;
+		pset:value 158.13404846
+	] , [
+		lv2:symbol "base" ;
+		pset:value 2.0
+	] , [
+		lv2:symbol "ch1_midi_channel" ;
+		pset:value 1.0
+	] , [
+		lv2:symbol "ch1_note_offset" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "ch1_pitch" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "ch1_velocity" ;
+		pset:value 1.00161505
+	] , [
+		lv2:symbol "ch2_midi_channel" ;
+		pset:value 2.0
+	] , [
+		lv2:symbol "ch2_note_offset" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "ch2_pitch" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "ch2_velocity" ;
+		pset:value 1.00161517
+	] , [
+		lv2:symbol "ch3_midi_channel" ;
+		pset:value 3.0
+	] , [
+		lv2:symbol "ch3_note_offset" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "ch3_pitch" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "ch3_velocity" ;
+		pset:value 1.0
+	] , [
+		lv2:symbol "ch4_midi_channel" ;
+		pset:value 4.0
+	] , [
+		lv2:symbol "ch4_note_offset" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "ch4_pitch" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "ch4_velocity" ;
+		pset:value 1.0
+	] , [
+		lv2:symbol "midi_in" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "mode" ;
+		pset:value 2.0
+	] , [
+		lv2:symbol "nr_of_steps" ;
+		pset:value 8.0
+	] , [
+		lv2:symbol "octave" ;
+		pset:value 4.0
+	] , [
+		lv2:symbol "on_key" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "play" ;
+		pset:value 1.0
+	] , [
+		lv2:symbol "root" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "scale" ;
+		pset:value 14.0
+	] , [
+		lv2:symbol "selection_channel" ;
+		pset:value 4.0
+	] , [
+		lv2:symbol "selection_duration" ;
+		pset:value 1.0
+	] , [
+		lv2:symbol "selection_duration_rand" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "selection_gate_rand" ;
+		pset:value 1.0
+	] , [
+		lv2:symbol "selection_pitch_note" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "selection_pitch_note_rand" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "selection_pitch_octave" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "selection_pitch_octave_rand" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "selection_velocity" ;
+		pset:value 0.74798131
+	] , [
+		lv2:symbol "selection_velocity_rand" ;
+		pset:value 0.25244132
+	] , [
+		lv2:symbol "signature" ;
+		pset:value 0.0
+	] , [
+		lv2:symbol "steps_per" ;
+		pset:value 3.0
+	] ;
+	state:state [
+		<https://www.jahnichen.de/plugins/lv2/BSEQuencer#STATEpad> """Matrix data:
+id:0; ch:1; st:0; oc:0; ve:0,66; du:1,00; rg:1; rs:0; ro:0; rv:0,21; rd:0,00;
+id:15; ch:4; st:0; oc:0; ve:0,75; du:1,00; rg:1; rs:0; ro:0; rv:0,25; rd:0,00;
+id:17; ch:2; st:0; oc:0; ve:0,49; du:1,00; rg:1; rs:0; ro:0; rv:0,17; rd:0,00;
+id:28; ch:4; st:0; oc:0; ve:1,49; du:1,00; rg:1; rs:0; ro:0; rv:0,51; rd:0,00;
+id:31; ch:4; st:0; oc:0; ve:0,66; du:1,00; rg:1; rs:0; ro:0; rv:0,21; rd:0,00;
+id:33; ch:2; st:0; oc:0; ve:0,49; du:1,00; rg:1; rs:0; ro:0; rv:0,17; rd:0,00;
+id:44; ch:4; st:0; oc:0; ve:1,49; du:1,00; rg:1; rs:0; ro:0; rv:0,51; rd:0,00;
+id:47; ch:4; st:0; oc:0; ve:0,66; du:1,00; rg:1; rs:0; ro:0; rv:0,21; rd:0,00;
+id:48; ch:1; st:0; oc:0; ve:0,66; du:1,00; rg:1; rs:0; ro:0; rv:0,21; rd:0,00;
+id:63; ch:4; st:0; oc:0; ve:0,75; du:1,00; rg:1; rs:0; ro:0; rv:0,25; rd:0,00;
+id:65; ch:2; st:0; oc:0; ve:0,49; du:1,00; rg:1; rs:0; ro:0; rv:0,17; rd:0,00;
+id:76; ch:4; st:0; oc:0; ve:1,49; du:1,00; rg:1; rs:0; ro:0; rv:0,51; rd:0,00;
+id:79; ch:4; st:0; oc:0; ve:0,66; du:1,00; rg:1; rs:0; ro:0; rv:0,21; rd:0,00;
+id:81; ch:2; st:0; oc:0; ve:0,49; du:1,00; rg:1; rs:0; ro:0; rv:0,17; rd:0,00;
+id:92; ch:4; st:0; oc:0; ve:1,49; du:1,00; rg:1; rs:0; ro:0; rv:0,51; rd:0,00;
+id:95; ch:4; st:0; oc:0; ve:0,66; du:1,00; rg:1; rs:0; ro:0; rv:0,21; rd:0,00;
+id:96; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:97; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:98; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:99; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:100; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:101; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:102; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:103; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:104; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:105; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:106; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:107; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:108; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:109; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:110; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:111; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:112; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:113; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:114; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:115; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:116; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:117; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:118; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:119; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:120; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:121; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:122; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:123; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:124; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:125; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:126; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+id:127; ch:112; st:0; oc:0; ve:0,00; du:0,00; rg:0; rs:0; ro:0; rv:0,00; rd:0,00;
+""" ;
+		<https://www.jahnichen.de/plugins/lv2/BSEQuencer#STATEscales> """Scale data:
+id:14;
+nm:"User scale 1";
+el:291;0;1;2;336;301;3;4;5;293;6;298;7;8;9;10;
+as:"35 (B1)";"C";"C#";"D";"80 (G#5)";"45 (A2)";"D#";"E";"F";"37 (C#2)";"F#";"42 (F#2)";"G";"G#";"A";"A#";
+sc:0;1;2;3;4;5;6;7;8;9;10;11;
+id:15;
+nm:"User scale 2";
+el:0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;
+as:"";"";"";"";"";"";"";"";"";"";"";"";"";"";"";"";
+sc:0;1;2;3;4;5;6;7;8;9;10;11;
+id:16;
+nm:"User scale 3";
+el:0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;
+as:"";"";"";"";"";"";"";"";"";"";"";"";"";"";"";"";
+sc:0;1;2;3;4;5;6;7;8;9;10;11;
+id:17;
+nm:"User scale 4";
+el:0;1;2;3;4;5;6;7;8;9;10;11;261;260;258;256;
+as:"";"";"";"D#";"E";"F";"G";"A";"B";"C";"C#";"D";"DrEI";"ZWEI";"EINS";"NULL";
+sc:0;2;4;5;7;9;11;-128;-128;-128;-128;-128;
+"""
+	] .

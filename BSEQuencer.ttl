@@ -654,3 +654,39 @@
 	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
 	rdfs:label "DR GM Disco 05" ;
 	rdfs:seeAlso <BSEQuencer_DR_GM_Disco_05.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Waltz_01>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Waltz 01" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Waltz_01.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Waltz_02>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Waltz 02" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Waltz_02.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Waltz_03>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Waltz 03" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Waltz_03.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Waltz_04>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Waltz 04" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Waltz_04.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Waltz_05>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Waltz 05" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Waltz_05.ttl> .
+
+<https://www.jahnichen.de/plugins/lv2/BSEQuencer#DR_GM_Waltz_06>
+	a pset:Preset ;
+	lv2:appliesTo <https://www.jahnichen.de/plugins/lv2/BSEQuencer> ;
+	rdfs:label "DR GM Waltz 06" ;
+	rdfs:seeAlso <BSEQuencer_DR_GM_Waltz_06.ttl> .
