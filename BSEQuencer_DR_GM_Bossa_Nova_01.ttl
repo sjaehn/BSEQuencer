@@ -15,7 +15,7 @@
 		pset:value 4.0
 	] , [
 		lv2:symbol "autoplay_bpm" ;
-		pset:value 70.0
+		pset:value 140.0
 	] , [
 		lv2:symbol "base" ;
 		pset:value 1.0
@@ -126,7 +126,7 @@
 		pset:value 0.0
 	] , [
 		lv2:symbol "steps_per" ;
-		pset:value 4.0
+		pset:value 2.0
 	] ;
 	state:state [
 		<https://www.jahnichen.de/plugins/lv2/BSEQuencer#STATEpad> """Matrix data:
