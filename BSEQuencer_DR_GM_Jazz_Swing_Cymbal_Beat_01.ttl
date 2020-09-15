@@ -15,7 +15,7 @@
 		pset:value 4.0
 	] , [
 		lv2:symbol "autoplay_bpm" ;
-		pset:value 158.13404846
+		pset:value 90.0
 	] , [
 		lv2:symbol "base" ;
 		pset:value 1.0

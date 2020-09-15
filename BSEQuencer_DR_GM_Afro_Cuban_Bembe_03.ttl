@@ -12,10 +12,10 @@
 	rdfs:label "DR GM Afro Cuban Bembe 03" ;
 	lv2:port [
 		lv2:symbol "autoplay_beats_per_bar" ;
-		pset:value 4.0
+		pset:value 6.0
 	] , [
 		lv2:symbol "autoplay_bpm" ;
-		pset:value 158.13404846
+		pset:value 120.0
 	] , [
 		lv2:symbol "base" ;
 		pset:value 1.0
