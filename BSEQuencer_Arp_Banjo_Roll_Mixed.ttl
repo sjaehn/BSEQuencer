@@ -117,10 +117,10 @@
 		pset:value 0.0
 	] , [
 		lv2:symbol "selection_duration" ;
-		pset:value 0.0
+		pset:value 1.0
 	] , [
 		lv2:symbol "selection_duration_rand" ;
-		pset:value 1.0
+		pset:value 0.0
 	] , [
 		lv2:symbol "signature" ;
 		pset:value 0.0
