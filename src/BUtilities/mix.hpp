@@ -1,4 +1,4 @@
-/* stof.hpp
+/* mix.hpp
  * Copyright (C) 2020  Sven Jähnichen
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,16 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef BUTILITIES_STOF_HPP_
-#define BUTILITIES_STOF_HPP_
-
-#include <string>
-#include <stdexcept>
+#ifndef BUTILITIES_MIX_HPP_
+#define BUTILITIES_MIX_HPP_
 
 namespace BUtilities {
 
-float stof (const std::string& str, size_t* idx = 0);
+template <class T> inline T mix (const T& t0, const T& t1, const double ratio)
+{
+        return t1 * ratio + t0 * (1.0f - ratio);
+}
 
 }
 
-#endif /* BUTILITIES_STOF_HPP_ */
+#endif /* BUTILITIES_MIX_HPP_ */

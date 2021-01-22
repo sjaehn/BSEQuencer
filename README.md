@@ -67,13 +67,7 @@ Key features
 
 What's new
 ----------
-* Bugfix duration of merged pads
-* New pad properties: Gate, note pitch
-* Randomization of pad properties
-* Reduce preset file size
-* International preset exchange (decimal point <-> decimal comma)
-* New factory presets: Waltz, Bossa Nova, Samba, Afro Cuban
-* Factory presets adapted to the new features
+* Enable enter slider and dial values via keyboard
 
 
 Usage

@@ -61,11 +61,7 @@ Label& Label::operator= (const Label& that)
 	cursorTo = that.cursorTo;
 	Widget::operator= (that);
 
-	if (labelText != oldText)
-	{
-		postMessage (BWIDGETS_LABEL_TEXT_CHANGED_MESSAGE, BUtilities::makeAny<std::string> (labelText));
-		oldText = labelText;
-	}
+	oldText = labelText;
 
 	return *this;
 }
@@ -76,6 +72,7 @@ void Label::setText (const std::string& text)
 {
 	if (text != labelText)
 	{
+		setEditMode (false);
 		labelText = text;
 		std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> convert;
 		u32labelText = convert.from_bytes (labelText);
@@ -83,11 +80,7 @@ void Label::setText (const std::string& text)
 		if (cursorFrom < sz) cursorFrom = sz;
 		if (cursorTo < sz) cursorTo = sz;
 		update ();
-		if (labelText != oldText)
-		{
-			postMessage (BWIDGETS_LABEL_TEXT_CHANGED_MESSAGE, BUtilities::makeAny<std::string> (labelText));
-			oldText = labelText;
-		}
+		oldText = labelText;
 	}
 }
 
@@ -162,7 +155,7 @@ void Label::applyTheme (BStyles::Theme& theme, const std::string& name)
 
 void Label::setEditable (const bool status)
 {
-	editable = true;
+	editable = status;
 	if (editMode) update ();
 }
 
@@ -174,7 +167,6 @@ void Label::setEditMode (const bool mode)
 	{
 		editMode = mode;
 		update ();
-		if (editable) postMessage (BWIDGETS_LABEL_EDIT_ENTERED_MESSAGE, BUtilities::makeAny<bool> (editMode));
 	}
 }
 
@@ -310,7 +302,7 @@ void Label::onKeyPressed (BEvents::KeyEvent* event)
 
 void Label::onKeyReleased (BEvents::KeyEvent* event) {cbfunction_[BEvents::EventType::KEY_RELEASE_EVENT] (event);}
 
-void Label::onButtonPressed (BEvents::PointerEvent* event)
+void Label::onButtonClicked (BEvents::PointerEvent* event)
 {
 	if (editable && (event) && (event->getWidget () == this) && (main_))
 	{
@@ -328,6 +320,7 @@ void Label::onPointerDragged (BEvents::PointerEvent* event)
 	if
 	(
 		editable &&
+		editMode &&
 		(event) &&
 		(event->getWidget () == this) &&
 		(main_) &&
