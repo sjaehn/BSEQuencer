@@ -68,6 +68,7 @@ Key features
 What's new
 ----------
 * Enable enter slider and dial values via keyboard
+* Update pugl
 
 
 Usage

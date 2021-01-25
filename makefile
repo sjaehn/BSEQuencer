@@ -79,8 +79,10 @@ GUI_INCL = \
 	src/BWidgets/BItems.cpp \
 	src/screen.c \
 	src/BWidgets/cairoplus.c \
-	src/BWidgets/pugl/pugl_x11_cairo.c \
-	src/BWidgets/pugl/pugl_x11.c \
+	src/BWidgets/pugl/implementation.c \
+	src/BWidgets/pugl/x11_stub.c \
+	src/BWidgets/pugl/x11_cairo.c \
+	src/BWidgets/pugl/x11.c \
 	src/BUtilities/to_string.cpp \
 	src/BUtilities/stof.cpp
 
