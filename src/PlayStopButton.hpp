@@ -39,7 +39,7 @@ public:
 		add (drawingSurface);
 	}
 
-	void setValue (const double val)
+	virtual void setValue (const double val) override
 	{
 		ValueWidget::setValue (val);
 		drawSymbol (value);
@@ -55,7 +55,7 @@ public:
 		}
 	}
 
-	void onButtonPressed (BEvents::PointerEvent* event)
+	virtual void onButtonPressed (BEvents::PointerEvent* event) override
 	{
 		if (value == 0.0) setValue (1.0);
 		else setValue (0.0);

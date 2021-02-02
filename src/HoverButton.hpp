@@ -45,7 +45,7 @@ public:
         	add (focusLabel);
         }
 
-        void onFocusIn (BEvents::FocusEvent* event) override
+        virtual void onFocusIn (BEvents::FocusEvent* event) override
         {
         	if (event && event->getWidget())
         	{
@@ -56,7 +56,7 @@ public:
         	}
         	Widget::onFocusIn (event);
         }
-        void onFocusOut (BEvents::FocusEvent* event) override
+        virtual void onFocusOut (BEvents::FocusEvent* event) override
         {
         	if (event && event->getWidget()) focusLabel.hide();
         	Widget::onFocusOut (event);

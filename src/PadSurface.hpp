@@ -42,7 +42,7 @@ public:
                 add (focusText);
         }
 
-        void onFocusIn (BEvents::FocusEvent* event) override
+        virtual void onFocusIn (BEvents::FocusEvent* event) override
         {
                 Widget::onFocusIn (event);
 
@@ -54,7 +54,7 @@ public:
         	}
         }
 
-        void onFocusOut (BEvents::FocusEvent* event) override
+        virtual void onFocusOut (BEvents::FocusEvent* event) override
         {
                 Widget::onFocusOut (event);
         	if (event && event->getWidget()) focusText.hide();
