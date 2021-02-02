@@ -35,6 +35,7 @@ Widget::Widget(const double x, const double y, const double width, const double 
 		name_ (name), widgetSurface_ (), widgetState_ (BWIDGETS_DEFAULT_STATE)
 {
 	mergeable_.fill (false);
+	mergeable_[BEvents::CONFIGURE_REQUEST_EVENT] = true;
 	mergeable_[BEvents::EXPOSE_REQUEST_EVENT] = true;
 	mergeable_[BEvents::POINTER_MOTION_EVENT] = true;
 	mergeable_[BEvents::POINTER_DRAG_EVENT] = true;
@@ -765,7 +766,7 @@ void Widget::draw (const BUtilities::RectArea& area)
 				}
 				else
 				{
-					cairo_rectangle_rounded (cr, innerBorders, innerBorders, getEffectiveWidth (), getEffectiveHeight (), innerRadius);
+					cairo_rectangle_rounded (cr, innerBorders, innerBorders, getEffectiveWidth (), getEffectiveHeight (), innerRadius, 0b1111);
 				}
 				cairo_fill (cr);
 			}
@@ -791,7 +792,8 @@ void Widget::draw (const BUtilities::RectArea& area)
 				outerBorders + lw / 2,
 				outerBorders + lw / 2,
 				getWidth () - 2 * outerBorders - lw,
-				getHeight () - 2 * outerBorders - lw, radius);
+				getHeight () - 2 * outerBorders - lw,
+				radius, 0b1111);
 
 			cairo_set_source_rgba (cr, CAIRO_RGBA (lc));
 			cairo_set_line_width (cr, lw);
