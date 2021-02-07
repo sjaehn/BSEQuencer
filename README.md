@@ -68,7 +68,10 @@ Key features
 What's new
 ----------
 * Enable enter slider and dial values via keyboard
+* Notify host about state changes
 * Update pugl
+* Support ui:resize (qtractor)
+* Code / compile cleanup
 * Bugfixes
 
 
