@@ -1989,8 +1989,8 @@ static int call_resize (LV2UI_Handle ui, int width, int height)
 	return 0;
 }
 
-static const LV2UI_Idle_Interface idle = {.idle = call_idle };
-static const LV2UI_Resize resize = {.ui_resize = call_resize} ;
+static const LV2UI_Idle_Interface idle = {call_idle};
+static const LV2UI_Resize resize = {nullptr, call_resize};
 
 static const void* extension_data(const char* uri)
 {
