@@ -1904,7 +1904,7 @@ void BSEQuencer_GUI::padClip (const int row, const int step)
 	}
 }
 
-LV2UI_Handle instantiate (const LV2UI_Descriptor *descriptor,
+static LV2UI_Handle instantiate (const LV2UI_Descriptor *descriptor,
 						  const char *plugin_uri,
 						  const char *bundle_path,
 						  LV2UI_Write_Function write_function,
@@ -1961,13 +1961,13 @@ LV2UI_Handle instantiate (const LV2UI_Descriptor *descriptor,
 	return (LV2UI_Handle) ui;
 }
 
-void cleanup(LV2UI_Handle ui)
+static void cleanup(LV2UI_Handle ui)
 {
 	BSEQuencer_GUI* self = (BSEQuencer_GUI*) ui;
 	delete self;
 }
 
-void port_event(LV2UI_Handle ui, uint32_t port_index, uint32_t buffer_size,
+static void port_event(LV2UI_Handle ui, uint32_t port_index, uint32_t buffer_size,
 	uint32_t format, const void* buffer)
 {
 	BSEQuencer_GUI* self = (BSEQuencer_GUI*) ui;
@@ -1999,7 +1999,7 @@ static const void* extension_data(const char* uri)
 	else return NULL;
 }
 
-const LV2UI_Descriptor guiDescriptor = {
+static const LV2UI_Descriptor guiDescriptor = {
 		BSEQUENCER_GUI_URI,
 		instantiate,
 		cleanup,
