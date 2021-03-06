@@ -1964,26 +1964,28 @@ static LV2UI_Handle instantiate (const LV2UI_Descriptor *descriptor,
 static void cleanup(LV2UI_Handle ui)
 {
 	BSEQuencer_GUI* self = (BSEQuencer_GUI*) ui;
-	delete self;
+	if (self) delete self;
 }
 
 static void port_event(LV2UI_Handle ui, uint32_t port_index, uint32_t buffer_size,
 	uint32_t format, const void* buffer)
 {
 	BSEQuencer_GUI* self = (BSEQuencer_GUI*) ui;
-	self->port_event(port_index, buffer_size, format, buffer);
+	if (self) self->port_event(port_index, buffer_size, format, buffer);
 }
 
 static int call_idle (LV2UI_Handle ui)
 {
 	BSEQuencer_GUI* self = (BSEQuencer_GUI*) ui;
-	self->handleEvents ();
+	if (self) self->handleEvents ();
 	return 0;
 }
 
 static int call_resize (LV2UI_Handle ui, int width, int height)
 {
 	BSEQuencer_GUI* self = (BSEQuencer_GUI*) ui;
+	if (!self) return 0;
+	 
 	BEvents::ExposeEvent* ev = new BEvents::ExposeEvent (self, self, BEvents::CONFIGURE_REQUEST_EVENT, self->getPosition().x, self->getPosition().y, width, height);
 	self->addEventToQueue (ev);
 	return 0;
