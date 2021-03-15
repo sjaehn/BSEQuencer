@@ -91,16 +91,14 @@ GUI_C_INCL = \
 	src/BWidgets/pugl/x11_cairo.c \
 	src/BWidgets/pugl/x11.c
 
-ifeq ($(shell $(PKG_CONFIG) --exists lv2 || echo no), no)
-  $(error LV2 not found. Please install LV2 first.)
+ifeq ($(shell $(PKG_CONFIG) --exists 'lv2 >= 1.12.4' || echo no), no)
+  $(error lv2 >= 1.12.4 not found. Please install lv2 >= 1.12.4 first.)
 endif
-
-ifeq ($(shell $(PKG_CONFIG) --exists x11 || echo no), no)
-  $(error X11 not found. Please install X11 first.)
+ifeq ($(shell $(PKG_CONFIG) --exists 'x11 >= 1.6.0' || echo no), no)
+  $(error x11 >= 1.6.0 not found. Please install x11 >= 1.6.0 first.)
 endif
-
-ifeq ($(shell $(PKG_CONFIG) --exists cairo || echo no), no)
-  $(error Cairo not found. Please install cairo first.)
+ifeq ($(shell $(PKG_CONFIG) --exists 'cairo >= 1.12.0' || echo no), no)
+  $(error cairo >= 1.12.0 not found. Please install cairo >= 1.12.0 first.)
 endif
 
 $(BUNDLE): clean $(DSP_OBJ) $(GUI_OBJ)
