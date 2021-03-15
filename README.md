@@ -77,11 +77,8 @@ Key features
 
 What's new
 ----------
-* Enable enter slider and dial values via keyboard
-* Notify host about state changes
-* Update pugl
-* Support ui:resize (qtractor)
-* Code / compile cleanup
+* Check dependencies / versions
+* Support older systems (gcc < 8, clang < 10, lv2 < 1.18)
 * Bugfixes
 
 
