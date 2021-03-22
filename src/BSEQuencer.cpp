@@ -1438,6 +1438,8 @@ LV2_State_Status BSEQuencer::state_restore (LV2_State_Retrieve_Function retrieve
 				}
 			}
 		}
+
+		scheduleNotifyScaleMapsToGui = true;
 	}
 
 	// Force GUI notification
