@@ -3,11 +3,25 @@ Repository: BSEQuencer
 
 Description: Multi channel MIDI step sequencer LV2 plugin with a variable matrix
 
+Key features:
+
+* Step sequencer with a selectable pattern matrix size (8x16, 16x16, 24x16, or 32x16)
+* Autoplay or host or host + MIDI controlled playing
+* User defined pad features: Gate, note pitch, octave pitch, velocity, and duration
+* Optional individual randomization of each pad feature
+* Handles multiple MIDI inputs signals (keys) in one sequencer instance
+* Use musical scales and / or drumkits
+* Scale & drumkit editor
+* Controls for playing direction, jump, skip, and stop options placeable to any position within the matrix
+* Notes can be associated with four different, configurable output channels
+* Additional channel features: velocity and MIDI note offset
+* Output channels connectable with individual MIDI channels
+
 ![screenshot](https://github.com/sjaehn/BSEQuencer/blob/master/docs/screenshot.png "Screenshot from B.SEQuencer")
 
 
-Installation
-------------
+## Installation
+
 a) Install the bsequencer (bsequencer-lv2) package for your system
 * [Arch linux](https://www.archlinux.org/packages/community/x86_64/bsequencer/) by David Runge
 * [Free BSD](https://www.freshports.org/audio/bsequencer-lv2) by yurivict
@@ -49,8 +63,8 @@ variable `PREFIX` while installing: `sudo make install PREFIX=/usr`. If you want
 install target directory, change the variable `LV2DIR` (e.g., `make install LV2DIR=~/.lv2`).
 
 
-Running
--------
+## Running
+
 After the installation Carla, Ardour and any other LV2 host should automatically detect B.SEQuencer.
 
 If jalv is installed, you can also call it
@@ -60,32 +74,25 @@ jalv.gtk https://www.jahnichen.de/plugins/lv2/BSEQuencer
 to run it stand-alone and connect it to the JACK system.
 
 
-Key features
-------------
-* Step sequencer with a selectable pattern matrix size (8x16, 16x16, 24x16, or 32x16)
-* Autoplay or host or host + MIDI controlled playing
-* User defined pad features: Gate, note pitch, octave pitch, velocity, and duration
-* Optional individual randomization of each pad feature
-* Handles multiple MIDI inputs signals (keys) in one sequencer instance
-* Use musical scales and / or drumkits
-* Scale & drumkit editor
-* Controls for playing direction, jump, skip, and stop options placeable to any position within the matrix
-* Notes can be associated with four different, configurable output channels
-* Additional channel features: velocity and MIDI note offset
-* Output channels connectable with individual MIDI channels
+## Usage
+
+See https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer
 
 
-What's new
-----------
+## Presets
+
+B.SEQuencer comes along with a set of factory presets including arpeggios and drum patterns. You can also import
+the large collection of Tidal Cycles drum patterns made by LVM from https://github.com/lvm/tidal-drum-patterns
+using the Importpattern tool: https://github.com/sjaehn/Importpattern .
+
+
+## What's new
+
 * Bugfixes
+* Link tool to import drum patterns to presets
 
 
-Usage
------
-see https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer
+## See also
 
-
-See also
---------
 * Feature tour: https://www.youtube.com/watch?v=J6bU4GdUVYc
 * Preview: https://www.youtube.com/watch?v=iERRKL7J-KU
