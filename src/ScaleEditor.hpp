@@ -33,6 +33,12 @@
 #include "BWidgets/TextButton.hpp"
 #include "BWidgets/ImageIcon.hpp"
 
+#ifdef LOCALEFILE
+#include LOCALEFILE
+#else
+#include "Locale_EN.hpp"
+#endif
+
 class ScaleEditor : public BWidgets::ValueWidget
 {
 public:

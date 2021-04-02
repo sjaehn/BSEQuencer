@@ -1,3 +1,6 @@
+#ifndef LOCALE_DE_HPP_
+#define LOCALE_DE_HPP_
+
 #define BSEQUENCER_LABEL_NO_CHANNEL "Kein Kanal"
 #define BSEQUENCER_LABEL_CHANNEL "Kanal"
 #define BSEQUENCER_LABEL_NO_CONTROL "Kein Kontroller"
@@ -58,3 +61,5 @@
 #define BSEQUENCER_LABEL_CANCEL "Abbruch"
 #define BSEQUENCER_LABEL_APPLY "Anwenden"
 #define BSEQUENCER_LABEL_USES_SCALE "wie Tonart"
+
+#endif

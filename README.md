@@ -101,7 +101,7 @@ the text for the respective definitions. But do not change or delete any definit
 
 * Bugfixes
 * Link tool to import drum patterns to presets
-* Internationalization
+* Support LANGUAGE parameter
 * Add locales: EN, DE
 
 

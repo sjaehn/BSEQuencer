@@ -1,3 +1,6 @@
+#ifndef LOCALE_EN_HPP_
+#define LOCALE_EN_HPP_
+
 #define BSEQUENCER_LABEL_NO_CHANNEL "No channel"
 #define BSEQUENCER_LABEL_CHANNEL "Channel"
 #define BSEQUENCER_LABEL_NO_CONTROL "No control"
@@ -29,6 +32,7 @@
 #define BSEQUENCER_LABEL_RESTART_SYNC "Restart & sync"
 #define BSEQUENCER_LABEL_CONTINUE "Continue"
 #define BSEQUENCER_LABEL_STATUS_PLAYING "Status: playing ..."
+#define BSEQUENCER_LABEL_STATUS_STOPPED "Status: stopped!"
 #define BSEQUENCER_LABEL_TOOLBOX "Toolbox"
 #define BSEQUENCER_LABEL_WHOLE_STEP "Whole step"
 #define BSEQUENCER_LABEL_CONTROLS "Controls"
@@ -57,3 +61,5 @@
 #define BSEQUENCER_LABEL_CANCEL "Cancel"
 #define BSEQUENCER_LABEL_APPLY "Apply"
 #define BSEQUENCER_LABEL_USES_SCALE "uses scale"
+
+#endif
