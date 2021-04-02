@@ -60,7 +60,11 @@ sudo make install
 is recommended to improve the plugin performance. Alternatively, you may build a debugging version using
 `make CPPFLAGS+=-g`. For installation into an alternative directory (e.g., /usr/lib/lv2/), change the
 variable `PREFIX` while installing: `sudo make install PREFIX=/usr`. If you want to freely choose the
-install target directory, change the variable `LV2DIR` (e.g., `make install LV2DIR=~/.lv2`).
+install target directory, change the variable `LV2DIR` (e.g., `make install LV2DIR=~/.lv2`) or even define
+`DESTDIR`.
+
+**Optional:** Further supported parameters include `LANGUAGE` (usually two letters code) to change the GUI language
+(see customize).
 
 
 ## Running
@@ -86,10 +90,19 @@ the large collection of Tidal Cycles drum patterns made by LVM from https://gith
 using the Importpattern tool: https://github.com/sjaehn/Importpattern .
 
 
+##Customize
+
+You can create customized builds of B.SEQuenzr using the parameter `LANGUAGE`(e.g.,
+`make LANGUAGE=DE`). To create a new language pack, copy `src/Locale_EN.hpp` and edit
+the text for the respective definitions. But do not change or delete any definition symbol!
+
+
 ## What's new
 
 * Bugfixes
 * Link tool to import drum patterns to presets
+* Internationalization
+* Add locales: EN, DE
 
 
 ## See also

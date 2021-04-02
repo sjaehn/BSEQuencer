@@ -31,6 +31,10 @@ GUICFLAGS += `$(PKG_CONFIG) --cflags $(GUI_LIBS)`
 DSPLFLAGS += `$(PKG_CONFIG) --libs $(LV2_LIBS)`
 GUILFLAGS += `$(PKG_CONFIG) --libs $(GUI_LIBS)`
 
+ifeq ($(shell test -e src/Locale_$(LANGUAGE).hpp && echo -n yes),yes)
+  GUIPPFLAGS += -DLOCALEFILE=\"Locale_$(LANGUAGE).hpp\"
+endif
+
 BUNDLE = BSEQuencer.lv2
 DSP = BSEQuencer
 DSP_SRC = ./src/BSEQuencer.cpp

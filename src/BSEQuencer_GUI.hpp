@@ -45,6 +45,12 @@
 #include "BWidgets/ImageIcon.hpp"
 #include "screen.h"
 
+#ifdef LOCALEFILE
+#include LOCALEFILE
+#else
+#include "Locale_EN.hpp"
+#endif
+
 #include "BScale.hpp"
 #include "ScaleMap.hpp"
 #include "drawbutton.hpp"
@@ -257,35 +263,35 @@ private:
 
 	std::array<ButtonStyle, NR_SEQUENCER_CHS + 1> chButtonStyles =
 	{{
-		{{0.0, 0.0, 0.0, 0.5}, NO_CTRL, "No channel"},
-		{{0.0, 0.0, 1.0, 1.0}, NO_CTRL, "Channel 1"},
-		{{1.0, 0.0, 1.0, 1.0}, NO_CTRL, "Channel 2"},
-		{{1.0, 0.5, 0.0, 1.0}, NO_CTRL, "Channel 3"},
-		{{1.0, 1.0, 0.0, 1.0}, NO_CTRL, "Channel 4"}
+		{{0.0, 0.0, 0.0, 0.5}, NO_CTRL, BSEQUENCER_LABEL_NO_CHANNEL},
+		{{0.0, 0.0, 1.0, 1.0}, NO_CTRL, BSEQUENCER_LABEL_CHANNEL " 1"},
+		{{1.0, 0.0, 1.0, 1.0}, NO_CTRL, BSEQUENCER_LABEL_CHANNEL " 2"},
+		{{1.0, 0.5, 0.0, 1.0}, NO_CTRL, BSEQUENCER_LABEL_CHANNEL " 3"},
+		{{1.0, 1.0, 0.0, 1.0}, NO_CTRL, BSEQUENCER_LABEL_CHANNEL " 4"}
 	}};
 
 	std::array<ButtonStyle, NR_CTRL_BUTTONS> ctrlButtonStyles =
 	{{
-		{{0.0, 0.0, 0.0, 0.5}, NO_CTRL, "No control"},
-		{{0.0, 0.03, 0.06, 1.0}, CTRL_PLAY_FWD, "Play forward"},
-		{{0.0, 0.03, 0.06, 1.0}, CTRL_PLAY_REW, "Play reverse"},
-	  	{{0.0, 0.03, 0.06, 1.0}, CTRL_ALL_MARK, "Set all mark"},
-		{{0.0, 0.03, 0.06, 1.0}, CTRL_MARK, "Set mark"},
-		{{0.0, 0.03, 0.06, 1.0}, CTRL_JUMP_FWD, "Jump forward"},
-		{{0.0, 0.03, 0.06, 1.0}, CTRL_JUMP_BACK, "Jump backward"},
-	  	{{0.0, 0.03, 0.06, 1.0}, CTRL_SKIP, "Skip"},
-		{{0.0, 0.03, 0.06, 1.0}, CTRL_STOP, "Stop"}
+		{{0.0, 0.0, 0.0, 0.5}, NO_CTRL, BSEQUENCER_LABEL_NO_CONTROL},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_PLAY_FWD, BSEQUENCER_LABEL_PLAY_FWD},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_PLAY_REW, BSEQUENCER_LABEL_PLAY_REW},
+	  	{{0.0, 0.03, 0.06, 1.0}, CTRL_ALL_MARK, BSEQUENCER_LABEL_ALL_MARK},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_MARK, BSEQUENCER_LABEL_ALL_MARK},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_JUMP_FWD, BSEQUENCER_LABEL_JUMP_FWD},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_JUMP_BACK, BSEQUENCER_LABEL_JUMP_BACK},
+	  	{{0.0, 0.03, 0.06, 1.0}, CTRL_SKIP, BSEQUENCER_LABEL_SKIP},
+		{{0.0, 0.03, 0.06, 1.0}, CTRL_STOP, BSEQUENCER_LABEL_STOP}
 	}};
 
 	std::array<ButtonStyle, NR_EDIT_BUTTONS> editButtonStyles =
 	{{
-		{{0.0, 0.03, 0.06, 1.0}, EDIT_PICK, "Pick"},
-		{{0.0, 0.03, 0.06, 1.0}, EDIT_MERGE, "Merge / split"},
-		{{0.0, 0.03, 0.06, 1.0}, EDIT_CUT, "Select & cut"},
-	  	{{0.0, 0.03, 0.06, 1.0}, EDIT_COPY, "Select & copy"},
-		{{0.0, 0.03, 0.06, 1.0}, EDIT_FLIPX, "Select & X flip"},
-		{{0.0, 0.03, 0.06, 1.0}, EDIT_FLIPY, "Select & Y flip"},
-		{{0.0, 0.03, 0.06, 1.0}, EDIT_PASTE, "Paste"}
+		{{0.0, 0.03, 0.06, 1.0}, EDIT_PICK, BSEQUENCER_LABEL_PICK},
+		{{0.0, 0.03, 0.06, 1.0}, EDIT_MERGE, BSEQUENCER_LABEL_MERGE},
+		{{0.0, 0.03, 0.06, 1.0}, EDIT_CUT, BSEQUENCER_LABEL_CUT},
+	  	{{0.0, 0.03, 0.06, 1.0}, EDIT_COPY, BSEQUENCER_LABEL_COPY},
+		{{0.0, 0.03, 0.06, 1.0}, EDIT_FLIPX, BSEQUENCER_LABEL_FLIPX},
+		{{0.0, 0.03, 0.06, 1.0}, EDIT_FLIPY, BSEQUENCER_LABEL_FLIPY},
+		{{0.0, 0.03, 0.06, 1.0}, EDIT_PASTE, BSEQUENCER_LABEL_PASTE}
 	}};
 
 	BStyles::Border border = {{ink, 1.0}, 0.0, 2.0, 0.0};

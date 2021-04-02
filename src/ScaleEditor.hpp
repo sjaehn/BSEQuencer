@@ -144,15 +144,15 @@ ScaleEditor::ScaleEditor() : ScaleEditor (0, 0, 0, 0, "editor", "", 0, ScaleMap 
 ScaleEditor::ScaleEditor(const double x, const double y, const double width, const double height, const std::string& name,
 						 const std::string& pluginPath, const int mapNr, const ScaleMap& scaleMap, const BScale& scale) :
 		BWidgets::ValueWidget (x, y, width, height, name, 0.0),
-		nameLabel (20, 60, 80, 20, "lflabel", "Scale name:"),
+		nameLabel (20, 60, 80, 20, "lflabel", BSEQUENCER_LABEL_SCALE_NAME ":"),
 		scaleNameLabel (120, 60, 320, 20, "lflabel", scaleMap.name),
-		rowLabel (20, 100, 80, 20, "lflabel", "Row"),
-		symbolLabel (70, 100, 48, 20, "ctlabel", "Mode"),
-		noteLabel (148, 100, 80, 20, "ctlabel", "Note"),
-		altSymbolLabel (248, 100, 80, 20, "ctlabel", "Symbol"),
+		rowLabel (20, 100, 80, 20, "lflabel", BSEQUENCER_LABEL_ROW),
+		symbolLabel (70, 100, 48, 20, "ctlabel", BSEQUENCER_LABEL_MODE),
+		noteLabel (148, 100, 80, 20, "ctlabel", BSEQUENCER_LABEL_NOTE),
+		altSymbolLabel (248, 100, 80, 20, "ctlabel", BSEQUENCER_LABEL_SYMBOL),
 		piano (50, 620, 260, 60, "widget", 0, 35),
-		cancelButton (60, 720, 60, 20, "button", "Cancel"),
-		applyButton (240, 720, 60, 20, "button", "Apply"),
+		cancelButton (60, 720, 60, 20, "button", BSEQUENCER_LABEL_CANCEL),
+		applyButton (240, 720, 60, 20, "button", BSEQUENCER_LABEL_APPLY),
 		pianoRoot (0), scale (scale), scaleMap (scaleMap), mapNr (mapNr),
 		sz (width / 360 < height / 760 ? width / 360 : height / 760)
 
@@ -212,7 +212,7 @@ ScaleEditor::ScaleEditor(const double x, const double y, const double width, con
 		nrNoteListbox[i].applyTheme (theme);
 		add (nrNoteListbox[i]);
 
-		nrNoteLabel[i] = BWidgets::Label (148, 580 - i * 30, 80, 24, "ctlabel", "(uses scale)");
+		nrNoteLabel[i] = BWidgets::Label (148, 580 - i * 30, 80, 24, "ctlabel", "(" BSEQUENCER_LABEL_USES_SCALE ")");
 		nrNoteLabel[i].rename ("ctlabel");
 		nrNoteLabel[i].applyTheme (theme);
 		add (nrNoteLabel[i]);

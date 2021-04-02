@@ -35,66 +35,66 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	captionSurface (18, 88, 64, 484, "box"),
 
 	modeBox (920, 88, 310, 170, "box"),
-	modeBoxLabel (10, 10, 290, 20, "ctlabel", "Play mode"),
-	modeLabel (10, 80, 60, 20, "lflabel", "Mode"),
-	modeListBox (80, 80, 220, 20, 220, 80, "menu", BItems::ItemList ({{1, "Autoplay"}, {3, "Host-controlled playback"} , {2, "Host & MIDI controlled"}}), 2.0),
-	modeAutoplayBpmLabel (10, 115, 120, 20, "lflabel", "Beats per min"),
+	modeBoxLabel (10, 10, 290, 20, "ctlabel", BSEQUENCER_LABEL_PLAY_MODE),
+	modeLabel (10, 80, 60, 20, "lflabel", BSEQUENCER_LABEL_MODE),
+	modeListBox (80, 80, 220, 20, 220, 80, "menu", BItems::ItemList ({{1, BSEQUENCER_LABEL_AUTOPLAY}, {3, BSEQUENCER_LABEL_HOST_CONTROLLED} , {2, BSEQUENCER_LABEL_HOST_AND_MIDI}}), 2.0),
+	modeAutoplayBpmLabel (10, 115, 120, 20, "lflabel", BSEQUENCER_LABEL_BPM),
 	modeAutoplayBpmSlider (120, 105, 180, 25, "slider", 120.0, 1.0, 300.0, 0.0, "%3.1f"),
-	modeAutoplayBpbLabel (10, 145, 120, 20, "lflabel", "Beats per bar"),
+	modeAutoplayBpbLabel (10, 145, 120, 20, "lflabel", BSEQUENCER_LABEL_BPB),
 	modeAutoplayBpbSlider (120, 135, 180, 25, "slider", 4.0, 1.0, 16.0, 1.0, "%2.0f"),
-	modeMidiInChannelLabel (10, 110, 130, 20 , "lflabel", "MIDI input channel"),
+	modeMidiInChannelLabel (10, 110, 130, 20 , "lflabel", BSEQUENCER_LABEL_MIDI_INPUT_CH),
 	modeMidiInChannelListBox (180, 110, 120, 20, 120, 200, "menu",
-				  BItems::ItemList ({{0, "All"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}, {9, "9"},
+				  BItems::ItemList ({{0, BSEQUENCER_LABEL_ALL}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}, {9, "9"},
 						     {10, "10"}, {11, "11"}, {12, "12"}, {13, "13"}, {14, "14"}, {15, "15"}, {16, "16"}})),
-	modeOnKeyLabel (10, 140, 100, 20, "lflabel", "On NOTE ON"),
-	modeOnKeyListBox (180, 140, 120, 20, 120, 80, "menu", BItems::ItemList ({{0, "Restart"}, {2, "Restart & sync"}, {1, "Continue"}})),
-	modePlayLabel (10, 50, 205, 20, "lflabel", "Status: playing ..."),
+	modeOnKeyLabel (10, 140, 100, 20, "lflabel", BSEQUENCER_LABEL_ON_NOTE_ON),
+	modeOnKeyListBox (180, 140, 120, 20, 120, 80, "menu", BItems::ItemList ({{0, BSEQUENCER_LABEL_RESTART}, {2, BSEQUENCER_LABEL_RESTART_SYNC}, {1, BSEQUENCER_LABEL_CONTINUE}})),
+	modePlayLabel (10, 50, 205, 20, "lflabel", BSEQUENCER_LABEL_STATUS_PLAYING),
 	modePlayButton (270, 40, 30, 30, "box", 1.0),
 
 	toolBox (920, 280, 310, 292, "box"),
-	toolBoxLabel (10, 10, 290, 20, "ctlabel", "Toolbox"),
+	toolBoxLabel (10, 10, 290, 20, "ctlabel", BSEQUENCER_LABEL_TOOLBOX),
 	toolButtonBox (0, 30, 310, 160, "widget"),
-	toolWholeStepButton (210, 40, 80, 20, "tgbutton", "Whole step", 0.0),
+	toolWholeStepButton (210, 40, 80, 20, "tgbutton", BSEQUENCER_LABEL_WHOLE_STEP, 0.0),
 	toolResetButton (90, 130, 20, 20, "tgbutton"),
 	toolUndoButton (120, 130, 20, 20, "tgbutton"),
 	toolRedoButton (150, 130, 20, 20, "tgbutton"),
-	toolButtonBoxCtrlLabel (10, 10, 60, 20, "lflabel", "Controls"),
-	toolButtonBoxChLabel (10, 70, 60, 20, "lflabel", "Channels"),
-	toolButtonBoxEditLabel (10, 100, 40, 20, "lflabel", "Edit"),
-	toolGateLabel (10, 260, 30, 20, "ctlabel", "Gate"),
+	toolButtonBoxCtrlLabel (10, 10, 80, 20, "lflabel", BSEQUENCER_LABEL_CONTROLS),
+	toolButtonBoxChLabel (10, 70, 80, 20, "lflabel", BSEQUENCER_LABEL_CHANNELS),
+	toolButtonBoxEditLabel (10, 100, 80, 20, "lflabel", BSEQUENCER_LABEL_EDIT),
+	toolGateLabel (10, 260, 30, 20, "ctlabel", BSEQUENCER_LABEL_GATE),
 	toolGateSlider (12.5, 200, 25, 60, "dial", 1.0, 0.0, 1.0, 0.0, "%1.2f", BWidgets::LABEL_BOTTOM),
-	toolNoteLabel (45, 260, 60, 20, "ctlabel", "Note"),
+	toolNoteLabel (45, 260, 60, 20, "ctlabel", BSEQUENCER_LABEL_NOTE),
 	toolNoteDial (50, 200, 50, 60, "dial", 0.0, -16.0, 16.0, 1.0, "%1.0f"),
-	toolOctaveLabel (110, 260, 60, 20, "ctlabel", "Octave"),
+	toolOctaveLabel (110, 260, 60, 20, "ctlabel", BSEQUENCER_LABEL_OCTAVE),
 	toolOctaveDial (115, 200, 50, 60, "dial", 0.0, -8.0, 8.0, 1.0, "%1.0f"),
-	toolVelocityLabel (175, 260, 60, 20, "ctlabel", "Velocity"),
+	toolVelocityLabel (175, 260, 60, 20, "ctlabel", BSEQUENCER_LABEL_VELOCITY),
 	toolVelocityDial  (180, 200, 50, 60, "dial", 1.0, 0.0, 2.0, 0.0, "%1.2f"),
-	toolDurationLabel (240, 260, 60, 20, "ctlabel", "Duration"),
+	toolDurationLabel (240, 260, 60, 20, "ctlabel", BSEQUENCER_LABEL_DURATION),
 	toolDurationDial (245, 200, 50, 60, "dial", 1.0, 0.0, 1.0, 0.0, "%1.2f", UNIDIRECTIONAL),
 
 	propertiesBox (920, 590, 310, 210, "box"),
-	propertiesBoxLabel (10, 10, 290, 20, "ctlabel", "Properties"),
-	propertiesNrStepsLabel (10, 50, 170, 20, "lflabel", "Total number of steps"),
+	propertiesBoxLabel (10, 10, 290, 20, "ctlabel", BSEQUENCER_LABEL_PROPERTIES),
+	propertiesNrStepsLabel (10, 50, 170, 20, "lflabel", BSEQUENCER_LABEL_TOTAL_NUMBER_OF_STEPS),
 	propertiesNrStepsListBox (210, 50, 90, 20, 90, 100, "menu",
 				  BItems::ItemList ({{8, "8"}, {16, "16"}, {24, "24"}, {32, "32"}}), 16.0),
-	propertiesStepsPerLabel (110, 85, 80, 20, "lflabel", "steps per"),
+	propertiesStepsPerLabel (110, 85, 80, 20, "lflabel", BSEQUENCER_LABEL_STEPS_PER),
 	propertiesStepsPerSlider (10, 75, 90, 25, "slider", 4.0, 1.0, 8.0, 1.0, "%2.0f"),
 	propertiesBaseListBox (210, 85, 90, 20, 90, 60, "menu",
-			       BItems::ItemList ({"beat", "bar"}), 1.0),
-	propertiesRootLabel (10, 115, 40, 20, "lflabel", "Root"),
+			       BItems::ItemList ({BSEQUENCER_LABEL_BEAT, BSEQUENCER_LABEL_BAR}), 1.0),
+	propertiesRootLabel (10, 115, 60, 20, "lflabel", BSEQUENCER_LABEL_ROOT),
 	propertiesRootListBox (110, 115, 90, 20, 0, -160, 90, 160, "menu",
 			       BItems::ItemList ({{0, "C"}, {2, "D"}, {4, "E"}, {5, "F"}, {7, "G"}, {9, "A"}, {11, "B"}}), 0.0),
 	propertiesSignatureListBox (210, 115, 90, 20, 90, 80, "menu",
 				    BItems::ItemList ({{-1, "b"}, {0, ""}, {1, "#"}}), 0.0),
-	propertiesOctaveLabel (10, 145, 55, 20, "lflabel", "Octave"),
+	propertiesOctaveLabel (10, 145, 60, 20, "lflabel", BSEQUENCER_LABEL_OCTAVE),
 	propertiesOctaveListBox (210, 145, 90, 20, 0, -220, 90, 220, "menu",
 				 BItems::ItemList ({{-1, "-1"}, {0, "0"}, {1, "1"}, {2, "2"}, {3, "3"}, {4, "4"}, {5, "5"}, {6, "6"}, {7, "7"}, {8, "8"}}), 4.0),
-	propertiesScaleLabel (10, 175, 50, 20, "lflabel", "Scale"),
+	propertiesScaleLabel (10, 175, 60, 20, "lflabel", BSEQUENCER_LABEL_SCALE),
 	propertiesScaleEditIcon (70, 175, 20, 20, "widget", (bundle_path ? std::string (bundle_path) + EDIT_SYMBOL : std::string (""))),
 	propertiesScaleListBox (),
 
-	helpButton (1166, 50, 24, 24, "halobutton", "Help"),
-	ytButton (1196, 50, 24, 24, "halobutton", "Feature tour"),
+	helpButton (1166, 50, 24, 24, "halobutton", BSEQUENCER_LABEL_HELP),
+	ytButton (1196, 50, 24, 24, "halobutton", BSEQUENCER_LABEL_FEATURE_TOUR),
 	scaleEditor (nullptr)
 {
 	// Init scale maps
@@ -113,9 +113,9 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	propertiesScaleListBox.rename ("menu");
 
 	// Init toolbox buttons
-	toolButtonBox.addButton (90, 70, 20, 20, {{0.0, 0.03, 0.06, 1.0}, NO_CTRL, "No channel"});
+	toolButtonBox.addButton (90, 70, 20, 20, {{0.0, 0.03, 0.06, 1.0}, NO_CTRL, BSEQUENCER_LABEL_NO_CHANNEL});
 	for (int i = 1; i < NR_SEQUENCER_CHS + 1; ++i) toolButtonBox.addButton (90 + i * 30, 70, 20, 20, chButtonStyles[i]);
-	toolButtonBox.addButton (90 , 10, 20, 20, {{0.0, 0.03, 0.06, 1.0}, NO_CTRL, "No control"});
+	toolButtonBox.addButton (90 , 10, 20, 20, {{0.0, 0.03, 0.06, 1.0}, NO_CTRL, BSEQUENCER_LABEL_NO_CONTROL});
 	for (int i = 1; i < NR_CTRL_BUTTONS; ++i) toolButtonBox.addButton (90 + (i % 7) * 30, 10 + ((int) (i / 7)) * 30, 20, 20, ctrlButtonStyles[i]);
 	for (int i = 0; i < NR_EDIT_BUTTONS; ++i) toolButtonBox.addButton (90 + i * 30, 100, 20, 20, editButtonStyles[i]);
 
@@ -124,19 +124,19 @@ BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *cons
 	{
 		chBoxes[i].box = BWidgets::Widget (98 + i * 203.5, 590, 193.5, 210, "box");
 		chBoxes[i].chSymbol = BWidgets::DrawingSurface (7, 7, 26, 26, "button");
-		chBoxes[i].chLabel = BWidgets::Label (40, 10, 133.5, 20, "ctlabel", "Channel " + std::to_string (i + 1));
-		chBoxes[i].channelLabel = BWidgets::Label (10, 50, 100, 20, "lflabel", "MIDI channel");
+		chBoxes[i].chLabel = BWidgets::Label (40, 10, 133.5, 20, "ctlabel", BSEQUENCER_LABEL_CHANNEL " " + std::to_string (i + 1));
+		chBoxes[i].channelLabel = BWidgets::Label (10, 50, 100, 20, "lflabel", BSEQUENCER_LABEL_MIDI_CH);
 		chBoxes[i].channelListBox = BWidgets::PopupListBox (123.5, 50, 60, 20, 60, 120, "menu",
 								    BItems::ItemList({"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"}),
 								    i + 1);
-		chBoxes[i].pitchLabel = BWidgets::Label (10, 80, 80, 20, "lflabel", "Input pitch");
+		chBoxes[i].pitchLabel = BWidgets::Label (10, 80, 100, 20, "lflabel", BSEQUENCER_LABEL_INPUT_PITCH);
 		chBoxes[i].pitchSwitch = BWidgets::HSwitch (132.5, 82, 42, 16, "ch" + std::to_string (i + 1), 0.0);
 		chBoxes[i].pitchScreen = BWidgets::Widget (10, 80, 173.5, 20, "screen");
 		chBoxes[i].pitchScreen.hide ();
 		chBoxes[i].velocityDial = BWidgets::DialValue (25, 120, 50, 60, "ch" + std::to_string (i + 1), 1.0, 0.0, 2.0, 0.0, "%1.2f");
-		chBoxes[i].velocityLabel = BWidgets::Label (20, 180, 60, 20, "ctlabel", "Velocity");
+		chBoxes[i].velocityLabel = BWidgets::Label (20, 180, 60, 20, "ctlabel", BSEQUENCER_LABEL_VELOCITY);
 		chBoxes[i].noteOffsetDial = BWidgets::DialValue (118.5, 120, 50, 60, "ch" + std::to_string (i + 1), 0.0, -127.0, 127.0, 1.0, "%1.0f");
-		chBoxes[i].noteOffsetLabel = BWidgets::Label (113.5, 180, 60, 20, "ctlabel", "Offset");
+		chBoxes[i].noteOffsetLabel = BWidgets::Label (113.5, 180, 60, 20, "ctlabel", BSEQUENCER_LABEL_OFFSET);
 	}
 
 	// Link controllerWidgets
@@ -585,9 +585,9 @@ void BSEQuencer_GUI::scale ()
 	RESIZE (toolResetButton, 90, 130, 20, 20, sz);
 	RESIZE (toolUndoButton, 120, 130, 20, 20, sz);
 	RESIZE (toolRedoButton, 150, 130, 20, 20, sz);
-	RESIZE (toolButtonBoxCtrlLabel, 10, 10, 60, 20, sz);
-	RESIZE (toolButtonBoxChLabel, 10, 70, 60, 20, sz);
-	RESIZE (toolButtonBoxEditLabel, 10, 100, 60, 20, sz);
+	RESIZE (toolButtonBoxCtrlLabel, 10, 10, 80, 20, sz);
+	RESIZE (toolButtonBoxChLabel, 10, 70, 80, 20, sz);
+	RESIZE (toolButtonBoxEditLabel, 10, 100, 80, 20, sz);
 	RESIZE (toolGateLabel, 10, 260, 30, 20, sz);
 	RESIZE (toolGateSlider, 12.5, 200, 25, 60, sz);
 	RESIZE (toolNoteLabel, 45, 260, 60, 20, sz);
@@ -610,7 +610,7 @@ void BSEQuencer_GUI::scale ()
 	RESIZE (propertiesBaseListBox, 210, 85, 90, 20, sz);
 	propertiesBaseListBox.resizeListBox (BUtilities::Point (90 * sz, 60 * sz));
 	propertiesBaseListBox.resizeListBoxItems (BUtilities::Point (90 * sz, 20 * sz));
-	RESIZE (propertiesRootLabel, 10, 115, 40, 20, sz);
+	RESIZE (propertiesRootLabel, 10, 115, 60, 20, sz);
 	RESIZE (propertiesRootListBox, 110, 115, 90, 20, sz);
 	propertiesRootListBox.resizeListBox (BUtilities::Point (90 * sz, 160 * sz));
 	propertiesRootListBox.moveListBox (BUtilities::Point (0, -160 * sz));
@@ -618,12 +618,12 @@ void BSEQuencer_GUI::scale ()
 	RESIZE (propertiesSignatureListBox, 210, 115, 90, 20, sz);
 	propertiesSignatureListBox.resizeListBox (BUtilities::Point (90 * sz, 80 * sz));
 	propertiesSignatureListBox.resizeListBoxItems (BUtilities::Point (90 * sz, 20 * sz));
-	RESIZE (propertiesOctaveLabel, 10, 145, 55, 20, sz);
+	RESIZE (propertiesOctaveLabel, 10, 145, 65, 20, sz);
 	RESIZE (propertiesOctaveListBox, 210, 145, 90, 20, sz);
 	propertiesOctaveListBox.resizeListBox (BUtilities::Point (90 * sz, 220 * sz));
 	propertiesOctaveListBox.moveListBox (BUtilities::Point (0, -220 * sz));
 	propertiesOctaveListBox.resizeListBoxItems (BUtilities::Point (90 * sz, 20 * sz));
-	RESIZE (propertiesScaleLabel, 10, 175, 50, 20, sz);
+	RESIZE (propertiesScaleLabel, 10, 175, 60, 20, sz);
 	RESIZE (propertiesScaleEditIcon, 70, 175, 20, 20, sz);
 	RESIZE (propertiesScaleListBox, 100, 175, 200, 20, sz);
 	propertiesScaleListBox.resizeListBox (BUtilities::Point (200 * sz, 420 * sz));
@@ -643,7 +643,7 @@ void BSEQuencer_GUI::scale ()
 		RESIZE (chBoxes[i].channelListBox, 123.5, 50, 60, 20, sz);
 		chBoxes[i].channelListBox.resizeListBox (BUtilities::Point (60 * sz, 120 * sz));
 		chBoxes[i].channelListBox.resizeListBoxItems (BUtilities::Point (60 * sz, 20 * sz));
-		RESIZE (chBoxes[i].pitchLabel, 10, 80, 80, 20, sz);
+		RESIZE (chBoxes[i].pitchLabel, 10, 80, 100, 20, sz);
 		RESIZE (chBoxes[i].pitchSwitch, 132.5, 82, 42, 16, sz);
 		RESIZE (chBoxes[i].pitchScreen, 10, 80, 173.5, 20, sz);
 		RESIZE (chBoxes[i].velocityDial, 25, 120, 50, 60, sz);
@@ -904,8 +904,8 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 				// Playing status changed
 				if (widgetNr == PLAY)
 				{
-					if (value) ui->modePlayLabel.setText ("Status: playing ...");
-					else ui->modePlayLabel.setText ("Status: stopped !");
+					if (value) ui->modePlayLabel.setText (BSEQUENCER_LABEL_STATUS_PLAYING);
+					else ui->modePlayLabel.setText (BSEQUENCER_LABEL_STATUS_STOPPED);
 				}
 
 				// Mode changed
@@ -1622,12 +1622,12 @@ void BSEQuencer_GUI::padsFocusedCallback (BEvents::Event* event)
 			double pdr = pd.duration * rd / dm;
 			ui->padSurface.focusText.setText
 			(
-				"Channel: " + std::to_string (int (pd.ch) & 0x0f) + "\n" +
-				"Gate: " + BUtilities::to_string (pd.randGate, "%1.2f") + "\n" +
-				"Note pitch: " + std::to_string (int (pd.pitchNote)) + " ± " + std::to_string (int (abs (pd.randNote))) + "\n" +
-				"Octave pitch: " + std::to_string (int (pd.pitchOctave)) + " ± " + std::to_string (int (abs (pd.randOctave))) + "\n" +
-				"Velocity: " + BUtilities::to_string (pd.velocity, "%1.2f") + " ± " + BUtilities::to_string (abs (pd.randVelocity), "%1.2f") + "\n" +
-				"Duration: " + BUtilities::to_string (pd.duration, "%1.2f") + " (" + BUtilities::to_string (pdr, "%1.2f") + ")");
+				BSEQUENCER_LABEL_CHANNEL ": " + std::to_string (int (pd.ch) & 0x0f) + "\n" +
+				BSEQUENCER_LABEL_GATE ": " + BUtilities::to_string (pd.randGate, "%1.2f") + "\n" +
+				BSEQUENCER_LABEL_NOTE ": " + std::to_string (int (pd.pitchNote)) + " ± " + std::to_string (int (abs (pd.randNote))) + "\n" +
+				BSEQUENCER_LABEL_OCTAVE ": " + std::to_string (int (pd.pitchOctave)) + " ± " + std::to_string (int (abs (pd.randOctave))) + "\n" +
+				BSEQUENCER_LABEL_VELOCITY ": " + BUtilities::to_string (pd.velocity, "%1.2f") + " ± " + BUtilities::to_string (abs (pd.randVelocity), "%1.2f") + "\n" +
+				BSEQUENCER_LABEL_DURATION ": " + BUtilities::to_string (pd.duration, "%1.2f") + " (" + BUtilities::to_string (pdr, "%1.2f") + ")");
 			ui->scaleFocus ();
 		}
 	}
@@ -1985,7 +1985,7 @@ static int call_resize (LV2UI_Handle ui, int width, int height)
 {
 	BSEQuencer_GUI* self = (BSEQuencer_GUI*) ui;
 	if (!self) return 0;
-	 
+
 	BEvents::ExposeEvent* ev = new BEvents::ExposeEvent (self, self, BEvents::CONFIGURE_REQUEST_EVENT, self->getPosition().x, self->getPosition().y, width, height);
 	self->addEventToQueue (ev);
 	return 0;
