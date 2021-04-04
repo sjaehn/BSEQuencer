@@ -1,5 +1,5 @@
-#ifndef LOCALE_EN_HPP_
-#define LOCALE_EN_HPP_
+#ifndef BSEQUENCER_LOCALE
+#define BSEQUENCER_LOCALE
 
 #define BSEQUENCER_LABEL_NO_CHANNEL "No channel"
 #define BSEQUENCER_LABEL_CHANNEL "Channel"
