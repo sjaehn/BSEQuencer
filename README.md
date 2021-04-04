@@ -102,7 +102,12 @@ the text for the respective definitions. But do not change or delete any definit
 * Bugfixes
 * Link tool to import drum patterns to presets
 * Support LANGUAGE parameter
-* Add locales: EN, DE
+* Add locales: EN, DE, IT (by LAM)
+
+
+## Acknowledgments
+
+* Thanks for translation by LAM
 
 
 ## See also
