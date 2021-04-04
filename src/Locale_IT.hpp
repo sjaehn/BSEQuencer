@@ -29,7 +29,7 @@
 #define BSEQUENCER_LABEL_ALL "Tutto"
 #define BSEQUENCER_LABEL_ON_NOTE_ON "Su NOTE ON"
 #define BSEQUENCER_LABEL_RESTART "Riavvia"
-#define BSEQUENCER_LABEL_RESTART_SYNC "Riavvia e sincronizza"
+#define BSEQUENCER_LABEL_RESTART_SYNC "Riavvia e sincron."
 #define BSEQUENCER_LABEL_CONTINUE "Continua"
 #define BSEQUENCER_LABEL_STATUS_PLAYING "Stato: Riprod. ..."
 #define BSEQUENCER_LABEL_STATUS_STOPPED "Stato: Fermato!"
