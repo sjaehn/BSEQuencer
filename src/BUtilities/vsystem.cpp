@@ -24,8 +24,8 @@ namespace BUtilities
 
 [[noreturn]] static void vexec (char* argv[])
 {
-        execvpe (argv[0], argv, environ);
-        perror ("execvpe");
+        execvp (argv[0], argv);
+        perror ("execvp");
         _exit (1);
 }
 
