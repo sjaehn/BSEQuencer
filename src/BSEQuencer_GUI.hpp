@@ -75,7 +75,7 @@
 #define EDIT_SYMBOL "EditSymbol.png"
 #define HELP_URL "https://github.com/sjaehn/BSEQuencer/wiki/B.SEQuencer"
 #define YT_URL "https://www.youtube.com/watch?v=J6bU4GdUVYc"
-#define OPEN_CMD "xdg-open"
+#define WWW_BROWSER_CMD "x-www-browser"
 
 #define RESIZE(widget, x, y, w, h, sz) widget.moveTo ((x) * (sz), (y) * (sz)); widget.resize ((w) * (sz), (h) * (sz));
 class BSEQuencer_GUI : public BWidgets::Window

@@ -35,6 +35,10 @@ ifeq ($(shell test -e src/Locale_$(LANGUAGE).hpp && echo -n yes),yes)
   GUIPPFLAGS += -DLOCALEFILE=\"Locale_$(LANGUAGE).hpp\"
 endif
 
+ifdef WWW_BROWSER_CMD
+  GUIPPFLAGS += -DWWW_BROWSER_CMD=\"$(WWW_BROWSER_CMD)\"
+endif
+
 BUNDLE = BSEQuencer.lv2
 DSP = BSEQuencer
 DSP_SRC = ./src/BSEQuencer.cpp
@@ -85,7 +89,8 @@ GUI_CXX_INCL = \
 	src/BWidgets/BColors.cpp \
 	src/BWidgets/BItems.cpp \
 	src/BUtilities/to_string.cpp \
-	src/BUtilities/stof.cpp
+	src/BUtilities/stof.cpp \
+	src/BUtilities/vsystem.cpp
 
 GUI_C_INCL = \
 	src/screen.c \

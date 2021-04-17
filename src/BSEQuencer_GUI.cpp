@@ -20,6 +20,7 @@
 
 #include "BSEQuencer_GUI.hpp"
 #include "BUtilities/to_string.hpp"
+#include "BUtilities/vsystem.hpp"
 #include <exception>
 
 BSEQuencer_GUI::BSEQuencer_GUI (const char *bundle_path, const LV2_Feature *const *features, PuglNativeView parentWindow) :
@@ -983,12 +984,20 @@ void BSEQuencer_GUI::valueChangedCallback(BEvents::Event* event)
 
 void BSEQuencer_GUI::helpPressedCallback (BEvents::Event* event)
 {
-	if (system(OPEN_CMD " " HELP_URL)) std::cerr << "BSEQuencer.lv2#GUI: Can't open " << HELP_URL << ". You can try to call it manually.\n";
+	char cmd[] = WWW_BROWSER_CMD;
+	char param[] = HELP_URL;
+	char* argv[] = {cmd, param, NULL};
+	std::cerr << "BSEQuencer.lv2#GUI: Call " << HELP_URL << " for help.\n";
+	if (BUtilities::vsystem (argv) == -1) std::cerr << "BSEQuencer.lv2#GUI: Couldn't fork.\n";
 }
 
 void BSEQuencer_GUI::ytPressedCallback (BEvents::Event* event)
 {
-	if (system(OPEN_CMD " " YT_URL))  std::cerr << "BSEQuencer.lv2#GUI: Can't open " << YT_URL << ". You can try to call it manually.\n";
+	char cmd[] = WWW_BROWSER_CMD;
+	char param[] = YT_URL;
+	char* argv[] = {cmd, param, NULL};
+	std::cerr << "BSEQuencer.lv2#GUI: Call " << YT_URL << " for tutorial video.\n";
+	if (BUtilities::vsystem (argv) == -1) std::cerr << "BSEQuencer.lv2#GUI: Couldn't fork.\n";
 }
 
 void BSEQuencer_GUI::editPressedCallback (BEvents::Event* event)
