@@ -193,6 +193,9 @@ void ChoiceBox::setValue (const double val)
 			}
 			++n;
 		}
+
+		ValueWidget::setValue (UNSELECTED);
+		activeNr = 0;
 	}
 }
 
