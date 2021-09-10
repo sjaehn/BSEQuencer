@@ -107,6 +107,7 @@ the text for the respective definitions. But do not change or delete any definit
 
 ## What's new
 
+* Logo
 * Bugfixes
 * Link tool to import drum patterns to presets
 * Support LANGUAGE parameter
